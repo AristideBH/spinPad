@@ -1,30 +1,17 @@
-<script>
-    import { Sun, Moon } from '@lucide/svelte';
-    import { Button }   from '$lib/components/ui/button/index.js';
+<script lang="ts">
+  import SunIcon from "@lucide/svelte/icons/sun";
+  import MoonIcon from "@lucide/svelte/icons/moon";
 
-    let isDark = $state(true);
-
-    function toggle() {
-        isDark = !isDark;
-        if (isDark) {
-            document.documentElement.classList.remove('light');
-        } else {
-            document.documentElement.classList.add('light');
-        }
-        localStorage.setItem('spinpad-theme', isDark ? 'dark' : 'light');
-    }
-
-    $effect(() => {
-        const saved = localStorage.getItem('spinpad-theme');
-        isDark = saved ? saved === 'dark' : true;
-        if (!isDark) document.documentElement.classList.add('light');
-    });
+  import { toggleMode } from "mode-watcher";
+  import { Button } from "$lib/components/ui/button/index.js";
 </script>
 
-<Button variant="ghost" size="icon-sm" onclick={toggle} aria-label="Basculer le thème">
-    {#if isDark}
-        <Sun class="size-4" />
-    {:else}
-        <Moon class="size-4" />
-    {/if}
+<Button onclick={toggleMode} variant="outline" size="icon">
+  <SunIcon
+    class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all! dark:scale-0 dark:-rotate-90"
+  />
+  <MoonIcon
+    class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all! dark:scale-100 dark:rotate-0"
+  />
+  <span class="sr-only">Toggle theme</span>
 </Button>

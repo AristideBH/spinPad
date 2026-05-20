@@ -15,6 +15,12 @@
   import ThemeToggle from "$lib/components/app/ThemeToggle.svelte";
   import DevModeBanner from "$lib/components/app/DevModeBanner.svelte";
   import { Keyboard, FlaskConical, Save } from "@lucide/svelte";
+  import { ModeWatcher } from "mode-watcher";
+
+  import AppSidebar from "$lib/components/ui/app-sidebar.svelte";
+  import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import StatusCard from "$lib/components/app/StatusCard.svelte";
 
   let { children } = $props();
 
@@ -41,89 +47,56 @@
   }
 </script>
 
-<!-- Top navbar -->
-<header
-  class="sticky top-0 z-50 flex h-14 items-center gap-1 border-b bg-[hsl(var(--card))] px-4"
->
-  <!-- Brand -->
-  <a
-    href="/"
-    class="flex items-center gap-2 mr-4 hover:text-primary transition-colors"
-  >
-    <Keyboard class="size-5 text-primary" />
-    <span class="font-bold text-sm">{APP_CONFIG.name}</span>
-  </a>
+<ModeWatcher />
 
-  <Separator orientation="vertical" class="h-5 mr-2" />
-
-  <!-- Nav links (main app) -->
-  {#each navItems.filter((n) => n.href !== "/docs") as item}
-    <a
-      href={item.href}
-      class="px-3 py-1.5 rounded-md text-sm transition-colors"
-      class:bg-accent={item.match(page.url.pathname)}
-      class:test={item.match(page.url.pathname)}
-      class:text-muted-foreground={!item.match(page.url.pathname)}
-    >
-      {item.label}
-    </a>
-  {/each}
-
-  <div class="flex-1"></div>
-
-  <!-- Dev mode toggle (visible si non connecté et non actif) -->
-  {#if !serial.connected && !devMode.active}
-    <Button
-      variant="ghost"
-      size="sm"
-      onclick={handleDevMode}
-      class="text-muted-foreground hover:text-amber-400 gap-1.5"
-    >
-      <FlaskConical class="size-4" />
-      Mode démo
-    </Button>
-  {/if}
-
-  <!-- Save button -->
-  {#if configState.isDirty}
-    <Button size="sm" onclick={saveConfig} class="gap-1.5">
-      <Save class="size-4" />
-      Sauvegarder
-    </Button>
-  {/if}
-
-  <!-- Docs link -->
-  <a
-    href="/docs"
-    class="px-3 py-1.5 rounded-md text-sm transition-colors"
-    class:bg-accent={page.url.pathname.startsWith("/docs")}
-    class:test={page.url.pathname.startsWith("/docs")}
-    class:text-muted-foreground={!page.url.pathname.startsWith("/docs")}
-  >
-    Docs
-  </a>
-
-  <!-- Status dot -->
-  <div class="flex items-center gap-1.5 ml-2 text-xs text-muted-foreground">
-    <div
-      class="size-2 rounded-full transition-colors"
-      class:bg-emerald-500={serial.connected || devMode.active}
-      class:bg-muted={!serial.connected && !devMode.active}
-    ></div>
-    {#if devMode.active}
-      <span class="text-amber-400">Démo</span>
-    {:else}
-      <span>{serial.connected ? "Connecté" : "Non connecté"}</span>
-    {/if}
-  </div>
-
-  <ThemeToggle />
-</header>
-
-<!-- Dev mode banner -->
-<DevModeBanner />
-
-<!-- Page content -->
-<main class="px-6 py-6 max-w-5xl mx-auto">
-  {@render children()}
-</main>
+<Sidebar.Provider>
+  <AppSidebar />
+  <Sidebar.Inset>
+    <header class="flex h-16 shrink-0 items-center gap-2 justify-between">
+      <div class="flex items-center gap-2 px-6">
+        <Sidebar.Trigger class="-ms-1" />
+        <Separator
+          orientation="vertical"
+          class="me-2 data-[orientation=vertical]:h-4"
+        />
+        <Breadcrumb.Root>
+          <Breadcrumb.List>
+            <Breadcrumb.Item class="hidden md:block">
+              <Breadcrumb.Link href="/editor">Editor</Breadcrumb.Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Separator class="hidden md:block" />
+            <Breadcrumb.Item>
+              <Breadcrumb.Page>Dashboard</Breadcrumb.Page>
+            </Breadcrumb.Item>
+          </Breadcrumb.List>
+        </Breadcrumb.Root>
+      </div>
+      <div class="flex items-center gap-2 px-6">
+        <!-- Dev mode toggle (visible si non connecté et non actif) -->
+        <!-- {#if !serial.connected && !devMode.active}
+          <Button
+            variant="ghost"
+            size="sm"
+            onclick={handleDevMode}
+            class="text-muted-foreground hover:text-amber-400 gap-1.5"
+          >
+            <FlaskConical class="size-4" />
+            Mode démo
+          </Button>
+        {/if} -->
+        <StatusCard></StatusCard>
+        <!-- Save button -->
+        {#if configState.isDirty}
+          <Button size="sm" onclick={saveConfig} class="gap-1.5">
+            <Save class="size-4" />
+            Sauvegarder
+          </Button>
+        {/if}
+      </div>
+    </header>
+    <DevModeBanner />
+    <main class="px-6 py-6">
+      {@render children()}
+    </main>
+  </Sidebar.Inset>
+</Sidebar.Provider>

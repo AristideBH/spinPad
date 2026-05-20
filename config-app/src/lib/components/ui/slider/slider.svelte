@@ -1,5 +1,4 @@
 <script lang="ts">
-	// @ts-nocheck — bits-ui discriminated union too complex for TS inference
 	import { Slider as SliderPrimitive } from "bits-ui";
 	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
 
