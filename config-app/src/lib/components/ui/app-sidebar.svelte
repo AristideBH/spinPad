@@ -13,7 +13,8 @@
     user: {
       name: "AristideBH",
       email: "aristide.bruneau@gmail.com",
-      avatar: "/avatars/shadcn.jpg",
+      avatar:
+        "https://lh3.googleusercontent.com/ogw/AF2bZygWD1VnCuSLoYoJgUw9D81WnItSm2tUzgU2KF3NvbXNIOuV=s32-c-mo",
     },
     navMain: [
       {
@@ -155,7 +156,7 @@
       <Sidebar.MenuItem>
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
-            <a href="##" {...props}>
+            <a href="/" {...props}>
               <div
                 class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
               >
@@ -178,4 +179,5 @@
   <Sidebar.Footer>
     <NavUser user={data.user} />
   </Sidebar.Footer>
+  <Sidebar.Rail class="my-6" />
 </Sidebar.Root>

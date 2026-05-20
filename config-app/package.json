@@ -12,7 +12,7 @@
   "devDependencies": {
     "@fontsource-variable/inter": "latest",
     "@internationalized/date": "^3.12.1",
-    "@lucide/svelte": "^0.577.0",
+    "@lucide/svelte": "^1.16.0",
     "@sveltejs/adapter-static": "^3.0.0",
     "@sveltejs/kit": "^2.20.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",

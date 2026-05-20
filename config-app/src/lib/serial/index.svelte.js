@@ -13,7 +13,7 @@
 
 class SerialState {
     connected = $state(false);
-    error     = $state(null);
+    error = $state(null);
 }
 export const serial = new SerialState();
 
@@ -21,9 +21,9 @@ export const serial = new SerialState();
 //  ÉTAT INTERNE
 // ─────────────────────────────────────────────────────────────
 
-let port       = null;
-let writer     = null;
-let reader     = null;
+let port = null;
+let writer = null;
+let reader = null;
 let readBuffer = '';
 
 const messageHandlers = new Set();
@@ -46,7 +46,7 @@ export async function connect() {
         startReading();
 
         serial.connected = true;
-        serial.error     = null;
+        serial.error = null;
         return true;
     } catch (err) {
         serial.error = `Erreur connexion : ${err.message}`;
@@ -56,8 +56,8 @@ export async function connect() {
 
 export async function disconnect() {
     if (writer) { await writer.close(); writer = null; }
-    if (reader) { reader.cancel();      reader = null; }
-    if (port)   { await port.close();   port   = null; }
+    if (reader) { reader.cancel(); reader = null; }
+    if (port) { await port.close(); port = null; }
     serial.connected = false;
 }
 

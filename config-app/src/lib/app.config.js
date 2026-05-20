@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
-    name:    'SpinPad Editor',
-    tagline: 'Keyboard configuration tool',
+    name: 'SpinPad',
+    tagline: 'Custom macropad with a smooth dial',
     version: '0.1.0',
-    repo:    '',
+    repo: '',
 };

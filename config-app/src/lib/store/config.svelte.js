@@ -1,14 +1,14 @@
-import { getConfig, setConfig }  from '$lib/serial/index.svelte.js';
-import { devMode }               from '$lib/store/devMode.svelte.js';
-import { MOCK_CONFIG }           from '$lib/mock/keyboard-config.js';
+import { getConfig, setConfig } from '$lib/serial/index.svelte.js';
+import { devMode } from '$lib/store/devMode.svelte.js';
+import { MOCK_CONFIG } from '$lib/mock/keyboard-config.js';
 
 class ConfigState {
-    data               = $state(null);
+    data = $state(null);
     activeProfileIndex = $state(0);
-    activeLayerIndex   = $state(0);
-    isDirty            = $state(false);
-    isLoading          = $state(false);
-    loadError          = $state(null);
+    activeLayerIndex = $state(0);
+    isDirty = $state(false);
+    isLoading = $state(false);
+    loadError = $state(null);
 
     get activeProfile() {
         return this.data?.profiles?.[this.activeProfileIndex] ?? null;
@@ -26,15 +26,15 @@ export async function loadConfig() {
     try {
         if (devMode.active) {
             await new Promise(r => setTimeout(r, 300)); // simule latence
-            configState.data               = structuredClone(MOCK_CONFIG);
+            configState.data = structuredClone(MOCK_CONFIG);
             configState.activeProfileIndex = MOCK_CONFIG.active_profile ?? 0;
-            configState.isDirty            = false;
+            configState.isDirty = false;
             return;
         }
         const cfg = await getConfig();
-        configState.data               = cfg;
+        configState.data = cfg;
         configState.activeProfileIndex = cfg.active_profile ?? 0;
-        configState.isDirty            = false;
+        configState.isDirty = false;
     } catch (err) {
         configState.loadError = err.message;
         console.error('Erreur chargement config :', err);
@@ -64,27 +64,27 @@ export async function saveConfig() {
 export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
     const cfg = structuredClone(configState.data);
     cfg.profiles[profileIdx].layers[layerIdx].keys[keyIndex] = actionValue;
-    configState.data    = cfg;
+    configState.data = cfg;
     configState.isDirty = true;
 }
 
 export function setEncoderAction(profileIdx, layerIdx, direction, actionValue) {
     const cfg = structuredClone(configState.data);
     cfg.profiles[profileIdx].layers[layerIdx].encoder[direction] = actionValue;
-    configState.data    = cfg;
+    configState.data = cfg;
     configState.isDirty = true;
 }
 
 export function addCombo(profileIdx, combo) {
     const cfg = structuredClone(configState.data);
     cfg.profiles[profileIdx].combos.push(combo);
-    configState.data    = cfg;
+    configState.data = cfg;
     configState.isDirty = true;
 }
 
 export function removeCombo(profileIdx, comboIdx) {
     const cfg = structuredClone(configState.data);
     cfg.profiles[profileIdx].combos.splice(comboIdx, 1);
-    configState.data    = cfg;
+    configState.data = cfg;
     configState.isDirty = true;
 }

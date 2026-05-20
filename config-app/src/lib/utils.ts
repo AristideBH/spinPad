@@ -11,3 +11,12 @@ export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
 export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, "children"> : T;
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
+
+
+
+export function safeCapitalize(str: string) {
+	if (typeof str !== 'string' || str.length === 0) {
+		return '';
+	}
+	return str[0].toUpperCase() + str.slice(1);
+}
