@@ -1,0 +1,112 @@
+{
+  "_comment": "Schéma de config du clavier custom — édité via l'app SvelteKit",
+  "_doc": {
+    "keys": "Valeurs uint16 encodées : type(4bits) + valeur(12bits). Utiliser les constantes de keymap.h ou l'app SvelteKit.",
+    "layers": "Index 0 = layer de base (toujours actif). Layers suivants activés via MO/TG/TO.",
+    "combos": "keys = index des SW# (0-based). window_ms = fenêtre de détection."
+  },
+
+  "version": 1,
+  "active_profile": 0,
+
+  "ble": {
+    "device_name": "CustomKeyboard",
+    "slot_names": ["PC Bureau", "Home Assistant"],
+    "active_slot": 0
+  },
+
+  "display": {
+    "brightness": 180,
+    "timeout_s": 30,
+    "show_battery": true,
+    "show_layer": true,
+    "show_profile": true,
+    "show_ble_status": true
+  },
+
+  "power": {
+    "sleep_timeout_s": 300,
+    "battery_critical_pct": 10
+  },
+
+  "profiles": [
+    {
+      "name": "Default",
+      "layers": [
+        {
+          "name": "Base",
+          "keys": [
+            4369, 4370, 4371, 4372, 4373,
+            4374, 4375, 4376, 4377, 4378,
+            8194, 8195, 4380, 4381, 4382,
+            4383, 4384, 4385, 4386, 4387
+          ],
+          "_key_comments": {
+            "_format": "ACTION(type, value) = (type << 12) | value",
+            "4369": "KC_A = ACTION(0, 0x11) — type KC (0), HID keycode A (0x04 = 4, mais 4369 = 0x1111 = type 1 (MOD)?",
+            "_note": "Les valeurs ci-dessus sont des placeholders. L'app SvelteKit génère les valeurs correctes via la liste des keycodes."
+          },
+          "encoder": {
+            "cw": 20481,
+            "ccw": 20482,
+            "press": 20483,
+            "_comments": {
+              "20481": "KC_VOLU = ACTION(5, 1) = (5 << 12) | 1 = 0x5001 = 20481",
+              "20482": "KC_VOLD = ACTION(5, 2) = 0x5002 = 20482",
+              "20483": "KC_MUTE = ACTION(5, 3) = 0x5003 = 20483"
+            }
+          }
+        },
+        {
+          "name": "Fn",
+          "keys": [
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0
+          ],
+          "_note": "0 = KC_NONE = transparent (passe au layer en dessous)",
+          "encoder": {
+            "cw": 20496,
+            "ccw": 20497,
+            "press": 0,
+            "_comments": {
+              "20496": "KC_SCRL_U = ACTION(5, 0x10) = 0x5010 = 20496",
+              "20497": "KC_SCRL_D = ACTION(5, 0x11) = 0x5011 = 20497"
+            }
+          }
+        }
+      ],
+      "combos": [
+        {
+          "_comment": "Exemple de combo : SW1 + SW2 simultanés → Escape",
+          "keys": [0, 1],
+          "action": 41,
+          "window_ms": 50,
+          "_action_comment": "KC_ESC = ACTION(0, 0x29) = 0x0029 = 41"
+        }
+      ]
+    },
+    {
+      "name": "Gaming",
+      "layers": [
+        {
+          "name": "Base",
+          "keys": [
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0
+          ],
+          "encoder": {
+            "cw": 20497,
+            "ccw": 20496,
+            "press": 0,
+            "_comment": "Scroll inversé pour gaming"
+          }
+        }
+      ],
+      "combos": []
+    }
+  ]
+}

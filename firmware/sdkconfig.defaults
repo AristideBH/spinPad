@@ -1,0 +1,48 @@
+# ─────────────────────────────────────────────────
+#  sdkconfig.defaults — ESP32-S3 Custom Keyboard
+#  Ces valeurs sont appliquées lors du premier build
+#  (idf.py set-target esp32s3 puis idf.py build)
+# ─────────────────────────────────────────────────
+
+# Cible hardware
+CONFIG_IDF_TARGET="esp32s3"
+
+# ── USB ──────────────────────────────────────────
+# Active le mode USB OTG (nécessaire pour USB HID via TinyUSB)
+CONFIG_USB_OTG_SUPPORTED=y
+# TinyUSB comme stack USB
+CONFIG_TINYUSB=y
+CONFIG_TINYUSB_HID_ENABLED=y
+# Buffer de descripteur HID
+CONFIG_TINYUSB_HID_BUFSIZE=64
+
+# ── Bluetooth ────────────────────────────────────
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+# HID over GATT Profile (HOG)
+CONFIG_BT_NIMBLE_HID_SERVICE=y
+# 2 connexions simultanées max (on en utilise 1 à la fois mais NimBLE a besoin de la config)
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
+# Stocker les bonds en NVS (persistance après reboot)
+CONFIG_BT_NIMBLE_NVS_PERSIST=y
+# Nombre de bonds stockés (slot 0 = PC, slot 1 = HA)
+CONFIG_BT_NIMBLE_MAX_BONDS=2
+
+# ── NVS (stockage config en flash) ───────────────
+CONFIG_NVS_ENCRYPTION=n
+
+# ── Logs ─────────────────────────────────────────
+# En développement : INFO. En production : WARNING
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# ── Deep sleep ───────────────────────────────────
+# Active le wakeup par GPIO (touches du clavier)
+CONFIG_ESP_SLEEP_GPIO_ENABLE_INTERNAL_RESISTORS=y
+
+# ── Taille de la partition NVS ───────────────────
+# 20KB suffisent largement pour les configs
+CONFIG_NVS_PAGE_SIZE=4096
+
+# ── FreeRTOS ─────────────────────────────────────
+# Tick rate à 1000Hz pour une meilleure précision des timers (combos, tap-hold)
+CONFIG_FREERTOS_HZ=1000

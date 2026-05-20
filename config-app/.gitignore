@@ -1,0 +1,22 @@
+# ──────────────────────────────────────────
+#  config-app (SvelteKit) — .gitignore
+# ──────────────────────────────────────────
+
+# ── SvelteKit ─────────────────────────────
+.svelte-kit/        # généré par svelte-kit sync / vite dev
+build/              # output du build statique (adapter-static)
+
+# ── Node ──────────────────────────────────
+node_modules/
+
+# ── Environnement ─────────────────────────
+# !! NEVER commit — local secrets
+.env
+# .env.example is committed intentionally (no secrets)
+
+# ── TypeScript ────────────────────────────
+*.tsbuildinfo
+
+# ── OS ────────────────────────────────────
+.DS_Store
+Thumbs.db

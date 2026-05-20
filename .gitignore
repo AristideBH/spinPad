@@ -1,0 +1,36 @@
+# ──────────────────────────────────────────
+#  keyboard-firmware — root .gitignore
+# ──────────────────────────────────────────
+
+# ── OS ────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ── Éditeurs ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── ESP-IDF / CMake (firmware/) ───────────
+firmware/build/
+firmware/sdkconfig
+firmware/dependencies.lock
+firmware/managed_components/
+
+# Build artefacts à la racine (ancienne position, au cas où)
+build/
+sdkconfig
+
+# ── config-app ────────────────────────────
+# (le sous-dossier a son propre .gitignore)
+config-app/node_modules/
+config-app/.svelte-kit/
+config-app/build/
+# !! NEVER commit — local secrets (VITE_DEV_MODE, etc.)
+config-app/.env

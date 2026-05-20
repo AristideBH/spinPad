@@ -1,0 +1,18 @@
+# ──────────────────────────────────────────
+#  firmware/ (ESP-IDF) — .gitignore
+# ──────────────────────────────────────────
+
+# ── Build ESP-IDF ─────────────────────────
+build/              # artefacts CMake + binaires compilés
+
+# ── Config menuconfig ─────────────────────
+sdkconfig           # généré par idf.py menuconfig, spécifique machine
+                    # sdkconfig.defaults est commité (valeurs de base)
+
+# ── Dépendances gérées ────────────────────
+dependencies.lock
+managed_components/ # composants téléchargés via idf_component_manager
+
+# ── Éditeurs / toolchain ──────────────────
+.ccls-cache/
+compile_commands.json
