@@ -102,26 +102,27 @@
     firmware: "bg-purple-950/80 hover:bg-purple-900/80",
   };
 
-  // Physical key layout — 4 rows × 3 cols, 10 switches.
+  // Physical key layout — 4 rows × 3 cols, 10 switches (X-mirrored).
   // Row/col are 1-indexed CSS grid coordinates.
-  // SW1: horizontal 2u — spans col 1+2, top row.
-  // SW10: vertical 2u — spans row 3+4, right column.
+  // SW1: horizontal 2u — spans col 2+3, top row (right side).
+  // SW8: col 1, top row (left).
+  // SW10: vertical 2u — spans row 3+4, col 1 (left).
   // Visual:
-  //   [ SW1  (2u wide)  ] [ SW8 ]
-  //   [ SW2 ] [ SW7 ] [ SW9 ]
-  //   [ SW3 ] [ SW6 ] [ SW10 (2u tall) ]
-  //   [ SW4 ] [ SW5 ] [               ]
+  //   [ SW8 ] [ SW1  (2u wide)  ]
+  //   [ SW9 ] [ SW7 ] [ SW2 ]
+  //   [ SW10 (2u tall) ] [ SW6 ] [ SW3 ]
+  //   [               ] [ SW5 ] [ SW4 ]
   const KEY_LAYOUT = [
-    { sw: "SW1",  idx: 0, row: 1, col: 1, rowSpan: 1, colSpan: 2 },
-    { sw: "SW8",  idx: 1, row: 1, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: "SW2",  idx: 2, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW8",  idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW1",  idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
+    { sw: "SW9",  idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
     { sw: "SW7",  idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: "SW9",  idx: 4, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: "SW3",  idx: 5, row: 3, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW2",  idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: "SW10", idx: 7, row: 3, col: 1, rowSpan: 2, colSpan: 1 },
     { sw: "SW6",  idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: "SW10", idx: 7, row: 3, col: 3, rowSpan: 2, colSpan: 1 },
-    { sw: "SW4",  idx: 8, row: 4, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW3",  idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
     { sw: "SW5",  idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: "SW4",  idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
   ];
 </script>
 
