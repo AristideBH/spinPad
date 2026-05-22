@@ -135,23 +135,23 @@ esp_err_t battery_init(void)
 
     adc_oneshot_chan_cfg_t chan_cfg = {
         .bitwidth = ADC_BITWIDTH_12,
-        .atten    = ADC_ATTEN_DB_11,  // 11dB = plage 0-3.3V
+        .atten    = ADC_ATTEN_DB_12,  // 12dB = plage 0-3.3V (DB_11 deprecated)
     };
     ESP_ERROR_CHECK(adc_oneshot_config_channel(g_adc_handle, BATTERY_ADC_CHANNEL, &chan_cfg));
 
-    // Calibration ADC (améliore la précision de la mesure)
-    adc_cali_line_fitting_config_t cali_cfg = {
+    // Calibration ADC — ESP32S3 uses curve fitting (line fitting is ESP32 only)
+    adc_cali_curve_fitting_config_t cali_cfg = {
         .unit_id  = BATTERY_ADC_UNIT,
-        .atten    = ADC_ATTEN_DB_11,
+        .chan     = BATTERY_ADC_CHANNEL,
+        .atten    = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_12,
     };
-    adc_cali_create_scheme_line_fitting(&cali_cfg, &g_adc_cali);
+    adc_cali_create_scheme_curve_fitting(&cali_cfg, &g_adc_cali);
 
     // ── LED WS2812 via RMT ───────────────────────────────────
     led_strip_config_t strip_cfg = {
         .strip_gpio_num   = LED_RGB_GPIO,
         .max_leds         = LED_RGB_COUNT,
-        .led_pixel_format = LED_PIXEL_FORMAT_GRB,  // WS2812 = GRB (pas RGB!)
         .led_model        = LED_MODEL_WS2812,
         .flags.invert_out = false,
     };
