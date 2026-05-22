@@ -33,10 +33,29 @@
   let searchQuery = $state("");
   let pickerOpen = $state(false);
 
+  // Local string state bound to the Select components (bits-ui requires strings)
+  let profileValue = $state(String(configState.activeProfileIndex));
+  let layerValue   = $state(String(configState.activeLayerIndex));
+
+  // Sync profile selector → store; reset layer whenever profile changes
+  $effect(() => {
+    configState.activeProfileIndex = +profileValue;
+    layerValue = "0";
+    configState.activeLayerIndex = 0;
+  });
+
+  // Sync layer selector → store
+  $effect(() => {
+    configState.activeLayerIndex = +layerValue;
+  });
+
   const profile = $derived(
     configState.data?.profiles?.[configState.activeProfileIndex],
   );
   const layer = $derived(profile?.layers?.[configState.activeLayerIndex]);
+
+  const profileLabel = $derived(profile?.name ?? "Profil");
+  const layerLabel   = $derived(layer?.name   ?? "Layer");
 
   const filteredKeycodes = $derived(
     searchQuery
@@ -139,19 +158,11 @@
   <div class="flex flex-wrap gap-4 mb-6 items-end">
     <div class="flex flex-col gap-1.5">
       <Label>Profil</Label>
-      <Select
-        value={String(configState.activeProfileIndex)}
-        onValueChange={(v) => {
-          configState.activeProfileIndex = +v;
-        }}
-      >
-        <SelectTrigger class="w-40">
-          {configState.data.profiles[configState.activeProfileIndex]?.name ??
-            "Profil"}
-        </SelectTrigger>
+      <Select type="single" bind:value={profileValue}>
+        <SelectTrigger class="w-40">{profileLabel}</SelectTrigger>
         <SelectContent>
           {#each configState.data.profiles as prof, i}
-            <SelectItem value={String(i)}>{prof.name}</SelectItem>
+            <SelectItem value={String(i)} label={prof.name} />
           {/each}
         </SelectContent>
       </Select>
@@ -160,18 +171,11 @@
     {#if profile}
       <div class="flex flex-col gap-1.5">
         <Label>Layer</Label>
-        <Select
-          value={String(configState.activeLayerIndex)}
-          onValueChange={(v) => {
-            configState.activeLayerIndex = +v;
-          }}
-        >
-          <SelectTrigger class="w-36">
-            {profile?.layers[configState.activeLayerIndex]?.name ?? "Layer"}
-          </SelectTrigger>
+        <Select type="single" bind:value={layerValue}>
+          <SelectTrigger class="w-36">{layerLabel}</SelectTrigger>
           <SelectContent>
             {#each profile.layers as l, i}
-              <SelectItem value={String(i)}>{l.name}</SelectItem>
+              <SelectItem value={String(i)} label={l.name} />
             {/each}
           </SelectContent>
         </Select>
