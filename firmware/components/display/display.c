@@ -1,12 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
-//  display.c — Écran SSD1315 (compatible SSD1306) via I2C
+//  display.c — Écran SSD1306 72×40px via I2C
 //
-//  On utilise esp_lcd (composant natif ESP-IDF) avec un
-//  panneau SSD1306 — le SSD1315 utilise le même protocole.
+//  Framebuffer 72×40 (5 pages de 8px × 72 colonnes = 360 bytes).
+//  Le SSD1306 72×40 a son buffer actif décalé à la colonne 28
+//  dans la mémoire interne 128 colonnes (offset géré dans fb_flush).
 //
-//  Rendu : on maintient un framebuffer 128x64 bits en RAM,
-//  on y dessine, puis on envoie le tout via I2C.
-//  Pas de lib externe nécessaire.
+//  Layout 72×40 :
+//    y= 0- 7  BLE status (icône + nom du slot)
+//    y= 8     séparateur
+//    y= 9-16  Layer actif
+//    y=17     séparateur
+//    y=18-25  Profil actif
+//    y=26     séparateur
+//    y=27-34  Batterie (icône + barre + %)
 // ═══════════════════════════════════════════════════════════════
 
 #include "display.h"
@@ -29,61 +35,48 @@
 static const char *TAG = "DISPLAY";
 
 // ─────────────────────────────────────────────────────────────
-//  FRAMEBUFFER
-//  128×64 pixels, 1 bit par pixel = 1024 bytes
-//  Organisé en 8 "pages" de 128 bytes (8 lignes de 8px chacune)
+//  FRAMEBUFFER  72×40 = 5 pages × 72 colonnes = 360 bytes
 // ─────────────────────────────────────────────────────────────
-#define FB_WIDTH   128
-#define FB_HEIGHT   64
-#define FB_PAGES    (FB_HEIGHT / 8)   // = 8
+#define FB_WIDTH   DISPLAY_WIDTH    // 72
+#define FB_HEIGHT  DISPLAY_HEIGHT   // 40
+#define FB_PAGES   (FB_HEIGHT / 8)  // 5
 
 static uint8_t g_framebuffer[FB_PAGES][FB_WIDTH];
 static esp_lcd_panel_handle_t g_panel = NULL;
 static bool g_display_on = true;
 
 // ─────────────────────────────────────────────────────────────
-//  POLICE DE CARACTÈRES 5×7 (ASCII 32-126)
-//  Chaque caractère = 5 bytes (5 colonnes de 8 bits)
-//  Source : police bitmap classique 5x7
+//  POLICE 5×7
 // ─────────────────────────────────────────────────────────────
-#include "font5x7.h"  // Voir font5x7.h dans ce même répertoire
+#include "font5x7.h"
 
 // ─────────────────────────────────────────────────────────────
 //  PRIMITIVES DE DESSIN
 // ─────────────────────────────────────────────────────────────
 
-// Effacer le framebuffer (tout noir)
 static void fb_clear(void)
 {
     memset(g_framebuffer, 0, sizeof(g_framebuffer));
 }
 
-// Allumer/éteindre un pixel
 static void fb_draw_pixel(int x, int y, bool on)
 {
     if (x < 0 || x >= FB_WIDTH || y < 0 || y >= FB_HEIGHT) return;
     int page = y / 8;
     int bit  = y % 8;
-    if (on) {
-        g_framebuffer[page][x] |=  (1 << bit);
-    } else {
-        g_framebuffer[page][x] &= ~(1 << bit);
-    }
+    if (on) g_framebuffer[page][x] |=  (1 << bit);
+    else    g_framebuffer[page][x] &= ~(1 << bit);
 }
 
-// Tracer une ligne horizontale
 static void fb_draw_hline(int x, int y, int w, bool on)
 {
     for (int i = 0; i < w; i++) fb_draw_pixel(x + i, y, on);
 }
 
-// Dessiner un caractère ASCII à la position (x, y)
-// Retourne la largeur utilisée (5 + 1 pixel d'espacement)
 static int fb_draw_char(int x, int y, char c, bool invert)
 {
     if (c < 32 || c > 126) c = '?';
-    const uint8_t *glyph = FONT5X7[c - 32];  // Pointeur vers les 5 bytes du caractère
-
+    const uint8_t *glyph = FONT5X7[c - 32];
     for (int col = 0; col < 5; col++) {
         uint8_t bits = glyph[col];
         for (int row = 0; row < 7; row++) {
@@ -92,34 +85,34 @@ static int fb_draw_char(int x, int y, char c, bool invert)
             fb_draw_pixel(x + col, y + row, pixel);
         }
     }
-    return 6;  // 5px + 1px d'espace
+    return 6;  // 5px + 1px espace
 }
 
-// Dessiner une string
 static void fb_draw_string(int x, int y, const char *str, bool invert)
 {
     while (*str) {
+        if (x + 5 > FB_WIDTH) break;
         x += fb_draw_char(x, y, *str++, invert);
-        if (x >= FB_WIDTH) break;
     }
 }
 
-// Envoyer le framebuffer à l'écran via esp_lcd
+// Envoie le framebuffer vers le SSD1306 72×40.
+// draw_bitmap(panel, x1, y1, x2, y2, data) — coordonnées dans l'espace
+// du panneau physique (0..71 en x, 0..39 en y).
+// L'offset colonne 28 est géré par le driver esp_lcd via panel_mirror/offset
+// ou directement dans les commandes d'init SSD1306.
 static void fb_flush(void)
 {
     if (!g_panel || !g_display_on) return;
-    // esp_lcd_panel_draw_bitmap envoie le buffer à l'écran
-    // Le SSD1306/1315 accepte les données page par page
     esp_lcd_panel_draw_bitmap(g_panel, 0, 0, FB_WIDTH, FB_HEIGHT, g_framebuffer);
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ICÔNES SIMPLES (bitmap 8×8)
+//  ICÔNES 8×8
 // ─────────────────────────────────────────────────────────────
 
-// Icône batterie — 8 colonnes de 8 bits
 static const uint8_t ICON_BATTERY[8] = {
-    0x7E, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x7E
+    0x3E, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x3E
 };
 static const uint8_t ICON_BLE[8] = {
     0x18, 0x28, 0x4A, 0x2C, 0x18, 0x2C, 0x4A, 0x28
@@ -127,37 +120,36 @@ static const uint8_t ICON_BLE[8] = {
 
 static void fb_draw_icon(int x, int y, const uint8_t icon[8])
 {
-    for (int col = 0; col < 8; col++) {
-        for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++)
+        for (int row = 0; row < 8; row++)
             fb_draw_pixel(x + col, y + row, (icon[col] >> row) & 1);
-        }
-    }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  LAYOUT DE L'ÉCRAN
+//  LAYOUT 72×40
 //
-//  ┌────────────────────────────────────┐
-//  │ [BLE] PC          Layer: Base       │  ligne 0 (y=0)
-//  │────────────────────────────────────│
-//  │ Profile: Default                    │  ligne 1 (y=16)
-//  │────────────────────────────────────│
-//  │ [BAT] ████░░░░ 78%                 │  ligne 2 (y=40)
-//  └────────────────────────────────────┘
+//  ┌────────────────────────────┐  ← 72px
+//  │[B] Slot name               │  y=0  (8px, icône BLE + texte)
+//  │────────────────────────────│  y=8
+//  │L: Base                     │  y=9  (7px, layer)
+//  │────────────────────────────│  y=17
+//  │Default                     │  y=18 (7px, profil)
+//  │────────────────────────────│  y=26
+//  │[=] ████████ 78%            │  y=27 (7px, batterie)
+//  └────────────────────────────┘  y=40 (5px inutilisés en bas)
 // ─────────────────────────────────────────────────────────────
 
 static void render_screen(void)
 {
     fb_clear();
 
-    const kb_config_t *cfg = config_store_get();
+    const kb_config_t *cfg  = config_store_get();
     const kb_display_config_t *dcfg = &cfg->display;
 
-    // ── Ligne 1 : BLE + Layer ────────────────────────────────
+    // ── BLE status (y=0) ──────────────────────────────────────
     if (dcfg->show_ble_status) {
         if (ble_hid_is_connected()) {
             fb_draw_icon(0, 0, ICON_BLE);
-            // Nom du slot actif
             uint8_t slot = ble_hid_get_active_slot();
             fb_draw_string(10, 1, cfg->ble.slot_names[slot], false);
         } else {
@@ -165,47 +157,47 @@ static void render_screen(void)
         }
     }
 
+    fb_draw_hline(0, 8, FB_WIDTH, true);
+
+    // ── Layer actif (y=9) ─────────────────────────────────────
     if (dcfg->show_layer) {
-        char layer_str[CONFIG_NAME_MAX_LEN + 3];  // "L:" + name + '\0'
+        char buf[14];  // "L:" + 11 chars + '\0' (72px / 6px = 12 chars max)
         uint8_t layer = keymap_get_active_layer();
         const char *lname = cfg->profiles[cfg->active_profile].layers[layer].name;
-        snprintf(layer_str, sizeof(layer_str), "L:%s", lname);
-        fb_draw_string(70, 1, layer_str, false);
+        snprintf(buf, sizeof(buf), "L:%s", lname);
+        fb_draw_string(0, 9, buf, false);
     }
 
-    // Séparateur
-    fb_draw_hline(0, 11, FB_WIDTH, true);
+    fb_draw_hline(0, 17, FB_WIDTH, true);
 
-    // ── Ligne 2 : Profil ─────────────────────────────────────
+    // ── Profil actif (y=18) ───────────────────────────────────
     if (dcfg->show_profile) {
-        char prof_str[CONFIG_NAME_MAX_LEN + 1];
-        snprintf(prof_str, sizeof(prof_str), "%s",
+        char buf[13];  // 12 chars + '\0'
+        snprintf(buf, sizeof(buf), "%s",
                  cfg->profiles[cfg->active_profile].name);
-        fb_draw_string(0, 16, prof_str, false);
+        fb_draw_string(0, 18, buf, false);
     }
 
-    // ── Ligne 3 : Batterie ───────────────────────────────────
+    fb_draw_hline(0, 26, FB_WIDTH, true);
+
+    // ── Batterie (y=27) ───────────────────────────────────────
     if (dcfg->show_battery) {
-        fb_draw_hline(0, 38, FB_WIDTH, true);
-        fb_draw_icon(0, 42, ICON_BATTERY);
+        fb_draw_icon(0, 27, ICON_BATTERY);
 
         uint8_t pct = battery_get_percent();
-        // Barre de progression 80px
-        int bar_w = (pct * 80) / 100;
-        for (int x = 12; x < 12 + bar_w; x++) {
-            fb_draw_pixel(x, 43, true);
-            fb_draw_pixel(x, 44, true);
-            fb_draw_pixel(x, 45, true);
-            fb_draw_pixel(x, 46, true);
-            fb_draw_pixel(x, 47, true);
+        // Barre : x=10..49 (40px), centrée verticalement dans 8px → y=30..32
+        int bar_w = (pct * 40) / 100;
+        for (int x = 10; x < 10 + bar_w; x++) {
+            fb_draw_pixel(x, 30, true);
+            fb_draw_pixel(x, 31, true);
+            fb_draw_pixel(x, 32, true);
         }
-        // Bordure de la barre
-        fb_draw_hline(12, 42, 80, true);
-        fb_draw_hline(12, 48, 80, true);
+        fb_draw_hline(10, 29, 40, true);  // bord haut
+        fb_draw_hline(10, 33, 40, true);  // bord bas
 
-        char pct_str[8];
+        char pct_str[6];  // "100%" + '\0'
         snprintf(pct_str, sizeof(pct_str), "%d%%", pct);
-        fb_draw_string(96, 43, pct_str, false);
+        fb_draw_string(52, 28, pct_str, false);
     }
 }
 
@@ -222,12 +214,12 @@ esp_err_t display_init(void)
         .scl_io_num       = DISPLAY_I2C_SCL,
         .sda_pullup_en    = GPIO_PULLUP_ENABLE,
         .scl_pullup_en    = GPIO_PULLUP_ENABLE,
-        .master.clk_speed = 400000,  // 400kHz (Fast mode I2C)
+        .master.clk_speed = 400000,
     };
     ESP_ERROR_CHECK(i2c_param_config(DISPLAY_I2C_PORT, &i2c_conf));
     ESP_ERROR_CHECK(i2c_driver_install(DISPLAY_I2C_PORT, I2C_MODE_MASTER, 0, 0, 0));
 
-    // ── Init esp_lcd avec panel I2C ───────────────────────────
+    // ── Init esp_lcd ─────────────────────────────────────────
     esp_lcd_panel_io_handle_t io_handle = NULL;
     esp_lcd_panel_io_i2c_config_t io_config = {
         .dev_addr            = DISPLAY_I2C_ADDR,
@@ -241,27 +233,31 @@ esp_err_t display_init(void)
 
     esp_lcd_panel_dev_config_t panel_config = {
         .bits_per_pixel = 1,
-        .reset_gpio_num = -1,  // Pas de pin RESET
+        .reset_gpio_num = -1,
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_ssd1306(io_handle, &panel_config, &g_panel));
 
     ESP_ERROR_CHECK(esp_lcd_panel_reset(g_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_init(g_panel));
+
+    // Le SSD1306 72×40 n'utilise que 72 des 128 colonnes internes.
+    // L'offset colonne 28 est appliqué via mirror/gap pour que les
+    // données envoyées à x=0 arrivent bien sur la colonne physique 0.
+    ESP_ERROR_CHECK(esp_lcd_panel_set_gap(g_panel, DISPLAY_COL_OFFSET, 0));
+
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(g_panel, true));
 
-    // Brightness via raw SSD1306 command not yet implemented in esp_lcd;
-    // default brightness used for now.
-
     fb_clear();
-    ESP_LOGI(TAG, "Écran SSD1315 initialisé (%dx%d)", FB_WIDTH, FB_HEIGHT);
+    ESP_LOGI(TAG, "Écran SSD1306 %dx%d initialisé", FB_WIDTH, FB_HEIGHT);
     return ESP_OK;
 }
 
 void display_show_boot_screen(void)
 {
     fb_clear();
-    fb_draw_string(20, 20, "Custom KB", false);
-    fb_draw_string(30, 32, "Loading...", false);
+    // Centre approximatif : 72/2 - 9*6/2 = 36 - 27 = 9
+    fb_draw_string(9, 10, "SpinPad", false);
+    fb_draw_string(6, 24, "Loading...", false);
     fb_flush();
     vTaskDelay(pdMS_TO_TICKS(1500));
 }

@@ -62,12 +62,15 @@ static const gpio_num_t KB_COL_PINS[KB_MATRIX_COLS] = {
 #define ENCODER_PIN_BTN     GPIO_NUM_6   // Bouton push de l'encodeur (optionnel)
 #define ENCODER_BTN_ACTIVE  0            // 0 = actif à l'état bas (pull-up)
 
-// ── Écran SSD1315 (I2C) ──────────────────────────────────────
+// ── Écran SSD1306 72×40 (I2C) ────────────────────────────────
 #define DISPLAY_I2C_SDA     GPIO_NUM_8
 #define DISPLAY_I2C_SCL     GPIO_NUM_9
-#define DISPLAY_I2C_ADDR    0x3C         // Adresse I2C standard SSD1315
-#define DISPLAY_WIDTH       128
-#define DISPLAY_HEIGHT      64
+#define DISPLAY_I2C_ADDR    0x3C         // Adresse I2C standard SSD1306
+#define DISPLAY_WIDTH       72
+#define DISPLAY_HEIGHT      40
+// Le SSD1306 72×40 mappe son buffer actif à partir de la colonne 28
+// (mémoire interne 128 colonnes, 72 actives centrées → offset = (128-72)/2 = 28)
+#define DISPLAY_COL_OFFSET  28
 #define DISPLAY_I2C_PORT    I2C_NUM_0
 
 // ── LED RGB (batterie) — WS2812 addressable ──────────────────
