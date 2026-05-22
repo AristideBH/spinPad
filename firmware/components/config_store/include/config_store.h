@@ -9,12 +9,22 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp_err.h"
-#include "keymap.h"  // Pour kb_combo_t et les constantes
 
 #define CONFIG_MAX_PROFILES     4
 #define CONFIG_MAX_LAYERS       8
 #define CONFIG_MAX_COMBOS      16
 #define CONFIG_NAME_MAX_LEN    32
+
+// Combo definition (mirrors keymap's internal type)
+#define KEYMAP_COMBO_MAX_KEYS   4
+
+typedef struct {
+    uint8_t  keys[KEYMAP_COMBO_MAX_KEYS];
+    uint8_t  key_count;
+    uint16_t action;
+    uint16_t window_ms;
+    bool     active;
+} kb_combo_t;
 
 // ── Un layer : tableau de keycodes ───────────────────────────
 typedef struct {

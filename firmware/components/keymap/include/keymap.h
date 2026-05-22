@@ -125,16 +125,6 @@
 
 #define KEYMAP_MAX_LAYERS    8    // Nombre maximum de layers simultanés
 #define KEYMAP_MAX_COMBOS   16    // Nombre maximum de combos définis
-#define KEYMAP_COMBO_MAX_KEYS 4   // Touches max dans un combo
-
-// Un combo : plusieurs touches pressées ensemble → une action
-typedef struct {
-    uint8_t  keys[KEYMAP_COMBO_MAX_KEYS];  // Index des touches du combo (SW#)
-    uint8_t  key_count;                     // Combien de touches dans ce combo
-    uint16_t action;                        // Action à déclencher
-    uint16_t window_ms;                     // Fenêtre de temps (toutes les touches dans ce délai)
-    bool     active;                        // Ce combo est-il activé dans la config ?
-} kb_combo_t;
 
 // ─────────────────────────────────────────────────────────────
 //  FONCTIONS PUBLIQUES

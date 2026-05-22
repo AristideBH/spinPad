@@ -1,138 +1,132 @@
 // ═══════════════════════════════════════════════════════════════
-//  usb_hid.c — USB HID via TinyUSB
+//  usb_hid.c — USB HID + CDC via managed TinyUSB (espressif__tinyusb)
 //
-//  TinyUSB gère tout le protocole USB bas niveau.
-//  On l'utilise en mode "HID composite" :
-//    - Interface 0 : Keyboard (touches + modifiers)
-//    - Interface 1 : Consumer Control (médias)
-//    - Interface 2 : CDC Serial (pour envoyer/recevoir la config JSON)
+//  Composite device:
+//    - Interface 0+1 : CDC Serial (WebSerial config JSON channel)
+//    - Interface 2   : HID (keyboard + consumer control reports)
 //
-//  Le CDC Serial est la clé pour WebSerial dans l'app SvelteKit :
-//  le navigateur voit un port série virtuel sur le câble USB.
+//  Note: tinyusb.h / tusb_cdc_acm.h were IDF-bundled wrappers removed
+//  in IDF v5.x. This file uses the raw TinyUSB API directly.
 // ═══════════════════════════════════════════════════════════════
 
 #include "usb_hid.h"
 #include "config_store.h"
 #include "keymap.h"
 
-#include "tinyusb.h"
-#include "tusb_cdc_acm.h"   // CDC = Communication Device Class (port série)
+#include "tusb.h"
 #include "esp_log.h"
+#include "esp_private/usb_phy.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <string.h>
 #include <stdlib.h>
 
 static const char *TAG = "USB_HID";
 
 // ─────────────────────────────────────────────────────────────
-//  DESCRIPTEURS HID
-//
-//  Un descripteur HID = métadonnées qui décrivent au système
-//  d'exploitation quel type de périphérique on est et
-//  quels rapports on envoie.
-//
-//  HID_REPORT_DESC_KEYBOARD() et HID_REPORT_DESC_CONSUMER()
-//  sont des macros TinyUSB qui génèrent ces descripteurs.
+//  HID REPORT DESCRIPTOR
 // ─────────────────────────────────────────────────────────────
 
-// IDs des rapports HID (doit correspondre aux envois plus bas)
 #define REPORT_ID_KEYBOARD  1
 #define REPORT_ID_CONSUMER  2
 
-// Descripteur composite : clavier + consumer
 static const uint8_t hid_report_descriptor[] = {
     TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(REPORT_ID_KEYBOARD)),
     TUD_HID_REPORT_DESC_CONSUMER(HID_REPORT_ID(REPORT_ID_CONSUMER)),
 };
 
-// Configuration TinyUSB
-static const tinyusb_config_t tusb_cfg = {
-    .device_descriptor        = NULL,  // Utilise le descripteur par défaut ESP-IDF
-    .string_descriptor        = NULL,  // Idem
-    .external_phy             = false,
-    .configuration_descriptor = NULL,
+// ─────────────────────────────────────────────────────────────
+//  USB DESCRIPTORS
+// ─────────────────────────────────────────────────────────────
+
+// Device descriptor
+static const tusb_desc_device_t device_descriptor = {
+    .bLength            = sizeof(tusb_desc_device_t),
+    .bDescriptorType    = TUSB_DESC_DEVICE,
+    .bcdUSB             = 0x0200,
+    .bDeviceClass       = TUSB_CLASS_MISC,
+    .bDeviceSubClass    = MISC_SUBCLASS_COMMON,
+    .bDeviceProtocol    = MISC_PROTOCOL_IAD,
+    .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
+    .idVendor           = 0x303A,
+    .idProduct          = 0x4002,
+    .bcdDevice          = 0x0100,
+    .iManufacturer      = 0x01,
+    .iProduct           = 0x02,
+    .iSerialNumber      = 0x03,
+    .bNumConfigurations = 0x01,
 };
 
-// Config CDC (port série virtuel pour WebSerial)
-static const tinyusb_config_cdcacm_t cdc_cfg = {
-    .usb_dev  = TINYUSB_USBDEV_0,
-    .cdc_port = TINYUSB_CDC_ACM_0,
-    .rx_unread_buf_sz = 512,
-    .callback_rx      = NULL,  // Sera défini après l'init
-    .callback_rx_wanted_char = NULL,
-    .callback_line_state_changed = NULL,
-    .callback_line_coding_changed = NULL,
+// Endpoint addresses
+#define EPNUM_CDC_NOTIF   0x81
+#define EPNUM_CDC_OUT     0x02
+#define EPNUM_CDC_IN      0x82
+#define EPNUM_HID         0x83
+
+#define CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_HID_DESC_LEN)
+
+static const uint8_t config_descriptor[] = {
+    TUD_CONFIG_DESCRIPTOR(1, 3, 0, CONFIG_TOTAL_LEN, 0x00, 100),
+    TUD_CDC_DESCRIPTOR(0, 4, EPNUM_CDC_NOTIF, 8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
+    TUD_HID_DESCRIPTOR(2, 0, HID_ITF_PROTOCOL_NONE,
+                       sizeof(hid_report_descriptor), EPNUM_HID,
+                       CFG_TUD_HID_BUFSIZE, 5),
+};
+
+// String descriptors
+enum { STRID_LANGID = 0, STRID_MANUFACTURER, STRID_PRODUCT, STRID_SERIAL, STRID_CDC };
+
+static const char *string_desc_arr[] = {
+    (const char[]){0x09, 0x04},  // 0: Language (English)
+    "SpinPad",                    // 1: Manufacturer
+    "SpinPad Keyboard",           // 2: Product
+    "SP000001",                   // 3: Serial
+    "SpinPad Config",             // 4: CDC interface name
 };
 
 // ─────────────────────────────────────────────────────────────
-//  ÉTAT INTERNE
+//  INTERNAL STATE
 // ─────────────────────────────────────────────────────────────
 
-static bool g_mounted = false;  // USB connecté et prêt ?
-
-// Rapport clavier courant
-// Structure HID : [modifier, reserved, key1, key2, key3, key4, key5, key6]
-static uint8_t g_keyboard_report[8] = {0};
-
-// Buffer de réception CDC (config JSON entrant depuis SvelteKit)
-static uint8_t g_cdc_rx_buf[CONFIG_JSON_MAX_SIZE];
-static size_t  g_cdc_rx_len = 0;
+static bool              g_mounted    = false;
+static uint8_t           g_keyboard_report[8] = {0};
+static uint8_t           g_cdc_rx_buf[CONFIG_JSON_MAX_SIZE];
+static size_t            g_cdc_rx_len = 0;
+static usb_phy_handle_t  g_phy        = NULL;
 
 // ─────────────────────────────────────────────────────────────
-//  CALLBACKS TinyUSB
-//  Ces fonctions sont appelées automatiquement par TinyUSB
-//  selon les événements USB.
+//  USB DEVICE TASK
 // ─────────────────────────────────────────────────────────────
 
-// Appelé quand l'hôte USB monte le périphérique (câble + driver prêt)
-void tud_mount_cb(void)
+static void usb_device_task(void *param)
 {
-    g_mounted = true;
-    ESP_LOGI(TAG, "USB monté");
-}
-
-// Appelé quand le câble est débranché
-void tud_umount_cb(void)
-{
-    g_mounted = false;
-    ESP_LOGI(TAG, "USB démonté");
-}
-
-// Appelé quand des données arrivent sur le port CDC (depuis SvelteKit)
-static void cdc_rx_callback(int itf, cdcacm_event_t *event)
-{
-    if (event->type != CDC_EVENT_RX) return;
-
-    // Lire les octets disponibles
-    size_t rx_size = 0;
-    tinyusb_cdcacm_read(itf, g_cdc_rx_buf + g_cdc_rx_len,
-                        sizeof(g_cdc_rx_buf) - g_cdc_rx_len - 1, &rx_size);
-    g_cdc_rx_len += rx_size;
-
-    // Chercher la fin du JSON (marqueur '\0' ou '\n')
-    // L'app SvelteKit termine chaque commande avec '\n'
-    if (g_cdc_rx_len > 0 && g_cdc_rx_buf[g_cdc_rx_len - 1] == '\n') {
-        g_cdc_rx_buf[g_cdc_rx_len] = '\0';
-        usb_hid_process_config_packet(g_cdc_rx_buf, g_cdc_rx_len);
-        g_cdc_rx_len = 0;
+    (void)param;
+    while (1) {
+        tud_task();
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
+//  PUBLIC API
 // ─────────────────────────────────────────────────────────────
 
 esp_err_t usb_hid_init(void)
 {
-    // Initialiser TinyUSB
-    ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
+    usb_phy_config_t phy_cfg = {
+        .controller = USB_PHY_CTRL_OTG,
+        .target     = USB_PHY_TARGET_INT,
+        .otg_mode   = USB_OTG_MODE_DEVICE,
+        .otg_speed  = USB_PHY_SPEED_FULL,
+    };
+    ESP_ERROR_CHECK(usb_new_phy(&phy_cfg, &g_phy));
 
-    // Initialiser le CDC (port série virtuel)
-    ESP_ERROR_CHECK(tusb_cdc_acm_init(&cdc_cfg));
-    ESP_ERROR_CHECK(tinyusb_cdcacm_register_callback(
-        TINYUSB_CDC_ACM_0,
-        CDC_EVENT_RX,
-        cdc_rx_callback
-    ));
+    if (!tud_init(0)) {
+        ESP_LOGE(TAG, "tud_init failed");
+        return ESP_FAIL;
+    }
+
+    xTaskCreate(usb_device_task, "usb_task", 4096, NULL, 5, NULL);
 
     ESP_LOGI(TAG, "USB HID + CDC initialisés");
     return ESP_OK;
@@ -142,16 +136,13 @@ void usb_hid_key_press(uint8_t keycode, uint8_t modifier)
 {
     if (!g_mounted) return;
 
-    // Trouver un slot libre dans le rapport (6 touches simultanées max en HID)
-    g_keyboard_report[0] = modifier;  // Byte 0 = modifier
-    for (int i = 2; i < 8; i++) {     // Bytes 2-7 = jusqu'à 6 keycodes
+    g_keyboard_report[0] = modifier;
+    for (int i = 2; i < 8; i++) {
         if (g_keyboard_report[i] == 0) {
             g_keyboard_report[i] = keycode;
             break;
         }
     }
-
-    // Envoyer le rapport à l'hôte USB
     tud_hid_n_report(0, REPORT_ID_KEYBOARD, g_keyboard_report, sizeof(g_keyboard_report));
 }
 
@@ -159,22 +150,18 @@ void usb_hid_key_release(uint8_t keycode)
 {
     if (!g_mounted) return;
 
-    // Retirer le keycode du rapport
     for (int i = 2; i < 8; i++) {
         if (g_keyboard_report[i] == keycode) {
             g_keyboard_report[i] = 0;
             break;
         }
     }
-
-    // Envoyer le rapport mis à jour
     tud_hid_n_report(0, REPORT_ID_KEYBOARD, g_keyboard_report, sizeof(g_keyboard_report));
 }
 
 void usb_hid_consumer_press(uint16_t usage)
 {
     if (!g_mounted) return;
-    // Rapport consumer = 2 bytes (usage code 16 bits)
     uint8_t report[2] = { (uint8_t)(usage & 0xFF), (uint8_t)(usage >> 8) };
     tud_hid_n_report(0, REPORT_ID_CONSUMER, report, sizeof(report));
 }
@@ -188,53 +175,113 @@ void usb_hid_consumer_release(void)
 
 void usb_hid_process_config_packet(const uint8_t *data, size_t len)
 {
-    // Protocole simple : le JSON commence par une commande
-    // {"cmd":"set_config", "payload": {...}} → mettre à jour la config
-    // {"cmd":"get_config"}                  → renvoyer la config JSON
-    // {"cmd":"factory_reset"}               → reset
-
     const char *str = (const char *)data;
 
     if (strstr(str, "\"get_config\"")) {
-        // Envoyer la config actuelle en JSON via CDC
         char *buf = malloc(CONFIG_JSON_MAX_SIZE);
         if (buf) {
             config_store_to_json(buf, CONFIG_JSON_MAX_SIZE);
-            tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (uint8_t *)buf, strlen(buf));
-            tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+            tud_cdc_n_write(0, buf, strlen(buf));
+            tud_cdc_n_write_flush(0);
             free(buf);
         }
     } else if (strstr(str, "\"set_config\"")) {
-        // Trouver le payload JSON et mettre à jour
-        const char *payload_start = strstr(str, "\"payload\":");
-        if (payload_start) {
-            payload_start += 10;  // Sauter "payload":
-            config_store_update_from_json(payload_start);
+        const char *payload = strstr(str, "\"payload\":");
+        if (payload) {
+            payload += 10;
+            config_store_update_from_json(payload);
             keymap_reload_from_config();
-            // Confirmer
             const char *ok = "{\"status\":\"ok\"}\n";
-            tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (uint8_t *)ok, strlen(ok));
-            tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+            tud_cdc_n_write(0, ok, strlen(ok));
+            tud_cdc_n_write_flush(0);
         }
     } else if (strstr(str, "\"factory_reset\"")) {
         config_store_factory_reset();
         keymap_reload_from_config();
         const char *ok = "{\"status\":\"ok\",\"msg\":\"factory_reset\"}\n";
-        tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (uint8_t *)ok, strlen(ok));
-        tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+        tud_cdc_n_write(0, ok, strlen(ok));
+        tud_cdc_n_write_flush(0);
     }
 }
 
 bool usb_hid_is_mounted(void) { return g_mounted; }
 
-// Callback requis par TinyUSB quand l'hôte demande le descripteur HID
+// ─────────────────────────────────────────────────────────────
+//  TINYUSB DESCRIPTOR CALLBACKS
+// ─────────────────────────────────────────────────────────────
+
+uint8_t const *tud_descriptor_device_cb(void)
+{
+    return (uint8_t const *)&device_descriptor;
+}
+
+uint8_t const *tud_descriptor_configuration_cb(uint8_t index)
+{
+    (void)index;
+    return config_descriptor;
+}
+
+uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid)
+{
+    (void)langid;
+    static uint16_t desc_str[32];
+    uint8_t chr_count;
+
+    if (index == 0) {
+        memcpy(&desc_str[1], string_desc_arr[0], 2);
+        chr_count = 1;
+    } else if (index >= sizeof(string_desc_arr) / sizeof(string_desc_arr[0])) {
+        return NULL;
+    } else {
+        const char *str = string_desc_arr[index];
+        chr_count = (uint8_t)strlen(str);
+        if (chr_count > 31) chr_count = 31;
+        for (uint8_t i = 0; i < chr_count; i++) {
+            desc_str[1 + i] = str[i];
+        }
+    }
+
+    desc_str[0] = (uint16_t)((TUSB_DESC_STRING << 8) | (2 * chr_count + 2));
+    return desc_str;
+}
+
 uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
 {
     (void)instance;
     return hid_report_descriptor;
 }
 
-// Callback requis par TinyUSB pour les requêtes GET_REPORT
+// ─────────────────────────────────────────────────────────────
+//  TINYUSB EVENT CALLBACKS
+// ─────────────────────────────────────────────────────────────
+
+void tud_mount_cb(void)
+{
+    g_mounted = true;
+    ESP_LOGI(TAG, "USB monté");
+}
+
+void tud_umount_cb(void)
+{
+    g_mounted = false;
+    ESP_LOGI(TAG, "USB démonté");
+}
+
+// Called by TinyUSB when CDC data arrives
+void tud_cdc_rx_cb(uint8_t itf)
+{
+    uint32_t count = tud_cdc_n_read(itf,
+                                    g_cdc_rx_buf + g_cdc_rx_len,
+                                    sizeof(g_cdc_rx_buf) - g_cdc_rx_len - 1);
+    g_cdc_rx_len += count;
+
+    if (g_cdc_rx_len > 0 && g_cdc_rx_buf[g_cdc_rx_len - 1] == '\n') {
+        g_cdc_rx_buf[g_cdc_rx_len] = '\0';
+        usb_hid_process_config_packet(g_cdc_rx_buf, g_cdc_rx_len);
+        g_cdc_rx_len = 0;
+    }
+}
+
 uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id,
                                 hid_report_type_t report_type,
                                 uint8_t *buffer, uint16_t reqlen)
@@ -243,11 +290,9 @@ uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id,
     return 0;
 }
 
-// Callback requis par TinyUSB pour les requêtes SET_REPORT (output reports)
 void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id,
                             hid_report_type_t report_type,
                             const uint8_t *buffer, uint16_t bufsize)
 {
     (void)instance; (void)report_id; (void)report_type; (void)buffer; (void)bufsize;
-    // On pourrait gérer les LEDs clavier (NumLock, CapsLock) ici
 }
