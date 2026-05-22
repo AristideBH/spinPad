@@ -34,3 +34,5 @@ config-app/.svelte-kit/
 config-app/build/
 # !! NEVER commit — local secrets (VITE_DEV_MODE, etc.)
 config-app/.env
+firmware/.clangd
+.claude/settings.local.json
