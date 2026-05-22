@@ -11,14 +11,13 @@
 // Matrice 4 lignes × 3 colonnes = 12 cellules, dont 2 vides = 10 touches.
 //
 // Layout physique (vue de dessus) :
-//   COL0     COL1     COL2
-//   [SW1 2u] [SW8 ]   [----]   ROW0
-//            [SW7 ]   [SW9 ]   ROW1  ← SW2 est aussi en ROW1/COL0
-//   [SW2 ]                           (SW1 est 2u, occupe ROW0+ROW1 physiquement)
-//   [SW3 ]   [SW6 ]   [SW10 2u] ROW2
-//   [SW4 ]   [SW5 ]   [----]   ROW3
+//   COL0           COL1           COL2
+//   [SW1 -----2u horizontal-----] [SW8 ]   ROW0  ← SW1 occupe COL0+COL1
+//   [SW2 ]         [SW7 ]         [SW9 ]   ROW1
+//   [SW3 ]         [SW6 ]         [SW10 2u vert]  ROW2  ← SW10 occupe ROW2+ROW3
+//   [SW4 ]         [SW5 ]         [            ]  ROW3
 //
-// Cellules vides (pas de switch câblé) :
+// Cellules vides dans la matrice électrique (pas de switch câblé) :
 //   (ROW0, COL2) et (ROW3, COL2)
 
 #define KB_MATRIX_ROWS      4       // Nombre de lignes (ROW)

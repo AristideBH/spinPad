@@ -102,21 +102,26 @@
     firmware: "bg-purple-950/80 hover:bg-purple-900/80",
   };
 
-  // Physical key layout — 4×3 grid, 10 switches.
-  // SW1 (idx 0) and SW10 (idx 7) are 2u tall keys.
-  // (row, col) are 1-indexed CSS grid coordinates.
-  // rowSpan=2 means the key spans 2 grid rows (2u physical size).
+  // Physical key layout — 4 rows × 3 cols, 10 switches.
+  // Row/col are 1-indexed CSS grid coordinates.
+  // SW1: horizontal 2u — spans col 1+2, top row.
+  // SW10: vertical 2u — spans row 3+4, right column.
+  // Visual:
+  //   [ SW1  (2u wide)  ] [ SW8 ]
+  //   [ SW2 ] [ SW7 ] [ SW9 ]
+  //   [ SW3 ] [ SW6 ] [ SW10 (2u tall) ]
+  //   [ SW4 ] [ SW5 ] [               ]
   const KEY_LAYOUT = [
-    { sw: "SW1",  idx: 0, row: 1, col: 1, rowSpan: 2 },
-    { sw: "SW8",  idx: 1, row: 1, col: 2, rowSpan: 1 },
-    { sw: "SW2",  idx: 2, row: 2, col: 1, rowSpan: 1 },
-    { sw: "SW7",  idx: 3, row: 2, col: 2, rowSpan: 1 },
-    { sw: "SW9",  idx: 4, row: 2, col: 3, rowSpan: 1 },
-    { sw: "SW3",  idx: 5, row: 3, col: 1, rowSpan: 1 },
-    { sw: "SW6",  idx: 6, row: 3, col: 2, rowSpan: 1 },
-    { sw: "SW10", idx: 7, row: 3, col: 3, rowSpan: 2 },
-    { sw: "SW4",  idx: 8, row: 4, col: 1, rowSpan: 1 },
-    { sw: "SW5",  idx: 9, row: 4, col: 2, rowSpan: 1 },
+    { sw: "SW1",  idx: 0, row: 1, col: 1, rowSpan: 1, colSpan: 2 },
+    { sw: "SW8",  idx: 1, row: 1, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: "SW2",  idx: 2, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW7",  idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: "SW9",  idx: 4, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: "SW3",  idx: 5, row: 3, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW6",  idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: "SW10", idx: 7, row: 3, col: 3, rowSpan: 2, colSpan: 1 },
+    { sw: "SW4",  idx: 8, row: 4, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: "SW5",  idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
   ];
 </script>
 
@@ -181,7 +186,7 @@
     >
       {#each KEY_LAYOUT as key}
         <button
-          style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col};"
+          style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
           class={cn(
             "rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50",
             editingKey === key.idx && editingField === "key"
@@ -191,8 +196,10 @@
           onclick={() => openKeyPicker(key.idx)}
         >
           <span class="text-[8px] text-muted-foreground">{key.sw}</span>
-          <span class="leading-none">{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span>
-          {#if key.rowSpan === 2}
+          <span class="leading-none"
+            >{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span
+          >
+          {#if key.rowSpan === 2 || key.colSpan === 2}
             <span class="text-[7px] text-muted-foreground/50">2u</span>
           {/if}
         </button>
