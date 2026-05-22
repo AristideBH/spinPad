@@ -23,11 +23,10 @@ export const MOCK_CONFIG = {
             layers: [
                 {
                     name: 'Base',
+                    // 10 keys: SW1 SW8 SW2 SW7 SW9 SW3 SW6 SW10 SW4 SW5
                     keys: [
-                        KC(0x04), KC(0x05), KC(0x06), KC(0x07), KC(0x08), // A B C D E
-                        KC(0x09), KC(0x0A), KC(0x0B), KC(0x0C), KC(0x0D), // F G H I J
-                        KC(0x0E), KC(0x0F), KC(0x10), KC(0x11), KC(0x12), // K L M N O
-                        MOD(0x01), KC(0x29), KC(0x28), MO(1), KC(0x2C), // LCtrl Esc Enter MO1 Space
+                        KC(0x04), KC(0x05), KC(0x06), KC(0x07), KC(0x08), // SW1 SW8 SW2 SW7 SW9
+                        KC(0x09), KC(0x0A), KC(0x0B), KC(0x0C), KC(0x0D), // SW3 SW6 SW10 SW4 SW5
                     ],
                     encoder: { cw: VOL_UP, ccw: VOL_DOWN, press: MUTE },
                 },
@@ -36,8 +35,6 @@ export const MOCK_CONFIG = {
                     keys: [
                         KC(0x3A), KC(0x3B), KC(0x3C), KC(0x3D), KC(0x3E), // F1-F5
                         KC(0x3F), KC(0x40), KC(0x41), KC(0x42), KC(0x43), // F6-F10
-                        KC(0x44), KC(0x45), 0, 0, 0,        // F11 F12
-                        0, 0, 0, 0, 0,
                     ],
                     encoder: { cw: 0, ccw: 0, press: 0 },
                 },
@@ -45,15 +42,13 @@ export const MOCK_CONFIG = {
             combos: [],
         },
         {
-            name: 'Gaming',
+            name: 'Media',
             layers: [
                 {
                     name: 'Base',
                     keys: [
-                        KC(0x1A), KC(0x17), KC(0x08), KC(0x15), 0,       // W A E R
-                        KC(0x04), KC(0x16), KC(0x07), KC(0x09), 0,       // A S D F
-                        KC(0x04), KC(0x05), KC(0x06), KC(0x07), 0,
-                        MOD(0x04), KC(0x2C), KC(0x28), 0, 0,       // LAlt Space
+                        MO(1), VOL_UP, KC(0x29), KC(0x2C), KC(0x28), // SW1 SW8 SW2 SW7 SW9
+                        MUTE,  VOL_DOWN, 0,       0,        0,        // SW3 SW6 SW10 SW4 SW5
                     ],
                     encoder: { cw: VOL_UP, ccw: VOL_DOWN, press: MUTE },
                 },

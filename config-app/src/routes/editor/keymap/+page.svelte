@@ -101,6 +101,23 @@
     media: "bg-orange-950/80 hover:bg-orange-900/80",
     firmware: "bg-purple-950/80 hover:bg-purple-900/80",
   };
+
+  // Physical key layout — 4×3 grid, 10 switches.
+  // SW1 (idx 0) and SW10 (idx 7) are 2u tall keys.
+  // (row, col) are 1-indexed CSS grid coordinates.
+  // rowSpan=2 means the key spans 2 grid rows (2u physical size).
+  const KEY_LAYOUT = [
+    { sw: "SW1",  idx: 0, row: 1, col: 1, rowSpan: 2 },
+    { sw: "SW8",  idx: 1, row: 1, col: 2, rowSpan: 1 },
+    { sw: "SW2",  idx: 2, row: 2, col: 1, rowSpan: 1 },
+    { sw: "SW7",  idx: 3, row: 2, col: 2, rowSpan: 1 },
+    { sw: "SW9",  idx: 4, row: 2, col: 3, rowSpan: 1 },
+    { sw: "SW3",  idx: 5, row: 3, col: 1, rowSpan: 1 },
+    { sw: "SW6",  idx: 6, row: 3, col: 2, rowSpan: 1 },
+    { sw: "SW10", idx: 7, row: 3, col: 3, rowSpan: 2 },
+    { sw: "SW4",  idx: 8, row: 4, col: 1, rowSpan: 1 },
+    { sw: "SW5",  idx: 9, row: 4, col: 2, rowSpan: 1 },
+  ];
 </script>
 
 <svelte:head>
@@ -157,20 +174,27 @@
   </div>
 
   {#if layer}
-    <!-- Key grid 5×4 -->
-    <div class="grid grid-cols-5 gap-1.5 max-w-xs mb-6">
-      {#each layer.keys as keyValue, idx}
+    <!-- Custom key layout: 4 rows × 3 cols, SW1 and SW10 are 2u tall -->
+    <div
+      class="inline-grid gap-1.5 mb-6"
+      style="grid-template-rows: repeat(4, 2.75rem); grid-template-columns: repeat(3, 2.75rem);"
+    >
+      {#each KEY_LAYOUT as key}
         <button
+          style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col};"
           class={cn(
-            "aspect-square rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50",
-            editingKey === idx && editingField === "key"
+            "rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50",
+            editingKey === key.idx && editingField === "key"
               ? "border-primary bg-primary/20"
-              : "  bg-card",
+              : "bg-card",
           )}
-          onclick={() => openKeyPicker(idx)}
+          onclick={() => openKeyPicker(key.idx)}
         >
-          <span class="text-[8px] text-muted-foreground">SW{idx + 1}</span>
-          <span class="leading-none">{getKeycodeLabel(keyValue)}</span>
+          <span class="text-[8px] text-muted-foreground">{key.sw}</span>
+          <span class="leading-none">{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span>
+          {#if key.rowSpan === 2}
+            <span class="text-[7px] text-muted-foreground/50">2u</span>
+          {/if}
         </button>
       {/each}
     </div>

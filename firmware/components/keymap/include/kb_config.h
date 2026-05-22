@@ -8,13 +8,22 @@
 #include "driver/gpio.h"
 
 // ── Matrice de touches ────────────────────────────────────────
-// Le clavier utilise une matrice ligne × colonne.
-// Chaque touche = une ligne + une colonne.
-// Exemple : SW1 = ligne 0, colonne 0
+// Matrice 4 lignes × 3 colonnes = 12 cellules, dont 2 vides = 10 touches.
+//
+// Layout physique (vue de dessus) :
+//   COL0     COL1     COL2
+//   [SW1 2u] [SW8 ]   [----]   ROW0
+//            [SW7 ]   [SW9 ]   ROW1  ← SW2 est aussi en ROW1/COL0
+//   [SW2 ]                           (SW1 est 2u, occupe ROW0+ROW1 physiquement)
+//   [SW3 ]   [SW6 ]   [SW10 2u] ROW2
+//   [SW4 ]   [SW5 ]   [----]   ROW3
+//
+// Cellules vides (pas de switch câblé) :
+//   (ROW0, COL2) et (ROW3, COL2)
 
 #define KB_MATRIX_ROWS      4       // Nombre de lignes (ROW)
-#define KB_MATRIX_COLS      5       // Nombre de colonnes (COL)
-#define KB_NUM_KEYS         (KB_MATRIX_ROWS * KB_MATRIX_COLS)  // = 20
+#define KB_MATRIX_COLS      3       // Nombre de colonnes (COL)
+#define KB_NUM_KEYS         10      // Touches actives (12 cellules - 2 vides)
 
 // GPIO des lignes (sorties — le firmware les met à LOW un par un)
 static const gpio_num_t KB_ROW_PINS[KB_MATRIX_ROWS] = {
@@ -29,32 +38,53 @@ static const gpio_num_t KB_COL_PINS[KB_MATRIX_COLS] = {
     GPIO_NUM_14,  // COL0
     GPIO_NUM_15,  // COL1
     GPIO_NUM_16,  // COL2
-    GPIO_NUM_17,  // COL3
-    GPIO_NUM_18,  // COL4
 };
 
-// Index logique de chaque switch dans la matrice (row * COLS + col)
-// SW1..SW20 — ajuste selon ton schéma PCB
-#define SW1   0
-#define SW2   1
-#define SW3   2
-#define SW4   3
-#define SW5   4
-#define SW6   5
-#define SW7   6
-#define SW8   7
-#define SW9   8
-#define SW10  9
-#define SW11  10   // ← switch BLE device (court appui = changer d'appareil)
-#define SW12  11
-#define SW13  12
-#define SW14  13
-#define SW15  14
-#define SW16  15   // ← pairing BLE (long appui SW16+SW17 simultané)
-#define SW17  16   // ← pairing BLE (idem)
-#define SW18  17
-#define SW19  18
-#define SW20  19
+// Validité des cellules de la matrice — false = pas de switch câblé
+static const bool KB_MATRIX_VALID[KB_MATRIX_ROWS][KB_MATRIX_COLS] = {
+    {true,  true,  false},  // ROW0: SW1, SW8, VIDE
+    {true,  true,  true },  // ROW1: SW2, SW7, SW9
+    {true,  true,  true },  // ROW2: SW3, SW6, SW10
+    {true,  true,  false},  // ROW3: SW4, SW5, VIDE
+};
+
+// Correspondance cellule matrice → index logique (0-9), -1 = cellule vide
+static const int8_t KB_MATRIX_TO_KEY[KB_MATRIX_ROWS][KB_MATRIX_COLS] = {
+    { 0,  1, -1},  // ROW0: SW1=0, SW8=1
+    { 2,  3,  4},  // ROW1: SW2=2, SW7=3, SW9=4
+    { 5,  6,  7},  // ROW2: SW3=5, SW6=6, SW10=7
+    { 8,  9, -1},  // ROW3: SW4=8, SW5=9
+};
+
+// Index logiques des touches du clavier (0-9)
+#define SW1   0   // COL0/ROW0 — touche 2u
+#define SW8   1   // COL1/ROW0
+#define SW2   2   // COL0/ROW1
+#define SW7   3   // COL1/ROW1
+#define SW9   4   // COL2/ROW1
+#define SW3   5   // COL0/ROW2
+#define SW6   6   // COL1/ROW2
+#define SW10  7   // COL2/ROW2 — touche 2u
+#define SW4   8   // COL0/ROW3
+#define SW5   9   // COL1/ROW3
+
+// Boutons spéciaux hors matrice (GPIO directs, pull-up, actif bas)
+// TODO: ajuster les GPIO selon le PCB final
+#define SW11_GPIO  GPIO_NUM_17   // Changement d'appareil BLE (court appui)
+#define SW16_GPIO  GPIO_NUM_18   // Pairing BLE (long appui SW16+SW17)
+#define SW17_GPIO  GPIO_NUM_19   // Pairing BLE (long appui SW16+SW17)
+#define SW_BTN_ACTIVE_LEVEL  0   // Actif bas (pull-up interne)
+
+// Index virtuels des boutons spéciaux dans le tableau d'état
+#define SW11  10
+#define SW16  11
+#define SW17  12
+#define KB_TOTAL_KEYS  13   // 10 touches matrice + 3 boutons spéciaux
+
+// ── LEDs RGB par touche — chaîne WS2812 (une LED par switch) ─────────
+// TODO: ajuster le GPIO selon le PCB final
+#define LED_KEY_GPIO    GPIO_NUM_3
+#define LED_KEY_COUNT   KB_NUM_KEYS  // 10 LEDs
 
 // ── Encodeur rotatif ─────────────────────────────────────────
 #define ENCODER_PIN_A       GPIO_NUM_4   // Signal A (CLK)

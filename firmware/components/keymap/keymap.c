@@ -44,14 +44,14 @@ static uint8_t  g_layer_stack[KEYMAP_MAX_LAYERS];
 static uint8_t  g_layer_stack_size = 0;
 
 // ── État physique des touches ─────────────────────────────────
-// Deux snapshots consécutifs pour la détection de changement d'état
-static uint8_t  g_key_state[KB_NUM_KEYS];       // État actuel (1=pressé, 0=relâché)
-static uint8_t  g_key_prev[KB_NUM_KEYS];        // État au scan précédent
-static uint8_t  g_debounce_count[KB_NUM_KEYS];  // Compteur anti-rebond
+// Indices 0..KB_NUM_KEYS-1  : touches matrice (SW1-SW10)
+// Indices KB_NUM_KEYS..KB_TOTAL_KEYS-1 : boutons spéciaux (SW11, SW16, SW17)
+static uint8_t  g_key_state[KB_TOTAL_KEYS];       // État actuel (1=pressé, 0=relâché)
+static uint8_t  g_key_prev[KB_TOTAL_KEYS];        // État au scan précédent
+static uint8_t  g_debounce_count[KB_TOTAL_KEYS];  // Compteur anti-rebond
 
 // Timestamp (µs) du moment où chaque touche a été pressée
-// Utilisé pour le tap-hold et les combos
-static int64_t  g_key_press_time[KB_NUM_KEYS];
+static int64_t  g_key_press_time[KB_TOTAL_KEYS];
 
 // Modificateur actuellement actif (byte HID : bits 0-7)
 static uint8_t  g_modifier_state = 0;
@@ -82,11 +82,10 @@ static bool    g_pairing_triggered = false;
 //  FONCTIONS PRIVÉES — MATRICE GPIO
 // ─────────────────────────────────────────────────────────────
 
-// Configure les GPIO de la matrice en entrée/sortie
+// Configure les GPIO de la matrice et des boutons spéciaux
 static void matrix_gpio_init(void)
 {
-    // Lignes (ROW) = sorties. On les met à HIGH par défaut.
-    // Quand on scanne une ligne, on la met à LOW.
+    // Lignes (ROW) = sorties, HIGH par défaut
     for (int r = 0; r < KB_MATRIX_ROWS; r++) {
         gpio_config_t cfg = {
             .pin_bit_mask = (1ULL << KB_ROW_PINS[r]),
@@ -96,23 +95,36 @@ static void matrix_gpio_init(void)
             .intr_type    = GPIO_INTR_DISABLE,
         };
         gpio_config(&cfg);
-        gpio_set_level(KB_ROW_PINS[r], 1);  // HIGH par défaut
+        gpio_set_level(KB_ROW_PINS[r], 1);
     }
 
-    // Colonnes (COL) = entrées avec pull-up interne.
-    // Quand une touche est pressée (ligne=LOW), la colonne passe à LOW.
-    // Donc : LOW = touche pressée, HIGH = touche relâchée.
+    // Colonnes (COL) = entrées avec pull-up — LOW = touche pressée
     for (int c = 0; c < KB_MATRIX_COLS; c++) {
         gpio_config_t cfg = {
             .pin_bit_mask = (1ULL << KB_COL_PINS[c]),
             .mode         = GPIO_MODE_INPUT,
-            .pull_up_en   = GPIO_PULLUP_ENABLE,   // Pull-up actif
+            .pull_up_en   = GPIO_PULLUP_ENABLE,
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
             .intr_type    = GPIO_INTR_DISABLE,
         };
         gpio_config(&cfg);
     }
-    ESP_LOGI(TAG, "GPIO matrice initialisée (%dx%d)", KB_MATRIX_ROWS, KB_MATRIX_COLS);
+
+    // Boutons spéciaux hors matrice (SW11, SW16, SW17)
+    const gpio_num_t special_pins[] = {SW11_GPIO, SW16_GPIO, SW17_GPIO};
+    for (int i = 0; i < 3; i++) {
+        gpio_config_t cfg = {
+            .pin_bit_mask = (1ULL << special_pins[i]),
+            .mode         = GPIO_MODE_INPUT,
+            .pull_up_en   = GPIO_PULLUP_ENABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type    = GPIO_INTR_DISABLE,
+        };
+        gpio_config(&cfg);
+    }
+
+    ESP_LOGI(TAG, "GPIO matrice initialisée (%dx%d + 3 boutons spéciaux)",
+             KB_MATRIX_ROWS, KB_MATRIX_COLS);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -319,10 +331,10 @@ esp_err_t keymap_init(void)
     // Initialiser les GPIO de la matrice
     matrix_gpio_init();
 
-    // Réinitialiser les états internes
-    memset(g_key_state,     0, sizeof(g_key_state));
-    memset(g_key_prev,      0, sizeof(g_key_prev));
-    memset(g_debounce_count,0, sizeof(g_debounce_count));
+    // Réinitialiser les états internes (matrice + boutons spéciaux)
+    memset(g_key_state,      0, sizeof(g_key_state));
+    memset(g_key_prev,       0, sizeof(g_key_prev));
+    memset(g_debounce_count, 0, sizeof(g_debounce_count));
     g_modifier_state = 0;
     g_has_activity   = false;
 
@@ -338,37 +350,29 @@ esp_err_t keymap_init(void)
     return ESP_OK;
 }
 
-// Scan de la matrice : met à jour g_key_state[]
+// Scan de la matrice : met à jour g_key_state[0..KB_NUM_KEYS-1]
 void keymap_scan_matrix(void)
 {
     int64_t now = esp_timer_get_time() / 1000;  // µs → ms
 
     for (int r = 0; r < KB_MATRIX_ROWS; r++) {
-        // Activer la ligne courante (mettre à LOW)
         gpio_set_level(KB_ROW_PINS[r], 0);
-        // Petit délai pour que le signal se stabilise (propagation RC)
         esp_rom_delay_us(5);
 
         for (int c = 0; c < KB_MATRIX_COLS; c++) {
-            int key_idx = r * KB_MATRIX_COLS + c;
-            // LOW = touche pressée (pull-up + ligne à 0)
+            if (!KB_MATRIX_VALID[r][c]) continue;  // Cellule vide
+
+            int key_idx = KB_MATRIX_TO_KEY[r][c];
             int raw = gpio_get_level(KB_COL_PINS[c]) == 0 ? 1 : 0;
 
-            // Anti-rebond : on valide uniquement si KB_DEBOUNCE_SCANS
-            // scans consécutifs donnent le même résultat
             if (raw != g_key_state[key_idx]) {
                 g_debounce_count[key_idx]++;
                 if (g_debounce_count[key_idx] >= KB_DEBOUNCE_SCANS) {
                     g_debounce_count[key_idx] = 0;
                     g_key_prev[key_idx]  = g_key_state[key_idx];
                     g_key_state[key_idx] = raw;
-
                     if (raw) {
-                        // Touche pressée : enregistrer le timestamp
                         g_key_press_time[key_idx] = now;
-                        // Tracker les temps de press de SW16/SW17
-                        if (key_idx == SW16) g_sw16_press_time = now;
-                        if (key_idx == SW17) g_sw17_press_time = now;
                         g_has_activity = true;
                     }
                 }
@@ -377,8 +381,32 @@ void keymap_scan_matrix(void)
             }
         }
 
-        // Désactiver la ligne (remettre à HIGH)
         gpio_set_level(KB_ROW_PINS[r], 1);
+    }
+
+    // Scan des boutons spéciaux hors matrice (SW11, SW16, SW17)
+    const gpio_num_t special_pins[] = {SW11_GPIO, SW16_GPIO, SW17_GPIO};
+    const int        special_idx[]  = {SW11,      SW16,      SW17     };
+    for (int i = 0; i < 3; i++) {
+        int ki  = special_idx[i];
+        int raw = gpio_get_level(special_pins[i]) == SW_BTN_ACTIVE_LEVEL ? 1 : 0;
+
+        if (raw != g_key_state[ki]) {
+            g_debounce_count[ki]++;
+            if (g_debounce_count[ki] >= KB_DEBOUNCE_SCANS) {
+                g_debounce_count[ki] = 0;
+                g_key_prev[ki]  = g_key_state[ki];
+                g_key_state[ki] = raw;
+                if (raw) {
+                    g_key_press_time[ki] = now;
+                    if (ki == SW16) g_sw16_press_time = now;
+                    if (ki == SW17) g_sw17_press_time = now;
+                    g_has_activity = true;
+                }
+            }
+        } else {
+            g_debounce_count[ki] = 0;
+        }
     }
 }
 
@@ -434,29 +462,35 @@ void keymap_process_events(void)
         return;  // Ignorer les touches individuelles pendant un combo
     }
 
-    // ── 3. Traitement touche par touche ──────────────────────
+    // ── 3. Traitement touche par touche (touches matrice uniquement) ─
     for (int k = 0; k < KB_NUM_KEYS; k++) {
         bool curr = g_key_state[k];
         bool prev = g_key_prev[k];
 
-        if (curr == prev) continue;  // Pas de changement → rien à faire
+        if (curr == prev) continue;
 
-        // Résoudre l'action via le layer stack
         uint16_t action = layer_resolve_action(k);
 
         if (curr && !prev) {
-            // Touche vient d'être PRESSÉE
             ESP_LOGD(TAG, "SW%d pressé → action 0x%04X", k+1, action);
             send_action(action, true);
         } else if (!curr && prev) {
-            // Touche vient d'être RELÂCHÉE
             ESP_LOGD(TAG, "SW%d relâché → action 0x%04X", k+1, action);
             send_action(action, false);
         }
 
-        // Mettre à jour l'état précédent
         g_key_prev[k] = curr;
     }
+
+    // ── 4. Boutons spéciaux hors matrice ─────────────────────
+    // SW11 : changement d'appareil BLE (front montant)
+    if (g_key_state[SW11] && !g_key_prev[SW11]) {
+        ESP_LOGI(TAG, "SW11 → BLE device switch");
+        ble_hid_switch_device();
+    }
+    g_key_prev[SW11] = g_key_state[SW11];
+    g_key_prev[SW16] = g_key_state[SW16];
+    g_key_prev[SW17] = g_key_state[SW17];
 }
 
 bool keymap_has_activity(void)

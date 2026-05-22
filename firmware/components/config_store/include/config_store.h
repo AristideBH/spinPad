@@ -14,6 +14,7 @@
 #define CONFIG_MAX_LAYERS       8
 #define CONFIG_MAX_COMBOS      16
 #define CONFIG_NAME_MAX_LEN    32
+#define CONFIG_NUM_KEYS        10  // Doit correspondre à KB_NUM_KEYS dans kb_config.h
 
 // Combo definition (mirrors keymap's internal type)
 #define KEYMAP_COMBO_MAX_KEYS   4
@@ -29,7 +30,7 @@ typedef struct {
 // ── Un layer : tableau de keycodes ───────────────────────────
 typedef struct {
     char     name[CONFIG_NAME_MAX_LEN];    // Ex: "Base", "Fn", "Media"
-    uint16_t keys[20];                     // Action pour chaque touche (KB_NUM_KEYS)
+    uint16_t keys[CONFIG_NUM_KEYS];        // Action pour chaque touche (KB_NUM_KEYS)
     uint16_t encoder_cw;                   // Encodeur sens horaire
     uint16_t encoder_ccw;                  // Encodeur sens anti-horaire
     uint16_t encoder_press;                // Bouton de l'encodeur
