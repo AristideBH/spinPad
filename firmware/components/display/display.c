@@ -166,7 +166,7 @@ static void render_screen(void)
     }
 
     if (dcfg->show_layer) {
-        char layer_str[16];
+        char layer_str[CONFIG_NAME_MAX_LEN + 3];  // "L:" + name + '\0'
         uint8_t layer = keymap_get_active_layer();
         const char *lname = cfg->profiles[cfg->active_profile].layers[layer].name;
         snprintf(layer_str, sizeof(layer_str), "L:%s", lname);
@@ -178,7 +178,7 @@ static void render_screen(void)
 
     // ── Ligne 2 : Profil ─────────────────────────────────────
     if (dcfg->show_profile) {
-        char prof_str[24];
+        char prof_str[CONFIG_NAME_MAX_LEN + 1];
         snprintf(prof_str, sizeof(prof_str), "%s",
                  cfg->profiles[cfg->active_profile].name);
         fb_draw_string(0, 16, prof_str, false);
@@ -249,11 +249,8 @@ esp_err_t display_init(void)
     ESP_ERROR_CHECK(esp_lcd_panel_init(g_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(g_panel, true));
 
-    // Luminosité initiale depuis config
-    const kb_config_t *cfg = config_store_get();
-    // Commande SSD1306 pour la luminosité (0x00-0xFF)
-    // Note: esp_lcd ne l'expose pas directement, on passe par la commande brute
-    // Pour l'instant, brightness par défaut
+    // Brightness via raw SSD1306 command not yet implemented in esp_lcd;
+    // default brightness used for now.
 
     fb_clear();
     ESP_LOGI(TAG, "Écran SSD1315 initialisé (%dx%d)", FB_WIDTH, FB_HEIGHT);
