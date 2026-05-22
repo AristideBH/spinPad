@@ -153,6 +153,8 @@ static void clear_bonded_address(uint8_t slot)
 //  ADVERTISING
 // ─────────────────────────────────────────────────────────────
 
+static int gap_event_handler(struct ble_gap_event *event, void *arg);
+
 static void start_advertising(bool directed)
 {
     // Paramètres d'advertising
