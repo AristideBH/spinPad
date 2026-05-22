@@ -61,7 +61,7 @@ static bool        g_slot_bonded[BLE_NUM_DEVICE_SLOTS] = {false, false};
 //  DESCRIPTEUR HID (même structure que USB, mais pour BLE)
 // ─────────────────────────────────────────────────────────────
 
-static const uint8_t ble_hid_report_descriptor[] = {
+static const uint8_t ble_hid_report_descriptor[] __attribute__((unused)) = {
     // Keyboard report (ID 1)
     0x05, 0x01,  // Usage Page (Generic Desktop)
     0x09, 0x06,  // Usage (Keyboard)
@@ -166,7 +166,7 @@ static void start_advertising(bool directed)
         ESP_LOGI(TAG, "Advertising dirigé vers slot %d", g_active_slot);
         // Démarrer l'advertising dirigé vers le peer stocké
         ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, &g_bonded_addrs[g_active_slot],
-                          BLE_HS_FOREVER, &adv_params, NULL, NULL);
+                          BLE_HS_FOREVER, &adv_params, gap_event_handler, NULL);
     } else {
         // General advertising : visible par tous
         adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
@@ -183,12 +183,12 @@ static void start_advertising(bool directed)
         fields.name                  = (uint8_t *)cfg->ble.device_name;
         fields.name_len              = strlen(cfg->ble.device_name);
         fields.name_is_complete      = 1;
-        // Apparence = HID Keyboard (0x03C1)
-        fields.appearance            = BLE_SVC_GAP_APPEARANCE_HID_KEYBOARD;
+        // Apparence = HID Keyboard (0x03C1, Bluetooth spec assigned number)
+        fields.appearance            = 0x03C1;
         fields.appearance_is_present = 1;
 
         ble_gap_adv_set_fields(&fields);
-        ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, NULL, NULL);
+        ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, gap_event_handler, NULL);
         ESP_LOGI(TAG, "Advertising général démarré");
     }
 
@@ -232,11 +232,14 @@ static int gap_event_handler(struct ble_gap_event *event, void *arg)
         start_advertising(g_slot_bonded[g_active_slot]);
         break;
 
-    case BLE_GAP_EVENT_REPEAT_PAIRING:
+    case BLE_GAP_EVENT_REPEAT_PAIRING: {
         // L'hôte veut re-pairer (ex: clés changées)
-        // On efface l'ancien bond et on accepte le nouveau
-        ble_store_util_delete_peer_records(&event->repeat_pairing.conn_handle);
+        struct ble_gap_conn_desc desc;
+        if (ble_gap_conn_find(event->repeat_pairing.conn_handle, &desc) == 0) {
+            ble_store_util_delete_peer(&desc.peer_id_addr);
+        }
         return BLE_GAP_REPEAT_PAIRING_RETRY;
+    }
 
     default:
         break;
