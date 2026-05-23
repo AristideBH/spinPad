@@ -10,6 +10,7 @@ idf_component_register(
         display
         battery
         power_mgmt
+        web_config
 )
 
 idf_component_get_property(tusb_lib espressif__tinyusb COMPONENT_LIB)

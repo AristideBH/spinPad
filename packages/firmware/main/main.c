@@ -29,6 +29,7 @@
 #include "display.h"
 #include "battery.h"
 #include "power_mgmt.h"
+#include "web_config.h"
 
 // Tag pour les logs — apparaît dans la console comme "[MAIN] message"
 static const char *TAG = "MAIN";
@@ -71,7 +72,11 @@ static void keyboard_scan_task(void *pvParameters)
 // ─────────────────────────────────────────────────────────────
 void app_main(void)
 {
-    ESP_LOGI(TAG, "=== Custom Keyboard démarrage ===");
+    ESP_LOGI(TAG, "=== SpinPad démarrage ===");
+
+    // ── 0. Pré-init réseau (requis avant keymap pour web_config) ─
+    // esp_netif et l'event loop doivent être créés une seule fois.
+    ESP_ERROR_CHECK(web_config_init());
 
     // ── 1. NVS (Non-Volatile Storage) ────────────────────────
     // NVS = espace flash pour stocker des données persistantes

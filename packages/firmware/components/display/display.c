@@ -276,3 +276,54 @@ void display_set_sleep(bool sleep)
         esp_lcd_panel_disp_on_off(g_panel, !sleep);
     }
 }
+
+// ── Studio Mode ──────────────────────────────────────────────
+//
+//  Écran Studio Mode :
+//    ╔══════════════════╗
+//    ║  STUDIO MODE     ║   y= 2 (ligne 1)
+//    ║──────────────────║   y= 9 (séparateur)
+//    ║  SpinPad-Config  ║   y=13 (SSID)
+//    ║  192.168.4.1     ║   y=25 (IP)
+//    ╚══════════════════╝
+
+static bool g_studio_mode_screen = false;  // True = écran verrouillé sur Studio Mode
+
+void display_show_studio_mode(const char *ssid, const char *ip)
+{
+    g_studio_mode_screen = true;
+
+    fb_clear();
+
+    // Titre centré
+    int title_x = (FB_WIDTH - (int)(strlen("STUDIO MODE") * 6)) / 2;
+    if (title_x < 0) title_x = 0;
+    fb_draw_string(title_x, 1, "STUDIO MODE", false);
+
+    // Séparateur horizontal
+    for (int x = 0; x < FB_WIDTH; x++) {
+        g_framebuffer[1][x] |= 0x01;   // Pixel tout en bas de la page 1 (y=8)
+    }
+
+    // SSID (tronqué si trop long pour 72px)
+    char ssid_buf[13];
+    snprintf(ssid_buf, sizeof(ssid_buf), "%s", ssid);
+    int ssid_x = (FB_WIDTH - (int)(strlen(ssid_buf) * 6)) / 2;
+    if (ssid_x < 0) ssid_x = 0;
+    fb_draw_string(ssid_x, 13, ssid_buf, false);
+
+    // IP
+    int ip_x = (FB_WIDTH - (int)(strlen(ip) * 6)) / 2;
+    if (ip_x < 0) ip_x = 0;
+    fb_draw_string(ip_x, 25, ip, false);
+
+    fb_flush();
+    ESP_LOGI(TAG, "Écran Studio Mode affiché — %s / %s", ssid, ip);
+}
+
+void display_show_status(void)
+{
+    g_studio_mode_screen = false;
+    // Forcer une mise à jour vers l'écran de statut normal
+    display_update();
+}

@@ -17,26 +17,33 @@ desktop.ini
 *.swo
 *~
 
-# ── ESP-IDF / CMake (firmware/) ───────────
+# ── ESP-IDF / CMake ───────────────────────
+packages/firmware/build/
+packages/firmware/sdkconfig
+packages/firmware/dependencies.lock
+packages/firmware/managed_components/
+packages/firmware/.clangd
+# Compat ancien chemin
 firmware/build/
 firmware/sdkconfig
 firmware/dependencies.lock
 firmware/managed_components/
-
-# Build artefacts à la racine (ancienne position, au cas où)
-build/
-sdkconfig
-
-# ── config-app ────────────────────────────
-# (le sous-dossier a son propre .gitignore)
-config-app/node_modules/
-config-app/.svelte-kit/
-config-app/build/
-# !! NEVER commit — local secrets (VITE_DEV_MODE, etc.)
-config-app/.env
 firmware/.clangd
+
+# ── Node / pnpm ───────────────────────────
+node_modules/
+.pnpm-store/
+
+# ── Studio / SvelteKit ────────────────────
+**/.svelte-kit/
+**/build/
+**/build-embedded/
+packages/studio/.env
+packages/studio/.env.*
+# Compat ancien chemin
+config-app/.env
+
+# ── Secrets locaux ────────────────────────
 .claude/settings.local.json
-node_modules
-
-
-**/.svelte-kit/    # généré par svelte-kit sync / vite dev
+.env
+.env.*

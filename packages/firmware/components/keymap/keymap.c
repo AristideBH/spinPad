@@ -12,6 +12,7 @@
 #include "config_store.h"
 #include "usb_hid.h"
 #include "ble_hid.h"
+#include "web_config.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -294,6 +295,45 @@ static void send_action(uint16_t action, bool pressed)
 }
 
 // ─────────────────────────────────────────────────────────────
+//  FONCTIONS PRIVÉES — STUDIO MODE LONG PRESS
+//
+//  SW8 + SW9 maintenus 3 secondes = basculer Studio Mode WiFi
+// ─────────────────────────────────────────────────────────────
+
+#define STUDIO_MODE_LONGPRESS_MS  3000
+
+static int64_t g_sw8sw9_press_start  = 0;
+static bool    g_studio_mode_triggered = false;
+
+static void check_studio_mode_longpress(void)
+{
+    bool sw8 = g_key_state[SW8];   // index 1
+    bool sw9 = g_key_state[SW9];   // index 4
+    int64_t now = esp_timer_get_time() / 1000;  // µs → ms
+
+    if (sw8 && sw9) {
+        if (g_sw8sw9_press_start == 0) {
+            g_sw8sw9_press_start = now;
+        }
+        if (!g_studio_mode_triggered &&
+            (now - g_sw8sw9_press_start) >= STUDIO_MODE_LONGPRESS_MS) {
+            if (web_config_is_running()) {
+                ESP_LOGI(TAG, "Long press SW8+SW9 → arrêt Studio Mode");
+                web_config_stop();
+            } else {
+                ESP_LOGI(TAG, "Long press SW8+SW9 → démarrage Studio Mode");
+                web_config_start();
+            }
+            g_studio_mode_triggered = true;
+        }
+    } else {
+        // Réinitialiser quand l'une des touches est relâchée
+        g_sw8sw9_press_start    = 0;
+        g_studio_mode_triggered = false;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
 //  FONCTIONS PRIVÉES — DÉTECTION LONG PRESS PAIRING
 //
 //  SW16 + SW17 maintenus BLE_PAIRING_LONG_PRESS_MS = pairing BLE
@@ -413,8 +453,9 @@ void keymap_scan_matrix(void)
 // Traitement des événements : combos, layers, envoi HID
 void keymap_process_events(void)
 {
-    // ── 1. Vérifier le long press pairing ────────────────────
-    check_pairing_longpress();
+    // ── 1. Vérifier les long press spéciaux ──────────────────
+    check_studio_mode_longpress();   // SW8+SW9 → Studio Mode WiFi
+    check_pairing_longpress();       // SW16+SW17 → Pairing BLE
 
     // ── 2. Détection de combos ───────────────────────────────
     int64_t now = esp_timer_get_time() / 1000;
