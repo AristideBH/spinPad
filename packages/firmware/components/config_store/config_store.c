@@ -68,19 +68,34 @@ static void apply_defaults(void)
     // Pas de combos par défaut
     p->combo_count = 0;
 
+    // ── Orientation ────────────────────────────────────────
+    g_config.orientation = ORIENTATION_0;
+
     // ── BLE ────────────────────────────────────────────────
-    strncpy(g_config.ble.device_name, "CustomKeyboard", CONFIG_NAME_MAX_LEN - 1);
+    strncpy(g_config.ble.device_name, "SpinPad", CONFIG_NAME_MAX_LEN - 1);
     strncpy(g_config.ble.slot_names[0], "PC", CONFIG_NAME_MAX_LEN - 1);
     strncpy(g_config.ble.slot_names[1], "HomeAssistant", CONFIG_NAME_MAX_LEN - 1);
     g_config.ble.active_slot = 0;
 
     // ── Écran ──────────────────────────────────────────────
-    g_config.display.brightness    = 180;
-    g_config.display.timeout_s     = 30;
-    g_config.display.show_battery  = true;
-    g_config.display.show_layer    = true;
-    g_config.display.show_profile  = true;
+    g_config.display.brightness      = 180;
+    g_config.display.timeout_s       = 30;
+    g_config.display.show_battery    = true;
+    g_config.display.show_layer      = true;
+    g_config.display.show_profile    = true;
     g_config.display.show_ble_status = true;
+
+    // ── Encodeur ───────────────────────────────────────────
+    g_config.encoder.sensitivity = 1;   // 1 événement par détent
+
+    // ── Extension LED ──────────────────────────────────────
+    g_config.led_extension.enabled    = false;
+    g_config.led_extension.count      = 10;
+    g_config.led_extension.mode       = LED_EXT_MODE_MIRROR;
+    g_config.led_extension.r          = 60;
+    g_config.led_extension.g          = 60;
+    g_config.led_extension.b          = 80;
+    g_config.led_extension.brightness = 128;
 
     // ── Power ──────────────────────────────────────────────
     g_config.power.sleep_timeout_s      = 300;   // 5 minutes
@@ -262,6 +277,52 @@ static esp_err_t parse_json_to_config(const char *json_str)
         g_config.active_profile = (uint8_t)ap->valuedouble;
     }
 
+    // ── Orientation ─────────────────────────────────────────
+    cJSON *orient = cJSON_GetObjectItem(root, "orientation");
+    if (cJSON_IsNumber(orient)) {
+        uint8_t o = (uint8_t)orient->valuedouble;
+        if (o <= ORIENTATION_270) g_config.orientation = (kb_orientation_t)o;
+    }
+
+    // ── Encodeur ────────────────────────────────────────────
+    cJSON *enc_cfg = cJSON_GetObjectItem(root, "encoder");
+    if (cJSON_IsObject(enc_cfg)) {
+        cJSON *sens = cJSON_GetObjectItem(enc_cfg, "sensitivity");
+        if (cJSON_IsNumber(sens)) {
+            uint8_t s = (uint8_t)sens->valuedouble;
+            g_config.encoder.sensitivity = (s >= 1 && s <= 4) ? s : 1;
+        }
+    }
+
+    // ── Extension LED ────────────────────────────────────────
+    cJSON *led_ext = cJSON_GetObjectItem(root, "led_extension");
+    if (cJSON_IsObject(led_ext)) {
+        cJSON *en = cJSON_GetObjectItem(led_ext, "enabled");
+        if (cJSON_IsBool(en)) g_config.led_extension.enabled = cJSON_IsTrue(en);
+
+        cJSON *cnt = cJSON_GetObjectItem(led_ext, "count");
+        if (cJSON_IsNumber(cnt)) {
+            uint8_t c = (uint8_t)cnt->valuedouble;
+            g_config.led_extension.count = (c >= 1 && c <= 50) ? c : 10;
+        }
+
+        cJSON *mode = cJSON_GetObjectItem(led_ext, "mode");
+        if (cJSON_IsNumber(mode)) {
+            uint8_t m = (uint8_t)mode->valuedouble;
+            if (m <= LED_EXT_MODE_HYPERION) g_config.led_extension.mode = (kb_led_ext_mode_t)m;
+        }
+
+        cJSON *r = cJSON_GetObjectItem(led_ext, "r");
+        if (cJSON_IsNumber(r)) g_config.led_extension.r = (uint8_t)r->valuedouble;
+        cJSON *g = cJSON_GetObjectItem(led_ext, "g");
+        if (cJSON_IsNumber(g)) g_config.led_extension.g = (uint8_t)g->valuedouble;
+        cJSON *b = cJSON_GetObjectItem(led_ext, "b");
+        if (cJSON_IsNumber(b)) g_config.led_extension.b = (uint8_t)b->valuedouble;
+
+        cJSON *br = cJSON_GetObjectItem(led_ext, "brightness");
+        if (cJSON_IsNumber(br)) g_config.led_extension.brightness = (uint8_t)br->valuedouble;
+    }
+
     // Libérer la mémoire allouée par cJSON
     cJSON_Delete(root);
     ESP_LOGI(TAG, "JSON parsé avec succès");
@@ -357,8 +418,23 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
     // Construire le JSON depuis la struct
     cJSON *root = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(root, "version", g_config.version);
+    cJSON_AddNumberToObject(root, "version",        g_config.version);
     cJSON_AddNumberToObject(root, "active_profile", g_config.active_profile);
+    cJSON_AddNumberToObject(root, "orientation",    (int)g_config.orientation);
+
+    // Encoder
+    cJSON *enc_out = cJSON_AddObjectToObject(root, "encoder");
+    cJSON_AddNumberToObject(enc_out, "sensitivity", g_config.encoder.sensitivity);
+
+    // LED extension
+    cJSON *led_ext_out = cJSON_AddObjectToObject(root, "led_extension");
+    cJSON_AddBoolToObject  (led_ext_out, "enabled",    g_config.led_extension.enabled);
+    cJSON_AddNumberToObject(led_ext_out, "count",      g_config.led_extension.count);
+    cJSON_AddNumberToObject(led_ext_out, "mode",       (int)g_config.led_extension.mode);
+    cJSON_AddNumberToObject(led_ext_out, "r",          g_config.led_extension.r);
+    cJSON_AddNumberToObject(led_ext_out, "g",          g_config.led_extension.g);
+    cJSON_AddNumberToObject(led_ext_out, "b",          g_config.led_extension.b);
+    cJSON_AddNumberToObject(led_ext_out, "brightness", g_config.led_extension.brightness);
 
     // BLE
     cJSON *ble = cJSON_AddObjectToObject(root, "ble");

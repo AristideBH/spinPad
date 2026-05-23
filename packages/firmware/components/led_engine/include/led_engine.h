@@ -93,3 +93,9 @@ void led_engine_set_extension_frame(const uint8_t *rgb, uint8_t count);
  * Retourne la luminosité globale actuelle.
  */
 uint8_t led_engine_get_brightness(void);
+
+/**
+ * Signale une activité clavier au moteur LED (pour le mode REACTIVE).
+ * Appeler depuis keymap_process_events() à chaque touche pressée.
+ */
+void led_engine_notify_activity(void);

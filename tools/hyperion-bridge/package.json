@@ -1,0 +1,20 @@
+{
+  "name": "@spinpad/hyperion-bridge",
+  "version": "0.1.0",
+  "description": "Bridge between Hyperion NG and SpinPad LEDs via serial",
+  "type": "module",
+  "main": "bridge.mjs",
+  "bin": {
+    "spinpad-hyperion": "./bridge.mjs"
+  },
+  "scripts": {
+    "start": "node bridge.mjs",
+    "start:demo": "node bridge.mjs --demo"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

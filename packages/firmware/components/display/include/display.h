@@ -1,5 +1,6 @@
 #pragma once
 #include "esp_err.h"
+#include "config_store.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -22,3 +23,9 @@ void display_show_studio_mode(const char *ssid, const char *ip);
  * Retourner à l'écran de statut normal (après sortie du Studio Mode).
  */
 void display_show_status(void);
+
+/**
+ * Appliquer l'orientation d'affichage (0°/90°/180°/270°).
+ * À appeler après display_init() et à chaque changement de config.
+ */
+void display_apply_orientation(kb_orientation_t orient);

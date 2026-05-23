@@ -97,14 +97,45 @@ static void fb_draw_string(int x, int y, const char *str, bool invert)
 }
 
 // Envoie le framebuffer vers le SSD1306 72×40.
-// draw_bitmap(panel, x1, y1, x2, y2, data) — coordonnées dans l'espace
-// du panneau physique (0..71 en x, 0..39 en y).
-// L'offset colonne 28 est géré par le driver esp_lcd via panel_mirror/offset
-// ou directement dans les commandes d'init SSD1306.
+// Pour 0°/180°, la rotation est gérée en hardware via panel_mirror().
+// Pour 90°/270°, on fait une rotation logicielle pixel par pixel.
 static void fb_flush(void)
 {
     if (!g_panel || !g_display_on) return;
-    esp_lcd_panel_draw_bitmap(g_panel, 0, 0, FB_WIDTH, FB_HEIGHT, g_framebuffer);
+
+    if (g_orientation == ORIENTATION_0 || g_orientation == ORIENTATION_180) {
+        // Hardware mirror, envoi direct
+        esp_lcd_panel_draw_bitmap(g_panel, 0, 0, FB_WIDTH, FB_HEIGHT, g_framebuffer);
+    } else {
+        // Rotation logicielle 90° / 270°
+        // Le framebuffer source est 72×40.
+        // Après rotation, on envoie un buffer 72×40 (même dimensions physiques).
+        static uint8_t rotated[FB_PAGES][FB_WIDTH];
+        memset(rotated, 0, sizeof(rotated));
+
+        for (int sy = 0; sy < FB_HEIGHT; sy++) {
+            for (int sx = 0; sx < FB_WIDTH; sx++) {
+                bool px = (g_framebuffer[sy / 8][sx] >> (sy % 8)) & 1;
+                if (!px) continue;
+
+                int dx, dy;
+                if (g_orientation == ORIENTATION_90) {
+                    // 90° CW : (sx, sy) → (FB_HEIGHT-1-sy, sx)
+                    dx = FB_HEIGHT - 1 - sy;
+                    dy = sx;
+                } else {
+                    // 270° CW (= 90° CCW) : (sx, sy) → (sy, FB_WIDTH-1-sx)
+                    dx = sy;
+                    dy = FB_WIDTH - 1 - sx;
+                }
+                // Clip aux dimensions physiques
+                if (dx >= 0 && dx < FB_WIDTH && dy >= 0 && dy < FB_HEIGHT) {
+                    rotated[dy / 8][dx] |= (1 << (dy % 8));
+                }
+            }
+        }
+        esp_lcd_panel_draw_bitmap(g_panel, 0, 0, FB_WIDTH, FB_HEIGHT, rotated);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -248,8 +279,27 @@ esp_err_t display_init(void)
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(g_panel, true));
 
     fb_clear();
+
+    // Appliquer l'orientation depuis la config initiale
+    const kb_config_t *cfg = config_store_get();
+    display_apply_orientation(cfg->orientation);
+
     ESP_LOGI(TAG, "Écran SSD1306 %dx%d initialisé", FB_WIDTH, FB_HEIGHT);
     return ESP_OK;
+}
+
+void display_apply_orientation(kb_orientation_t orient)
+{
+    g_orientation = orient;
+
+    if (!g_panel) return;
+
+    // 0° et 90° : pas de mirror hardware (ou géré par la rotation logicielle)
+    // 180° et 270° : mirror horizontal+vertical pour compléter la rotation hardware
+    bool mirror_x = (orient == ORIENTATION_180 || orient == ORIENTATION_270);
+    bool mirror_y = (orient == ORIENTATION_180 || orient == ORIENTATION_270);
+    esp_lcd_panel_mirror(g_panel, mirror_x, mirror_y);
+    ESP_LOGI(TAG, "Orientation %d° appliquée", orient * 90);
 }
 
 void display_show_boot_screen(void)
@@ -287,7 +337,8 @@ void display_set_sleep(bool sleep)
 //    ║  192.168.4.1     ║   y=25 (IP)
 //    ╚══════════════════╝
 
-static bool g_studio_mode_screen = false;  // True = écran verrouillé sur Studio Mode
+static bool g_studio_mode_screen = false;    // True = écran verrouillé sur Studio Mode
+static kb_orientation_t g_orientation = ORIENTATION_0;
 
 void display_show_studio_mode(const char *ssid, const char *ip)
 {

@@ -13,6 +13,9 @@
 #include "usb_hid.h"
 #include "ble_hid.h"
 #include "web_config.h"
+#include "display.h"
+#include "led_engine.h"
+#include "action_types.gen.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -280,10 +283,17 @@ static void send_action(uint16_t action, bool pressed)
     case ACTION_TYPE_SPECIAL:
         // Actions firmware spéciales
         if (pressed) {
-            if (value == 0x01) {
-                // BLE_SWITCH : changer d'appareil BLE
+            if (value == SPECIAL_BLE_SWITCH) {
                 ESP_LOGI(TAG, "BLE device switch demandé");
                 ble_hid_switch_device();
+            } else if (value == SPECIAL_ORIENT_CW || value == SPECIAL_ORIENT_CCW) {
+                // Rotation de l'orientation globale
+                kb_config_t *cfg = (kb_config_t *)config_store_get();
+                int delta = (value == SPECIAL_ORIENT_CW) ? 1 : 3; // +1 ou -1 mod 4
+                cfg->orientation = (kb_orientation_t)((cfg->orientation + delta) % 4);
+                display_apply_orientation(cfg->orientation);
+                config_store_save();
+                ESP_LOGI(TAG, "Orientation → %d°", cfg->orientation * 90);
             }
             // BLE_PAIR est géré séparément (long press SW16+SW17)
         }
@@ -453,6 +463,13 @@ void keymap_scan_matrix(void)
 // Traitement des événements : combos, layers, envoi HID
 void keymap_process_events(void)
 {
+    // ── 0. Notifier le moteur LED si une touche vient d'être pressée ──
+    if (g_has_activity) {
+        led_engine_notify_activity();
+        // NB : on ne remet PAS g_has_activity à false ici — keymap_has_activity()
+        // le fait séparément pour les autres consommateurs (display, etc.)
+    }
+
     // ── 1. Vérifier les long press spéciaux ──────────────────
     check_studio_mode_longpress();   // SW8+SW9 → Studio Mode WiFi
     check_pairing_longpress();       // SW16+SW17 → Pairing BLE
