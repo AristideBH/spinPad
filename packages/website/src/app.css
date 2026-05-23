@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html { scroll-behavior: smooth; }
+
+/* Prose overrides for docs */
+.prose code { @apply bg-gray-800 px-1.5 py-0.5 rounded text-sm; }
+.prose pre  { @apply bg-gray-900 border border-gray-700; }

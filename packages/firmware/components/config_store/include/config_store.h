@@ -45,6 +45,37 @@ typedef struct {
     kb_combo_t  combos[CONFIG_MAX_COMBOS];
 } kb_profile_t;
 
+// ── Orientation globale ───────────────────────────────────────
+typedef enum {
+    ORIENTATION_0   = 0,   // Normal
+    ORIENTATION_90  = 1,   // +90° CW
+    ORIENTATION_180 = 2,   // 180°
+    ORIENTATION_270 = 3,   // +270° CW (= -90°)
+} kb_orientation_t;
+
+// ── Config encodeur ───────────────────────────────────────────
+typedef struct {
+    uint8_t sensitivity;   // Pas par événement : 1 (1 clic/détent) à 4 (1 clic/4 détents)
+} kb_encoder_config_t;
+
+// ── Extension LED chain ───────────────────────────────────────
+typedef enum {
+    LED_EXT_MODE_OFF      = 0,   // Extension éteinte
+    LED_EXT_MODE_MIRROR   = 1,   // Copie les couleurs des 10 touches en boucle
+    LED_EXT_MODE_AMBIENT  = 2,   // Couleur unique douce (breathe)
+    LED_EXT_MODE_STATIC   = 3,   // Couleur statique configurable
+    LED_EXT_MODE_REACTIVE = 4,   // Flash sur touche pressée
+    LED_EXT_MODE_HYPERION = 5,   // Piloté par Hyperion NG bridge (set_extension_frame)
+} kb_led_ext_mode_t;
+
+typedef struct {
+    bool              enabled;
+    uint8_t           count;       // Nombre de LEDs extension (1–50)
+    kb_led_ext_mode_t mode;
+    uint8_t           r, g, b;    // Couleur statique (si mode = STATIC ou AMBIENT)
+    uint8_t           brightness; // 0–255 (indépendant de la luminosité touches)
+} kb_led_extension_t;
+
 // ── Config BLE ────────────────────────────────────────────────
 typedef struct {
     char device_name[CONFIG_NAME_MAX_LEN];   // Nom diffusé en BLE
@@ -73,9 +104,12 @@ typedef struct {
     uint8_t             version;         // Version du schéma (pour migrations futures)
     uint8_t             profile_count;
     uint8_t             active_profile;
+    kb_orientation_t    orientation;     // Rotation globale (0/90/180/270°)
     kb_profile_t        profiles[CONFIG_MAX_PROFILES];
     kb_ble_config_t     ble;
     kb_display_config_t display;
+    kb_encoder_config_t encoder;
+    kb_led_extension_t  led_extension;
     kb_power_config_t   power;
 } kb_config_t;
 

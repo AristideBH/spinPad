@@ -1,0 +1,63 @@
+name: Website Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/website/**'
+      - 'packages/shared/**'
+      - '.github/workflows/website-deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run codegen
+        run: pnpm --filter @spinpad/shared codegen
+
+      - name: Build website
+        run: pnpm --filter @spinpad/website build
+
+      # Uncomment and configure for your deployment target:
+      # ── Vercel ──────────────────────────────────────────────────
+      # - name: Deploy to Vercel
+      #   uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.VERCEL_WEBSITE_PROJECT_ID }}
+      #     working-directory: packages/website
+
+      # ── GitHub Pages ─────────────────────────────────────────────
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/website/build
+
+  # Uncomment to deploy to GitHub Pages:
+  # deploy-pages:
+  #   needs: deploy
+  #   permissions:
+  #     pages: write
+  #     id-token: write
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - id: deployment
+  #       uses: actions/deploy-pages@v4

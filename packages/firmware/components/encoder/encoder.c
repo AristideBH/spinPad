@@ -160,13 +160,20 @@ void encoder_process(void)
         g_encoder_accumulator += delta;
     }
 
-    // Seuil de 4 pas (une "cran" d'encodeur = généralement 4 impulsions)
-    while (g_encoder_accumulator >= 4) {
+    // Seuil adapté à la sensibilité config (1–4) :
+    //   sensitivity=1 → seuil 4 (1 événement par détent, comportement standard)
+    //   sensitivity=2 → seuil 2 (2× plus réactif)
+    //   sensitivity=4 → seuil 1 (1 événement par impulsion quadrature)
+    uint8_t sens = config_store_get()->encoder.sensitivity;
+    if (sens < 1 || sens > 4) sens = 1;
+    int8_t threshold = (int8_t)(4 / sens);  // 4, 2, 1, 1
+
+    while (g_encoder_accumulator >= threshold) {
         send_encoder_action(true);   // Clockwise
-        g_encoder_accumulator -= 4;
+        g_encoder_accumulator -= threshold;
     }
-    while (g_encoder_accumulator <= -4) {
+    while (g_encoder_accumulator <= -threshold) {
         send_encoder_action(false);  // Counter-clockwise
-        g_encoder_accumulator += 4;
+        g_encoder_accumulator += threshold;
     }
 }

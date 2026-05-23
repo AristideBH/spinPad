@@ -141,6 +141,17 @@
     setEncoderAction(pi, li, "ccw", preset.ccw);
   }
 
+  // Orientation visuelle du pad (sync avec config.orientation)
+  const ORIENT_DEG = [0, 90, 180, 270];
+  const orientDeg = $derived(ORIENT_DEG[configState.data?.orientation ?? 0] ?? 0);
+  // La grille est 3 cols × 4 rows. Après rotation 90°/270° les dimensions s'inversent.
+  const isTransposed = $derived(orientDeg === 90 || orientDeg === 270);
+  // Taille d'une cellule et du gap en px
+  const CELL = 44;  // 2.75rem ≈ 44px
+  const GAP  = 6;   // 0.375rem ≈ 6px
+  const gridW = $derived(isTransposed ? 4 * CELL + 3 * GAP : 3 * CELL + 2 * GAP);
+  const gridH = $derived(isTransposed ? 3 * CELL + 2 * GAP : 4 * CELL + 3 * GAP);
+
   // Physical key layout — 4 rows × 3 cols, 10 switches (X-mirrored).
   // Row/col are 1-indexed CSS grid coordinates.
   // SW1: horizontal 2u — spans col 2+3, top row (right side).
@@ -204,31 +215,52 @@
   </div>
 
   {#if layer}
-    <!-- Custom key layout: 4 rows × 3 cols, SW1 and SW10 are 2u tall -->
+    <!-- Orientation badge -->
+    {#if orientDeg !== 0}
+      <p class="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+        <span>Orientation</span>
+        <span class="font-mono bg-muted rounded px-1">{orientDeg}°</span>
+        <span>— vue depuis la face avant du SpinPad</span>
+      </p>
+    {/if}
+
+    <!-- Outer bounding box adapts to rotated dimensions -->
     <div
-      class="inline-grid gap-1.5 mb-6"
-      style="grid-template-rows: repeat(4, 2.75rem); grid-template-columns: repeat(3, 2.75rem);"
+      class="relative mb-6"
+      style="width: {gridW}px; height: {gridH}px;"
     >
-      {#each KEY_LAYOUT as key}
-        <button
-          style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
-          class={cn(
-            "rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50",
-            editingKey === key.idx && editingField === "key"
-              ? "border-primary bg-primary/20"
-              : "bg-card",
-          )}
-          onclick={() => openKeyPicker(key.idx)}
-        >
-          <span class="text-[8px] text-muted-foreground">{key.sw}</span>
-          <span class="leading-none"
-            >{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span
+      <!-- Inner grid rotated around its center -->
+      <div
+        class="inline-grid gap-1.5 transition-transform duration-300"
+        style="
+          grid-template-rows: repeat(4, {CELL}px);
+          grid-template-columns: repeat(3, {CELL}px);
+          transform: rotate({orientDeg}deg);
+          transform-origin: center center;
+          position: absolute;
+          top: 50%; left: 50%;
+          translate: -50% -50%;
+        "
+      >
+        {#each KEY_LAYOUT as key}
+          <button
+            style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
+            class={cn(
+              "rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50",
+              editingKey === key.idx && editingField === "key"
+                ? "border-primary bg-primary/20"
+                : "bg-card",
+            )}
+            onclick={() => openKeyPicker(key.idx)}
           >
-          {#if key.rowSpan === 2 || key.colSpan === 2}
-            <span class="text-[7px] text-muted-foreground/50">2u</span>
-          {/if}
-        </button>
-      {/each}
+            <span class="text-[8px] text-muted-foreground">{key.sw}</span>
+            <span class="leading-none">{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span>
+            {#if key.rowSpan === 2 || key.colSpan === 2}
+              <span class="text-[7px] text-muted-foreground/50">2u</span>
+            {/if}
+          </button>
+        {/each}
+      </div>
     </div>
 
     <!-- Encodeur -->
