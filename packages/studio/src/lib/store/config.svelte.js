@@ -5,10 +5,18 @@
 //    VITE_TRANSPORT=http  → transport/http.js  (Studio Mode embarqué)
 //    (défaut)             → serial/index.svelte.js (WebSerial USB)
 //    VITE_DEV_MODE=true   → mock data (développement sans device)
+//
+//  Features :
+//    - Auto-save debounced (800ms) → transport.setConfig()
+//    - Undo / Redo via Runed StateHistory (Ctrl+Z / Ctrl+Y)
+//    - Import / Export au format .spinpad (JSON avec header)
 // ═══════════════════════════════════════════════════════════════
 
+import { browser } from '$app/environment';
+import { StateHistory } from 'runed';
 import { devMode } from '$lib/store/devMode.svelte.js';
 import { MOCK_CONFIG } from '$lib/mock/keyboard-config.js';
+import { parseSpinpadFile, createSpinpadFile } from '@spinpad/shared';
 
 // ── Sélection du transport ────────────────────────────────────
 // Déterminé au build via la variable d'environnement VITE_TRANSPORT.
@@ -22,6 +30,35 @@ import * as httpTransport   from '$lib/transport/http.js';
 
 /** @type {{ getConfig: () => Promise<object>, setConfig: (d: object) => Promise<void>, factoryReset: () => Promise<void> }} */
 const transport = USE_HTTP ? httpTransport : serialTransport;
+
+// ─────────────────────────────────────────────────────────────
+//  AUTO-SAVE (debounce 800ms)
+// ─────────────────────────────────────────────────────────────
+
+let _saveTimer = null;
+
+function _scheduleSave() {
+    if (!browser) return;
+    if (_saveTimer) clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => {
+        _saveTimer = null;
+        _flushSave();
+    }, 800);
+}
+
+async function _flushSave() {
+    if (!configState.data || devMode.active) return;
+    configState.isSaving = true;
+    try {
+        await transport.setConfig(configState.data);
+        configState.isDirty = false;
+    } catch (err) {
+        configState.loadError = err.message;
+        console.error('[config] Erreur auto-save :', err);
+    } finally {
+        configState.isSaving = false;
+    }
+}
 
 // ─────────────────────────────────────────────────────────────
 //  STATE
@@ -56,6 +93,62 @@ class ConfigState {
 export const configState = new ConfigState();
 
 // ─────────────────────────────────────────────────────────────
+//  HISTORIQUE UNDO/REDO (Runed StateHistory)
+// ─────────────────────────────────────────────────────────────
+
+// StateHistory suit les mutations de configState.data.
+// On ne l'initialise que côté browser (SSR n'a pas besoin de l'historique).
+let _history = null;
+
+function _getHistory() {
+    if (!_history && browser) {
+        _history = new StateHistory(
+            () => configState.data,
+            (v) => {
+                configState.data = v ? structuredClone(v) : null;
+                configState.isDirty = true;
+                _scheduleSave();
+            },
+            { capacity: 50 }
+        );
+    }
+    return _history;
+}
+
+export function undo() {
+    const h = _getHistory();
+    if (h?.canUndo) { h.undo(); }
+}
+
+export function redo() {
+    const h = _getHistory();
+    if (h?.canRedo) { h.redo(); }
+}
+
+export function canUndo() { return _getHistory()?.canUndo ?? false; }
+export function canRedo() { return _getHistory()?.canRedo ?? false; }
+
+// ─────────────────────────────────────────────────────────────
+//  RACCOURCIS CLAVIER (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z)
+// ─────────────────────────────────────────────────────────────
+
+if (browser) {
+    window.addEventListener('keydown', (e) => {
+        // Ignorer si le focus est dans un input/textarea
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+        } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            redo();
+        }
+    });
+}
+
+// ─────────────────────────────────────────────────────────────
 //  CHARGEMENT
 // ─────────────────────────────────────────────────────────────
 
@@ -83,26 +176,12 @@ export async function loadConfig() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SAUVEGARDE
+//  SAUVEGARDE MANUELLE (force flush immédiat)
 // ─────────────────────────────────────────────────────────────
 
 export async function saveConfig() {
-    if (!configState.data) return;
-    configState.isSaving = true;
-    try {
-        if (devMode.active) {
-            await new Promise(r => setTimeout(r, 200));
-            configState.isDirty = false;
-            return;
-        }
-        await transport.setConfig(configState.data);
-        configState.isDirty = false;
-    } catch (err) {
-        configState.loadError = err.message;
-        console.error('[config] Erreur sauvegarde :', err);
-    } finally {
-        configState.isSaving = false;
-    }
+    if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+    await _flushSave();
 }
 
 export async function factoryReset() {
@@ -121,7 +200,55 @@ export async function factoryReset() {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  IMPORT / EXPORT .spinpad
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Exporte la config courante en fichier .spinpad (JSON structuré).
+ * Déclenche un téléchargement dans le navigateur.
+ */
+export function exportConfig() {
+    if (!configState.data) return;
+    const wrapper = createSpinpadFile(configState.data);
+    const blob = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `spinpad-config-${new Date().toISOString().slice(0, 10)}.spinpad`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Importe une config depuis un fichier .spinpad ou .json brut.
+ * @param {File} file
+ * @returns {Promise<void>}
+ */
+export async function importConfig(file) {
+    const text = await file.text();
+    let parsed;
+    try {
+        const raw = JSON.parse(text);
+        // Supporte les deux formats : wrapper .spinpad et JSON brut
+        parsed = raw._type ? parseSpinpadFile(raw) : raw;
+    } catch (err) {
+        throw new Error(`Fichier invalide : ${err.message}`);
+    }
+    configState.data = parsed;
+    configState.activeProfileIndex = parsed.active_profile ?? 0;
+    configState.isDirty = true;
+    _scheduleSave();
+}
+
+// ─────────────────────────────────────────────────────────────
 //  MUTATIONS (keymap + encoder)
+//
+//  Toutes les mutations :
+//   1. Appliquent le changement via structuredClone (immutabilité)
+//   2. Marquent isDirty = true
+//   3. Déclenchent l'auto-save (debounce 800ms)
 // ─────────────────────────────────────────────────────────────
 
 export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
@@ -129,6 +256,7 @@ export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
     cfg.profiles[profileIdx].layers[layerIdx].keys[keyIndex] = actionValue;
     configState.data = cfg;
     configState.isDirty = true;
+    _scheduleSave();
 }
 
 export function setEncoderAction(profileIdx, layerIdx, direction, actionValue) {
@@ -136,6 +264,7 @@ export function setEncoderAction(profileIdx, layerIdx, direction, actionValue) {
     cfg.profiles[profileIdx].layers[layerIdx].encoder[direction] = actionValue;
     configState.data = cfg;
     configState.isDirty = true;
+    _scheduleSave();
 }
 
 export function addCombo(profileIdx, combo) {
@@ -143,6 +272,7 @@ export function addCombo(profileIdx, combo) {
     cfg.profiles[profileIdx].combos.push(combo);
     configState.data = cfg;
     configState.isDirty = true;
+    _scheduleSave();
 }
 
 export function removeCombo(profileIdx, comboIdx) {
@@ -150,4 +280,5 @@ export function removeCombo(profileIdx, comboIdx) {
     cfg.profiles[profileIdx].combos.splice(comboIdx, 1);
     configState.data = cfg;
     configState.isDirty = true;
+    _scheduleSave();
 }

@@ -9,6 +9,9 @@
     KEYCODES,
     KEYCODES_FLAT,
     getKeycodeLabel,
+    action,
+    ACTION_TYPES,
+    MEDIA_CODES,
   } from "$lib/keycodes/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { cn } from "$lib/utils.js";
@@ -121,6 +124,23 @@
     firmware: "bg-purple-950/80 hover:bg-purple-900/80",
   };
 
+  // ── Encoder presets ───────────────────────────────────────────
+  // Chaque preset définit les actions CW et CCW d'un seul clic.
+  const ENCODER_PRESETS = [
+    { label: "Volume",       icon: "🔊", cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_VOL_UP),  ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_VOL_DN) },
+    { label: "Scroll ↕",    icon: "↕",  cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_UP), ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_DN) },
+    { label: "Scroll ↔",    icon: "↔",  cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_RIGHT), ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_LEFT) },
+    { label: "Piste",        icon: "⏭",  cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_NEXT),    ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_PREV) },
+    { label: "Zoom",         icon: "🔍", cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_ZOOM_IN),   ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_ZOOM_OUT) },
+  ];
+
+  function applyEncoderPreset(preset) {
+    const pi = configState.activeProfileIndex;
+    const li = configState.activeLayerIndex;
+    setEncoderAction(pi, li, "cw",  preset.cw);
+    setEncoderAction(pi, li, "ccw", preset.ccw);
+  }
+
   // Physical key layout — 4 rows × 3 cols, 10 switches (X-mirrored).
   // Row/col are 1-indexed CSS grid coordinates.
   // SW1: horizontal 2u — spans col 2+3, top row (right side).
@@ -214,6 +234,23 @@
     <!-- Encodeur -->
     <div class="mb-6">
       <p class="text-sm text-muted-foreground mb-2 font-medium">Encodeur</p>
+
+      <!-- Sets prédéfinis -->
+      <div class="flex flex-wrap gap-1.5 mb-3">
+        {#each ENCODER_PRESETS as preset}
+          <button
+            class="flex items-center gap-1 px-2.5 py-1 rounded border text-xs font-medium bg-card hover:border-violet-500/60 transition-all cursor-pointer"
+            onclick={() => applyEncoderPreset(preset)}
+            title="Appliquer le set {preset.label} (CW + CCW)"
+          >
+            <span>{preset.icon}</span>
+            <span>{preset.label}</span>
+          </button>
+        {/each}
+        <span class="text-[10px] text-muted-foreground self-center ml-1">Sets rapides</span>
+      </div>
+
+      <!-- CW / CCW / Press individuels -->
       <div class="flex gap-2">
         {#each [{ field: "encoder_cw", label: "↻ CW", value: layer.encoder?.cw ?? 0 }, { field: "encoder_ccw", label: "↺ CCW", value: layer.encoder?.ccw ?? 0 }, { field: "encoder_press", label: "● Press", value: layer.encoder?.press ?? 0 }] as enc}
           <button
@@ -221,7 +258,7 @@
               "flex flex-col items-center gap-0.5 px-3 py-2 rounded-md border text-sm transition-all cursor-pointer hover:border-violet-500/50",
               editingField === enc.field
                 ? "border-violet-500 bg-violet-950/40"
-                : "  bg-card",
+                : "bg-card",
             )}
             onclick={() => openEncoderPicker(enc.field)}
           >

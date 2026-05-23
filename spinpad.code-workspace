@@ -32,11 +32,12 @@
       "**/managed_components": true
     },
     "[c]": {
-      "editor.defaultFormatter": "ms-vscode.cpptools"
+      "editor.defaultFormatter": "ms-vscode.cpp-devtools"
     },
     "[svelte]": {
       "editor.defaultFormatter": "svelte.svelte-vscode"
-    }
+    },
+    "hide-files.files": []
   },
   "extensions": {
     "recommendations": [
