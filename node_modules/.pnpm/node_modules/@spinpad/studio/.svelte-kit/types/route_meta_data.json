@@ -1,0 +1,16 @@
+{
+	"/": [],
+	"/docs": [
+		"src/routes/docs/+layout.ts",
+		"src/routes/docs/+layout.ts"
+	],
+	"/docs/[...slug]": [
+		"src/routes/docs/[...slug]/+page.ts",
+		"src/routes/docs/+layout.ts"
+	],
+	"/editor": [],
+	"/editor/ble": [],
+	"/editor/display": [],
+	"/editor/keymap": [],
+	"/editor/profiles": []
+}

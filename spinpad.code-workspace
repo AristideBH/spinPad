@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "path": "packages/firmware",
+      "name": "🔧 Firmware (ESP-IDF)"
+    },
+    {
+      "path": "packages/studio",
+      "name": "🎨 Studio"
+    },
+    {
+      "path": "packages/shared",
+      "name": "📦 Shared"
+    },
+    {
+      "path": ".",
+      "name": "🗂 Root"
+    }
+  ],
+  "settings": {
+    "idf.idfContainerPath": "${workspaceFolder:🔧 Firmware (ESP-IDF)}",
+    "cmake.sourceDirectory": "${workspaceFolder:🔧 Firmware (ESP-IDF)}",
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.svelte-kit": true,
+      "**/build": false
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/build": true,
+      "**/.svelte-kit": true,
+      "**/managed_components": true
+    },
+    "[c]": {
+      "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "[svelte]": {
+      "editor.defaultFormatter": "svelte.svelte-vscode"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "espressif.esp-idf-extension",
+      "svelte.svelte-vscode",
+      "bradlc.vscode-tailwindcss",
+      "dbaeumer.vscode-eslint"
+    ]
+  }
+}
