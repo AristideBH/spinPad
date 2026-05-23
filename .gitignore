@@ -36,3 +36,7 @@ config-app/build/
 config-app/.env
 firmware/.clangd
 .claude/settings.local.json
+node_modules
+
+
+**/.svelte-kit/    # généré par svelte-kit sync / vite dev
