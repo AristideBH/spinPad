@@ -1,0 +1,107 @@
+# ═══════════════════════════════════════════════════════════════
+#  studio-ci.yml — CI pour packages/studio + packages/shared
+#
+#  Déclencheurs :
+#    - Push/PR sur main avec changements dans studio/ ou shared/
+#    - Tag firmware/v* (pour inclure le build embedded dans la release)
+#
+#  Jobs :
+#    check  — svelte-check (typecheck + lint)
+#    build  — build web standard (Vercel deploy si disponible)
+# ═══════════════════════════════════════════════════════════════
+
+name: Studio CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/studio/**'
+      - 'packages/shared/**'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+    tags:
+      - 'firmware/v*'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/studio/**'
+      - 'packages/shared/**'
+
+jobs:
+  check:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Codegen (shared → action_types.gen.h)
+        run: pnpm codegen
+
+      - name: Verify codegen is up to date
+        run: git diff --exit-code packages/firmware/components/keymap/include/action_types.gen.h
+
+      - name: Type check Studio
+        working-directory: packages/studio
+        run: pnpm check
+
+  build:
+    name: Build Studio
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Studio (web)
+        working-directory: packages/studio
+        run: pnpm build
+
+      - name: Build Studio (embedded)
+        working-directory: packages/studio
+        run: pnpm build:embedded
+
+      - name: Check embedded size
+        run: |
+          SIZE=$(du -sb packages/studio/build-embedded | cut -f1)
+          echo "Build-embedded size: ${SIZE} bytes"
+          # 983040 = 960KB SPIFFS partition
+          if [ "$SIZE" -gt 983040 ]; then
+            echo "❌ build-embedded trop grand pour la partition SPIFFS (${SIZE} > 983040 bytes)"
+            exit 1
+          fi
+          echo "✅ OK (${SIZE}/983040 bytes)"
+
+      - name: Upload embedded artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-embedded
+          path: packages/studio/build-embedded/
+          retention-days: 7

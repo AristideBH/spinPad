@@ -1,0 +1,122 @@
+# ═══════════════════════════════════════════════════════════════
+#  firmware-release.yml — Build + Release firmware ESP32-S3
+#
+#  Déclencheur : tag firmware/v* (ex: firmware/v1.2.0)
+#  Sortie : GitHub Release avec les .bin attachés
+#
+#  Artefacts produits :
+#    - spinpad.bin         (application)
+#    - bootloader.bin      (bootloader)
+#    - partition-table.bin (table de partition)
+#    - spiffs_image.bin    (Studio Mode — si packages/studio/ a changé)
+# ═══════════════════════════════════════════════════════════════
+
+name: Firmware Release
+
+on:
+  push:
+    tags:
+      - 'firmware/v*'
+
+jobs:
+  build:
+    name: Build firmware (ESP32-S3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (avec sous-modules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # ── pnpm + Node pour le build Studio ──────────────────────
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Build Studio en mode embarqué ─────────────────────────
+      - name: Build Studio (build-embedded)
+        run: pnpm build:embedded
+
+      # ── ESP-IDF ───────────────────────────────────────────────
+      - name: Setup ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.3.2
+          target: esp32s3
+
+      - name: Build firmware
+        working-directory: packages/firmware
+        run: idf.py build
+
+      # ── Générer l'image SPIFFS ────────────────────────────────
+      - name: Generate SPIFFS image
+        run: |
+          python $IDF_PATH/components/spiffs/spiffsgen.py \
+            --page-size 256 \
+            --obj-name-len 64 \
+            983040 \
+            packages/studio/build-embedded \
+            packages/firmware/build/spiffs_image.bin
+
+      # ── Extraire la version du tag ────────────────────────────
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#firmware/}" >> $GITHUB_OUTPUT
+
+      # ── Upload artefacts ──────────────────────────────────────
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ steps.version.outputs.VERSION }}
+          path: |
+            packages/firmware/build/spinpad.bin
+            packages/firmware/build/bootloader/bootloader.bin
+            packages/firmware/build/partition_table/partition-table.bin
+            packages/firmware/build/spiffs_image.bin
+
+      # ── Créer la GitHub Release ───────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Firmware ${{ steps.version.outputs.VERSION }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## SpinPad Firmware ${{ steps.version.outputs.VERSION }}
+
+            ### Flash manuel
+
+            ```bash
+            # Application + bootloader + partition table
+            esptool.py --chip esp32s3 -p <PORT> write_flash \
+              0x0      bootloader.bin \
+              0x8000   partition-table.bin \
+              0x10000  spinpad.bin
+
+            # Studio Mode (optionnel — interface de config WiFi)
+            esptool.py --chip esp32s3 -p <PORT> write_flash \
+              0x310000 spiffs_image.bin
+            ```
+
+            ### Flash via idf.py (rebuild complet)
+
+            ```bash
+            cd packages/firmware && idf.py -p <PORT> flash monitor
+            ```
+          files: |
+            packages/firmware/build/spinpad.bin
+            packages/firmware/build/bootloader/bootloader.bin
+            packages/firmware/build/partition_table/partition-table.bin
+            packages/firmware/build/spiffs_image.bin
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
