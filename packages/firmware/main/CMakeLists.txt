@@ -9,6 +9,7 @@ idf_component_register(
         encoder
         display
         battery
+        led_engine
         power_mgmt
         web_config
 )

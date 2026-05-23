@@ -5,6 +5,7 @@
 #include "web_config.h"
 #include "config_store.h"
 #include "display.h"
+#include "led_engine.h"
 
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -173,6 +174,8 @@ static esp_err_t handle_post_config(httpd_req_t *req)
         // Recharger le keymap avec la nouvelle config
         extern void keymap_reload_from_config(void);
         keymap_reload_from_config();
+        // Recharger les LEDs (luminosité peut avoir changé dans la config)
+        led_engine_apply_config();
         httpd_resp_set_type(req, "application/json");
         httpd_resp_sendstr(req, "{\"ok\":true}");
     } else {
@@ -194,6 +197,7 @@ static esp_err_t handle_factory_reset(httpd_req_t *req)
 
     extern void keymap_reload_from_config(void);
     keymap_reload_from_config();
+    led_engine_apply_config();
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_sendstr(req, "{\"ok\":true}");
@@ -378,6 +382,9 @@ esp_err_t web_config_start(void)
     // ── 5. Mettre à jour l'écran OLED ────────────────────────
     display_show_studio_mode(WEB_CONFIG_AP_SSID, WEB_CONFIG_AP_IP);
 
+    // ── 6. Dimmer les LEDs touches (~20% puissance RF) ────────
+    led_engine_set_brightness_global(WEB_CONFIG_LED_DIM_BRIGHTNESS);
+
     g_running = true;
     ESP_LOGI(TAG, "Studio Mode actif — http://%s/", WEB_CONFIG_AP_IP);
     return ESP_OK;
@@ -415,6 +422,9 @@ esp_err_t web_config_stop(void)
 
     // ── 5. Restaurer l'écran OLED ─────────────────────────────
     display_show_status();  // Retour à l'écran de statut normal
+
+    // ── 6. Restaurer la luminosité LED ────────────────────────
+    led_engine_apply_config();  // Relit brightness depuis config_store
 
     g_running = false;
     ESP_LOGI(TAG, "Studio Mode arrêté");

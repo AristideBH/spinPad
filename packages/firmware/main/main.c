@@ -28,6 +28,7 @@
 #include "encoder.h"
 #include "display.h"
 #include "battery.h"
+#include "led_engine.h"
 #include "power_mgmt.h"
 #include "web_config.h"
 
@@ -59,6 +60,9 @@ static void keyboard_scan_task(void *pvParameters)
         if (keymap_has_activity()) {
             power_mgmt_reset_idle_timer();
         }
+
+        // 5. Tick LED engine (met à jour les effets animés + refresh WS2812)
+        led_engine_tick();
 
         // Pause de 5ms avant le prochain scan
         // pdMS_TO_TICKS convertit des millisecondes en "ticks" FreeRTOS
@@ -125,6 +129,11 @@ void app_main(void)
     // ── 5c. Batterie + LED RGB ───────────────────────────────
     ESP_ERROR_CHECK(battery_init());
     ESP_LOGI(TAG, "Batterie initialisée");
+
+    // ── 5d. LED Engine (chaîne WS2812 touches) ───────────────
+    // Initialiser après battery_init pour éviter un conflit RMT au démarrage.
+    ESP_ERROR_CHECK(led_engine_init());
+    ESP_LOGI(TAG, "LED Engine prêt");
 
     // ── 6. Power manager ─────────────────────────────────────
     // Doit être initialisé en dernier pour connaître

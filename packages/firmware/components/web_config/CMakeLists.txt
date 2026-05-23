@@ -10,5 +10,6 @@ idf_component_register(
         nvs_flash
         config_store
         display
+        led_engine
         keymap
 )
