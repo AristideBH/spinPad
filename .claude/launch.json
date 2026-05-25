@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Studio",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@spinpad/studio", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "Website",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@spinpad/website", "dev"],
+      "port": 5174
+    },
+    {
+      "name": "Flasher",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@spinpad/flasher", "dev"],
+      "port": 5175
+    }
+  ]
+}

@@ -16,7 +16,6 @@
 
   import AppSidebar from "$lib/components/ui/app-sidebar.svelte";
   import StatusCard from "$lib/components/app/StatusCard.svelte";
-  import Breadcrumbs from "$lib/components/app/Breadcrumbs.svelte";
 
   let { children } = $props();
 
@@ -50,11 +49,6 @@
     >
       <div class="flex items-center gap-2 px-6">
         <Sidebar.Trigger class="-ms-1" />
-        <Separator
-          orientation="vertical"
-          class="me-2 data-[orientation=vertical]:h-4"
-        />
-        <Breadcrumbs></Breadcrumbs>
       </div>
       <div class="flex items-center gap-2 px-6">
         <!-- Connection status -->

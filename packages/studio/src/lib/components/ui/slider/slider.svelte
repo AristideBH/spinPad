@@ -5,6 +5,7 @@
 	let {
 		ref = $bindable(null),
 		value = $bindable(),
+		type = "single" as const,
 		orientation = "horizontal",
 		class: className,
 		...restProps
@@ -18,6 +19,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 <SliderPrimitive.Root
 	bind:ref
 	bind:value={value as never}
+	{type}
 	data-slot="slider"
 	{orientation}
 	class={cn(

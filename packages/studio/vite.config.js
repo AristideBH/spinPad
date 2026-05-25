@@ -1,7 +1,7 @@
-import { sveltekit }   from '@sveltejs/kit/vite';
-import tailwindcss    from '@tailwindcss/vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
-import path             from 'path';
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -10,8 +10,11 @@ export default defineConfig({
     ],
     server: {
         fs: {
-            // Permet d'accéder aux fichiers .md dans keyboard-firmware/docs/
-            allow: [path.resolve('..')],
+            // searchForWorkspaceRoot remonte jusqu'à la racine du monorepo
+            // (là où se trouve pnpm-workspace.yaml / package.json racine)
+            // afin que les fichiers dans node_modules/.pnpm/ soient servis
+            // correctement par Vite avec le bon MIME type.
+            allow: [path.resolve('../..')],
         },
     },
 });

@@ -252,7 +252,7 @@ export async function importConfig(file) {
 // ─────────────────────────────────────────────────────────────
 
 export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
-    const cfg = structuredClone(configState.data);
+    const cfg = $state.snapshot(configState.data);
     cfg.profiles[profileIdx].layers[layerIdx].keys[keyIndex] = actionValue;
     configState.data = cfg;
     configState.isDirty = true;
@@ -260,7 +260,7 @@ export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
 }
 
 export function setEncoderAction(profileIdx, layerIdx, direction, actionValue) {
-    const cfg = structuredClone(configState.data);
+    const cfg = $state.snapshot(configState.data);
     cfg.profiles[profileIdx].layers[layerIdx].encoder[direction] = actionValue;
     configState.data = cfg;
     configState.isDirty = true;
@@ -268,7 +268,7 @@ export function setEncoderAction(profileIdx, layerIdx, direction, actionValue) {
 }
 
 export function addCombo(profileIdx, combo) {
-    const cfg = structuredClone(configState.data);
+    const cfg = $state.snapshot(configState.data);
     cfg.profiles[profileIdx].combos.push(combo);
     configState.data = cfg;
     configState.isDirty = true;
@@ -276,7 +276,7 @@ export function addCombo(profileIdx, combo) {
 }
 
 export function removeCombo(profileIdx, comboIdx) {
-    const cfg = structuredClone(configState.data);
+    const cfg = $state.snapshot(configState.data);
     cfg.profiles[profileIdx].combos.splice(comboIdx, 1);
     configState.data = cfg;
     configState.isDirty = true;

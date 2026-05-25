@@ -19,6 +19,6 @@
     "autoprefixer": "^10.4.0"
   },
   "dependencies": {
-    "@esptool.js/esptool": "^0.1.0"
+    "esptool-js": "^0.3.0"
   }
 }

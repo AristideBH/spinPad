@@ -2,15 +2,19 @@
   "folders": [
     {
       "path": "packages/firmware",
-      "name": "🔧 Firmware (ESP-IDF)"
+      "name": "💽 Firmware"
     },
     {
       "path": "packages/studio",
-      "name": "🎨 Studio"
+      "name": "⚙️ Studio"
     },
     {
       "path": "packages/shared",
       "name": "📦 Shared"
+    },
+    {
+      "path": "packages/website",
+      "name": "🌐 Website"
     },
     {
       "path": ".",
@@ -18,8 +22,8 @@
     }
   ],
   "settings": {
-    "idf.idfContainerPath": "${workspaceFolder:🔧 Firmware (ESP-IDF)}",
-    "cmake.sourceDirectory": "${workspaceFolder:🔧 Firmware (ESP-IDF)}",
+    "idf.idfContainerPath": "${workspaceFolder:🔧 Firmware}",
+    "cmake.sourceDirectory": "${workspaceFolder:🔧 Firmware}",
     "files.exclude": {
       "**/node_modules": true,
       "**/.svelte-kit": true,
