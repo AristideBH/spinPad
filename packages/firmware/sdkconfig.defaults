@@ -1,11 +1,15 @@
 # ─────────────────────────────────────────────────
-#  sdkconfig.defaults — ESP32-S3 Custom Keyboard
-#  Ces valeurs sont appliquées lors du premier build
-#  (idf.py set-target esp32s3 puis idf.py build)
+#  sdkconfig.defaults — SpinPad (valeurs communes à toutes les boards)
+#  Ces valeurs sont appliquées lors du premier build.
+#
+#  NOTE : CONFIG_IDF_TARGET n'est PAS défini ici.
+#  Il doit être spécifié par le fichier sdkconfig propre à chaque board :
+#    hardware/boards/<board>/sdkconfig.board
+#  Exemple d'utilisation :
+#    idf.py -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;../../hardware/boards/spinpad-v1/sdkconfig.board" build
+#
+#  Cela permet de supporter spinpad-v2 (ou un autre ESP) sans modifier ce fichier.
 # ─────────────────────────────────────────────────
-
-# Cible hardware
-CONFIG_IDF_TARGET="esp32s3"
 
 # ── USB ──────────────────────────────────────────
 # Active le mode USB OTG (nécessaire pour USB HID via TinyUSB)
@@ -25,7 +29,7 @@ CONFIG_BT_NIMBLE_HID_SERVICE=y
 CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
 # Stocker les bonds en NVS (persistance après reboot)
 CONFIG_BT_NIMBLE_NVS_PERSIST=y
-# Nombre de bonds stockés (slot 0 = PC, slot 1 = HA)
+# Nombre de bonds stockés (un par slot BLE)
 CONFIG_BT_NIMBLE_MAX_BONDS=2
 
 # ── NVS (stockage config en flash) ───────────────

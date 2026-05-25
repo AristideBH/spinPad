@@ -18,11 +18,106 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
+#include "nvs_flash.h"
+#include "nvs.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
 
 static const char *TAG = "WEB_CONFIG";
+
+// ─────────────────────────────────────────────────────────────
+//  BACKUP CONFIG (NVS) — protection contre corruption/perte
+//
+//  À l'entrée en Studio Mode, la config courante est sauvegardée
+//  dans un namespace NVS séparé "kb_backup".
+//  À la sortie propre, le backup est supprimé.
+//  Si un Studio Mode précédent n'a pas été quitté proprement
+//  (coupure de courant, crash...), le backup est restauré
+//  automatiquement à l'entrée du prochain Studio Mode.
+// ─────────────────────────────────────────────────────────────
+
+#define BACKUP_NVS_NAMESPACE    "kb_backup"
+#define BACKUP_NVS_KEY          "cfg_json"
+#define BACKUP_JSON_MAX_SIZE    8192
+
+static esp_err_t _backup_config(void)
+{
+    char *buf = malloc(BACKUP_JSON_MAX_SIZE);
+    if (!buf) return ESP_ERR_NO_MEM;
+
+    esp_err_t err = config_store_to_json(buf, BACKUP_JSON_MAX_SIZE);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Impossible de sérialiser la config pour backup");
+        free(buf);
+        return err;
+    }
+
+    nvs_handle_t nvs;
+    err = nvs_open(BACKUP_NVS_NAMESPACE, NVS_READWRITE, &nvs);
+    if (err == ESP_OK) {
+        err = nvs_set_str(nvs, BACKUP_NVS_KEY, buf);
+        if (err == ESP_OK) nvs_commit(nvs);
+        nvs_close(nvs);
+    }
+
+    free(buf);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Backup config sauvegardé en NVS (%s/%s)", BACKUP_NVS_NAMESPACE, BACKUP_NVS_KEY);
+    } else {
+        ESP_LOGW(TAG, "Échec sauvegarde backup config : %s", esp_err_to_name(err));
+    }
+    return err;
+}
+
+static void _delete_backup(void)
+{
+    nvs_handle_t nvs;
+    if (nvs_open(BACKUP_NVS_NAMESPACE, NVS_READWRITE, &nvs) == ESP_OK) {
+        nvs_erase_key(nvs, BACKUP_NVS_KEY);
+        nvs_commit(nvs);
+        nvs_close(nvs);
+        ESP_LOGI(TAG, "Backup config supprimé (sortie propre Studio Mode)");
+    }
+}
+
+static esp_err_t _restore_backup(void)
+{
+    nvs_handle_t nvs;
+    esp_err_t err = nvs_open(BACKUP_NVS_NAMESPACE, NVS_READONLY, &nvs);
+    if (err != ESP_OK) return ESP_ERR_NOT_FOUND;
+
+    size_t len = BACKUP_JSON_MAX_SIZE;
+    char *buf = malloc(len);
+    if (!buf) { nvs_close(nvs); return ESP_ERR_NO_MEM; }
+
+    err = nvs_get_str(nvs, BACKUP_NVS_KEY, buf, &len);
+    nvs_close(nvs);
+
+    if (err == ESP_OK) {
+        err = config_store_update_from_json(buf);
+        if (err == ESP_OK) {
+            config_store_save();
+            ESP_LOGW(TAG, "⚠ Config restaurée depuis le backup (Studio Mode interrompu)");
+        } else {
+            ESP_LOGE(TAG, "Échec restauration backup — config potentiellement corrompue");
+        }
+    }
+
+    free(buf);
+    return err;
+}
+
+static bool _backup_exists(void)
+{
+    nvs_handle_t nvs;
+    if (nvs_open(BACKUP_NVS_NAMESPACE, NVS_READONLY, &nvs) != ESP_OK) return false;
+    size_t len = 0;
+    bool exists = (nvs_get_str(nvs, BACKUP_NVS_KEY, NULL, &len) == ESP_OK && len > 0);
+    nvs_close(nvs);
+    return exists;
+}
 
 // ─────────────────────────────────────────────────────────────
 //  ÉTAT INTERNE
@@ -311,6 +406,16 @@ esp_err_t web_config_start(void)
 
     ESP_LOGI(TAG, "Démarrage Studio Mode...");
 
+    // ── 0. Backup / restauration config ──────────────────────
+    // Si un backup existe, cela signifie que le précédent Studio Mode a été
+    // interrompu sans sortie propre (coupure, crash...). On restaure d'abord.
+    if (_backup_exists()) {
+        ESP_LOGW(TAG, "Backup détecté — Studio Mode précédent interrompu. Restauration...");
+        _restore_backup();
+    }
+    // Sauvegarder la config actuelle comme point de restauration
+    _backup_config();
+
     // ── 1. WiFi AP ────────────────────────────────────────────
     esp_netif_create_default_wifi_ap();
 
@@ -425,6 +530,9 @@ esp_err_t web_config_stop(void)
 
     // ── 6. Restaurer la luminosité LED ────────────────────────
     led_engine_apply_config();  // Relit brightness depuis config_store
+
+    // ── 7. Supprimer le backup (sortie propre) ────────────────
+    _delete_backup();
 
     g_running = false;
     ESP_LOGI(TAG, "Studio Mode arrêté");

@@ -1,6 +1,6 @@
 packages:
   - "packages/*"
-  - "tools/flasher"
+  - "tools/*"
 
 # Allow builds for specific native modules
 allowBuilds:

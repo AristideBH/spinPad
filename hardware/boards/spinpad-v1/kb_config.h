@@ -122,10 +122,10 @@ static const int8_t KB_MATRIX_TO_KEY[KB_MATRIX_ROWS][KB_MATRIX_COLS] = {
 #define BATTERY_VOLTAGE_MIN_MV   3300
 
 // ── BLE ──────────────────────────────────────────────────────
-#define BLE_DEVICE_NAME         "CustomKeyboard"
-#define BLE_NUM_DEVICE_SLOTS    2       // slot 0 = PC, slot 1 = HA
-#define BLE_SLOT_PC             0
-#define BLE_SLOT_HA             1
+#define BLE_DEVICE_NAME         "SpinPad"
+#define BLE_NUM_DEVICE_SLOTS    2
+#define BLE_SLOT_0              0
+#define BLE_SLOT_1              1
 // Durée du long appui pour déclencher le mode pairing (ms)
 #define BLE_PAIRING_LONG_PRESS_MS   2000
 // Timeout du mode pairing sans connexion (ms)

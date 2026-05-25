@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {
         configState,
         setKeyAction,
@@ -26,8 +26,8 @@
     import { Label }        from '$lib/components/ui/label/index.js';
     import NotConnected     from '$lib/components/app/NotConnected.svelte';
 
-    let editingKey   = $state(null);
-    let editingField = $state(null);
+    let editingKey   = $state<number | null>(null);
+    let editingField = $state<string | null>(null);
     let searchQuery  = $state('');
     let pickerOpen   = $state(false);
 
@@ -59,21 +59,21 @@
             : null
     );
 
-    function openKeyPicker(keyIndex) {
+    function openKeyPicker(keyIndex: number): void {
         editingKey = keyIndex;
         editingField = 'key';
         searchQuery = '';
         pickerOpen = true;
     }
 
-    function openEncoderPicker(field) {
+    function openEncoderPicker(field: string): void {
         editingKey = null;
         editingField = field;
         searchQuery = '';
         pickerOpen = true;
     }
 
-    function selectKeycode(kc) {
+    function selectKeycode(kc: { value: number; label: string; category: string }): void {
         if (editingField === 'key' && editingKey !== null) {
             setKeyAction(configState.activeProfileIndex, configState.activeLayerIndex, editingKey, kc.value);
         } else if (editingField === 'encoder_cw') {
@@ -124,7 +124,7 @@
         },
     ];
 
-    function applyEncoderPreset(preset) {
+    function applyEncoderPreset(preset: { cw: number; ccw: number }): void {
         const pi = configState.activeProfileIndex;
         const li = configState.activeLayerIndex;
         setEncoderAction(pi, li, 'cw',  preset.cw);

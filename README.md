@@ -12,11 +12,14 @@ spinpad/
 ├── packages/
 │   ├── firmware/          # Firmware ESP-IDF (C) — USB HID, BLE, encoder, OLED, LEDs
 │   ├── studio/            # Config app SvelteKit — éditeur keymap, profils, LEDs
+│   ├── website/           # Site public SvelteKit — landing, docs, Studio embarqué
 │   └── shared/            # Constantes partagées JS → C (keycodes, action types)
 ├── hardware/
 │   └── boards/
-│       └── spinpad-v1/    # Pinmap (kb_config.h), PCB, BOM, 3D
-├── tools/                 # Scripts utilitaires (build embedded, flash, Hyperion bridge)
+│       └── spinpad-v1/    # Pinmap (kb_config.h), sdkconfig.board, PCB, BOM
+├── tools/
+│   ├── flasher/           # Outil de flash WebSerial (SvelteKit, standalone)
+│   └── hyperion-bridge/   # Bridge Hyperion NG → SpinPad LEDs (Node.js)
 ├── docs/                  # Documentation projet
 └── .github/workflows/     # CI/CD (firmware release, studio deploy)
 ```
@@ -33,7 +36,23 @@ spinpad/
 
 ```bash
 pnpm install
-pnpm dev        # → http://localhost:5173
+pnpm dev                                    # → http://localhost:5173 (WebSerial, Chrome/Edge)
+pnpm --filter @spinpad/studio build         # Build web standard
+pnpm --filter @spinpad/studio build:embedded # Build pour Studio Mode (WiFi AP embarqué)
+```
+
+### Website
+
+```bash
+pnpm --filter @spinpad/website dev      # → http://localhost:5174
+pnpm --filter @spinpad/website build
+```
+
+### Flash Tool
+
+```bash
+pnpm --filter @spinpad/flasher dev      # → http://localhost:5175
+pnpm --filter @spinpad/flasher build
 ```
 
 ### Firmware
@@ -55,6 +74,30 @@ Maintenir **SW8 + SW9 pendant 3 secondes** → le SpinPad crée un point d'accè
 | `SpinPad-Config` | `192.168.4.1` |
 
 Connecter son téléphone ou PC au réseau, ouvrir le navigateur → Studio se charge directement depuis le SpinPad. Même combo pour quitter (ou auto-exit après 5 min d'inactivité).
+
+## Home Assistant
+
+Le SpinPad s'intègre nativement avec Home Assistant via l'intégration [`keyboard_remote`](https://www.home-assistant.io/integrations/keyboard_remote/).
+
+1. Appairer le SpinPad en BLE sur le host HA (Raspberry Pi, etc.) — slot BLE dédié recommandé
+2. HA détecte le clavier BLE → déclencher des automatisations sur keypresses :
+
+```yaml
+automation:
+  trigger:
+    platform: event
+    event_type: keyboard_remote_command_received
+    event_data:
+      device_name: "SpinPad"
+      type: key_pressed
+      key_code: 30    # Touche SW1 (keycode HID = 'a' par défaut)
+  action:
+    service: light.toggle
+    target:
+      entity_id: light.bureau
+```
+
+Aucun code firmware supplémentaire requis — le BLE HID standard suffit.
 
 ## Hardware
 

@@ -1,16 +1,16 @@
-<script>
-    import { configState }           from '$lib/store/config.svelte.js';
+<script lang="ts">
+    import { configState, updateConfig } from '$lib/store/config.svelte.js';
     import { Card, CardContent,
-             CardHeader, CardTitle }  from '$lib/components/ui/card/index.js';
-    import { Input }                  from '$lib/components/ui/input/index.js';
-    import { Slider }                 from '$lib/components/ui/slider/index.js';
-    import { Switch }                 from '$lib/components/ui/switch/index.js';
-    import { Label }                  from '$lib/components/ui/label/index.js';
-    import { Badge }                  from '$lib/components/ui/badge/index.js';
-    import SettingsField              from '$lib/components/app/SettingsField.svelte';
-    import NotConnected               from '$lib/components/app/NotConnected.svelte';
+             CardHeader, CardTitle }     from '$lib/components/ui/card/index.js';
+    import { Input }                     from '$lib/components/ui/input/index.js';
+    import { Slider }                    from '$lib/components/ui/slider/index.js';
+    import { Switch }                    from '$lib/components/ui/switch/index.js';
+    import { Label }                     from '$lib/components/ui/label/index.js';
+    import { Badge }                     from '$lib/components/ui/badge/index.js';
+    import SettingsField                 from '$lib/components/app/SettingsField.svelte';
+    import NotConnected                  from '$lib/components/app/NotConnected.svelte';
 
-    // ── Orientation ──────────────────────────────────────────────
+    // ── Orientation ───────────────────────────────────────────────
     const ORIENTATIONS = [
         { value: 0, label: '0°',   icon: '↑' },
         { value: 1, label: '90°',  icon: '→' },
@@ -18,71 +18,43 @@
         { value: 3, label: '270°', icon: '←' },
     ];
 
-    // ── Sliders locaux requis par bits-ui Slider ─────────────────
-    let brightness   = $state(configState.data?.display?.brightness        ?? 180);
-    let encoderSens  = $state(configState.data?.encoder?.sensitivity        ?? 1);
-    let ledExtBright = $state(configState.data?.led_extension?.brightness   ?? 200);
+    // ── Sliders locaux (bits-ui Slider nécessite bind:value) ──────
+    // La sync STORE → LOCAL se fait via $effect (ex: undo/redo, rechargement).
+    // La sync LOCAL → STORE se fait via onValueChange sur le Slider (jamais via $effect,
+    // pour éviter une boucle qui écraserait le résultat d'un undo/redo).
+    let brightness   = $state(0);
+    let encoderSens  = $state(1);
+    let ledExtBright = $state(200);
 
-    // Sync store → local
-    $effect(() => {
-        const b = configState.data?.display?.brightness ?? 180;
-        if (b !== brightness) brightness = b;
-    });
-    $effect(() => {
-        const s = configState.data?.encoder?.sensitivity ?? 1;
-        if (s !== encoderSens) encoderSens = s;
-    });
-    $effect(() => {
-        const b = configState.data?.led_extension?.brightness ?? 200;
-        if (b !== ledExtBright) ledExtBright = b;
-    });
+    // Sync store → local (déclenché par undo/redo, chargement config, etc.)
+    $effect(() => { brightness   = configState.data?.display?.brightness      ?? 180; });
+    $effect(() => { encoderSens  = configState.data?.encoder?.sensitivity      ?? 1;   });
+    $effect(() => { ledExtBright = configState.data?.led_extension?.brightness ?? 200; });
 
-    // Sync local → store
-    $effect(() => {
-        if (configState.data && brightness !== configState.data.display?.brightness)
-            update('display.brightness', brightness);
-    });
-    $effect(() => {
-        if (configState.data && encoderSens !== configState.data.encoder?.sensitivity)
-            update('encoder.sensitivity', encoderSens);
-    });
-    $effect(() => {
-        if (configState.data && ledExtBright !== configState.data.led_extension?.brightness)
-            update('led_extension.brightness', ledExtBright);
-    });
-
-    // ── Helpers ───────────────────────────────────────────────────
-    function update(path, value) {
-        const cfg   = $state.snapshot(configState.data);
-        const parts = path.split('.');
-        let obj = cfg;
-        for (let i = 0; i < parts.length - 1; i++) {
-            if (obj[parts[i]] == null) obj[parts[i]] = {};
-            obj = obj[parts[i]];
-        }
-        obj[parts[parts.length - 1]] = value;
-        configState.data    = cfg;
-        configState.isDirty = true;
-    }
-
-    function hexToRgb(hex) {
-        const m = hex.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-        return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
-    }
-
-    function rgbToHex(r, g, b) {
-        return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
-    }
+    // ── Conditions dérivées ───────────────────────────────────────
+    // $derived garantit la réactivité sans boucle d'effet.
+    const ledExtEnabled = $derived(configState.data?.led_extension?.enabled ?? false);
+    const ledExtMode    = $derived(configState.data?.led_extension?.mode    ?? 0);
 
     // ── LED extension modes ───────────────────────────────────────
     const EXT_MODES = [
         { value: 0, label: 'Off',      desc: 'LEDs éteintes' },
         { value: 1, label: 'Mirror',   desc: 'Copie les couleurs des touches' },
-        { value: 2, label: 'Ambient',  desc: 'Respiration douce avec la couleur choisie' },
+        { value: 2, label: 'Ambient',  desc: 'Respiration douce' },
         { value: 3, label: 'Static',   desc: 'Couleur fixe' },
         { value: 4, label: 'Reactive', desc: 'Flash sur chaque touche pressée' },
-        { value: 5, label: 'Hyperion', desc: 'Frame RGB injectée via le bridge Hyperion' },
+        { value: 5, label: 'Hyperion', desc: 'Frame RGB via bridge Hyperion' },
     ];
+
+    // ── Helpers couleur ───────────────────────────────────────────
+    function hexToRgb(hex: string) {
+        const m = hex.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+        return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
+    }
+
+    function rgbToHex(r: number, g: number, b: number) {
+        return '#' + [r, g, b].map(v => v?.toString(16).padStart(2, '0') ?? '00').join('');
+    }
 </script>
 
 {#if !configState.data}
@@ -104,7 +76,7 @@
                             <Label>Nom diffusé en Bluetooth</Label>
                             <Input
                                 value={configState.data.ble?.device_name}
-                                oninput={e => update('ble.device_name', e.target.value)}
+                                oninput={(e: Event) => updateConfig('ble.device_name', (e.target as HTMLInputElement).value)}
                                 maxlength={31}
                             />
                         </div>
@@ -126,12 +98,7 @@
                                 </div>
                                 <Input
                                     value={configState.data.ble?.slot_names?.[slotIdx]}
-                                    oninput={e => {
-                                        const cfg = $state.snapshot(configState.data);
-                                        cfg.ble.slot_names[slotIdx] = e.target.value;
-                                        configState.data = cfg;
-                                        configState.isDirty = true;
-                                    }}
+                                    oninput={(e: Event) => updateConfig(`ble.slot_names.${slotIdx}`, (e.target as HTMLInputElement).value)}
                                 />
                             </div>
                         {/each}
@@ -162,9 +129,13 @@
                         <div class="mb-5">
                             <div class="flex justify-between text-sm mb-3">
                                 <span>Luminosité</span>
-                                <span class="text-muted-foreground">{configState.data.display?.brightness}</span>
+                                <span class="text-muted-foreground">{brightness}</span>
                             </div>
-                            <Slider type="single" min={10} max={255} bind:value={brightness} />
+                            <Slider
+                                type="single" min={10} max={255}
+                                bind:value={brightness}
+                                onValueChange={() => updateConfig('display.brightness', brightness)}
+                            />
                         </div>
 
                         <SettingsField label="Extinction après (s)">
@@ -173,7 +144,7 @@
                                     type="number" min={5} max={600}
                                     class="w-20 text-right"
                                     value={configState.data.display?.timeout_s}
-                                    onchange={e => update('display.timeout_s', +e.target.value)}
+                                    onchange={(e: Event) => updateConfig('display.timeout_s', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -182,7 +153,7 @@
                             {#snippet children()}
                                 <Switch
                                     checked={configState.data.display?.show_battery}
-                                    onCheckedChange={v => update('display.show_battery', v)}
+                                    onCheckedChange={(v: boolean) => updateConfig('display.show_battery', v)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -190,7 +161,7 @@
                             {#snippet children()}
                                 <Switch
                                     checked={configState.data.display?.show_layer}
-                                    onCheckedChange={v => update('display.show_layer', v)}
+                                    onCheckedChange={(v: boolean) => updateConfig('display.show_layer', v)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -198,7 +169,7 @@
                             {#snippet children()}
                                 <Switch
                                     checked={configState.data.display?.show_profile}
-                                    onCheckedChange={v => update('display.show_profile', v)}
+                                    onCheckedChange={(v: boolean) => updateConfig('display.show_profile', v)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -206,7 +177,7 @@
                             {#snippet children()}
                                 <Switch
                                     checked={configState.data.display?.show_ble_status}
-                                    onCheckedChange={v => update('display.show_ble_status', v)}
+                                    onCheckedChange={(v: boolean) => updateConfig('display.show_ble_status', v)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -227,7 +198,7 @@
                                     type="number" min={30} max={3600}
                                     class="w-20 text-right"
                                     value={configState.data.power?.sleep_timeout_s}
-                                    onchange={e => update('power.sleep_timeout_s', +e.target.value)}
+                                    onchange={(e: Event) => updateConfig('power.sleep_timeout_s', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -238,7 +209,7 @@
                                     type="number" min={3} max={30}
                                     class="w-20 text-right"
                                     value={configState.data.power?.battery_critical_pct}
-                                    onchange={e => update('power.battery_critical_pct', +e.target.value)}
+                                    onchange={(e: Event) => updateConfig('power.battery_critical_pct', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
                         </SettingsField>
@@ -264,7 +235,7 @@
                                            {configState.data.orientation === o.value
                                                ? 'border-primary bg-primary/10 text-primary font-semibold'
                                                : 'border-border hover:border-primary/50 hover:bg-accent'}"
-                                    onclick={() => update('orientation', o.value)}
+                                    onclick={() => updateConfig('orientation', o.value)}
                                 >
                                     <span class="text-lg leading-none">{o.icon}</span>
                                     <span>{o.label}</span>
@@ -289,10 +260,14 @@
                             <div class="flex justify-between text-sm mb-1">
                                 <span>Sensibilité</span>
                                 <span class="text-muted-foreground font-mono">
-                                    {['', '1× (standard)', '2× (réactif)', '3×', '4× (max)'][configState.data.encoder?.sensitivity ?? 1] ?? '—'}
+                                    {(['', '1× (standard)', '2× (réactif)', '3×', '4× (max)'] as const)[encoderSens] ?? '—'}
                                 </span>
                             </div>
-                            <Slider type="single" min={1} max={4} step={1} bind:value={encoderSens} />
+                            <Slider
+                                type="single" min={1} max={4} step={1}
+                                bind:value={encoderSens}
+                                onValueChange={() => updateConfig('encoder.sensitivity', encoderSens)}
+                            />
                             <div class="flex justify-between text-xs text-muted-foreground mt-1">
                                 <span>1 clic / détent</span>
                                 <span>4 clics / détent</span>
@@ -323,13 +298,13 @@
                         <SettingsField label="Activer l'extension" description="Active les LEDs branchées sur le connecteur d'extension">
                             {#snippet children()}
                                 <Switch
-                                    checked={configState.data.led_extension?.enabled}
-                                    onCheckedChange={v => update('led_extension.enabled', v)}
+                                    checked={ledExtEnabled}
+                                    onCheckedChange={(v: boolean) => updateConfig('led_extension.enabled', v)}
                                 />
                             {/snippet}
                         </SettingsField>
 
-                        {#if configState.data.led_extension?.enabled}
+                        {#if ledExtEnabled}
 
                             <SettingsField label="Nombre de LEDs" description="1–50 LEDs WS2812 branchées sur le connecteur">
                                 {#snippet children()}
@@ -337,7 +312,7 @@
                                         type="number" min={1} max={50}
                                         class="w-20 text-right"
                                         value={configState.data.led_extension?.count}
-                                        onchange={e => update('led_extension.count', Math.min(50, Math.max(1, +e.target.value)))}
+                                        onchange={(e: Event) => updateConfig('led_extension.count', Math.min(50, Math.max(1, +(e.target as HTMLInputElement).value)))}
                                     />
                                 {/snippet}
                             </SettingsField>
@@ -350,10 +325,10 @@
                                         <button
                                             type="button"
                                             class="flex flex-col gap-0.5 rounded-lg border px-3 py-2.5 text-left transition-colors
-                                                   {configState.data.led_extension?.mode === m.value
+                                                   {ledExtMode === m.value
                                                        ? 'border-primary bg-primary/10 text-primary'
                                                        : 'border-border hover:border-primary/50 hover:bg-accent'}"
-                                            onclick={() => update('led_extension.mode', m.value)}
+                                            onclick={() => updateConfig('led_extension.mode', m.value)}
                                         >
                                             <span class="text-sm font-medium">{m.label}</span>
                                             <span class="text-xs text-muted-foreground leading-snug">{m.desc}</span>
@@ -362,32 +337,27 @@
                                 </div>
                             </div>
 
-                            <!-- Couleur (visible si mode ≠ Mirror ≠ Hyperion) -->
-                            {#if ![1, 5].includes(configState.data.led_extension?.mode)}
+                            <!-- Couleur (masquée en modes Mirror et Hyperion) -->
+                            {#if ledExtMode !== 1 && ledExtMode !== 5}
                                 <SettingsField
                                     label="Couleur"
-                                    description={configState.data.led_extension?.mode === 4
-                                        ? 'Couleur du flash réactif'
-                                        : 'Couleur de base'}
+                                    description={ledExtMode === 4 ? 'Couleur du flash réactif' : 'Couleur de base'}
                                 >
                                     {#snippet children()}
                                         <input
                                             type="color"
                                             class="w-10 h-8 cursor-pointer rounded border border-border bg-transparent p-0.5"
                                             value={rgbToHex(
-                                                configState.data.led_extension?.r,
-                                                configState.data.led_extension?.g,
-                                                configState.data.led_extension?.b
+                                                configState.data.led_extension?.r ?? 255,
+                                                configState.data.led_extension?.g ?? 255,
+                                                configState.data.led_extension?.b ?? 255
                                             )}
-                                            oninput={e => {
-                                                const rgb = hexToRgb(e.target.value);
+                                            oninput={(e: Event) => {
+                                                const rgb = hexToRgb((e.target as HTMLInputElement).value);
                                                 if (rgb) {
-                                                    const cfg = $state.snapshot(configState.data);
-                                                    cfg.led_extension.r = rgb.r;
-                                                    cfg.led_extension.g = rgb.g;
-                                                    cfg.led_extension.b = rgb.b;
-                                                    configState.data    = cfg;
-                                                    configState.isDirty = true;
+                                                    updateConfig('led_extension.r', rgb.r);
+                                                    updateConfig('led_extension.g', rgb.g);
+                                                    updateConfig('led_extension.b', rgb.b);
                                                 }
                                             }}
                                         />
@@ -399,9 +369,13 @@
                             <div class="mt-4">
                                 <div class="flex justify-between text-sm mb-3">
                                     <span>Luminosité</span>
-                                    <span class="text-muted-foreground">{configState.data.led_extension?.brightness}</span>
+                                    <span class="text-muted-foreground">{ledExtBright}</span>
                                 </div>
-                                <Slider type="single" min={0} max={255} bind:value={ledExtBright} />
+                                <Slider
+                                    type="single" min={0} max={255}
+                                    bind:value={ledExtBright}
+                                    onValueChange={() => updateConfig('led_extension.brightness', ledExtBright)}
+                                />
                             </div>
 
                         {/if}

@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────────────────────────
+#  sdkconfig.board — SpinPad v1 (ESP32-S3)
+#
+#  Fichier de config Kconfig spécifique à cette board.
+#  À inclure via SDKCONFIG_DEFAULTS lors du build :
+#
+#    idf.py \
+#      -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;../../hardware/boards/spinpad-v1/sdkconfig.board" \
+#      build
+#
+#  Si spinpad-v2 utilise un autre SoC (ex: ESP32-C6), créer
+#  hardware/boards/spinpad-v2/sdkconfig.board avec CONFIG_IDF_TARGET="esp32c6".
+# ─────────────────────────────────────────────────────────────
+
+# Cible hardware de cette board
+CONFIG_IDF_TARGET="esp32s3"

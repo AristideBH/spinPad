@@ -97,11 +97,12 @@ export const configState = new ConfigState();
 // ─────────────────────────────────────────────────────────────
 
 // StateHistory suit les mutations de configState.data.
-// On ne l'initialise que côté browser (SSR n'a pas besoin de l'historique).
+// Initialisé dans $effect.root() pour créer un contexte réactif persistant
+// qui survit aux montages/démontages de composants.
 let _history = null;
 
-function _getHistory() {
-    if (!_history && browser) {
+if (browser) {
+    $effect.root(() => {
         _history = new StateHistory(
             () => configState.data,
             (v) => {
@@ -111,22 +112,13 @@ function _getHistory() {
             },
             { capacity: 50 }
         );
-    }
-    return _history;
+    });
 }
 
-export function undo() {
-    const h = _getHistory();
-    if (h?.canUndo) { h.undo(); }
-}
-
-export function redo() {
-    const h = _getHistory();
-    if (h?.canRedo) { h.redo(); }
-}
-
-export function canUndo() { return _getHistory()?.canUndo ?? false; }
-export function canRedo() { return _getHistory()?.canRedo ?? false; }
+export function undo()    { if (_history?.canUndo) _history.undo(); }
+export function redo()    { if (_history?.canRedo) _history.redo(); }
+export function canUndo() { return _history?.canUndo ?? false; }
+export function canRedo() { return _history?.canRedo ?? false; }
 
 // ─────────────────────────────────────────────────────────────
 //  RACCOURCIS CLAVIER (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z)
@@ -250,6 +242,27 @@ export async function importConfig(file) {
 //   2. Marquent isDirty = true
 //   3. Déclenchent l'auto-save (debounce 800ms)
 // ─────────────────────────────────────────────────────────────
+
+/**
+ * Mise à jour générique d'un champ de config via un chemin pointé (ex: "display.brightness").
+ * Crée les objets intermédiaires manquants, marque isDirty et déclenche l'auto-save.
+ * À utiliser depuis les composants UI (SettingsTab, etc.) à la place d'un update() local.
+ * @param {string} path   Chemin pointé, ex: "display.brightness", "led_extension.enabled"
+ * @param {*}      value  Nouvelle valeur
+ */
+export function updateConfig(path, value) {
+    const cfg   = $state.snapshot(configState.data);
+    const parts = path.split('.');
+    let obj = cfg;
+    for (let i = 0; i < parts.length - 1; i++) {
+        if (obj[parts[i]] == null) obj[parts[i]] = {};
+        obj = obj[parts[i]];
+    }
+    obj[parts[parts.length - 1]] = value;
+    configState.data    = cfg;
+    configState.isDirty = true;
+    _scheduleSave();
+}
 
 export function setKeyAction(profileIdx, layerIdx, keyIndex, actionValue) {
     const cfg = $state.snapshot(configState.data);

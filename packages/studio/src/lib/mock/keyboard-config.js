@@ -162,4 +162,20 @@ export const MOCK_CONFIG = {
         sleep_timeout_s: 300,
         battery_critical_pct: 10,
     },
+
+    orientation: 0,
+
+    encoder: {
+        sensitivity: 1,
+    },
+
+    led_extension: {
+        enabled: false,
+        count: 10,
+        mode: 0,
+        r: 255,
+        g: 100,
+        b: 0,
+        brightness: 200,
+    },
 };
