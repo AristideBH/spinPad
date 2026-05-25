@@ -4,14 +4,18 @@
   "description": "Shared constants and utilities for SpinPad firmware and Studio",
   "type": "module",
   "exports": {
-    ".": "./src/index.js",
-    "./keycodes": "./src/keycodes.js",
-    "./action-types": "./src/action-types.js",
-    "./config-schema": "./src/config-schema.js",
-    "./config-migrations": "./src/config-migrations.js"
+    ".": "./src/index.ts",
+    "./keycodes": "./src/keycodes.ts",
+    "./action-types": "./src/action-types.ts",
+    "./config-schema": "./src/config-schema.ts",
+    "./config-migrations": "./src/config-migrations.ts"
   },
   "scripts": {
-    "codegen": "node scripts/codegen.mjs",
-    "build": "node scripts/codegen.mjs"
+    "codegen": "tsx scripts/codegen.mjs",
+    "build": "tsx scripts/codegen.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
   }
 }
