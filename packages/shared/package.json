@@ -1,18 +1,33 @@
 {
   "name": "@spinpad/shared",
   "version": "0.1.0",
-  "description": "Shared constants and utilities for SpinPad firmware and Studio",
+  "description": "Shared UI components, stores, and constants for SpinPad",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./keycodes": "./src/keycodes.ts",
-    "./action-types": "./src/action-types.ts",
-    "./config-schema": "./src/config-schema.ts",
-    "./config-migrations": "./src/config-migrations.ts"
+    ".": "./src/lib/index.ts",
+    "./Studio.svelte": "./src/lib/Studio.svelte",
+    "./styles": "./src/lib/styles.css",
+    "./action-types": "./src/lib/action-types.ts",
+    "./config-schema": "./src/lib/config-schema.ts",
+    "./config-migrations": "./src/lib/config-migrations.ts",
+    "./keycodes": "./src/lib/keycodes.ts"
   },
   "scripts": {
     "codegen": "tsx scripts/codegen.mjs",
     "build": "tsx scripts/codegen.mjs"
+  },
+  "peerDependencies": {
+    "svelte": ">=5.0.0"
+  },
+  "dependencies": {
+    "@internationalized/date": "^3.12.1",
+    "@lucide/svelte": "^1.16.0",
+    "bits-ui": "^2.18.1",
+    "clsx": "^2.1.1",
+    "mode-watcher": "^1.1.0",
+    "runed": "^0.24.0",
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

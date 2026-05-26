@@ -10,7 +10,7 @@
 //  Sortie : packages/firmware/components/keymap/include/action_types.gen.h
 // ═══════════════════════════════════════════════════════════════
 
-import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/action-types.ts';
+import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/lib/action-types.ts';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';

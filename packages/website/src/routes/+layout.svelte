@@ -1,6 +1,6 @@
 <script lang="ts">
   import "../app.css";
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import * as Sidebar from "$shared/components/ui/sidebar/index.js";
   import AppSidebar from "$lib/components/ui/app-sidebar.svelte";
   import { ModeWatcher } from "mode-watcher";
 

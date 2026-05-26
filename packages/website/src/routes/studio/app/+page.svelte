@@ -1,10 +1,10 @@
 <script lang="ts">
   import { PersistedState } from "runed";
-  import * as Tabs       from "$lib/components/ui/tabs/index.js";
-  import DashboardTab    from "$lib/components/app/tabs/DashboardTab.svelte";
-  import KeypadTab       from "$lib/components/app/tabs/KeypadTab.svelte";
-  import SettingsTab     from "$lib/components/app/tabs/SettingsTab.svelte";
-  import { APP_CONFIG }  from "$lib/app.config.js";
+  import * as Tabs       from "$shared/components/ui/tabs/index.js";
+  import DashboardTab    from "$shared/components/app/tabs/DashboardTab.svelte";
+  import KeypadTab       from "$shared/components/app/tabs/KeypadTab.svelte";
+  import SettingsTab     from "$shared/components/app/tabs/SettingsTab.svelte";
+  import { APP_CONFIG }  from "$shared/app.config.js";
 
   const activeTab = new PersistedState<string>("spinpad-active-tab", "dashboard");
 </script>

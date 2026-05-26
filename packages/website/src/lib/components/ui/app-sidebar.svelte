@@ -1,6 +1,6 @@
 <script lang="ts">
-  import * as Collapsible from "$lib/components/ui/collapsible/index.js";
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import * as Collapsible from "$shared/components/ui/collapsible/index.js";
+  import * as Sidebar from "$shared/components/ui/sidebar/index.js";
   import { page } from "$app/stores";
   import HomeIcon from "@lucide/svelte/icons/house";
   import MonitorIcon from "@lucide/svelte/icons/monitor";
@@ -28,9 +28,9 @@
   ];
 
   let docsOpen = $derived($page.url.pathname.startsWith("/docs"));
-  let isHome    = $derived($page.url.pathname === "/");
-  let isStudio  = $derived($page.url.pathname.startsWith("/studio"));
-  let isFlash   = $derived($page.url.pathname.startsWith("/flash"));
+  let isHome   = $derived($page.url.pathname === "/");
+  let isStudio = $derived($page.url.pathname.startsWith("/studio"));
+  let isFlash  = $derived($page.url.pathname.startsWith("/flash"));
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>

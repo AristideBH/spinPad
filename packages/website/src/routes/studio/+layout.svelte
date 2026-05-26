@@ -3,11 +3,11 @@
     configState, saveConfig,
     undo, redo, canUndo, canRedo,
     exportConfig, importConfig,
-  } from "$lib/store/config.svelte.js";
-  import { Button } from "$lib/components/ui/button/index.js";
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-  import { Separator } from "$lib/components/ui/separator/index.js";
-  import StatusCard from "$lib/components/app/StatusCard.svelte";
+  } from "$shared/store/config.svelte.js";
+  import { Button } from "$shared/components/ui/button/index.js";
+  import * as Sidebar from "$shared/components/ui/sidebar/index.js";
+  import { Separator } from "$shared/components/ui/separator/index.js";
+  import StatusCard from "$shared/components/app/StatusCard.svelte";
   import { Save, Undo2, Redo2, Upload, Download, Loader2, Check } from "@lucide/svelte";
 
   let { children } = $props();
