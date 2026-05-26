@@ -10,9 +10,9 @@ export default {
     ],
     kit: {
         adapter: adapter({
-            pages:       'build',
-            assets:      'build',
-            fallback:    '404.html',
+            pages: 'build',
+            assets: 'build',
+            fallback: '404.html',
             precompress: true,
         }),
         prerender: {
