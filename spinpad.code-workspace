@@ -41,7 +41,9 @@
     "[svelte]": {
       "editor.defaultFormatter": "svelte.svelte-vscode"
     },
-    "hide-files.files": []
+    "hide-files.files": [],
+    "liveServer.settings.multiRootWorkspaceName": "🖌️ Studio",
+    "liveServer.settings.port": 5501
   },
   "extensions": {
     "recommendations": [
