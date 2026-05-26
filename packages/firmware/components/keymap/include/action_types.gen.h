@@ -1,5 +1,5 @@
 // AUTO-GENERATED — do not edit manually
-// Source: packages/shared/src/action-types.ts
+// Source: packages/shared/src/constants/action-types.ts
 // Run:   pnpm codegen
 //
 // This file is committed to the repo so the firmware can compile
