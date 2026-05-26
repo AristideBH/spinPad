@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @spinpad/website dev",
+    "dev:studio": "pnpm --filter @spinpad/studio dev",
     "build:studio": "pnpm --filter @spinpad/studio build",
     "build:embedded": "pnpm --filter @spinpad/studio build:embedded",
     "codegen": "pnpm --filter @spinpad/shared codegen",
