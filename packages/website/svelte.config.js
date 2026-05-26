@@ -20,7 +20,7 @@ export default {
         },
         alias: {
             $shared: '../shared/src',
-            $lib: '../shared/src',
+            $lib: 'src/lib',
         },
     },
 };

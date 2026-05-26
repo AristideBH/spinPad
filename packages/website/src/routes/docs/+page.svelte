@@ -1,12 +1,24 @@
+<script lang="ts">
+  import Studio from "$shared/Studio.svelte";
+  import { useHeaderRight } from '$lib/header-right.svelte.js';
+  import Search from './Search.svelte';
+  
+  const headerRight = useHeaderRight();
+  $effect(() => {
+    headerRight.set(Search);
+    return () => headerRight.set(null); // nettoyage auto à la navigation
+  });
+</script>
+
 <svelte:head>
     <title>Documentation — SpinPad</title>
 </svelte:head>
 
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold mb-2">Documentation</h1>
-    <p class="text-gray-400 mb-10">Tout ce qu'il faut savoir pour configurer et personnaliser votre SpinPad.</p>
+<div class="max-w-4xl px-4 py-12 mx-auto">
+    <h1 class="mb-2 text-3xl font-bold">Documentation</h1>
+    <p class="mb-10 text-gray-400">Tout ce qu'il faut savoir pour configurer et personnaliser votre SpinPad.</p>
 
-    <div class="grid sm:grid-cols-2 gap-4">
+    <div class="grid gap-4 sm:grid-cols-2">
         {#each [
             { href: '/docs/getting-started/', title: 'Démarrage',          icon: '🚀', desc: 'Premier flash, connexion USB, premier keymap.' },
             { href: '/docs/keymap/',          title: 'Keymap',             icon: '⌨️', desc: 'Profils, layers, actions, combos.' },
@@ -19,11 +31,11 @@
         ] as doc}
             <a
                 href={doc.href}
-                class="flex gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4 hover:border-spinpad/50 transition-colors group"
+                class="flex gap-4 p-4 transition-colors bg-gray-900 border border-gray-800 rounded-xl hover:border-spinpad/50 group"
             >
                 <span class="text-2xl mt-0.5">{doc.icon}</span>
                 <div>
-                    <p class="font-semibold text-white group-hover:text-spinpad-light transition-colors">{doc.title}</p>
+                    <p class="font-semibold text-white transition-colors group-hover:text-spinpad-light">{doc.title}</p>
                     <p class="text-sm text-gray-400 mt-0.5">{doc.desc}</p>
                 </div>
             </a>

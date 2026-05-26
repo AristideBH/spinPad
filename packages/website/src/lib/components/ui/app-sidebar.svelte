@@ -10,27 +10,20 @@
   import LifeBuoyIcon from "@lucide/svelte/icons/life-buoy";
   import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import type { ComponentProps } from "svelte";
+  import { navTree } from "$lib/nav.js";
 
   let {
     ref = $bindable(null),
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
 
-  const docsItems = [
-    { title: "Démarrage",   url: "/docs/getting-started/" },
-    { title: "Keymap",      url: "/docs/keymap/" },
-    { title: "Encodeur",    url: "/docs/encoder/" },
-    { title: "LEDs",        url: "/docs/leds/" },
-    { title: "Studio Mode", url: "/docs/studio-mode/" },
-    { title: "Orientation", url: "/docs/orientation/" },
-    { title: "Bluetooth",   url: "/docs/ble/" },
-    { title: "Compiler",    url: "/docs/firmware-build/" },
-  ];
+  const docsItem = navTree.find((n) => n.url === "/docs/")!;
+  const docsChildren = docsItem.children ?? [];
 
   let docsOpen = $derived($page.url.pathname.startsWith("/docs"));
-  let isHome   = $derived($page.url.pathname === "/");
+  let isHome = $derived($page.url.pathname === "/");
   let isStudio = $derived($page.url.pathname.startsWith("/studio"));
-  let isFlash  = $derived($page.url.pathname.startsWith("/flash"));
+  let isFlash = $derived($page.url.pathname.startsWith("/flash"));
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
@@ -41,12 +34,14 @@
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
             <a href="/" {...props}>
-              <div class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg font-bold text-xs">
+              <div
+                class="flex items-center justify-center text-xs font-bold rounded-lg bg-sidebar-primary text-sidebar-primary-foreground aspect-square size-8"
+              >
                 SP
               </div>
-              <div class="grid flex-1 text-start text-sm leading-tight">
-                <span class="truncate font-semibold">SpinPad</span>
-                <span class="truncate text-xs text-muted-foreground">macropad</span>
+              <div class="grid flex-1 text-sm leading-tight text-start">
+                <span class="font-semibold truncate">SpinPad</span>
+                <span class="text-xs truncate text-muted-foreground">macropad</span>
               </div>
             </a>
           {/snippet}
@@ -60,39 +55,26 @@
     <Sidebar.Group>
       <Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
       <Sidebar.Menu>
-
-        <!-- Accueil -->
         <Sidebar.MenuItem>
           <Sidebar.MenuButton isActive={isHome} tooltipContent="Accueil">
             {#snippet child({ props })}
-              <a href="/" {...props}>
-                <HomeIcon />
-                <span>Accueil</span>
-              </a>
+              <a href="/" {...props}><HomeIcon /><span>Accueil</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
 
-        <!-- Studio -->
         <Sidebar.MenuItem>
           <Sidebar.MenuButton isActive={isStudio} tooltipContent="Studio">
             {#snippet child({ props })}
-              <a href="/studio/app/" {...props}>
-                <MonitorIcon />
-                <span>Studio</span>
-              </a>
+              <a href="/studio/" {...props}><MonitorIcon /><span>Studio</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
 
-        <!-- Flash -->
         <Sidebar.MenuItem>
           <Sidebar.MenuButton isActive={isFlash} tooltipContent="Flash firmware">
             {#snippet child({ props })}
-              <a href="/flash/" {...props}>
-                <ZapIcon />
-                <span>Flash firmware</span>
-              </a>
+              <a href="/flash/" {...props}><ZapIcon /><span>Flash firmware</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
@@ -103,10 +85,7 @@
             <Sidebar.MenuItem {...props}>
               <Sidebar.MenuButton isActive={docsOpen} tooltipContent="Documentation">
                 {#snippet child({ props: btnProps })}
-                  <a href="/docs/" {...btnProps}>
-                    <BookOpenIcon />
-                    <span>Documentation</span>
-                  </a>
+                  <a href="/docs/" {...btnProps}><BookOpenIcon /><span>Documentation</span></a>
                 {/snippet}
               </Sidebar.MenuButton>
               <Collapsible.Trigger>
@@ -119,7 +98,7 @@
               </Collapsible.Trigger>
               <Collapsible.Content>
                 <Sidebar.MenuSub>
-                  {#each docsItems as item (item.title)}
+                  {#each docsChildren as item (item.title)}
                     <Sidebar.MenuSubItem>
                       <Sidebar.MenuSubButton
                         href={item.url}
@@ -134,7 +113,6 @@
             </Sidebar.MenuItem>
           {/snippet}
         </Collapsible.Root>
-
       </Sidebar.Menu>
     </Sidebar.Group>
 
@@ -144,9 +122,13 @@
         <Sidebar.MenuItem>
           <Sidebar.MenuButton tooltipContent="GitHub">
             {#snippet child({ props })}
-              <a href="https://github.com/YOUR_ORG/spinpad" target="_blank" rel="noopener" {...props}>
-                <ExternalLinkIcon />
-                <span>GitHub</span>
+              <a
+                href="https://github.com/AristideBH/spinPad"
+                target="_blank"
+                rel="noopener"
+                {...props}
+              >
+                <ExternalLinkIcon /><span>GitHub</span>
               </a>
             {/snippet}
           </Sidebar.MenuButton>
@@ -154,10 +136,7 @@
         <Sidebar.MenuItem>
           <Sidebar.MenuButton tooltipContent="Support / Feedback">
             {#snippet child({ props })}
-              <a href="/feedback/" {...props}>
-                <LifeBuoyIcon />
-                <span>Support / Feedback</span>
-              </a>
+              <a href="/feedback/" {...props}><LifeBuoyIcon /><span>Support / Feedback</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
