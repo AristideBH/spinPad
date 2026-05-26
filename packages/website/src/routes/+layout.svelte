@@ -49,11 +49,9 @@
 
       <!-- Right: dynamic slot for per-page toolbar content -->
       {#if headerRight.current}
+        {@const HeaderRightComponent = headerRight.current.component}
         <div class="ms-auto flex items-center gap-2">
-          <svelte:component
-            this={headerRight.current.component}
-            {...headerRight.current.props}
-          />
+          <HeaderRightComponent {...headerRight.current.props} />
         </div>
       {/if}
     </header>
