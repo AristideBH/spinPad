@@ -13,7 +13,7 @@
 
 class SerialState {
     connected = $state(false);
-    error = $state(null);
+    error     = $state(null);
 }
 export const serial = new SerialState();
 
@@ -21,12 +21,48 @@ export const serial = new SerialState();
 //  ÉTAT INTERNE
 // ─────────────────────────────────────────────────────────────
 
-let port = null;
-let writer = null;
-let reader = null;
+let port       = null;
+let writer     = null;
+let reader     = null;
 let readBuffer = '';
 
+const encoder        = new TextEncoder();
 const messageHandlers = new Set();
+
+// ─────────────────────────────────────────────────────────────
+//  FILE D'ATTENTE RPC
+//  Un seul appel en vol à la fois → pas de contamination croisée
+//  entre getConfig / setConfig / factoryReset.
+// ─────────────────────────────────────────────────────────────
+
+let _rpcBusy = false;
+const _rpcQueue = [];
+
+function _drainRpcQueue() {
+    if (_rpcBusy || _rpcQueue.length === 0) return;
+    _rpcBusy = true;
+    const { fn, resolve, reject } = _rpcQueue.shift();
+    Promise.resolve()
+        .then(() => fn())
+        .then(resolve, reject)
+        .finally(() => {
+            _rpcBusy = false;
+            _drainRpcQueue();
+        });
+}
+
+function _enqueueRpc(fn) {
+    return new Promise((resolve, reject) => {
+        _rpcQueue.push({ fn, resolve, reject });
+        _drainRpcQueue();
+    });
+}
+
+function _cancelQueuedRpcs(reason) {
+    const err = new Error(reason);
+    _rpcQueue.splice(0).forEach(({ reject }) => reject(err));
+    _rpcBusy = false;
+}
 
 // ─────────────────────────────────────────────────────────────
 //  CONNEXION
@@ -39,14 +75,19 @@ export async function connect() {
     }
 
     try {
-        port = await navigator.serial.requestPort();
+        port = await navigator.serial.requestPort({
+            filters: [{ usbVendorId: 0x303A }],  // Espressif — filtre le sélecteur de port
+        });
         await port.open({ baudRate: 115200 });
+
+        // Nettoyer proprement si le câble est débranché physiquement
+        port.addEventListener('disconnect', _handleUnexpectedDisconnect);
 
         writer = port.writable.getWriter();
         startReading();
 
         serial.connected = true;
-        serial.error = null;
+        serial.error     = null;
         return true;
     } catch (err) {
         serial.error = `Erreur connexion : ${err.message}`;
@@ -54,10 +95,28 @@ export async function connect() {
     }
 }
 
+function _handleUnexpectedDisconnect() {
+    readBuffer = '';
+    _cancelQueuedRpcs('Déconnecté');
+    writer = null;
+    reader = null;
+    port   = null;
+    serial.connected = false;
+}
+
 export async function disconnect() {
-    if (writer) { await writer.close(); writer = null; }
-    if (reader) { reader.cancel(); reader = null; }
-    if (port) { await port.close(); port = null; }
+    _cancelQueuedRpcs('Déconnecté');
+    readBuffer = '';
+
+    try { if (writer) await writer.close(); } catch { /* port déjà fermé */ }
+    writer = null;
+
+    try { if (reader) reader.cancel(); } catch { /* reader déjà annulé */ }
+    reader = null;
+
+    try { if (port) await port.close(); } catch { /* port déjà fermé */ }
+    port = null;
+
     serial.connected = false;
 }
 
@@ -112,52 +171,62 @@ export function onMessage(handler) {
 
 async function sendRaw(jsonString) {
     if (!writer || !serial.connected) throw new Error('Non connecté');
-    const encoder = new TextEncoder();
     await writer.write(encoder.encode(jsonString + '\n'));
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER RPC
+//  Envoie une commande, attend la première réponse qui satisfait
+//  matchFn, et rejette proprement en cas de timeout ou d'erreur d'écriture.
+// ─────────────────────────────────────────────────────────────
+
+function _rpcCall(command, matchFn, timeoutMs = 5000) {
+    return new Promise((resolve, reject) => {
+        let cleanup;
+
+        const timer = setTimeout(() => {
+            cleanup?.();
+            reject(new Error(`Timeout — pas de réponse du clavier (${command.cmd})`));
+        }, timeoutMs);
+
+        cleanup = onMessage((msg) => {
+            if (matchFn(msg)) {
+                clearTimeout(timer);
+                cleanup();
+                resolve(msg);
+            }
+        });
+
+        sendRaw(JSON.stringify(command)).catch(err => {
+            clearTimeout(timer);
+            cleanup?.();
+            reject(err);
+        });
+    });
 }
 
 // ─────────────────────────────────────────────────────────────
 //  API PUBLIQUE
 // ─────────────────────────────────────────────────────────────
 
-export async function getConfig() {
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            cleanup();
-            reject(new Error('Timeout — pas de réponse du clavier'));
-        }, 5000);
-
-        const cleanup = onMessage((msg) => {
-            if (msg.version !== undefined && msg.profiles !== undefined) {
-                clearTimeout(timeout);
-                cleanup();
-                resolve(msg);
-            }
-        });
-
-        sendRaw(JSON.stringify({ cmd: 'get_config' }));
-    });
+export function getConfig() {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'get_config' },
+        msg => msg.version !== undefined && msg.profiles !== undefined
+    ));
 }
 
-export async function setConfig(config) {
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            cleanup();
-            reject(new Error('Timeout'));
-        }, 5000);
-
-        const cleanup = onMessage((msg) => {
-            if (msg.status === 'ok') {
-                clearTimeout(timeout);
-                cleanup();
-                resolve(msg);
-            }
-        });
-
-        sendRaw(JSON.stringify({ cmd: 'set_config', payload: config }));
-    });
+export function setConfig(config) {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'set_config', payload: config },
+        msg => msg.status === 'ok' && !msg.msg  // exclut factory_reset
+    ));
 }
 
-export async function factoryReset() {
-    await sendRaw(JSON.stringify({ cmd: 'factory_reset' }));
+export function factoryReset() {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'factory_reset' },
+        msg => msg.status === 'ok' && msg.msg === 'factory_reset',
+        10000  // reset usine peut prendre plus de temps
+    ));
 }
