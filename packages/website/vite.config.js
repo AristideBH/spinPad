@@ -19,6 +19,7 @@ export default defineConfig({
     },
     // SharedArrayBuffer requis par esptool-js (flash tool)
     server: {
+        host: '127.0.0.1',
         headers: {
             'Cross-Origin-Opener-Policy': 'same-origin',
             'Cross-Origin-Embedder-Policy': 'require-corp',

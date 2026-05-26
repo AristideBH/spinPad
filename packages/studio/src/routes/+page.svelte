@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Studio from '$lib/Studio.svelte';
+  import Studio from '$shared/Studio.svelte';
 </script>
 
 <Studio />
