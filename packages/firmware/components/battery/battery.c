@@ -4,7 +4,12 @@
 //  ADC : lit la tension sur BATTERY_ADC_CHANNEL,
 //        convertit en % via une courbe de décharge LiPo.
 //
-//  LED WS2812 (LED11) via RMT (Remote Control Transceiver) :
+//  Batterie optionnelle :
+//    power.battery_present = "auto"  → auto-détection via ADC
+//                          = "yes"   → forcer présente
+//                          = "no"    → désactiver totalement
+//
+//  LED WS2812 (LED11) via RMT, allumée seulement si batterie présente :
 //    > 60% → vert
 //    25-60% → jaune
 //    < 25% → rouge
@@ -18,13 +23,21 @@
 #include "esp_adc/adc_oneshot.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
-#include "led_strip.h"   // Composant ESP-IDF pour WS2812 via RMT
+#include "led_strip.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include <string.h>
+
 static const char *TAG = "BATTERY";
+
+// Plage de tension "plausible" pour l'auto-détection. En dehors
+// (typiquement ~0 mV si le diviseur n'est pas câblé, ou USB seul)
+// → batterie marquée absente.
+#define BATTERY_DETECT_MIN_MV  2800
+#define BATTERY_DETECT_MAX_MV  4500
 
 // ─────────────────────────────────────────────────────────────
 //  ÉTAT INTERNE
@@ -36,31 +49,21 @@ static led_strip_handle_t        g_led_strip  = NULL;
 static uint16_t g_voltage_mv  = 0;
 static uint8_t  g_percent     = 100;
 static bool     g_blink_state = false;
+static bool     g_present     = false;
+static char     g_source[16]  = "forced_no";
 
 // ─────────────────────────────────────────────────────────────
-//  COURBE DE DÉCHARGE LIPO (tension → pourcentage)
-//  Table de correspondance (interpolation linéaire entre les points)
-//  Valeurs typiques pour une cellule LiPo 3.7V
+//  COURBE DE DÉCHARGE LIPO
 // ─────────────────────────────────────────────────────────────
 typedef struct { uint16_t mv; uint8_t pct; } batt_point_t;
 
 static const batt_point_t BATT_CURVE[] = {
-    {4200, 100},
-    {4100,  90},
-    {4000,  80},
-    {3900,  70},
-    {3800,  60},
-    {3700,  50},
-    {3650,  40},
-    {3600,  30},
-    {3550,  20},
-    {3500,  10},
-    {3400,   5},
-    {3300,   0},
+    {4200, 100}, {4100,  90}, {4000,  80}, {3900,  70},
+    {3800,  60}, {3700,  50}, {3650,  40}, {3600,  30},
+    {3550,  20}, {3500,  10}, {3400,   5}, {3300,   0},
 };
 #define BATT_CURVE_SIZE (sizeof(BATT_CURVE) / sizeof(BATT_CURVE[0]))
 
-// Interpoler le pourcentage depuis la tension (mv)
 static uint8_t voltage_to_percent(uint16_t mv)
 {
     if (mv >= BATT_CURVE[0].mv) return 100;
@@ -68,8 +71,6 @@ static uint8_t voltage_to_percent(uint16_t mv)
 
     for (int i = 0; i < BATT_CURVE_SIZE - 1; i++) {
         if (mv <= BATT_CURVE[i].mv && mv >= BATT_CURVE[i+1].mv) {
-            // Interpolation linéaire entre deux points
-            // Formule : pct = pct_low + (mv - mv_low) * (pct_high - pct_low) / (mv_high - mv_low)
             uint16_t mv_high  = BATT_CURVE[i].mv;
             uint16_t mv_low   = BATT_CURVE[i+1].mv;
             uint8_t  pct_high = BATT_CURVE[i].pct;
@@ -77,7 +78,7 @@ static uint8_t voltage_to_percent(uint16_t mv)
             return pct_low + (uint8_t)((mv - mv_low) * (pct_high - pct_low) / (mv_high - mv_low));
         }
     }
-    return 50;  // Fallback
+    return 50;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -100,24 +101,64 @@ static void led_off(void)
 
 static void update_led(void)
 {
+    if (!g_present) { led_off(); return; }
     const kb_config_t *cfg = config_store_get();
     uint8_t critical_pct   = cfg->power.battery_critical_pct;
 
     if (g_percent > LED_BATT_GREEN_PCT) {
-        // Vert
         led_set_color(0, 50, 0);
     } else if (g_percent > LED_BATT_YELLOW_PCT) {
-        // Jaune
         led_set_color(50, 50, 0);
     } else if (g_percent > critical_pct) {
-        // Rouge
         led_set_color(50, 0, 0);
     } else {
-        // Rouge clignotant (critique)
         g_blink_state = !g_blink_state;
         if (g_blink_state) led_set_color(80, 0, 0);
         else               led_off();
     }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ADC — lecture brute (utilisée par init pour la détection
+//  et par battery_update() pour le monitoring continu)
+// ─────────────────────────────────────────────────────────────
+
+static esp_err_t adc_setup(void)
+{
+    adc_oneshot_unit_init_cfg_t adc_cfg = {
+        .unit_id  = BATTERY_ADC_UNIT,
+        .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+    if (adc_oneshot_new_unit(&adc_cfg, &g_adc_handle) != ESP_OK) return ESP_FAIL;
+
+    adc_oneshot_chan_cfg_t chan_cfg = {
+        .bitwidth = ADC_BITWIDTH_12,
+        .atten    = ADC_ATTEN_DB_12,
+    };
+    if (adc_oneshot_config_channel(g_adc_handle, BATTERY_ADC_CHANNEL, &chan_cfg) != ESP_OK) return ESP_FAIL;
+
+    adc_cali_curve_fitting_config_t cali_cfg = {
+        .unit_id  = BATTERY_ADC_UNIT,
+        .chan     = BATTERY_ADC_CHANNEL,
+        .atten    = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+    adc_cali_create_scheme_curve_fitting(&cali_cfg, &g_adc_cali);
+    return ESP_OK;
+}
+
+static uint16_t adc_read_voltage_mv(void)
+{
+    int raw = 0;
+    if (adc_oneshot_read(g_adc_handle, BATTERY_ADC_CHANNEL, &raw) != ESP_OK) return 0;
+
+    int mv_adc = 0;
+    if (g_adc_cali) {
+        adc_cali_raw_to_voltage(g_adc_cali, raw, &mv_adc);
+    } else {
+        mv_adc = (raw * 3300) / 4095;
+    }
+    return (uint16_t)((float)mv_adc / BATTERY_VOLTAGE_DIVIDER_RATIO);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -126,29 +167,27 @@ static void update_led(void)
 
 esp_err_t battery_init(void)
 {
-    // ── ADC ──────────────────────────────────────────────────
-    adc_oneshot_unit_init_cfg_t adc_cfg = {
-        .unit_id  = BATTERY_ADC_UNIT,
-        .ulp_mode = ADC_ULP_MODE_DISABLE,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&adc_cfg, &g_adc_handle));
+    // Résoudre la config (auto / yes / no)
+    const kb_config_t *cfg = config_store_get();
+    const char *mode = cfg->power.battery_present;
+    if (!mode || !mode[0]) mode = "auto";
 
-    adc_oneshot_chan_cfg_t chan_cfg = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten    = ADC_ATTEN_DB_12,  // 12dB = plage 0-3.3V (DB_11 deprecated)
-    };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(g_adc_handle, BATTERY_ADC_CHANNEL, &chan_cfg));
+    if (strcmp(mode, "no") == 0) {
+        g_present = false;
+        strncpy(g_source, "forced_no", sizeof(g_source) - 1);
+        ESP_LOGI(TAG, "Batterie désactivée par config (forced_no)");
+        return ESP_OK;
+    }
 
-    // Calibration ADC — ESP32S3 uses curve fitting (line fitting is ESP32 only)
-    adc_cali_curve_fitting_config_t cali_cfg = {
-        .unit_id  = BATTERY_ADC_UNIT,
-        .chan     = BATTERY_ADC_CHANNEL,
-        .atten    = ADC_ATTEN_DB_12,
-        .bitwidth = ADC_BITWIDTH_12,
-    };
-    adc_cali_create_scheme_curve_fitting(&cali_cfg, &g_adc_cali);
+    // Pour "yes" et "auto" : on tente d'initialiser l'ADC
+    if (adc_setup() != ESP_OK) {
+        ESP_LOGW(TAG, "Init ADC échouée — batterie marquée absente");
+        g_present = false;
+        strncpy(g_source, "auto", sizeof(g_source) - 1);
+        return ESP_OK;
+    }
 
-    // ── LED WS2812 via RMT ───────────────────────────────────
+    // LED RGB (toujours init, même si batterie absente — peut servir ailleurs)
     led_strip_config_t strip_cfg = {
         .strip_gpio_num   = LED_RGB_GPIO,
         .max_leds         = LED_RGB_COUNT,
@@ -157,50 +196,52 @@ esp_err_t battery_init(void)
     };
     led_strip_rmt_config_t rmt_cfg = {
         .clk_src        = RMT_CLK_SRC_DEFAULT,
-        .resolution_hz  = 10 * 1000 * 1000,  // 10MHz
+        .resolution_hz  = 10 * 1000 * 1000,
         .flags.with_dma = false,
     };
-    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_cfg, &rmt_cfg, &g_led_strip));
+    led_strip_new_rmt_device(&strip_cfg, &rmt_cfg, &g_led_strip);
     led_off();
 
-    // Première lecture
-    battery_update();
+    if (strcmp(mode, "yes") == 0) {
+        g_present = true;
+        strncpy(g_source, "forced_yes", sizeof(g_source) - 1);
+    } else {
+        // auto-détection : moyenne de 3 lectures
+        uint32_t acc = 0;
+        for (int i = 0; i < 3; i++) {
+            acc += adc_read_voltage_mv();
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        uint16_t mv = (uint16_t)(acc / 3);
+        g_present = (mv >= BATTERY_DETECT_MIN_MV && mv <= BATTERY_DETECT_MAX_MV);
+        strncpy(g_source, "auto", sizeof(g_source) - 1);
+        ESP_LOGI(TAG, "Auto-détection : %dmV → %s", mv,
+                 g_present ? "présente" : "absente");
+    }
 
-    ESP_LOGI(TAG, "Batterie init : %dmV → %d%%", g_voltage_mv, g_percent);
+    if (g_present) {
+        battery_update();
+        ESP_LOGI(TAG, "Batterie init : %dmV → %d%% (%s)",
+                 g_voltage_mv, g_percent, g_source);
+    } else {
+        ESP_LOGI(TAG, "Batterie absente (%s)", g_source);
+    }
     return ESP_OK;
 }
 
 void battery_update(void)
 {
-    // Lire l'ADC
-    int raw = 0;
-    adc_oneshot_read(g_adc_handle, BATTERY_ADC_CHANNEL, &raw);
+    if (!g_present) return;
 
-    // Convertir en millivolts via calibration
-    int mv_adc = 0;
-    if (g_adc_cali) {
-        adc_cali_raw_to_voltage(g_adc_cali, raw, &mv_adc);
-    } else {
-        // Conversion manuelle si pas de calibration (moins précis)
-        mv_adc = (raw * 3300) / 4095;
-    }
-
-    // Appliquer le ratio du diviseur de tension du PCB
-    // Exemple : si R1=R2=100k → ratio 0.5 → tension réelle = mv_adc / 0.5
-    g_voltage_mv = (uint16_t)((float)mv_adc / BATTERY_VOLTAGE_DIVIDER_RATIO);
-
-    // Clamp entre min et max
+    g_voltage_mv = adc_read_voltage_mv();
     if (g_voltage_mv > BATTERY_VOLTAGE_MAX_MV) g_voltage_mv = BATTERY_VOLTAGE_MAX_MV;
     if (g_voltage_mv < BATTERY_VOLTAGE_MIN_MV) g_voltage_mv = BATTERY_VOLTAGE_MIN_MV;
-
-    // Calculer le pourcentage
     g_percent = voltage_to_percent(g_voltage_mv);
-
-    // Mettre à jour la LED
     update_led();
-
-    ESP_LOGD(TAG, "ADC raw=%d, mv=%d, pct=%d%%", raw, g_voltage_mv, g_percent);
+    ESP_LOGD(TAG, "mv=%d pct=%d", g_voltage_mv, g_percent);
 }
 
-uint8_t battery_get_percent(void) { return g_percent; }
-uint16_t battery_get_voltage_mv(void) { return g_voltage_mv; }
+uint8_t  battery_get_percent(void)    { return g_present ? g_percent : 0; }
+uint16_t battery_get_voltage_mv(void) { return g_present ? g_voltage_mv : 0; }
+bool     battery_is_present(void)     { return g_present; }
+const char *battery_source_str(void)  { return g_source; }

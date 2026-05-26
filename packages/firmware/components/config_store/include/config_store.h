@@ -95,8 +95,13 @@ typedef struct {
 
 // ── Config power ─────────────────────────────────────────────
 typedef struct {
-    uint32_t sleep_timeout_s;    // Deep sleep après N secondes d'inactivité
+    uint32_t sleep_timeout_s;       // Deep sleep après N secondes d'inactivité
     uint8_t  battery_critical_pct;  // % batterie → LED rouge clignotant
+    // Présence de la batterie (variantes SpinPad sans batterie LiPo) :
+    //   "auto" → auto-détection ADC (défaut)
+    //   "yes"  → forcer présente
+    //   "no"   → désactiver totalement
+    char     battery_present[8];
 } kb_power_config_t;
 
 // ── Config complète ───────────────────────────────────────────

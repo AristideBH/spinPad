@@ -100,6 +100,7 @@ static void apply_defaults(void)
     // ── Power ──────────────────────────────────────────────
     g_config.power.sleep_timeout_s      = 300;   // 5 minutes
     g_config.power.battery_critical_pct = 10;
+    strncpy(g_config.power.battery_present, "auto", sizeof(g_config.power.battery_present) - 1);
 
     ESP_LOGI(TAG, "Config par défaut appliquée");
 }
@@ -180,6 +181,16 @@ static esp_err_t parse_json_to_config(const char *json_str)
 
         cJSON *bc = cJSON_GetObjectItem(power, "battery_critical_pct");
         if (cJSON_IsNumber(bc)) g_config.power.battery_critical_pct = (uint8_t)bc->valuedouble;
+
+        cJSON *bp = cJSON_GetObjectItem(power, "battery_present");
+        if (cJSON_IsString(bp) && bp->valuestring) {
+            // Accepter uniquement "auto" / "yes" / "no"
+            const char *v = bp->valuestring;
+            if (strcmp(v, "auto") == 0 || strcmp(v, "yes") == 0 || strcmp(v, "no") == 0) {
+                strncpy(g_config.power.battery_present, v, sizeof(g_config.power.battery_present) - 1);
+                g_config.power.battery_present[sizeof(g_config.power.battery_present) - 1] = '\0';
+            }
+        }
     }
 
     // ── Profils ─────────────────────────────────────────────
@@ -457,6 +468,8 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
     cJSON *power = cJSON_AddObjectToObject(root, "power");
     cJSON_AddNumberToObject(power, "sleep_timeout_s",     g_config.power.sleep_timeout_s);
     cJSON_AddNumberToObject(power, "battery_critical_pct",g_config.power.battery_critical_pct);
+    cJSON_AddStringToObject(power, "battery_present",
+        g_config.power.battery_present[0] ? g_config.power.battery_present : "auto");
 
     // Profils
     cJSON *profiles = cJSON_AddArrayToObject(root, "profiles");

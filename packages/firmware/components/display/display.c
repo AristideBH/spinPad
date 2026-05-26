@@ -212,7 +212,7 @@ static void render_screen(void)
     fb_draw_hline(0, 26, FB_WIDTH, true);
 
     // ── Batterie (y=27) ───────────────────────────────────────
-    if (dcfg->show_battery) {
+    if (dcfg->show_battery && battery_is_present()) {
         fb_draw_icon(0, 27, ICON_BATTERY);
 
         uint8_t pct = battery_get_percent();

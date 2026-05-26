@@ -12,6 +12,7 @@
 #include "usb_hid.h"
 #include "config_store.h"
 #include "keymap.h"
+#include "device_status.h"
 
 #include "tusb.h"
 #include "esp_log.h"
@@ -201,6 +202,14 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         const char *ok = "{\"status\":\"ok\",\"msg\":\"factory_reset\"}\n";
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
+    } else if (strstr(str, "\"device_status\"")) {
+        // Buffer dédié — 512 octets suffisent largement pour le payload actuel.
+        char buf[512];
+        size_t n = 0;
+        if (device_status_to_json(buf, sizeof(buf), &n, true) == ESP_OK) {
+            tud_cdc_n_write(0, buf, n);
+            tud_cdc_n_write_flush(0);
+        }
     }
 }
 

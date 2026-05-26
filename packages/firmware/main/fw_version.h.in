@@ -1,0 +1,10 @@
+#pragma once
+// Auto-généré par CMake (configure_file). Ne pas éditer à la main.
+
+#define KB_FW_VERSION_MAJOR  @KB_FW_VERSION_MAJOR@
+#define KB_FW_VERSION_MINOR  @KB_FW_VERSION_MINOR@
+#define KB_FW_VERSION_PATCH  @KB_FW_VERSION_PATCH@
+
+#define KB_FW_VERSION        "@KB_FW_VERSION@"
+#define KB_FW_BUILD          "@KB_FW_BUILD@"
+#define KB_FW_BUILD_DIRTY    @KB_FW_BUILD_DIRTY@

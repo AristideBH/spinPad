@@ -111,7 +111,13 @@ void app_main(void)
     ESP_ERROR_CHECK(usb_hid_init());
     ESP_LOGI(TAG, "USB HID prêt");
 
-    // ── 4b. BLE HID ──────────────────────────────────────────
+    // ── 4b. Batterie + LED RGB ──────────────────────────────
+    // Doit être init AVANT ble_hid pour que le service BAS sache
+    // s'il doit être annoncé (présence détectée via ADC).
+    ESP_ERROR_CHECK(battery_init());
+    ESP_LOGI(TAG, "Batterie initialisée");
+
+    // ── 4c. BLE HID ──────────────────────────────────────────
     // Démarre NimBLE, charge les bonds depuis NVS,
     // et tente de se reconnecter au dernier appareil utilisé.
     ESP_ERROR_CHECK(ble_hid_init());
@@ -125,10 +131,6 @@ void app_main(void)
     ESP_ERROR_CHECK(display_init());
     display_show_boot_screen();   // Affiche le splash screen au démarrage
     ESP_LOGI(TAG, "Écran prêt");
-
-    // ── 5c. Batterie + LED RGB ───────────────────────────────
-    ESP_ERROR_CHECK(battery_init());
-    ESP_LOGI(TAG, "Batterie initialisée");
 
     // ── 5d. LED Engine (chaîne WS2812 touches) ───────────────
     // Initialiser après battery_init pour éviter un conflit RMT au démarrage.

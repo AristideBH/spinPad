@@ -11,13 +11,31 @@
         factoryReset,
     } from '../../../store/config.svelte.js';
     import { devMode } from '../../../store/devMode.svelte.js';
+    import { refreshDeviceStatus } from '../../../store/deviceStatus.svelte.js';
     import { Button }   from '../../ui/button/index.js';
     import { Badge }    from '../../ui/badge/index.js';
     import { Card, CardContent } from '../../ui/card/index.js';
     import InfoCard     from '../InfoCard.svelte';
+    import DeviceStatusCard from '../DeviceStatusCard.svelte';
     import { Spinner }  from '../../ui/spinner/index.js';
     import * as Item    from '../../ui/item/index.js';
     import { Plug, PlugZap, RefreshCw, LogOut, Trash2, FlaskConical } from '@lucide/svelte';
+
+    type BatteryScenario = 'present' | 'absent' | 'low';
+    type ConnScenario    = 'usb' | 'ble' | 'both';
+    const BATT_SCENARIOS: { v: BatteryScenario; label: string }[] = [
+        { v: 'present', label: '78 %' },
+        { v: 'low',     label: '12 %' },
+        { v: 'absent',  label: 'Absente' },
+    ];
+    const CONN_SCENARIOS: { v: ConnScenario; label: string }[] = [
+        { v: 'usb',  label: 'USB' },
+        { v: 'ble',  label: 'BLE' },
+        { v: 'both', label: 'USB + BLE' },
+    ];
+
+    function setBatt(v: BatteryScenario) { devMode.battery    = v; refreshDeviceStatus(); }
+    function setConn(v: ConnScenario)    { devMode.connection = v; refreshDeviceStatus(); }
 
     async function handleConnect() {
         const ok = await connect();
@@ -75,6 +93,50 @@
         </Item.Root>
     </div>
 {:else if configState.data}
+    <!-- Live device status (battery / connection / firmware) -->
+    <div class="mb-6">
+        <DeviceStatusCard />
+    </div>
+
+    {#if devMode.active}
+        <Card class="mb-6 border-amber-500/40 bg-amber-500/5">
+            <CardContent class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <FlaskConical class="size-4 text-amber-500" />
+                    <span class="text-xs uppercase tracking-widest text-amber-500 font-semibold">
+                        Scénarios démo
+                    </span>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-muted-foreground w-20">Batterie</span>
+                        {#each BATT_SCENARIOS as s}
+                            <Button
+                                variant={devMode.battery === s.v ? 'default' : 'outline'}
+                                size="sm"
+                                onclick={() => setBatt(s.v)}
+                            >
+                                {s.label}
+                            </Button>
+                        {/each}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-muted-foreground w-20">Connexion</span>
+                        {#each CONN_SCENARIOS as s}
+                            <Button
+                                variant={devMode.connection === s.v ? 'default' : 'outline'}
+                                size="sm"
+                                onclick={() => setConn(s.v)}
+                            >
+                                {s.label}
+                            </Button>
+                        {/each}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    {/if}
+
     <!-- Info grid -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
         <InfoCard

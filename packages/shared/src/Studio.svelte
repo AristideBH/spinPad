@@ -16,6 +16,22 @@
     exportConfig,
     importConfig,
   } from "./store/config.svelte.js";
+  import { serial } from "./serial/index.svelte.js";
+  import { devMode } from "./store/devMode.svelte.js";
+  import { startPolling, stopPolling } from "./store/deviceStatus.svelte.js";
+
+  // Démarrer le polling du statut device quand connecté ou en mode démo.
+  // Le store route automatiquement vers le bon transport (serial / http / mock).
+  $effect(() => {
+    const shouldPoll =
+      serial.connected ||
+      devMode.active ||
+      import.meta.env.VITE_TRANSPORT === "http";
+    if (shouldPoll) {
+      startPolling(5000);
+      return () => stopPolling();
+    }
+  });
   import { Button } from "./components/ui/button/index.js";
   import { Separator } from "./components/ui/separator/index.js";
   import StatusCard from "./components/app/StatusCard.svelte";

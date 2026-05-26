@@ -18,6 +18,7 @@
 #include "config_store.h"
 #include "display.h"
 #include "battery.h"
+#include "ble_hid.h"
 
 #include "esp_sleep.h"
 #include "esp_timer.h"
@@ -124,9 +125,11 @@ static void power_monitor_task(void *pvParameters)
         }
 
         // ── Mise à jour batterie (toutes les 30s) ────────────
+        // Skip si batterie absente (variante USB-only).
         static int64_t last_batt_update = 0;
-        if ((now - last_batt_update) >= 30000) {
+        if (battery_is_present() && (now - last_batt_update) >= 30000) {
             battery_update();
+            ble_hid_publish_battery(battery_get_percent());
             last_batt_update = now;
         }
 

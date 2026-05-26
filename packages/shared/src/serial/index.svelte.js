@@ -230,3 +230,11 @@ export function factoryReset() {
         10000  // reset usine peut prendre plus de temps
     ));
 }
+
+export function getDeviceStatus() {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'device_status' },
+        msg => msg && msg.fw !== undefined && msg.connection !== undefined,
+        2000
+    ));
+}
