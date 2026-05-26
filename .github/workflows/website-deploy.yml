@@ -49,15 +49,13 @@ jobs:
           path: packages/website/build
 
   # Uncomment to deploy to GitHub Pages:
-  # deploy-pages:
-  #   needs: deploy
-  #   permissions:
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - id: deployment
-  #       uses: actions/deploy-pages@v4
+  deploy-pages:
+    needs: deploy
+    permissions:
+      pages: write
+      id-token: write
+    # Remove environment block to avoid invalid environment name errors in some setups
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
