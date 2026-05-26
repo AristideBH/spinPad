@@ -118,6 +118,32 @@ build: add SPIFFS partition to firmware partitions.csv
 
 ---
 
+## Licence et DCO
+
+SpinPad est distribué sous licence **PolyForm Noncommercial 1.0.0**. En contribuant, tu acceptes que ta contribution soit couverte par cette même licence.
+
+### Developer Certificate of Origin (DCO)
+
+Chaque commit doit être signé avec un `Signed-off-by`. C'est ta certification que tu as le droit de soumettre cette contribution sous la licence du projet (voir [DCO 1.1](https://developercertificate.org/)).
+
+**Comment signer :** ajoute `-s` à ta commande de commit :
+
+```bash
+git commit -s -m "feat(studio): add import/export config"
+# → ajoute automatiquement : Signed-off-by: Ton Nom <ton@email.com>
+```
+
+Pour configurer ton identité Git une fois pour toutes :
+
+```bash
+git config --global user.name "Ton Nom"
+git config --global user.email "ton@email.com"
+```
+
+> Les PRs dont les commits ne contiennent pas de `Signed-off-by` ne seront pas mergées.
+
+---
+
 ## Ajouter une nouvelle action firmware
 
 1. **Ajouter la constante dans `packages/shared/src/action-types.js`**

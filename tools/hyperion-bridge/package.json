@@ -2,6 +2,7 @@
   "name": "@spinpad/hyperion-bridge",
   "version": "0.1.0",
   "description": "Bridge between Hyperion NG and SpinPad LEDs via serial",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "main": "bridge.mjs",
   "bin": {

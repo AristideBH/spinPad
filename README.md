@@ -106,4 +106,12 @@ Voir [CONTRIBUTING.md](./CONTRIBUTING.md) pour le workflow de développement, le
 
 ## Licence
 
-À définir.
+Le logiciel SpinPad est distribué sous licence **[PolyForm Noncommercial 1.0.0](LICENSE)**.
+
+- Usage personnel, éducatif, et open-source : libre et gratuit
+- Usage commercial : interdit sans accord explicite de l'auteur
+- Toute redistribution doit inclure cette licence et l'avis de copyright
+
+Le matériel (PCB) est publié sous **CC BY-NC-SA 4.0** sur [OSHWLAB](https://oshwlab.com/aristide.bruneau/spinpad-v1).
+
+> Pour une demande de licence commerciale, ouvrir une issue ou contacter l'auteur directement.

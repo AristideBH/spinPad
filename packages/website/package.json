@@ -2,6 +2,7 @@
   "name": "@spinpad/website",
   "version": "0.1.0",
   "description": "SpinPad public website — landing, docs, Studio online, flash tool",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
