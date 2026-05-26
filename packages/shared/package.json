@@ -4,13 +4,13 @@
   "description": "Shared UI components, stores, and constants for SpinPad",
   "type": "module",
   "exports": {
-    ".": "./src/lib/index.ts",
-    "./Studio.svelte": "./src/lib/Studio.svelte",
-    "./styles": "./src/lib/styles.css",
-    "./action-types": "./src/lib/action-types.ts",
-    "./config-schema": "./src/lib/config-schema.ts",
-    "./config-migrations": "./src/lib/config-migrations.ts",
-    "./keycodes": "./src/lib/keycodes.ts"
+    ".": "./src/index.ts",
+    "./Studio.svelte": "./src/Studio.svelte",
+    "./styles": "./src/styles/index.css",
+    "./action-types": "./src/constants/action-types.ts",
+    "./config-schema": "./src/constants/config-schema.ts",
+    "./config-migrations": "./src/constants/config-migrations.ts",
+    "./keycodes": "./src/constants/keycodes.ts"
   },
   "scripts": {
     "codegen": "tsx scripts/codegen.mjs",

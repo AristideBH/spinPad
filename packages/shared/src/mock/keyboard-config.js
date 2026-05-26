@@ -1,4 +1,4 @@
-import { action, ACTION_TYPES, MEDIA_CODES } from '../action-types.js';
+import { action, ACTION_TYPES, MEDIA_CODES } from '../constants/action-types.js';
 
 // ── Action type constants ─────────────────────────────────────
 const { ACTION_TYPE_KC: TYPE_KC, ACTION_TYPE_MOD: TYPE_MOD,

@@ -5,7 +5,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 
 // Tous les composants et stores sont dans shared — studio n'a pas de src/lib propre.
-const SHARED_LIB = path.resolve('../shared/src/lib');
+const SHARED_LIB = path.resolve('../shared/src');
 const STUDIO_LIB = path.resolve('./src/lib');
 
 const norm = s => s.replace(/\\/g, '/').toLowerCase();
@@ -29,7 +29,7 @@ function resolveInShared(rel) {
 /**
  * SvelteKit pré-résout $lib/ en chemin absolu (packages/studio/src/lib/...)
  * avant que le pipeline resolveId ne s'exécute.
- * Ce plugin intercepte ces chemins absolus et les redirige vers shared/src/lib.
+ * Ce plugin intercepte ces chemins absolus et les redirige vers shared/src.
  */
 function sharedLibPlugin() {
     return {

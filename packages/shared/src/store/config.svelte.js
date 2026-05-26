@@ -16,7 +16,7 @@ import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
 import { devMode } from './devMode.svelte.js';
 import { MOCK_CONFIG } from '../mock/keyboard-config.js';
-import { parseSpinpadFile, createSpinpadFile } from '../config-migrations.js';
+import { parseSpinpadFile, createSpinpadFile } from '../constants/config-migrations.js';
 
 // ── Sélection du transport ────────────────────────────────────
 // Déterminé au build via la variable d'environnement VITE_TRANSPORT.

@@ -11,7 +11,7 @@
         action,
         ACTION_TYPES,
         MEDIA_CODES,
-    } from '../../../keycodes/index.js';
+    } from '../../../constants/keycodes/index.js';
     import { Button }   from '../../ui/button/index.js';
     import { cn }       from '../../../utils.js';
     import { Input }    from '../../ui/input/index.js';

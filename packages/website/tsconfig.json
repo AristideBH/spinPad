@@ -11,7 +11,7 @@
     "strict": true,
     "moduleResolution": "bundler",
     "paths": {
-      "$shared/*": ["../shared/src/lib/*"]
+      "$shared/*": ["../shared/src/*"]
     }
   }
 }

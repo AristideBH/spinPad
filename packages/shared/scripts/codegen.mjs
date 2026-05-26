@@ -10,7 +10,7 @@
 //  Sortie : packages/firmware/components/keymap/include/action_types.gen.h
 // ═══════════════════════════════════════════════════════════════
 
-import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/lib/action-types.ts';
+import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/constants/action-types.ts';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -38,7 +38,7 @@ function defineBlock(comment, entries, prefix = '') {
 
 const lines = [
   '// AUTO-GENERATED — do not edit manually',
-  '// Source: packages/shared/src/action-types.ts',
+  '// Source: packages/shared/src/constants/action-types.ts',
   '// Run:   pnpm codegen',
   '//',
   '// This file is committed to the repo so the firmware can compile',

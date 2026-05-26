@@ -40,9 +40,9 @@
 </script>
 
 <script lang="ts">
-  import NavMain from "./nav-main.svelte";
-  import NavSecondary from "./nav-secondary.svelte";
-  import NavUser from "./nav-user.svelte";
+  import NavMain from "./nav/nav-main.svelte";
+  import NavSecondary from "./nav/nav-secondary.svelte";
+  import NavUser from "./nav/nav-user.svelte";
   import * as Sidebar from "./sidebar/index.js";
   import CommandIcon from "@lucide/svelte/icons/command";
   import type { ComponentProps } from "svelte";

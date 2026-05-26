@@ -15,9 +15,9 @@ const config = {
             precompress: false,
         }),
 
-        // $lib → shared/src/lib (studio n'a plus de lib propre)
+        // $lib → shared/src (studio n'a plus de lib propre)
         alias: {
-            '$lib': path.resolve('../shared/src/lib'),
+            '$lib': path.resolve('../shared/src'),
         },
     },
 };

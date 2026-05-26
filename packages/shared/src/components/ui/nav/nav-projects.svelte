@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as DropdownMenu from "./dropdown-menu/index.js";
-	import * as Sidebar from "./sidebar/index.js";
-	import { useSidebar } from "./sidebar/index.js";
+	import * as DropdownMenu from "../dropdown-menu/index.js";
+	import * as Sidebar from "../sidebar/index.js";
+	import { useSidebar } from "../sidebar/index.js";
 	import EllipsisIcon from "@lucide/svelte/icons/ellipsis";
 	import FolderIcon from "@lucide/svelte/icons/folder";
 	import ShareIcon from "@lucide/svelte/icons/share";
