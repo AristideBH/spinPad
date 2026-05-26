@@ -18,7 +18,6 @@ spinpad/
 │   └── boards/
 │       └── spinpad-v1/    # Pinmap (kb_config.h), sdkconfig.board, PCB, BOM
 ├── tools/
-│   ├── flasher/           # Outil de flash WebSerial (SvelteKit, standalone)
 │   └── hyperion-bridge/   # Bridge Hyperion NG → SpinPad LEDs (Node.js)
 ├── docs/                  # Documentation projet
 └── .github/workflows/     # CI/CD (firmware release, studio deploy)
@@ -46,13 +45,6 @@ pnpm --filter @spinpad/studio build:embedded # Build pour Studio Mode (WiFi AP e
 ```bash
 pnpm --filter @spinpad/website dev      # → http://localhost:5174
 pnpm --filter @spinpad/website build
-```
-
-### Flash Tool
-
-```bash
-pnpm --filter @spinpad/flasher dev      # → http://localhost:5175
-pnpm --filter @spinpad/flasher build
 ```
 
 ### Firmware
