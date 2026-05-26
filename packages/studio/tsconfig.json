@@ -5,6 +5,7 @@
         "checkJs": false,
         "moduleResolution": "bundler",
         "strict": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
     }
 }

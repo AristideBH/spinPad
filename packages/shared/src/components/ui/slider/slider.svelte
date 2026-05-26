@@ -26,7 +26,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 		"data-vertical:min-h-40 relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col",
 		className
 	)}
-	{...restProps}
+	{...(restProps as Record<string, unknown>)}
 >
 	{#snippet children({ thumbItems })}
 		<span

@@ -149,7 +149,7 @@
         />
         <InfoCard
             label="BLE Device"
-            value={configState.data.ble?.slot_names?.[configState.data.ble?.active_slot]}
+            value={configState.data.ble?.slot_names?.[configState.data.ble?.active_slot ?? 0]}
         />
         <InfoCard
             label="Sleep timeout"

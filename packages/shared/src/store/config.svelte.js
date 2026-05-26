@@ -65,6 +65,7 @@ async function _flushSave() {
 // ─────────────────────────────────────────────────────────────
 
 class ConfigState {
+    /** @type {import('../constants/config-schema.js').FullConfig | null} */
     data                = $state(null);
     activeProfileIndex  = $state(0);
     activeLayerIndex    = $state(0);

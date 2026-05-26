@@ -21,22 +21,40 @@ export interface LayerConfig {
   keys:        number[];   // length = CONFIG_NUM_KEYS
   encoder_cw:  number;
   encoder_ccw: number;
+  name?:       string;
+  encoder?:    { cw: number; ccw: number; press?: number };
 }
 
 export interface ProfileConfig {
-  name:   string;
-  layers: LayerConfig[];  // length = CONFIG_NUM_LAYERS
+  name:          string;
+  layers:        LayerConfig[];  // length = CONFIG_NUM_LAYERS
+  layer_count?:  number;
+  combos?:       unknown[];
+  combo_count?:  number;
 }
 
 export interface FullConfig {
   active_profile: number;
   profiles:       ProfileConfig[];   // length = CONFIG_NUM_PROFILES
+  version?:       number;
+  profile_count?: number;
   display: {
-    brightness: number;  // 0–255
-    timeout_s:  number;
+    brightness:       number;  // 0–255
+    timeout_s:        number;
+    show_battery?:    boolean;
+    show_layer?:      boolean;
+    show_profile?:    boolean;
+    show_ble_status?: boolean;
   };
   ble: {
-    device_name: string;
+    device_name:  string;
+    active_slot?: number;
+    slot_names?:  string[];
+  };
+  power?: {
+    sleep_timeout_s:      number;
+    battery_critical_pct?: number;
+    battery_present?:     'auto' | 'yes' | 'no';
   };
   orientation:    number;   // 0–3 (ORIENTATION_0 … ORIENTATION_270)
   encoder: {

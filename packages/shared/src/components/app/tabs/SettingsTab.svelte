@@ -60,6 +60,7 @@
 {#if !configState.data}
     <NotConnected />
 {:else}
+    {@const data = configState.data!}
     <div class="flex flex-col gap-8">
 
         <!-- ══ BLE ══════════════════════════════════════════════════ -->
@@ -75,7 +76,7 @@
                         <div class="flex flex-col gap-1.5">
                             <Label>Nom diffusé en Bluetooth</Label>
                             <Input
-                                value={configState.data.ble?.device_name}
+                                value={data.ble?.device_name}
                                 oninput={(e: Event) => updateConfig('ble.device_name', (e.target as HTMLInputElement).value)}
                                 maxlength={31}
                             />
@@ -97,7 +98,7 @@
                                     </Label>
                                 </div>
                                 <Input
-                                    value={configState.data.ble?.slot_names?.[slotIdx]}
+                                    value={data.ble?.slot_names?.[slotIdx]}
                                     oninput={(e: Event) => updateConfig(`ble.slot_names.${slotIdx}`, (e.target as HTMLInputElement).value)}
                                 />
                             </div>
@@ -143,7 +144,7 @@
                                 <Input
                                     type="number" min={5} max={600}
                                     class="w-20 text-right"
-                                    value={configState.data.display?.timeout_s}
+                                    value={data.display?.timeout_s}
                                     onchange={(e: Event) => updateConfig('display.timeout_s', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
@@ -152,7 +153,7 @@
                         <SettingsField label="Afficher batterie">
                             {#snippet children()}
                                 <Switch
-                                    checked={configState.data.display?.show_battery}
+                                    checked={data.display?.show_battery}
                                     onCheckedChange={(v: boolean) => updateConfig('display.show_battery', v)}
                                 />
                             {/snippet}
@@ -160,7 +161,7 @@
                         <SettingsField label="Afficher layer actif">
                             {#snippet children()}
                                 <Switch
-                                    checked={configState.data.display?.show_layer}
+                                    checked={data.display?.show_layer}
                                     onCheckedChange={(v: boolean) => updateConfig('display.show_layer', v)}
                                 />
                             {/snippet}
@@ -168,7 +169,7 @@
                         <SettingsField label="Afficher profil">
                             {#snippet children()}
                                 <Switch
-                                    checked={configState.data.display?.show_profile}
+                                    checked={data.display?.show_profile}
                                     onCheckedChange={(v: boolean) => updateConfig('display.show_profile', v)}
                                 />
                             {/snippet}
@@ -176,7 +177,7 @@
                         <SettingsField label="Afficher statut BLE">
                             {#snippet children()}
                                 <Switch
-                                    checked={configState.data.display?.show_ble_status}
+                                    checked={data.display?.show_ble_status}
                                     onCheckedChange={(v: boolean) => updateConfig('display.show_ble_status', v)}
                                 />
                             {/snippet}
@@ -197,7 +198,7 @@
                                 <Input
                                     type="number" min={30} max={3600}
                                     class="w-20 text-right"
-                                    value={configState.data.power?.sleep_timeout_s}
+                                    value={data.power?.sleep_timeout_s}
                                     onchange={(e: Event) => updateConfig('power.sleep_timeout_s', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
@@ -208,7 +209,7 @@
                                 <Input
                                     type="number" min={3} max={30}
                                     class="w-20 text-right"
-                                    value={configState.data.power?.battery_critical_pct}
+                                    value={data.power?.battery_critical_pct}
                                     onchange={(e: Event) => updateConfig('power.battery_critical_pct', +(e.target as HTMLInputElement).value)}
                                 />
                             {/snippet}
@@ -227,7 +228,7 @@
                                     { v: 'yes',  label: 'Forcer présente' },
                                     { v: 'no',   label: 'Forcer absente' },
                                 ] as o}
-                                    {@const current = configState.data.power?.battery_present ?? 'auto'}
+                                    {@const current = data.power?.battery_present ?? 'auto'}
                                     <button
                                         type="button"
                                         class="rounded-lg border py-2 text-xs transition-colors
@@ -260,7 +261,7 @@
                                 <button
                                     type="button"
                                     class="flex flex-col items-center justify-center gap-1 rounded-lg border py-3 text-sm transition-colors
-                                           {configState.data.orientation === o.value
+                                           {data.orientation === o.value
                                                ? 'border-primary bg-primary/10 text-primary font-semibold'
                                                : 'border-border hover:border-primary/50 hover:bg-accent'}"
                                     onclick={() => updateConfig('orientation', o.value)}
@@ -339,7 +340,7 @@
                                     <Input
                                         type="number" min={1} max={50}
                                         class="w-20 text-right"
-                                        value={configState.data.led_extension?.count}
+                                        value={data.led_extension?.count}
                                         onchange={(e: Event) => updateConfig('led_extension.count', Math.min(50, Math.max(1, +(e.target as HTMLInputElement).value)))}
                                     />
                                 {/snippet}
@@ -376,9 +377,9 @@
                                             type="color"
                                             class="w-10 h-8 cursor-pointer rounded border border-border bg-transparent p-0.5"
                                             value={rgbToHex(
-                                                configState.data.led_extension?.r ?? 255,
-                                                configState.data.led_extension?.g ?? 255,
-                                                configState.data.led_extension?.b ?? 255
+                                                data.led_extension?.r ?? 255,
+                                                data.led_extension?.g ?? 255,
+                                                data.led_extension?.b ?? 255
                                             )}
                                             oninput={(e: Event) => {
                                                 const rgb = hexToRgb((e.target as HTMLInputElement).value);
