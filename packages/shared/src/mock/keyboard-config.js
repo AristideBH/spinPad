@@ -161,6 +161,7 @@ export const MOCK_CONFIG = {
     power: {
         sleep_timeout_s: 300,
         battery_critical_pct: 10,
+        battery_present: 'auto',
     },
 
     orientation: 0,

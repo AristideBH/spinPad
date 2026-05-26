@@ -25,3 +25,7 @@ bool ble_hid_is_connected(void);
 
 // Slot actif (0 ou 1)
 uint8_t ble_hid_get_active_slot(void);
+
+// Publier le niveau de batterie sur la caractéristique GATT BAS (0x2A19).
+// No-op si le service BAS n'est pas initialisé (variante sans batterie).
+void ble_hid_publish_battery(uint8_t percent);

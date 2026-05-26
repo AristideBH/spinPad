@@ -15,6 +15,7 @@
 #include "ble_hid.h"
 #include "kb_config.h"
 #include "config_store.h"
+#include "battery.h"
 
 // Headers NimBLE (inclus dans ESP-IDF via composant "bt")
 #include "nimble/nimble_port.h"
@@ -24,6 +25,7 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 #include "services/hid/ble_svc_hid.h"
+#include "services/bas/ble_svc_bas.h"
 
 #include "nvs_flash.h"
 #include "nvs.h"
@@ -47,6 +49,7 @@ typedef enum {
 static ble_state_t g_ble_state  = BLE_STATE_IDLE;
 static uint16_t    g_conn_handle = BLE_HS_CONN_HANDLE_NONE;  // Handle de la connexion active
 static uint8_t     g_active_slot = 0;  // 0 = PC, 1 = HA
+static bool        g_bas_inited  = false;  // BAS service initialisé (batterie présente)
 
 // Adresses des peers bondés (chargées depuis NVS)
 // ble_addr_t = adresse BLE 6 bytes + type
@@ -405,6 +408,19 @@ esp_err_t ble_hid_init(void)
     // Note : ble_svc_hid_init() est à configurer selon la version d'IDF
     // avec le descripteur HID défini plus haut
 
+    // Battery Service (BAS) — uniquement si la batterie est présente.
+    // Le host OS verra ainsi l'indicateur batterie quand pertinent,
+    // et rien du tout pour les variantes USB-only.
+    if (battery_is_present()) {
+        ble_svc_bas_init();
+        g_bas_inited = true;
+        // Pousser la valeur courante au plus tôt
+        ble_svc_bas_battery_level_set(battery_get_percent());
+        ESP_LOGI(TAG, "BAS service init (batterie %d%%)", battery_get_percent());
+    } else {
+        ESP_LOGI(TAG, "BAS service skip (batterie absente)");
+    }
+
     // Lancer la tâche NimBLE dans FreeRTOS
     nimble_port_freertos_init(nimble_host_task);
 
@@ -420,4 +436,11 @@ bool ble_hid_is_connected(void)
 uint8_t ble_hid_get_active_slot(void)
 {
     return g_active_slot;
+}
+
+void ble_hid_publish_battery(uint8_t percent)
+{
+    if (!g_bas_inited) return;
+    if (percent > 100) percent = 100;
+    ble_svc_bas_battery_level_set(percent);
 }

@@ -27,4 +27,38 @@ if(NOT DEFINED ENV{IDF_PATH} OR "$ENV{IDF_PATH}" STREQUAL "")
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
+# ── Firmware version + git build hash ────────────────────────────
+set(KB_FW_VERSION_MAJOR 1)
+set(KB_FW_VERSION_MINOR 0)
+set(KB_FW_VERSION_PATCH 0)
+set(KB_FW_VERSION "${KB_FW_VERSION_MAJOR}.${KB_FW_VERSION_MINOR}.${KB_FW_VERSION_PATCH}")
+
+# Git short hash + dirty marker (injecté dans device_status)
+execute_process(
+    COMMAND git describe --always --dirty=+ --abbrev=7
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../.."
+    OUTPUT_VARIABLE KB_FW_BUILD
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    RESULT_VARIABLE _git_result
+)
+if(NOT _git_result EQUAL 0 OR "${KB_FW_BUILD}" STREQUAL "")
+    set(KB_FW_BUILD "unknown")
+endif()
+
+if(KB_FW_BUILD MATCHES "\\+$")
+    set(KB_FW_BUILD_DIRTY 1)
+else()
+    set(KB_FW_BUILD_DIRTY 0)
+endif()
+
+message(STATUS "Firmware version : ${KB_FW_VERSION} (build ${KB_FW_BUILD}, dirty=${KB_FW_BUILD_DIRTY})")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/main/fw_version.h.in"
+    "${CMAKE_BINARY_DIR}/generated/fw_version.h"
+    @ONLY
+)
+include_directories("${CMAKE_BINARY_DIR}/generated")
+
 project(${PROJECT_NAME})

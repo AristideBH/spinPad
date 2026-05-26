@@ -214,6 +214,34 @@
                             {/snippet}
                         </SettingsField>
 
+                        <div class="mt-4">
+                            <Label class="text-sm mb-2 block">Présence de la batterie</Label>
+                            <p class="text-xs text-muted-foreground mb-2 leading-relaxed">
+                                Le SpinPad existe en variantes avec et sans batterie. <strong>Auto</strong>
+                                laisse le firmware détecter via l'ADC. <strong>Forcer présente / absente</strong>
+                                désactive la détection.
+                            </p>
+                            <div class="grid grid-cols-3 gap-2">
+                                {#each [
+                                    { v: 'auto', label: 'Auto' },
+                                    { v: 'yes',  label: 'Forcer présente' },
+                                    { v: 'no',   label: 'Forcer absente' },
+                                ] as o}
+                                    {@const current = configState.data.power?.battery_present ?? 'auto'}
+                                    <button
+                                        type="button"
+                                        class="rounded-lg border py-2 text-xs transition-colors
+                                               {current === o.v
+                                                   ? 'border-primary bg-primary/10 text-primary font-semibold'
+                                                   : 'border-border hover:border-primary/50 hover:bg-accent'}"
+                                        onclick={() => updateConfig('power.battery_present', o.v)}
+                                    >
+                                        {o.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+
                     </CardContent>
                 </Card>
 

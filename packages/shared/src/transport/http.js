@@ -46,6 +46,16 @@ export async function factoryReset() {
 }
 
 /**
+ * Récupérer le statut device live (batterie, connexion, version).
+ * @returns {Promise<import('../constants/device-status-schema.js').DeviceStatus>}
+ */
+export async function getDeviceStatus() {
+  const r = await fetch(`${BASE}/api/status`);
+  if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du chargement du statut`);
+  return r.json();
+}
+
+/**
  * Vérifier si le device est joignable via HTTP.
  * @returns {Promise<boolean>}
  */

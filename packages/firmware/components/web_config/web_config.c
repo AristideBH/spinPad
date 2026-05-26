@@ -6,6 +6,7 @@
 #include "config_store.h"
 #include "display.h"
 #include "led_engine.h"
+#include "device_status.h"
 
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -280,6 +281,24 @@ static esp_err_t handle_post_config(httpd_req_t *req)
     return ESP_OK;
 }
 
+// GET /api/status — télémétrie live (batterie, connexion, fw)
+static esp_err_t handle_get_status(httpd_req_t *req)
+{
+    reset_idle_timer();
+    set_cors_headers(req);
+
+    char buf[512];
+    size_t n = 0;
+    if (device_status_to_json(buf, sizeof(buf), &n, false) != ESP_OK) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "device_status build failed");
+        return ESP_FAIL;
+    }
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, buf, n);
+    return ESP_OK;
+}
+
 // POST /api/factory_reset
 static esp_err_t handle_factory_reset(httpd_req_t *req)
 {
@@ -361,6 +380,12 @@ static esp_err_t start_http_server(void)
         .handler = handle_factory_reset, .user_ctx = NULL
     };
     httpd_register_uri_handler(g_server, &post_reset_uri);
+
+    httpd_uri_t get_status_uri = {
+        .uri = "/api/status", .method = HTTP_GET,
+        .handler = handle_get_status, .user_ctx = NULL
+    };
+    httpd_register_uri_handler(g_server, &get_status_uri);
 
     httpd_uri_t options_uri = {
         .uri = "/*", .method = HTTP_OPTIONS,
