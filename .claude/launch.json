@@ -12,12 +12,6 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@spinpad/website", "dev"],
       "port": 5174
-    },
-    {
-      "name": "Flasher",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@spinpad/flasher", "dev"],
-      "port": 5175
     }
   ]
 }

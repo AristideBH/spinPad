@@ -19,7 +19,6 @@ spinpad/
 │       └── spinpad-v1/    # Pinmap (kb_config.h), sdkconfig.board, PCB, BOM
 ├── tools/
 │   └── hyperion-bridge/   # Bridge Hyperion NG → SpinPad LEDs (Node.js)
-├── docs/                  # Documentation projet
 └── .github/workflows/     # CI/CD (firmware release, studio deploy)
 ```
 

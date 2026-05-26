@@ -24,7 +24,7 @@ export default defineConfig({
             'Cross-Origin-Embedder-Policy': 'require-corp',
         },
         fs: {
-            allow: [path.resolve('../..')],
+            allow: [path.resolve('../shared/src')],
         },
     },
 });

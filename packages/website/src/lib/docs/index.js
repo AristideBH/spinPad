@@ -1,19 +1,19 @@
-// Glob depuis src/lib/docs/ → 4 niveaux → keyboard-firmware/docs/
-// Vite résout ce glob à build-time ; server.fs.allow autorise le répertoire parent.
-const raw = import.meta.glob('../../../../docs/**/*.md', {
+const raw = import.meta.glob('/content/docs/**/*.md', {
     query: '?raw',
     import: 'default',
     eager: true,
 });
+
+export const components = import.meta.glob('/content/docs/**/*.md', { eager: true });
 
 /**
  * @returns {{ slug: string, title: string, group: string | null }[]}
  */
 export function getDocsManifest() {
     return Object.entries(raw).map(([filePath, content]) => {
-        // "../../../../docs/keymap/layers.md" → "keymap/layers"
+        // "/content/docs/keymap/layers.md" → "keymap/layers"
         const slug  = filePath
-            .replace('../../../../docs/', '')
+            .replace('/content/docs/', '')
             .replace(/\.md$/, '');
 
         const parts = slug.split('/');
@@ -32,7 +32,7 @@ export function getDocsManifest() {
  */
 export function getDocBySlug(slug) {
     const filePath = Object.keys(raw).find(p =>
-        p.replace('../../../../docs/', '').replace(/\.md$/, '') === slug
+        p.replace('/content/docs/', '').replace(/\.md$/, '') === slug
     );
     if (!filePath) return null;
     const content = raw[filePath];
