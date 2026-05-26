@@ -1,3 +1,7 @@
+<script lang="ts">
+  import { Button } from "$shared/components/ui/button/index.js";
+</script>
+
 <svelte:head>
   <title>SpinPad — Macropad ESP32-S3</title>
   <meta
@@ -38,6 +42,7 @@
         >Flasher le firmware</a
       >
     </div>
+    <Button>Button</Button>
   </div>
 </section>
 

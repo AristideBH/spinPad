@@ -18,5 +18,9 @@ export default {
         prerender: {
             handleHttpError: 'warn',
         },
+        alias: {
+            $shared: '../shared/src',
+            $lib: '../shared/src',
+        },
     },
 };

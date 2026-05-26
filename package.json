@@ -5,7 +5,7 @@
   "description": "SpinPad — custom macropad monorepo (firmware + studio + shared)",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @spinpad/studio dev",
+    "dev": "pnpm --filter @spinpad/website dev",
     "build:studio": "pnpm --filter @spinpad/studio build",
     "build:embedded": "pnpm --filter @spinpad/studio build:embedded",
     "codegen": "pnpm --filter @spinpad/shared codegen",
