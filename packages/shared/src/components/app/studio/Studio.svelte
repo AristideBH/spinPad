@@ -4,13 +4,12 @@
   import { devMode } from "../../../store/devMode.svelte.js";
   import { Toaster } from "svelte-sonner";
   import ConnectBanner from "./ConnectBanner.svelte";
-  import DashboardTab from "./daskboard/DashboardTab.svelte";
+  import Dashboard from "./dashboard/Dashboard.svelte";
   import KeypadTab from "./keypad/KeypadTab.svelte";
 
   const isOnline = $derived(serial.connected || devMode.active);
 </script>
 
-<Toaster theme="system" richColors position="bottom-right" />
 
 <svelte:head>
   <title>{APP_CONFIG.name} — Studio</title>
@@ -18,9 +17,11 @@
 
 {#if !isOnline}
   <ConnectBanner />
-  {:else}
-  <article class="items-stretch w-full max-w-5xl px-6 py-6 mx-auto">
-    <DashboardTab />
+{:else}
+  <article class="flex flex-col items-stretch w-full max-w-5xl gap-6 px-6 py-6 mx-auto">
+    <Dashboard />
     <KeypadTab />
   </article>
-  {/if}
+{/if}
+
+<Toaster theme="system" richColors position="bottom-right" />

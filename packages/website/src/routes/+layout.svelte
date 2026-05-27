@@ -19,6 +19,7 @@
 
 <ModeWatcher defaultMode="dark" />
 
+
 <Sidebar.Provider>
   <AppSidebar />
   <Sidebar.Inset>
@@ -50,12 +51,13 @@
       <!-- Right: dynamic slot for per-page toolbar content -->
       {#if headerRight.current}
         {@const HeaderRightComponent = headerRight.current.component}
-        <div class="flex items-center w-full gap-2 ms-auto">
+        <div class="flex items-center w-full gap-2 ms-auto container/main">
           <HeaderRightComponent {...headerRight.current.props} />
         </div>
       {/if}
     </header>
-
-      {@render children()}
+    <div class="@container/main flex flex-1 flex-col  gap-4 md:gap-6">
+          {@render children()}
+    </div>
   </Sidebar.Inset>
 </Sidebar.Provider>
