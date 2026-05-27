@@ -16,6 +16,7 @@
 #include "display.h"
 #include "led_engine.h"
 #include "action_types.gen.h"
+#include <stdio.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -23,6 +24,7 @@
 #include "esp_timer.h"      // Timestamps en microsecondes
 #include "esp_log.h"
 #include <string.h>         // memset, memcpy
+#include <stdlib.h>         // malloc, free
 
 static const char *TAG = "KEYMAP";
 
@@ -50,9 +52,12 @@ static uint8_t  g_layer_stack_size = 0;
 // ── État physique des touches ─────────────────────────────────
 // Indices 0..KB_NUM_KEYS-1  : touches matrice (SW1-SW10)
 // Indices KB_NUM_KEYS..KB_TOTAL_KEYS-1 : boutons spéciaux (SW11, SW16, SW17)
-static uint8_t  g_key_state[KB_TOTAL_KEYS];       // État actuel (1=pressé, 0=relâché)
-static uint8_t  g_key_prev[KB_TOTAL_KEYS];        // État au scan précédent
-static uint8_t  g_debounce_count[KB_TOTAL_KEYS];  // Compteur anti-rebond
+static uint8_t  g_key_state[KB_TOTAL_KEYS];          // État actuel (1=pressé, 0=relâché)
+static uint8_t  g_key_prev[KB_TOTAL_KEYS];           // État au scan précédent
+static uint8_t  g_debounce_count[KB_TOTAL_KEYS];     // Compteur anti-rebond
+static uint8_t  g_debounce_timeout[KB_TOTAL_KEYS];  // Scans totaux d'oscillation (force-accept)
+
+#define KB_DEBOUNCE_TIMEOUT_SCANS 20  // Force-accept après 20 scans (~100ms) d'oscillation
 
 // Timestamp (µs) du moment où chaque touche a été pressée
 static int64_t  g_key_press_time[KB_TOTAL_KEYS];
@@ -81,6 +86,11 @@ static int64_t       g_combo_start_time = 0;   // Quand le premier appui du comb
 static int64_t g_sw16_press_time = 0;
 static int64_t g_sw17_press_time = 0;
 static bool    g_pairing_triggered = false;
+
+// ── Mode moniteur (training) ──────────────────────────────────
+static bool    g_monitor_enabled  = false;
+static int64_t g_monitor_start_ms = 0;
+#define MONITOR_AUTO_OFF_MS (5 * 60 * 1000)  // 5 minutes
 
 // ─────────────────────────────────────────────────────────────
 //  FONCTIONS PRIVÉES — MATRICE GPIO
@@ -280,6 +290,13 @@ static void send_action(uint16_t action, bool pressed)
         }
         break;
 
+    case ACTION_TYPE_MACRO:
+        // Lancer la macro en arrière-plan à l'appui uniquement
+        if (pressed && value < MACRO_MAX_PER_PROFILE) {
+            keymap_play_macro((uint8_t)value);
+        }
+        break;
+
     case ACTION_TYPE_SPECIAL:
         // Actions firmware spéciales
         if (pressed) {
@@ -400,10 +417,64 @@ esp_err_t keymap_init(void)
     return ESP_OK;
 }
 
+// Valide l'état d'une touche après anti-rebond asymétrique avec timeout.
+// Retourne true si l'état a changé et doit être appliqué.
+static bool _debounce_update(int key_idx, int raw, int64_t now,
+                             uint8_t press_scans, uint8_t release_scans)
+{
+    if (raw == g_key_state[key_idx]) {
+        // Signal stable → réinitialiser les compteurs
+        g_debounce_count[key_idx]   = 0;
+        g_debounce_timeout[key_idx] = 0;
+        return false;
+    }
+
+    g_debounce_count[key_idx]++;
+    g_debounce_timeout[key_idx]++;
+
+    uint8_t threshold = raw ? press_scans : release_scans;
+
+    bool timeout_force = (g_debounce_timeout[key_idx] >= KB_DEBOUNCE_TIMEOUT_SCANS);
+    bool threshold_met = (g_debounce_count[key_idx]   >= threshold);
+
+    if (threshold_met || timeout_force) {
+        if (timeout_force && !threshold_met) {
+            ESP_LOGD("KEYMAP", "Debounce timeout forcé key=%d raw=%d", key_idx, raw);
+        }
+        g_debounce_count[key_idx]   = 0;
+        g_debounce_timeout[key_idx] = 0;
+        g_key_prev[key_idx]         = g_key_state[key_idx];
+        g_key_state[key_idx]        = raw;
+        return true;
+    }
+    return false;
+}
+
+static void _monitor_emit(int key_idx, int state, int64_t now)
+{
+    if (!g_monitor_enabled) return;
+    char buf[96];
+    uint16_t act = (key_idx < KB_NUM_KEYS) ? g_keymap[g_active_profile][g_layer_stack[g_layer_stack_size - 1]][key_idx] : 0;
+    snprintf(buf, sizeof(buf),
+             "{\"event\":\"key\",\"idx\":%d,\"state\":\"%s\",\"layer\":%d,\"action\":%u,\"ts_ms\":%lld}\n",
+             key_idx, state ? "down" : "up",
+             (int)g_layer_stack[g_layer_stack_size - 1], (unsigned)act, (long long)now);
+    usb_hid_cdc_send(buf);
+}
+
 // Scan de la matrice : met à jour g_key_state[0..KB_NUM_KEYS-1]
 void keymap_scan_matrix(void)
 {
     int64_t now = esp_timer_get_time() / 1000;  // µs → ms
+    const kb_config_t *cfg = config_store_get();
+    uint8_t press_scans   = cfg->power.debounce_press_scans   ? cfg->power.debounce_press_scans   : 3;
+    uint8_t release_scans = cfg->power.debounce_release_scans ? cfg->power.debounce_release_scans : 5;
+
+    // Auto-disable monitor après 5 minutes
+    if (g_monitor_enabled && (now - g_monitor_start_ms) > MONITOR_AUTO_OFF_MS) {
+        g_monitor_enabled = false;
+        ESP_LOGI(TAG, "Mode moniteur désactivé (timeout)");
+    }
 
     for (int r = 0; r < KB_MATRIX_ROWS; r++) {
         gpio_set_level(KB_ROW_PINS[r], 0);
@@ -415,19 +486,12 @@ void keymap_scan_matrix(void)
             int key_idx = KB_MATRIX_TO_KEY[r][c];
             int raw = gpio_get_level(KB_COL_PINS[c]) == 0 ? 1 : 0;
 
-            if (raw != g_key_state[key_idx]) {
-                g_debounce_count[key_idx]++;
-                if (g_debounce_count[key_idx] >= KB_DEBOUNCE_SCANS) {
-                    g_debounce_count[key_idx] = 0;
-                    g_key_prev[key_idx]  = g_key_state[key_idx];
-                    g_key_state[key_idx] = raw;
-                    if (raw) {
-                        g_key_press_time[key_idx] = now;
-                        g_has_activity = true;
-                    }
+            if (_debounce_update(key_idx, raw, now, press_scans, release_scans)) {
+                if (raw) {
+                    g_key_press_time[key_idx] = now;
+                    g_has_activity = true;
                 }
-            } else {
-                g_debounce_count[key_idx] = 0;
+                _monitor_emit(key_idx, raw, now);
             }
         }
 
@@ -441,22 +505,96 @@ void keymap_scan_matrix(void)
         int ki  = special_idx[i];
         int raw = gpio_get_level(special_pins[i]) == SW_BTN_ACTIVE_LEVEL ? 1 : 0;
 
-        if (raw != g_key_state[ki]) {
-            g_debounce_count[ki]++;
-            if (g_debounce_count[ki] >= KB_DEBOUNCE_SCANS) {
-                g_debounce_count[ki] = 0;
-                g_key_prev[ki]  = g_key_state[ki];
-                g_key_state[ki] = raw;
-                if (raw) {
-                    g_key_press_time[ki] = now;
-                    if (ki == SW16) g_sw16_press_time = now;
-                    if (ki == SW17) g_sw17_press_time = now;
-                    g_has_activity = true;
-                }
+        if (_debounce_update(ki, raw, now, press_scans, release_scans)) {
+            if (raw) {
+                g_key_press_time[ki] = now;
+                if (ki == SW16) g_sw16_press_time = now;
+                if (ki == SW17) g_sw17_press_time = now;
+                g_has_activity = true;
             }
-        } else {
-            g_debounce_count[ki] = 0;
         }
+    }
+}
+
+void keymap_set_monitor(bool enable)
+{
+    g_monitor_enabled = enable;
+    if (enable) {
+        g_monitor_start_ms = esp_timer_get_time() / 1000;
+        ESP_LOGI(TAG, "Mode moniteur activé");
+    } else {
+        ESP_LOGI(TAG, "Mode moniteur désactivé");
+    }
+}
+
+bool keymap_get_monitor(void) { return g_monitor_enabled; }
+
+// ─────────────────────────────────────────────────────────────
+//  MACRO PLAYBACK
+//  Chaque appui sur une touche macro lance une tâche éphémère
+//  qui joue les étapes dans l'ordre, puis se termine.
+// ─────────────────────────────────────────────────────────────
+typedef struct { uint8_t macro_idx; uint8_t profile; } MacroTaskArg;
+
+static void macro_task(void *pvArg)
+{
+    MacroTaskArg *arg = (MacroTaskArg *)pvArg;
+    const kb_config_t *cfg = config_store_get();
+    const kb_profile_t *profile = &cfg->profiles[arg->profile];
+
+    if (arg->macro_idx >= profile->macro_count) goto done;
+    const kb_macro_t *macro = &profile->macros[arg->macro_idx];
+
+    for (int si = 0; si < macro->step_count; si++) {
+        const kb_macro_step_t *step = &macro->steps[si];
+        switch (step->type) {
+        case MACRO_STEP_KEY_DOWN:
+            usb_hid_key_press(step->keycode_or_delay, 0);
+            ble_hid_key_press(step->keycode_or_delay, 0);
+            break;
+        case MACRO_STEP_KEY_UP:
+            usb_hid_key_release(step->keycode_or_delay);
+            ble_hid_key_release(step->keycode_or_delay);
+            break;
+        case MACRO_STEP_DELAY_MS:
+            if (step->keycode_or_delay > 0) {
+                vTaskDelay(pdMS_TO_TICKS(step->keycode_or_delay));
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+done:
+    free(pvArg);
+    vTaskDelete(NULL);
+}
+
+void keymap_play_macro(uint8_t macro_idx)
+{
+    const kb_config_t *cfg = config_store_get();
+    uint8_t profile = cfg->active_profile;
+
+    if (macro_idx >= cfg->profiles[profile].macro_count) {
+        ESP_LOGW(TAG, "Macro %d inexistante (profil %d)", macro_idx, profile);
+        return;
+    }
+
+    MacroTaskArg *arg = malloc(sizeof(MacroTaskArg));
+    if (!arg) {
+        ESP_LOGE(TAG, "OOM — macro ignorée");
+        return;
+    }
+    arg->macro_idx = macro_idx;
+    arg->profile   = profile;
+
+    // Tâche éphémère, priorité 4 (légèrement au-dessus du scan)
+    // Stack 1024 mots = 4KB, suffisant pour des appels HID simples
+    BaseType_t rc = xTaskCreate(macro_task, "macro", 1024, arg, 4, NULL);
+    if (rc != pdPASS) {
+        free(arg);
+        ESP_LOGE(TAG, "xTaskCreate macro échoué");
     }
 }
 

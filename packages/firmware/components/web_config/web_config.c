@@ -464,6 +464,7 @@ esp_err_t web_config_start(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_config));
     ESP_ERROR_CHECK(esp_wifi_start());
+    esp_wifi_set_ps(WIFI_PS_MIN_MODEM);  // Économie énergie entre les requêtes HTTP
 
     ESP_LOGI(TAG, "WiFi AP démarré — SSID: %s, IP: %s",
              WEB_CONFIG_AP_SSID, WEB_CONFIG_AP_IP);

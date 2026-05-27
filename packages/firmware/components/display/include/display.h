@@ -29,3 +29,10 @@ void display_show_status(void);
  * À appeler après display_init() et à chaque changement de config.
  */
 void display_apply_orientation(kb_orientation_t orient);
+
+/**
+ * Synchroniser l'horloge du widget Clock.
+ * unix_ts = timestamp Unix courant (secondes depuis epoch).
+ * Le firmware calcule l'heure affichée à partir de ce point + l'uptime.
+ */
+void display_set_clock(uint32_t unix_ts);

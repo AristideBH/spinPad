@@ -35,6 +35,7 @@
   import { Button } from "./components/ui/button/index.js";
   import { Separator } from "./components/ui/separator/index.js";
   import StatusCard from "./components/app/StatusCard.svelte";
+  import { Toaster, toast } from "svelte-sonner";
   import {
     Save,
     Undo2,
@@ -59,7 +60,7 @@
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[import]", msg);
-      alert(`Import échoué : ${msg}`);
+      toast.error("Import échoué", { description: msg });
     }
     fileInput.value = "";
   }
@@ -69,6 +70,8 @@
     "dashboard",
   );
 </script>
+
+<Toaster richColors position="bottom-right" />
 
 <svelte:head>
   <title>{APP_CONFIG.name} — Studio</title>

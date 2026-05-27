@@ -19,6 +19,7 @@
 #include "display.h"
 #include "battery.h"
 #include "ble_hid.h"
+#include "led_engine.h"
 
 #include "esp_sleep.h"
 #include "esp_timer.h"
@@ -37,6 +38,10 @@ static const char *TAG = "POWER";
 
 static int64_t g_last_activity_ms = 0;   // Timestamp de la dernière activité
 static bool    g_display_sleeping = false;  // Écran éteint ?
+static bool    g_led_dimmed       = false;  // LEDs réduites à 30% pour économie
+static bool    g_ble_idle         = false;  // BLE en mode basse fréquence
+
+#define BLE_IDLE_INTERVAL_MS (60 * 1000)
 
 // Tâche FreeRTOS dédiée au monitoring d'inactivité
 static TaskHandle_t g_power_task_handle = NULL;
@@ -109,6 +114,21 @@ static void power_monitor_task(void *pvParameters)
         const kb_config_t *cfg = config_store_get();
         uint32_t sleep_timeout_ms   = cfg->power.sleep_timeout_s * 1000;
         uint32_t display_timeout_ms = cfg->display.timeout_s * 1000;
+
+        // ── Dim LEDs à 50% du timeout écran ─────────────────
+        uint32_t led_dim_ms = display_timeout_ms / 2;
+        if (!g_led_dimmed && idle_ms >= led_dim_ms) {
+            led_engine_set_brightness_global(77);  // ~30% de 255
+            g_led_dimmed = true;
+            ESP_LOGD(TAG, "LEDs réduites (idle %lld ms)", idle_ms);
+        }
+
+        // ── BLE idle (60s) ──────────────────────────────────
+        if (!g_ble_idle && idle_ms >= BLE_IDLE_INTERVAL_MS) {
+            ble_hid_set_idle_conn_interval(true);
+            g_ble_idle = true;
+            ESP_LOGD(TAG, "BLE interval élargi (idle %lld ms)", idle_ms);
+        }
 
         // ── Timeout écran ────────────────────────────────────
         if (!g_display_sleeping && idle_ms >= display_timeout_ms) {
@@ -189,5 +209,18 @@ void power_mgmt_reset_idle_timer(void)
     if (g_display_sleeping) {
         display_set_sleep(false);
         g_display_sleeping = false;
+    }
+
+    // Si les LEDs étaient en mode dim, les restaurer à la luminosité config
+    if (g_led_dimmed) {
+        const kb_config_t *cfg = config_store_get();
+        led_engine_set_brightness_global(cfg ? cfg->display.brightness : 200);
+        g_led_dimmed = false;
+    }
+
+    // Restaurer l'intervalle BLE actif
+    if (g_ble_idle) {
+        ble_hid_set_idle_conn_interval(false);
+        g_ble_idle = false;
     }
 }

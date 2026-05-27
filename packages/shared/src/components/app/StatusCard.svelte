@@ -35,13 +35,17 @@
     <div
       class="size-1.5 mr-0.5 rounded-full transition-colors"
       class:bg-emerald-500={serial.connected && !configState.loadError}
-      class:bg-amber-400={!serial.connected && !devMode.active}
+      class:bg-amber-400={!serial.connected && !devMode.active && !serial.reconnecting}
+      class:animate-pulse={serial.reconnecting}
+      class:bg-yellow-400={serial.reconnecting}
       class:bg-destructive={configState.loadError && !devMode.active}
       class:bg-blue-400={devMode.active}
     ></div>
 
     {#if devMode.active}
       Démo
+    {:else if serial.reconnecting}
+      Reconnexion {serial.reconnectAttempt}/{15}…
     {:else if configState.loadError}
       Erreur
     {:else}
