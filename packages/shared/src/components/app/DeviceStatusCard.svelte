@@ -79,15 +79,15 @@
         {#if !data}
             <p class="text-sm text-muted-foreground">Statut device indisponible.</p>
             {#if deviceStatus.error}
-                <p class="text-xs text-destructive mt-1">{deviceStatus.error}</p>
+                <p class="mt-1 text-xs text-destructive">{deviceStatus.error}</p>
             {/if}
         {:else}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
 
                 <!-- ══ Batterie ══════════════════════════════════ -->
                 <section>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs text-muted-foreground uppercase tracking-widest">Batterie</span>
+                        <span class="text-xs tracking-widest uppercase text-muted-foreground">Batterie</span>
                         <BatteryIcon class="size-4 text-muted-foreground" />
                     </div>
 
@@ -103,7 +103,7 @@
                             <span class="text-2xl font-bold tabular-nums">{batteryPct}<span class="text-sm text-muted-foreground">%</span></span>
                             <span class="text-xs text-muted-foreground tabular-nums">{(batteryMv / 1000).toFixed(2)}V</span>
                         </div>
-                        <div class="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div class="w-full h-2 overflow-hidden rounded-full bg-muted">
                             <div
                                 class="h-full rounded-full transition-all duration-500 {batteryColorClass}"
                                 style="width: {batteryPct}%"
@@ -117,7 +117,7 @@
 
                 <!-- ══ Connexion ═════════════════════════════════ -->
                 <section>
-                    <p class="text-xs text-muted-foreground uppercase tracking-widest mb-2">Connexion</p>
+                    <p class="mb-2 text-xs tracking-widest uppercase text-muted-foreground">Connexion</p>
                     <div class="flex flex-wrap gap-2">
                         <Badge variant={usbOn ? 'default' : 'outline'} class="gap-1">
                             <Usb class="size-3" />
@@ -137,7 +137,7 @@
 
                 <!-- ══ Firmware ══════════════════════════════════ -->
                 <section>
-                    <p class="text-xs text-muted-foreground uppercase tracking-widest mb-2">Firmware</p>
+                    <p class="mb-2 text-xs tracking-widest uppercase text-muted-foreground">Firmware</p>
                     <div class="flex items-center gap-1.5 mb-1">
                         <Cpu class="size-3.5 text-muted-foreground" />
                         <span class="text-base font-semibold tabular-nums">v{fwVersion}</span>

@@ -53,8 +53,4 @@
     {/if}
   {/if}
 </Badge>
-<div class="flex items-center gap-1.5 text-xs text-muted-foreground"></div>
 
-<div class="flex flex-col items-center gap-2">
-  <div class="flex w-full flex-wrap gap-2"></div>
-</div>

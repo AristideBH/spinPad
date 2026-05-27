@@ -17,7 +17,7 @@ const config = {
 
         // $lib → shared/src (studio n'a plus de lib propre)
         alias: {
-            $lib: path.resolve('../shared/src'),
+            // $lib: 'src/lib',
             $shared: path.resolve('../shared/src'),
         },
     },

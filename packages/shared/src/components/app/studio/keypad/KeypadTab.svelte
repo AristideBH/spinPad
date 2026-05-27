@@ -650,27 +650,25 @@
         {#if filteredKeycodes}
           <div class="flex flex-wrap gap-1.5">
             {#each filteredKeycodes as kc}
-              <button
-                class="px-2.5 py-1 rounded text-xs font-semibold border cursor-pointer transition-all hover:border-primary {CATEGORY_COLORS[
+              <Button
+                class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[
                   kc.category
                 ] ?? 'bg-card'}"
-                onclick={() => selectKeycode(kc)}>{kc.label}</button
+                onclick={() => selectKeycode(kc)}>{kc.label}</Button
               >
             {/each}
           </div>
         {:else}
           {#each Object.entries(KEYCODES) as [cat, keys]}
             <div class="mb-4">
-              <p class="text-[10px] uppercase tracking-widest text-white mb-2">
-                {cat}
-              </p>
+            <Label class="mb-2 text-xs uppercase">{cat}</Label>
               <div class="flex flex-wrap gap-1.5">
                 {#each keys as kc}
-                  <button
-                    class="px-2.5 py-1 rounded text-xs font-semibold border cursor-pointer transition-all hover:border-primary {CATEGORY_COLORS[
+                  <Button
+                    class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[
                       kc.category
                     ] ?? 'bg-card'}"
-                    onclick={() => selectKeycode(kc)}>{kc.label}</button
+                    onclick={() => selectKeycode(kc)}>{kc.label}</Button
                   >
                 {/each}
               </div>

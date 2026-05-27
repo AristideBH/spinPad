@@ -22,9 +22,9 @@
 <Sidebar.Provider>
   <AppSidebar />
   <Sidebar.Inset>
-    <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border/50 px-4">
+    <header class="sticky top-0 z-10 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl">
       <!-- Left: trigger + breadcrumbs -->
-      <div class="flex items-center gap-2 min-w-0">
+      <div class="flex items-center min-w-0 gap-2">
         <Sidebar.Trigger class="-ms-1" />
         {#if breadcrumbs.length > 0}
           <Separator orientation="vertical" class="me-2 data-[orientation=vertical]:h-4" />
@@ -50,14 +50,12 @@
       <!-- Right: dynamic slot for per-page toolbar content -->
       {#if headerRight.current}
         {@const HeaderRightComponent = headerRight.current.component}
-        <div class="ms-auto flex items-center gap-2">
+        <div class="flex items-center w-full gap-2 ms-auto">
           <HeaderRightComponent {...headerRight.current.props} />
         </div>
       {/if}
     </header>
 
-    <main class="flex flex-col flex-1">
       {@render children()}
-    </main>
   </Sidebar.Inset>
 </Sidebar.Provider>

@@ -12,8 +12,14 @@ export type BreadcrumbItem = {
 
 export const navTree: NavItem[] = [
 	{ title: 'Accueil', url: '/' },
-	{ title: 'Studio', url: '/studio/' },
-	{ title: 'Flash firmware', url: '/flash/' },
+	{
+		title: 'Tools',
+		url: '/studio/',
+		children: [
+			{ title: 'Studio', url: '/studio/' },
+			{ title: 'Flasher', url: '/flash/' },
+		]
+	},
 	{
 		title: 'Documentation',
 		url: '/docs/',

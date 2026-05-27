@@ -3,7 +3,7 @@
   import * as Sidebar from "$shared/components/ui/sidebar/index.js";
   import { page } from "$app/stores";
   import HomeIcon from "@lucide/svelte/icons/house";
-  import MonitorIcon from "@lucide/svelte/icons/monitor";
+  import Palette from "@lucide/svelte/icons/Palette";
   import ZapIcon from "@lucide/svelte/icons/zap";
   import BookOpenIcon from "@lucide/svelte/icons/book-open";
   import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
@@ -11,6 +11,7 @@
   import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import type { ComponentProps } from "svelte";
   import { navTree } from "$lib/nav.js";
+  import { WrenchIcon } from "@lucide/svelte";
 
   let {
     ref = $bindable(null),
@@ -19,8 +20,11 @@
 
   const docsItem = navTree.find((n) => n.url === "/docs/")!;
   const docsChildren = docsItem.children ?? [];
+  const toolsItem = navTree.find((n) => n.url === "/studio/") || navTree.find((n) => n.url === "/flash/")!;
+  const toolsChildren = toolsItem.children ?? [];
 
   let docsOpen = $derived($page.url.pathname.startsWith("/docs"));
+  let toolsOpen = $derived($page.url.pathname.startsWith("/studio") || $page.url.pathname.startsWith("/flash"));
   let isHome = $derived($page.url.pathname === "/");
   let isStudio = $derived($page.url.pathname.startsWith("/studio"));
   let isFlash = $derived($page.url.pathname.startsWith("/flash"));
@@ -63,10 +67,10 @@
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
 
-        <Sidebar.MenuItem>
+        <!-- <Sidebar.MenuItem>
           <Sidebar.MenuButton isActive={isStudio} tooltipContent="Studio">
             {#snippet child({ props })}
-              <a href="/studio/" {...props}><MonitorIcon /><span>Studio</span></a>
+              <a href="/studio/" {...props}><Palette /><span>Studio</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
@@ -77,8 +81,42 @@
               <a href="/flash/" {...props}><ZapIcon /><span>Flash firmware</span></a>
             {/snippet}
           </Sidebar.MenuButton>
-        </Sidebar.MenuItem>
+        </Sidebar.MenuItem> -->
 
+        <!-- Tools (collapsible) -->
+        <Collapsible.Root open={toolsOpen}>
+          {#snippet child({ props })}
+            <Sidebar.MenuItem {...props}>
+              <Sidebar.MenuButton tooltipContent="Tools">
+                {#snippet child({ props: btnProps })}
+                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Tools</span></a>
+                {/snippet}
+              </Sidebar.MenuButton>
+              <Collapsible.Trigger>
+                {#snippet child({ props: trigProps })}
+                  <Sidebar.MenuAction {...trigProps} class="data-[state=open]:rotate-90">
+                    <ChevronRightIcon />
+                    <span class="sr-only">Ouvrir/Fermer</span>
+                  </Sidebar.MenuAction>
+                {/snippet}
+              </Collapsible.Trigger>
+              <Collapsible.Content>
+                <Sidebar.MenuSub>
+                  {#each toolsChildren as item (item.title)}
+                    <Sidebar.MenuSubItem>
+                      <Sidebar.MenuSubButton
+                        href={item.url}
+                        isActive={$page.url.pathname === item.url}
+                      >
+                        {item.title}
+                      </Sidebar.MenuSubButton>
+                    </Sidebar.MenuSubItem>
+                  {/each}
+                </Sidebar.MenuSub>
+              </Collapsible.Content>
+            </Sidebar.MenuItem>
+          {/snippet}
+        </Collapsible.Root>
         <!-- Documentation (collapsible) -->
         <Collapsible.Root open={docsOpen}>
           {#snippet child({ props })}

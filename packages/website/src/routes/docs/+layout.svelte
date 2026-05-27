@@ -13,12 +13,12 @@
   }, {});
 </script>
 
-<div class="max-w-5xl mx-auto px-4 py-10 flex gap-10">
+<div class="flex max-w-5xl gap-10 px-4 py-10 mx-auto">
   <nav class="hidden md:block w-52 shrink-0">
-    <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Docs</p>
+    <p class="mb-4 text-xs font-semibold tracking-widest uppercase text-muted-foreground">Docs</p>
     {#each Object.entries(groups) as [group, items]}
       {#if group !== '__root__'}
-        <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground mt-5 mb-2">{group}</p>
+        <p class="mt-5 mb-2 text-xs font-semibold tracking-widest uppercase text-muted-foreground">{group}</p>
       {/if}
       <ul class="space-y-1">
         {#each items as doc}
@@ -38,7 +38,7 @@
     {/each}
   </nav>
 
-  <article class="prose prose-invert max-w-none flex-1 min-w-0">
+  <article class="flex-1 min-w-0 prose prose-invert max-w-none">
     {@render children()}
   </article>
 </div>

@@ -7,14 +7,13 @@
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLSpanElement>> = $props();
 </script>
 
-<kbd
+<span
 	bind:this={ref}
-	data-slot="kbd-group"
-	class={cn("gap-1 inline-flex items-center", className)}
+	class={cn("text-muted-foreground gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 flex items-center [&_svg]:pointer-events-none", className)}
 	{...restProps}
 >
 	{@render children?.()}
-</kbd>
+</span>
