@@ -18,6 +18,8 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"          // Stockage clé-valeur en flash
 #include "esp_log.h"            // Système de logs ESP-IDF
+#include "esp_task_wdt.h"       // Task watchdog
+#include "esp_heap_caps.h"      // Heap monitoring
 
 // Nos composants
 #include "kb_config.h"
@@ -41,11 +43,19 @@ static const char *TAG = "MAIN";
 //  Une "tâche" FreeRTOS = un thread qui tourne en boucle.
 //  vTaskDelay(pdMS_TO_TICKS(5)) = attendre 5ms entre chaque scan.
 // ─────────────────────────────────────────────────────────────
+#define HEAP_WARN_THRESHOLD 8192   // Log avertissement si heap libre < 8 Ko
+#define HEAP_CHECK_EVERY_N  200    // Vérifier le heap toutes les N itérations (~1s)
+
 static void keyboard_scan_task(void *pvParameters)
 {
     ESP_LOGI(TAG, "Tâche scan clavier démarrée");
+    esp_task_wdt_add(NULL);   // Enregistre cette tâche auprès du TWDT
+
+    uint32_t heap_check_counter = 0;
 
     while (1) {
+        esp_task_wdt_reset();  // Nourrit le watchdog — doit arriver < 10s
+
         // 1. Scanner la matrice physique → détecter les touches pressées
         keymap_scan_matrix();
 
@@ -63,6 +73,15 @@ static void keyboard_scan_task(void *pvParameters)
 
         // 5. Tick LED engine (met à jour les effets animés + refresh WS2812)
         led_engine_tick();
+
+        // 6. Surveillance heap (périodique, pas à chaque tick)
+        if (++heap_check_counter >= HEAP_CHECK_EVERY_N) {
+            heap_check_counter = 0;
+            size_t free_heap = esp_get_free_heap_size();
+            if (free_heap < HEAP_WARN_THRESHOLD) {
+                ESP_LOGW(TAG, "Heap bas : %u octets libres", (unsigned)free_heap);
+            }
+        }
 
         // Pause de 5ms avant le prochain scan
         // pdMS_TO_TICKS convertit des millisecondes en "ticks" FreeRTOS

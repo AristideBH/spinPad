@@ -15,7 +15,9 @@
   },
   "scripts": {
     "codegen": "tsx scripts/codegen.mjs",
-    "build": "tsx scripts/codegen.mjs"
+    "build": "tsx scripts/codegen.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "svelte": ">=5.0.0"
@@ -27,11 +29,13 @@
     "clsx": "^2.1.1",
     "mode-watcher": "^1.1.0",
     "runed": "^0.37.1",
+    "svelte-sonner": "^1.1.1",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
     "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
   }
 }

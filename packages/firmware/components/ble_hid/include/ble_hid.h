@@ -29,3 +29,7 @@ uint8_t ble_hid_get_active_slot(void);
 // Publier le niveau de batterie sur la caractéristique GATT BAS (0x2A19).
 // No-op si le service BAS n'est pas initialisé (variante sans batterie).
 void ble_hid_publish_battery(uint8_t percent);
+
+// Ajuster l'intervalle de connexion BLE selon l'état d'inactivité.
+// idle=true → ~200ms (économie radio), idle=false → ~15ms (réactif)
+void ble_hid_set_idle_conn_interval(bool idle);

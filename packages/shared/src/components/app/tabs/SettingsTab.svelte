@@ -1,14 +1,20 @@
 <script lang="ts">
-    import { configState, updateConfig } from '../../../store/config.svelte.js';
+    import { configState, updateConfig }           from '../../../store/config.svelte.js';
+    import { serial, setTime }                     from '../../../serial/index.svelte.js';
     import { Card, CardContent,
-             CardHeader, CardTitle }     from '../../ui/card/index.js';
-    import { Input }                     from '../../ui/input/index.js';
-    import { Slider }                    from '../../ui/slider/index.js';
-    import { Switch }                    from '../../ui/switch/index.js';
-    import { Label }                     from '../../ui/label/index.js';
-    import { Badge }                     from '../../ui/badge/index.js';
-    import SettingsField                 from '../SettingsField.svelte';
-    import NotConnected                  from '../NotConnected.svelte';
+             CardHeader, CardTitle }               from '../../ui/card/index.js';
+    import { Input }                               from '../../ui/input/index.js';
+    import { Slider }                              from '../../ui/slider/index.js';
+    import { Switch }                              from '../../ui/switch/index.js';
+    import { Label }                               from '../../ui/label/index.js';
+    import { Badge }                               from '../../ui/badge/index.js';
+    import { Button }                              from '../../ui/button/index.js';
+    import SettingsField                           from '../SettingsField.svelte';
+    import NotConnected                            from '../NotConnected.svelte';
+    import { WIDGET_TYPE, WIDGET_LABELS,
+             DISPLAY_MAX_WIDGETS,
+             defaultWidgets }                      from '../../../constants/config-schema.js';
+    import type { WidgetConfig, WidgetType }       from '../../../constants/config-schema.js';
 
     // ── Orientation ───────────────────────────────────────────────
     const ORIENTATIONS = [
@@ -54,6 +60,56 @@
 
     function rgbToHex(r: number, g: number, b: number) {
         return '#' + [r, g, b].map(v => v?.toString(16).padStart(2, '0') ?? '00').join('');
+    }
+
+    // ── Widget system ─────────────────────────────────────────────
+    const WIDGET_TYPE_OPTIONS = Object.entries(WIDGET_LABELS)
+        .filter(([k]) => Number(k) !== WIDGET_TYPE.NONE)
+        .map(([k, label]) => ({ value: Number(k) as WidgetType, label }));
+
+    // Reactive alias so widgets array is always fresh from the store
+    const widgets = $derived<WidgetConfig[]>(
+        (configState.data?.display?.widgets ?? defaultWidgets()) as WidgetConfig[]
+    );
+
+    function updateWidget(idx: number, patch: Partial<WidgetConfig>) {
+        const updated = widgets.map((w, i) => i === idx ? { ...w, ...patch } : w);
+        updateConfig('display.widgets', updated);
+    }
+
+    function addWidget() {
+        if (widgets.length >= DISPLAY_MAX_WIDGETS) return;
+        const updated = [
+            ...widgets,
+            { type: WIDGET_TYPE.CUSTOM_TEXT as WidgetType, enabled: true, row: widgets.length, col: 0, custom_text: 'Hello' },
+        ];
+        updateConfig('display.widgets', updated);
+    }
+
+    function removeWidget(idx: number) {
+        const updated = widgets.filter((_, i) => i !== idx);
+        updateConfig('display.widgets', updated);
+    }
+
+    // SVG preview helpers — 72×40 logical px, displayed at 3× scale
+    const SVG_SCALE = 3;
+    const SVG_W = 72 * SVG_SCALE;
+    const SVG_H = 40 * SVG_SCALE;
+
+    function widgetLabel(w: WidgetConfig): string {
+        if (w.type === WIDGET_TYPE.CUSTOM_TEXT) return w.custom_text?.slice(0, 12) || '…';
+        return WIDGET_LABELS[w.type] ?? '?';
+    }
+
+    // Approximate pixel width of label in the font (5px/char + 1px space = 6px)
+    function widgetPreviewWidth(w: WidgetConfig): number {
+        const chars = Math.min(widgetLabel(w).length, 12);
+        const iconPx = (w.type === WIDGET_TYPE.BLE_STATUS || w.type === WIDGET_TYPE.BATTERY) ? 10 : 0;
+        return (iconPx + chars * 6) * SVG_SCALE;
+    }
+
+    function syncClock() {
+        setTime(Math.floor(Date.now() / 1000));
     }
 </script>
 
@@ -150,38 +206,112 @@
                             {/snippet}
                         </SettingsField>
 
-                        <SettingsField label="Afficher batterie">
-                            {#snippet children()}
-                                <Switch
-                                    checked={data.display?.show_battery}
-                                    onCheckedChange={(v: boolean) => updateConfig('display.show_battery', v)}
-                                />
-                            {/snippet}
-                        </SettingsField>
-                        <SettingsField label="Afficher layer actif">
-                            {#snippet children()}
-                                <Switch
-                                    checked={data.display?.show_layer}
-                                    onCheckedChange={(v: boolean) => updateConfig('display.show_layer', v)}
-                                />
-                            {/snippet}
-                        </SettingsField>
-                        <SettingsField label="Afficher profil">
-                            {#snippet children()}
-                                <Switch
-                                    checked={data.display?.show_profile}
-                                    onCheckedChange={(v: boolean) => updateConfig('display.show_profile', v)}
-                                />
-                            {/snippet}
-                        </SettingsField>
-                        <SettingsField label="Afficher statut BLE">
-                            {#snippet children()}
-                                <Switch
-                                    checked={data.display?.show_ble_status}
-                                    onCheckedChange={(v: boolean) => updateConfig('display.show_ble_status', v)}
-                                />
-                            {/snippet}
-                        </SettingsField>
+                        <!-- Widget editor -->
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <Label class="text-sm font-medium">Widgets OLED</Label>
+                                <button
+                                    type="button"
+                                    class="text-xs px-2 py-1 rounded border border-dashed border-border hover:border-primary/60 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                                    onclick={addWidget}
+                                    disabled={widgets.length >= DISPLAY_MAX_WIDGETS}
+                                >+ Ajouter</button>
+                            </div>
+
+                            <!-- SVG preview: 72×40 scaled 3× -->
+                            <div class="mb-3 flex justify-center">
+                                <div class="rounded border border-border bg-black p-1 inline-block">
+                                    <svg
+                                        width={SVG_W}
+                                        height={SVG_H}
+                                        viewBox="0 0 {SVG_W} {SVG_H}"
+                                        class="block"
+                                        style="image-rendering:pixelated"
+                                    >
+                                        {#each widgets as w, i}
+                                            {#if w.enabled && w.type !== 0}
+                                                {@const wx = w.col * 6 * SVG_SCALE}
+                                                {@const wy = w.row * 8 * SVG_SCALE}
+                                                {@const ww = widgetPreviewWidth(w)}
+                                                {@const wh = 7 * SVG_SCALE}
+                                                <rect x={wx} y={wy + SVG_SCALE} width={ww} height={wh}
+                                                      fill="rgba(255,255,255,0.15)" rx="1" />
+                                                <text
+                                                    x={wx + 2}
+                                                    y={wy + wh - 1}
+                                                    fill="#fff"
+                                                    font-size="7"
+                                                    font-family="monospace"
+                                                >{widgetLabel(w)}</text>
+                                            {/if}
+                                        {/each}
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Widget list -->
+                            <div class="flex flex-col gap-2">
+                                {#each widgets as w, i}
+                                    <div class="rounded-lg border border-border p-2 flex flex-col gap-2 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <Switch
+                                                checked={w.enabled}
+                                                onCheckedChange={(v: boolean) => updateWidget(i, { enabled: v })}
+                                            />
+                                            <select
+                                                class="flex-1 bg-transparent border border-border rounded px-2 py-1 text-sm"
+                                                value={w.type}
+                                                onchange={(e: Event) => updateWidget(i, { type: +(e.target as HTMLSelectElement).value as WidgetType })}
+                                            >
+                                                {#each WIDGET_TYPE_OPTIONS as opt}
+                                                    <option value={opt.value}>{opt.label}</option>
+                                                {/each}
+                                            </select>
+                                            <span class="text-xs text-muted-foreground">R{w.row} C{w.col}</span>
+                                            <button
+                                                type="button"
+                                                class="text-xs text-muted-foreground hover:text-destructive transition-colors ml-auto"
+                                                onclick={() => removeWidget(i)}
+                                            >✕</button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <Label class="text-xs text-muted-foreground w-8">Ligne</Label>
+                                            <input
+                                                type="number" min="0" max="4"
+                                                class="w-14 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-right"
+                                                value={w.row}
+                                                onchange={(e: Event) => updateWidget(i, { row: Math.min(4, Math.max(0, +(e.target as HTMLInputElement).value)) })}
+                                            />
+                                            <Label class="text-xs text-muted-foreground w-8">Col</Label>
+                                            <input
+                                                type="number" min="0" max="11"
+                                                class="w-14 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-right"
+                                                value={w.col}
+                                                onchange={(e: Event) => updateWidget(i, { col: Math.min(11, Math.max(0, +(e.target as HTMLInputElement).value)) })}
+                                            />
+                                            {#if w.type === WIDGET_TYPE.CUSTOM_TEXT}
+                                                <input
+                                                    type="text"
+                                                    maxlength="12"
+                                                    placeholder="Texte (12 max)"
+                                                    class="flex-1 rounded border border-border bg-transparent px-2 py-0.5 text-xs"
+                                                    value={w.custom_text ?? ''}
+                                                    oninput={(e: Event) => updateWidget(i, { custom_text: (e.target as HTMLInputElement).value.slice(0, 12) })}
+                                                />
+                                            {/if}
+                                            {#if w.type === WIDGET_TYPE.CLOCK}
+                                                <button
+                                                    type="button"
+                                                    class="text-xs px-2 py-0.5 rounded border border-border hover:bg-accent transition-colors"
+                                                    onclick={syncClock}
+                                                    disabled={!serial.connected}
+                                                >Sync heure</button>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
 
                     </CardContent>
                 </Card>

@@ -190,9 +190,26 @@ static void render_extension(uint8_t breathe)
 //  Rendu : calcule la couleur finale de chaque pixel
 // ─────────────────────────────────────────────────────────────
 
+// WS2812 power model : chaque unité (0–255) d'un canal RGB ≈ 0.392 mW @ 5V/20mA.
+// Entier approché : total_mW = sum_rgb * 392 / 1000 ≈ sum_rgb * 2 / 5
+static uint8_t power_scale_factor(uint32_t sum_rgb, uint16_t max_power_mw)
+{
+    if (max_power_mw == 0) return 255;  // Illimité
+    uint32_t total_mw = (sum_rgb * 392) / (255 * 1000 / 100);  // Approximation entière
+    if (total_mw <= (uint32_t)max_power_mw) return 255;
+    return (uint8_t)(((uint32_t)max_power_mw * 255) / total_mw);
+}
+
 static void render_frame(void)
 {
     uint8_t breathe = breathe_factor();
+
+    const kb_config_t *cfg = config_store_get();
+    uint16_t max_power_mw = cfg ? cfg->led_extension.max_power_mw : 500;
+
+    // Première passe : calculer les couleurs post-brightness
+    uint8_t pixels[LED_KEY_COUNT][3];
+    uint32_t sum_rgb = 0;
 
     for (uint8_t i = 0; i < LED_KEY_COUNT; i++) {
         const led_key_config_t *k = &g_key_cfg[i];
@@ -212,12 +229,22 @@ static void render_frame(void)
                 break;
         }
 
-        // Appliquer luminosité globale
         r = scale8(r, g_brightness);
         g = scale8(g, g_brightness);
         b = scale8(b, g_brightness);
+        pixels[i][0] = r;
+        pixels[i][1] = g;
+        pixels[i][2] = b;
+        sum_rgb += r + g + b;
+    }
 
-        led_strip_set_pixel(g_strip, i, r, g, b);
+    // Deuxième passe : appliquer budget de puissance si nécessaire
+    uint8_t pscale = power_scale_factor(sum_rgb, max_power_mw);
+    for (uint8_t i = 0; i < LED_KEY_COUNT; i++) {
+        led_strip_set_pixel(g_strip, i,
+            scale8(pixels[i][0], pscale),
+            scale8(pixels[i][1], pscale),
+            scale8(pixels[i][2], pscale));
     }
 
     // Extension de chaîne — délégué à render_extension()

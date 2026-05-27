@@ -19,3 +19,6 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len);
 
 // True si l'USB est monté (câble connecté + hôte prêt)
 bool usb_hid_is_mounted(void);
+
+// Émettre une ligne JSON terminée par \n sur le port série CDC
+void usb_hid_cdc_send(const char *msg);

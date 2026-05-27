@@ -444,3 +444,24 @@ void ble_hid_publish_battery(uint8_t percent)
     if (percent > 100) percent = 100;
     ble_svc_bas_battery_level_set(percent);
 }
+
+void ble_hid_set_idle_conn_interval(bool idle)
+{
+    if (g_conn_handle == BLE_HS_CONN_HANDLE_NONE) return;
+
+    struct ble_gap_upd_params params = {
+        // Intervalle en unités de 1.25ms
+        // Actif    : 12–24 = 15–30ms  (clavier réactif)
+        // Inactif  : 160–160 = 200ms  (économie radio)
+        .itvl_min            = idle ? 160 : 12,
+        .itvl_max            = idle ? 160 : 24,
+        .latency             = 0,
+        .supervision_timeout = 400,   // 4 secondes
+        .min_ce_len          = 0,
+        .max_ce_len          = 0,
+    };
+    int rc = ble_gap_update_params(g_conn_handle, &params);
+    if (rc != 0) {
+        ESP_LOGD(TAG, "ble_gap_update_params rc=%d", rc);
+    }
+}

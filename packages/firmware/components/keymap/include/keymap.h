@@ -34,7 +34,7 @@
 #define ACTION_TYPE_LAYER_TG    0x3   // Toggle layer (appui = on/off)
 #define ACTION_TYPE_LAYER_TO    0x4   // To layer (aller sur ce layer définitivement)
 #define ACTION_TYPE_MEDIA       0x5   // Touche média (volume, play, etc.)
-#define ACTION_TYPE_COMBO       0x6   // Déclencheur de combo (interne, ne pas utiliser directement)
+#define ACTION_TYPE_MACRO       0x6   // Séquence macro (bits 11–0 = index 0–15)
 #define ACTION_TYPE_SPECIAL     0xF   // Actions spéciales du firmware
 
 // Macro pour construire une action — combine type et valeur
@@ -147,3 +147,11 @@ void keymap_reload_from_config(void);
 
 // Obtenir le layer actif actuellement (pour affichage sur l'écran)
 uint8_t keymap_get_active_layer(void);
+
+// Activer/désactiver le streaming d'événements clavier (mode entraînement)
+// Quand activé, chaque changement d'état est émis via usb_hid_cdc_send().
+void keymap_set_monitor(bool enable);
+bool keymap_get_monitor(void);
+
+// Lancer la macro macro_idx du profil actif dans une tâche FreeRTOS éphémère.
+void keymap_play_macro(uint8_t macro_idx);
