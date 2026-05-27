@@ -17,6 +17,7 @@ export const ACTION_TYPES = {
   ACTION_TYPE_LAYER_TG:  0x3,   // Toggle layer (bascule à chaque appui)
   ACTION_TYPE_LAYER_TO:  0x4,   // To layer (reset stack + aller au layer n)
   ACTION_TYPE_MEDIA:     0x5,   // Consumer Control HID (volume, lecture...)
+  ACTION_TYPE_MACRO:     0x6,   // Macro sequence (bits 11–0 = index 0–15)
   ACTION_TYPE_SPECIAL:   0xF,   // Actions firmware spéciales
 } as const satisfies Record<string, number>;
 

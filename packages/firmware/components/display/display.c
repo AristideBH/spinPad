@@ -23,6 +23,7 @@
 #include "ble_hid.h"
 
 #include "driver/i2c.h"
+#include "esp_timer.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_vendor.h"
@@ -157,78 +158,107 @@ static void fb_draw_icon(int x, int y, const uint8_t icon[8])
 }
 
 // ─────────────────────────────────────────────────────────────
-//  LAYOUT 72×40
+//  WIDGET RENDERER
 //
-//  ┌────────────────────────────┐  ← 72px
-//  │[B] Slot name               │  y=0  (8px, icône BLE + texte)
-//  │────────────────────────────│  y=8
-//  │L: Base                     │  y=9  (7px, layer)
-//  │────────────────────────────│  y=17
-//  │Default                     │  y=18 (7px, profil)
-//  │────────────────────────────│  y=26
-//  │[=] ████████ 78%            │  y=27 (7px, batterie)
-//  └────────────────────────────┘  y=40 (5px inutilisés en bas)
+//  Chaque widget est positionné par (row, col).
+//  row 0-4 → y = row * 8  (chaque rangée = 8px)
+//  col 0-11 → x = col * 6 (police 5×7 + 1px espace = 6px/char)
 // ─────────────────────────────────────────────────────────────
+
+static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
+{
+    if (!w->enabled || w->type == WIDGET_NONE) return;
+
+    int y = w->row * 8;
+    int x = w->col * 6;
+
+    switch (w->type) {
+
+    case WIDGET_BLE_STATUS:
+        if (ble_hid_is_connected()) {
+            if (x == 0) {
+                fb_draw_icon(0, y, ICON_BLE);
+                fb_draw_string(10, y + 1, cfg->ble.slot_names[ble_hid_get_active_slot()], false);
+            } else {
+                fb_draw_string(x, y + 1,
+                    cfg->ble.slot_names[ble_hid_get_active_slot()], false);
+            }
+        } else {
+            fb_draw_string(x, y + 1, "BLE--", false);
+        }
+        break;
+
+    case WIDGET_LAYER: {
+        char buf[14];
+        uint8_t layer = keymap_get_active_layer();
+        const char *lname = cfg->profiles[cfg->active_profile].layers[layer].name;
+        snprintf(buf, sizeof(buf), "L:%s", lname);
+        fb_draw_string(x, y + 1, buf, false);
+        break;
+    }
+
+    case WIDGET_PROFILE: {
+        char buf[13];
+        snprintf(buf, sizeof(buf), "%s", cfg->profiles[cfg->active_profile].name);
+        fb_draw_string(x, y + 1, buf, false);
+        break;
+    }
+
+    case WIDGET_BATTERY:
+        if (battery_is_present()) {
+            if (x == 0) {
+                fb_draw_icon(0, y, ICON_BATTERY);
+                uint8_t pct = battery_get_percent();
+                int bar_w = (pct * 40) / 100;
+                for (int bx = 10; bx < 10 + bar_w; bx++) {
+                    fb_draw_pixel(bx, y + 3, true);
+                    fb_draw_pixel(bx, y + 4, true);
+                    fb_draw_pixel(bx, y + 5, true);
+                }
+                fb_draw_hline(10, y + 2, 40, true);
+                fb_draw_hline(10, y + 6, 40, true);
+                char pct_str[6];
+                snprintf(pct_str, sizeof(pct_str), "%d%%", pct);
+                fb_draw_string(52, y + 1, pct_str, false);
+            } else {
+                char pct_str[6];
+                snprintf(pct_str, sizeof(pct_str), "%d%%", battery_get_percent());
+                fb_draw_string(x, y + 1, pct_str, false);
+            }
+        }
+        break;
+
+    case WIDGET_CUSTOM_TEXT:
+        fb_draw_string(x, y + 1, w->custom_text, false);
+        break;
+
+    case WIDGET_CLOCK: {
+        if (cfg->display.clock_base_unix_ts == 0) break;
+        uint64_t now_ms   = (uint64_t)(esp_timer_get_time() / 1000);
+        uint64_t elapsed  = now_ms > cfg->display.clock_base_uptime_ms
+                            ? (now_ms - cfg->display.clock_base_uptime_ms) / 1000 : 0;
+        uint32_t unix_now = cfg->display.clock_base_unix_ts + (uint32_t)elapsed;
+        uint8_t  hour     = (unix_now % 86400) / 3600;
+        uint8_t  min      = (unix_now % 3600)  / 60;
+        char buf[6];
+        snprintf(buf, sizeof(buf), "%02u:%02u", hour, min);
+        fb_draw_string(x, y + 1, buf, false);
+        break;
+    }
+
+    default:
+        break;
+    }
+}
 
 static void render_screen(void)
 {
     fb_clear();
 
-    const kb_config_t *cfg  = config_store_get();
-    const kb_display_config_t *dcfg = &cfg->display;
+    const kb_config_t *cfg = config_store_get();
 
-    // ── BLE status (y=0) ──────────────────────────────────────
-    if (dcfg->show_ble_status) {
-        if (ble_hid_is_connected()) {
-            fb_draw_icon(0, 0, ICON_BLE);
-            uint8_t slot = ble_hid_get_active_slot();
-            fb_draw_string(10, 1, cfg->ble.slot_names[slot], false);
-        } else {
-            fb_draw_string(0, 1, "BLE--", false);
-        }
-    }
-
-    fb_draw_hline(0, 8, FB_WIDTH, true);
-
-    // ── Layer actif (y=9) ─────────────────────────────────────
-    if (dcfg->show_layer) {
-        char buf[14];  // "L:" + 11 chars + '\0' (72px / 6px = 12 chars max)
-        uint8_t layer = keymap_get_active_layer();
-        const char *lname = cfg->profiles[cfg->active_profile].layers[layer].name;
-        snprintf(buf, sizeof(buf), "L:%s", lname);
-        fb_draw_string(0, 9, buf, false);
-    }
-
-    fb_draw_hline(0, 17, FB_WIDTH, true);
-
-    // ── Profil actif (y=18) ───────────────────────────────────
-    if (dcfg->show_profile) {
-        char buf[13];  // 12 chars + '\0'
-        snprintf(buf, sizeof(buf), "%s",
-                 cfg->profiles[cfg->active_profile].name);
-        fb_draw_string(0, 18, buf, false);
-    }
-
-    fb_draw_hline(0, 26, FB_WIDTH, true);
-
-    // ── Batterie (y=27) ───────────────────────────────────────
-    if (dcfg->show_battery && battery_is_present()) {
-        fb_draw_icon(0, 27, ICON_BATTERY);
-
-        uint8_t pct = battery_get_percent();
-        // Barre : x=10..49 (40px), centrée verticalement dans 8px → y=30..32
-        int bar_w = (pct * 40) / 100;
-        for (int x = 10; x < 10 + bar_w; x++) {
-            fb_draw_pixel(x, 30, true);
-            fb_draw_pixel(x, 31, true);
-            fb_draw_pixel(x, 32, true);
-        }
-        fb_draw_hline(10, 29, 40, true);  // bord haut
-        fb_draw_hline(10, 33, 40, true);  // bord bas
-
-        char pct_str[6];  // "100%" + '\0'
-        snprintf(pct_str, sizeof(pct_str), "%d%%", pct);
-        fb_draw_string(52, 28, pct_str, false);
+    for (int i = 0; i < cfg->display.widget_count && i < DISPLAY_MAX_WIDGETS; i++) {
+        render_widget(cfg, &cfg->display.widgets[i]);
     }
 }
 
@@ -377,4 +407,12 @@ void display_show_status(void)
     g_studio_mode_screen = false;
     // Forcer une mise à jour vers l'écran de statut normal
     display_update();
+}
+
+void display_set_clock(uint32_t unix_ts)
+{
+    kb_config_t *cfg = (kb_config_t *)config_store_get();  // cast const away for clock only
+    cfg->display.clock_base_unix_ts  = unix_ts;
+    cfg->display.clock_base_uptime_ms = (uint64_t)(esp_timer_get_time() / 1000);
+    ESP_LOGI(TAG, "Horloge synchronisée : %lu", (unsigned long)unix_ts);
 }

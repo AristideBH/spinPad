@@ -10,10 +10,70 @@
 
 // ── Constantes structurelles ────────────────────────────────────
 
-export const CONFIG_NUM_KEYS      = 10;   // SW1–SW10
-export const CONFIG_NUM_PROFILES  = 4;
-export const CONFIG_NUM_LAYERS    = 4;    // par profil
+export const CONFIG_NUM_KEYS       = 10;   // SW1–SW10
+export const CONFIG_NUM_PROFILES   = 4;
+export const CONFIG_NUM_LAYERS     = 4;    // par profil
 export const CONFIG_FORMAT_VERSION = 1;
+
+// ── Widget OLED ─────────────────────────────────────────────────
+
+export const WIDGET_TYPE = {
+  NONE:        0,
+  BLE_STATUS:  1,
+  LAYER:       2,
+  PROFILE:     3,
+  BATTERY:     4,
+  CUSTOM_TEXT: 5,
+  CLOCK:       6,
+} as const;
+export type WidgetType = typeof WIDGET_TYPE[keyof typeof WIDGET_TYPE];
+
+export const WIDGET_LABELS: Record<WidgetType, string> = {
+  0: 'Aucun',
+  1: 'Statut BLE',
+  2: 'Layer actif',
+  3: 'Profil actif',
+  4: 'Batterie',
+  5: 'Texte personnalisé',
+  6: 'Horloge',
+};
+
+export interface WidgetConfig {
+  type:         WidgetType;
+  enabled:      boolean;
+  row:          number;       // 0–4 (chaque rangée = 8px sur 40px)
+  col:          number;       // 0–11 (chaque colonne = 6px sur 72px)
+  custom_text?: string;       // max 12 chars (type CUSTOM_TEXT uniquement)
+}
+
+export const DISPLAY_MAX_WIDGETS = 8;
+
+export function defaultWidgets(): WidgetConfig[] {
+  return [
+    { type: WIDGET_TYPE.BLE_STATUS, enabled: true,  row: 0, col: 0 },
+    { type: WIDGET_TYPE.LAYER,      enabled: true,  row: 1, col: 0 },
+    { type: WIDGET_TYPE.PROFILE,    enabled: true,  row: 2, col: 0 },
+    { type: WIDGET_TYPE.BATTERY,    enabled: true,  row: 3, col: 0 },
+  ];
+}
+
+// ── Macros ──────────────────────────────────────────────────────
+
+export const MACRO_STEP_TYPE = {
+  KEY_DOWN: 0,
+  KEY_UP:   1,
+  DELAY_MS: 2,
+} as const;
+export type MacroStepType = typeof MACRO_STEP_TYPE[keyof typeof MACRO_STEP_TYPE];
+
+export interface MacroStep {
+  type:     MacroStepType;
+  keycode?: number;   // HID keycode (KEY_DOWN / KEY_UP)
+  delay?:   number;   // ms, max 1000 (DELAY_MS)
+}
+
+export const MACRO_MAX_STEPS    = 32;
+export const MACRO_MAX_PER_PROFILE = 16;
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -31,6 +91,7 @@ export interface ProfileConfig {
   layer_count?:  number;
   combos?:       unknown[];
   combo_count?:  number;
+  macros?:       MacroStep[][];  // up to MACRO_MAX_PER_PROFILE, each up to MACRO_MAX_STEPS
 }
 
 export interface FullConfig {
@@ -39,12 +100,10 @@ export interface FullConfig {
   version?:       number;
   profile_count?: number;
   display: {
-    brightness:       number;  // 0–255
-    timeout_s:        number;
-    show_battery?:    boolean;
-    show_layer?:      boolean;
-    show_profile?:    boolean;
-    show_ble_status?: boolean;
+    brightness:         number;  // 0–255
+    timeout_s:          number;
+    widgets?:           WidgetConfig[];
+    clock_base_unix_ts?: number;
   };
   ble: {
     device_name:  string;
@@ -52,22 +111,25 @@ export interface FullConfig {
     slot_names?:  string[];
   };
   power?: {
-    sleep_timeout_s:      number;
-    battery_critical_pct?: number;
-    battery_present?:     'auto' | 'yes' | 'no';
+    sleep_timeout_s:        number;
+    battery_critical_pct?:  number;
+    battery_present?:       'auto' | 'yes' | 'no';
+    debounce_press_scans?:  number;   // 1–20, default 3
+    debounce_release_scans?: number;  // 1–20, default 5
   };
   orientation:    number;   // 0–3 (ORIENTATION_0 … ORIENTATION_270)
   encoder: {
     sensitivity: number;   // 1–4
   };
   led_extension: {
-    enabled:    boolean;
-    count:      number;    // 0–50
-    mode:       number;    // LED_EXT_MODE_*
-    r:          number;    // 0–255
-    g:          number;
-    b:          number;
-    brightness: number;
+    enabled:       boolean;
+    count:         number;    // 0–50
+    mode:          number;    // LED_EXT_MODE_*
+    r:             number;    // 0–255
+    g:             number;
+    b:             number;
+    brightness:    number;
+    max_power_mw?: number;    // 0 = illimité, défaut 500
   };
 }
 
@@ -106,6 +168,7 @@ export function defaultConfig(): FullConfig {
     display: {
       brightness: 200,
       timeout_s:  60,
+      widgets:    defaultWidgets(),
     },
     ble: {
       device_name: 'SpinPad',
@@ -153,6 +216,9 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
     display: {
       brightness: (r.display as any)?.brightness ?? defaults.display.brightness,
       timeout_s:  (r.display as any)?.timeout_s  ?? defaults.display.timeout_s,
+      widgets:    Array.isArray((r.display as any)?.widgets)
+                    ? (r.display as any).widgets as WidgetConfig[]
+                    : defaults.display.widgets,
     },
 
     ble: {
@@ -170,13 +236,14 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
     },
 
     led_extension: {
-      enabled:    (r.led_extension as any)?.enabled    ?? defaults.led_extension.enabled,
-      count:      (r.led_extension as any)?.count      ?? defaults.led_extension.count,
-      mode:       (r.led_extension as any)?.mode       ?? defaults.led_extension.mode,
-      r:          (r.led_extension as any)?.r          ?? defaults.led_extension.r,
-      g:          (r.led_extension as any)?.g          ?? defaults.led_extension.g,
-      b:          (r.led_extension as any)?.b          ?? defaults.led_extension.b,
-      brightness: (r.led_extension as any)?.brightness ?? defaults.led_extension.brightness,
+      enabled:       (r.led_extension as any)?.enabled       ?? defaults.led_extension.enabled,
+      count:         (r.led_extension as any)?.count         ?? defaults.led_extension.count,
+      mode:          (r.led_extension as any)?.mode          ?? defaults.led_extension.mode,
+      r:             (r.led_extension as any)?.r             ?? defaults.led_extension.r,
+      g:             (r.led_extension as any)?.g             ?? defaults.led_extension.g,
+      b:             (r.led_extension as any)?.b             ?? defaults.led_extension.b,
+      brightness:    (r.led_extension as any)?.brightness    ?? defaults.led_extension.brightness,
+      max_power_mw:  (r.led_extension as any)?.max_power_mw  ?? 500,
     },
   };
 
@@ -192,6 +259,10 @@ function mergeProfile(raw: unknown, def: ProfileConfig): ProfileConfig {
       ? (r.layers as unknown[]).slice(0, CONFIG_NUM_LAYERS).map((l, i) =>
           mergeLayer(l, def.layers[i]))
       : def.layers,
+    macros: Array.isArray(r.macros)
+      ? (r.macros as unknown[]).slice(0, MACRO_MAX_PER_PROFILE).map(m =>
+          Array.isArray(m) ? (m as MacroStep[]).slice(0, MACRO_MAX_STEPS) : [])
+      : undefined,
   };
 }
 

@@ -158,9 +158,6 @@
         <InfoCard label="Version" value="v{configState.data.version}" />
     </div>
 
-    {#if configState.loadError}
-        <p class="text-destructive text-sm mb-4">{configState.loadError}</p>
-    {/if}
 
     <!-- Actions -->
     <div class="flex flex-wrap gap-2 mb-8">

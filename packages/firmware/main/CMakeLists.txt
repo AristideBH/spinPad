@@ -12,6 +12,7 @@ idf_component_register(
         led_engine
         power_mgmt
         web_config
+        esp_system
 )
 
 idf_component_get_property(tusb_lib espressif__tinyusb COMPONENT_LIB)

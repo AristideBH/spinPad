@@ -13,7 +13,7 @@ import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types
 const {
   ACTION_TYPE_KC, ACTION_TYPE_MOD, ACTION_TYPE_LAYER_MO,
   ACTION_TYPE_LAYER_TG, ACTION_TYPE_LAYER_TO,
-  ACTION_TYPE_MEDIA, ACTION_TYPE_SPECIAL,
+  ACTION_TYPE_MEDIA, ACTION_TYPE_SPECIAL, ACTION_TYPE_MACRO,
 } = ACTION_TYPES;
 
 const {
@@ -35,7 +35,8 @@ export type KeycodeCategory =
   | 'modifier'
   | 'layer'
   | 'media'
-  | 'firmware';
+  | 'firmware'
+  | 'macro';
 
 export interface Keycode {
   label:    string;
@@ -149,6 +150,13 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'LED +',       value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_UP), category: 'firmware' },
     { label: 'LED -',       value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
   ],
+
+  // ── Macros ────────────────────────────────────────────────────
+  macros: Array.from({ length: 16 }, (_, i) => ({
+    label:    `Macro ${i}`,
+    value:    action(ACTION_TYPE_MACRO, i),
+    category: 'macro' as KeycodeCategory,
+  })),
 };
 
 /** Table à plat pour la recherche par valeur ou label */
@@ -158,5 +166,9 @@ export const KEYCODES_FLAT: Keycode[] = Object.values(KEYCODES).flat();
 export function getKeycodeLabel(value: number): string {
   if (value === 0) return '—';
   const kc = KEYCODES_FLAT.find(k => k.value === value);
-  return kc ? kc.label : `0x${value.toString(16).toUpperCase()}`;
+  if (kc) return kc.label;
+  // Fallback pour macros non encore dans la table (index > 15)
+  const type = (value >> 12) & 0xF;
+  if (type === ACTION_TYPE_MACRO) return `Macro ${value & 0x0FFF}`;
+  return `0x${value.toString(16).toUpperCase()}`;
 }

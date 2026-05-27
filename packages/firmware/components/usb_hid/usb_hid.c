@@ -13,6 +13,8 @@
 #include "config_store.h"
 #include "keymap.h"
 #include "device_status.h"
+#include "display.h"
+#include "cJSON.h"
 
 #include "tusb.h"
 #include "esp_log.h"
@@ -202,6 +204,25 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         const char *ok = "{\"status\":\"ok\",\"msg\":\"factory_reset\"}\n";
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
+    } else if (strstr(str, "\"key_monitor\"")) {
+        bool enable = strstr(str, "\"enable\":true") != NULL;
+        keymap_set_monitor(enable);
+        const char *ok = "{\"status\":\"ok\"}\n";
+        tud_cdc_n_write(0, ok, strlen(ok));
+        tud_cdc_n_write_flush(0);
+    } else if (strstr(str, "\"set_time\"")) {
+        // {"cmd":"set_time","ts":1234567890}
+        cJSON *root = cJSON_Parse(str);
+        if (root) {
+            cJSON *ts = cJSON_GetObjectItem(root, "ts");
+            if (cJSON_IsNumber(ts)) {
+                display_set_clock((uint32_t)ts->valuedouble);
+            }
+            cJSON_Delete(root);
+        }
+        const char *ok = "{\"status\":\"ok\"}\n";
+        tud_cdc_n_write(0, ok, strlen(ok));
+        tud_cdc_n_write_flush(0);
     } else if (strstr(str, "\"device_status\"")) {
         // Buffer dédié — 512 octets suffisent largement pour le payload actuel.
         char buf[512];
@@ -214,6 +235,13 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
 }
 
 bool usb_hid_is_mounted(void) { return g_mounted; }
+
+void usb_hid_cdc_send(const char *msg)
+{
+    if (!msg) return;
+    tud_cdc_n_write(0, msg, strlen(msg));
+    tud_cdc_n_write_flush(0);
+}
 
 // ─────────────────────────────────────────────────────────────
 //  TINYUSB DESCRIPTOR CALLBACKS

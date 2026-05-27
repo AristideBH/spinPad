@@ -14,6 +14,7 @@
 
 import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
+import { toast } from 'svelte-sonner';
 import { devMode } from './devMode.svelte.js';
 import { MOCK_CONFIG } from '../mock/keyboard-config.js';
 import { parseSpinpadFile, createSpinpadFile } from '../constants/config-migrations.js';
@@ -55,6 +56,7 @@ async function _flushSave() {
     } catch (err) {
         configState.loadError = err.message;
         console.error('[config] Erreur auto-save :', err);
+        toast.error('Erreur de sauvegarde', { description: err.message });
     } finally {
         configState.isSaving = false;
     }
@@ -163,6 +165,7 @@ export async function loadConfig() {
     } catch (err) {
         configState.loadError = err.message;
         console.error('[config] Erreur chargement :', err);
+        toast.error('Impossible de charger la config', { description: err.message });
     } finally {
         configState.isLoading = false;
     }
@@ -184,9 +187,11 @@ export async function factoryReset() {
             await transport.factoryReset();
         }
         await loadConfig();   // Recharger après reset
+        toast.success('Reset usine effectué');
     } catch (err) {
         configState.loadError = err.message;
         console.error('[config] Erreur factory reset :', err);
+        toast.error('Erreur lors du reset usine', { description: err.message });
     } finally {
         configState.isLoading = false;
     }
@@ -212,6 +217,7 @@ export function exportConfig() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    toast.success('Config exportée');
 }
 
 /**
@@ -233,6 +239,7 @@ export async function importConfig(file) {
     configState.activeProfileIndex = parsed.active_profile ?? 0;
     configState.isDirty = true;
     _scheduleSave();
+    toast.success('Config importée', { description: file.name });
 }
 
 // ─────────────────────────────────────────────────────────────

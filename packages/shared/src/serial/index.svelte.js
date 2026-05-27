@@ -7,13 +7,17 @@
 //    → {"cmd":"factory_reset"}           reset usine
 // ═══════════════════════════════════════════════════════════════
 
+import { toast } from 'svelte-sonner';
+
 // ─────────────────────────────────────────────────────────────
 //  ÉTAT RÉACTIF (Svelte 5 runes)
 // ─────────────────────────────────────────────────────────────
 
 class SerialState {
-    connected = $state(false);
-    error     = $state(null);
+    connected        = $state(false);
+    error            = $state(null);
+    reconnecting     = $state(false);
+    reconnectAttempt = $state(0);
 }
 export const serial = new SerialState();
 
@@ -25,6 +29,42 @@ let port       = null;
 let writer     = null;
 let reader     = null;
 let readBuffer = '';
+
+let _reconnectTimer   = null;
+const RECONNECT_INTERVAL_MS   = 2000;
+const RECONNECT_MAX_ATTEMPTS  = 15;   // 15 × 2s = 30s
+
+function _startReconnect(savedPort) {
+    serial.reconnecting     = true;
+    serial.reconnectAttempt = 0;
+
+    _reconnectTimer = setInterval(async () => {
+        serial.reconnectAttempt++;
+        if (serial.reconnectAttempt > RECONNECT_MAX_ATTEMPTS) {
+            _stopReconnect();
+            return;
+        }
+        try {
+            await savedPort.open({ baudRate: 115200 });
+            _stopReconnect();
+            port   = savedPort;
+            writer = port.writable.getWriter();
+            port.addEventListener('disconnect', _handleUnexpectedDisconnect);
+            startReading();
+            serial.connected = true;
+            serial.error     = null;
+            toast.success('Reconnecté');
+        } catch {
+            // Périphérique pas encore disponible
+        }
+    }, RECONNECT_INTERVAL_MS);
+}
+
+function _stopReconnect() {
+    if (_reconnectTimer) { clearInterval(_reconnectTimer); _reconnectTimer = null; }
+    serial.reconnecting     = false;
+    serial.reconnectAttempt = 0;
+}
 
 const encoder        = new TextEncoder();
 const messageHandlers = new Set();
@@ -69,6 +109,8 @@ function _cancelQueuedRpcs(reason) {
 // ─────────────────────────────────────────────────────────────
 
 export async function connect() {
+    _stopReconnect();
+
     if (!('serial' in navigator)) {
         serial.error = 'WebSerial non supporté. Utilise Chrome ou Edge.';
         return false;
@@ -88,23 +130,32 @@ export async function connect() {
 
         serial.connected = true;
         serial.error     = null;
+        toast.success('Clavier connecté');
         return true;
     } catch (err) {
-        serial.error = `Erreur connexion : ${err.message}`;
+        if (err.name !== 'NotFoundError') {
+            // NotFoundError = user cancelled the port picker, no toast needed
+            serial.error = `Erreur connexion : ${err.message}`;
+            toast.error('Connexion échouée', { description: err.message });
+        }
         return false;
     }
 }
 
 function _handleUnexpectedDisconnect() {
+    const savedPort = port;
     readBuffer = '';
     _cancelQueuedRpcs('Déconnecté');
     writer = null;
     reader = null;
     port   = null;
     serial.connected = false;
+    toast.warning('Clavier déconnecté — tentative de reconnexion…');
+    if (savedPort) _startReconnect(savedPort);
 }
 
 export async function disconnect() {
+    _stopReconnect();
     _cancelQueuedRpcs('Déconnecté');
     readBuffer = '';
 
@@ -235,6 +286,30 @@ export function getDeviceStatus() {
     return _enqueueRpc(() => _rpcCall(
         { cmd: 'device_status' },
         msg => msg && msg.fw !== undefined && msg.connection !== undefined,
+        2000
+    ));
+}
+
+export function keyMonitor(enable) {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'key_monitor', enable },
+        msg => msg.status === 'ok',
+        3000
+    ));
+}
+
+// Subscribe to raw key events (event === 'key') without going through the RPC queue.
+// Returns an unsubscribe function.
+export function onKeyEvent(handler) {
+    return onMessage(msg => {
+        if (msg && msg.event === 'key') handler(msg);
+    });
+}
+
+export function setTime(unixTs) {
+    return _enqueueRpc(() => _rpcCall(
+        { cmd: 'set_time', ts: unixTs },
+        msg => msg.status === 'ok',
         2000
     ));
 }

@@ -16,6 +16,26 @@
 #define CONFIG_NAME_MAX_LEN    32
 #define CONFIG_NUM_KEYS        10  // Doit correspondre à KB_NUM_KEYS dans kb_config.h
 
+// Macro step definitions
+#define MACRO_MAX_STEPS           32   // Pas par macro
+#define MACRO_MAX_PER_PROFILE     16   // Macros par profil
+
+typedef enum {
+    MACRO_STEP_KEY_DOWN = 0,
+    MACRO_STEP_KEY_UP   = 1,
+    MACRO_STEP_DELAY_MS = 2,
+} kb_macro_step_type_t;
+
+typedef struct {
+    kb_macro_step_type_t type;
+    uint16_t             keycode_or_delay;  // HID keycode (KEY_DOWN/UP) ou ms (DELAY, max 1000)
+} kb_macro_step_t;
+
+typedef struct {
+    uint8_t         step_count;
+    kb_macro_step_t steps[MACRO_MAX_STEPS];
+} kb_macro_t;
+
 // Combo definition (mirrors keymap's internal type)
 #define KEYMAP_COMBO_MAX_KEYS   4
 
@@ -36,13 +56,15 @@ typedef struct {
     uint16_t encoder_press;                // Bouton de l'encodeur
 } kb_layer_t;
 
-// ── Un profil : plusieurs layers + combos ────────────────────
+// ── Un profil : plusieurs layers + combos + macros ───────────
 typedef struct {
     char        name[CONFIG_NAME_MAX_LEN]; // Ex: "Default", "Gaming", "Dev"
     uint8_t     layer_count;
     kb_layer_t  layers[CONFIG_MAX_LAYERS];
     uint8_t     combo_count;
     kb_combo_t  combos[CONFIG_MAX_COMBOS];
+    uint8_t     macro_count;
+    kb_macro_t  macros[MACRO_MAX_PER_PROFILE];
 } kb_profile_t;
 
 // ── Orientation globale ───────────────────────────────────────
@@ -70,10 +92,11 @@ typedef enum {
 
 typedef struct {
     bool              enabled;
-    uint8_t           count;       // Nombre de LEDs extension (1–50)
+    uint8_t           count;          // Nombre de LEDs extension (1–50)
     kb_led_ext_mode_t mode;
-    uint8_t           r, g, b;    // Couleur statique (si mode = STATIC ou AMBIENT)
-    uint8_t           brightness; // 0–255 (indépendant de la luminosité touches)
+    uint8_t           r, g, b;       // Couleur statique (si mode = STATIC ou AMBIENT)
+    uint8_t           brightness;    // 0–255 (indépendant de la luminosité touches)
+    uint16_t          max_power_mw;  // Budget max en mW (0 = illimité, défaut : 500)
 } kb_led_extension_t;
 
 // ── Config BLE ────────────────────────────────────────────────
@@ -83,14 +106,37 @@ typedef struct {
     uint8_t active_slot;                     // 0 ou 1
 } kb_ble_config_t;
 
+// ── Widgets OLED ─────────────────────────────────────────────
+typedef enum {
+    WIDGET_NONE        = 0,
+    WIDGET_BLE_STATUS  = 1,
+    WIDGET_LAYER       = 2,
+    WIDGET_PROFILE     = 3,
+    WIDGET_BATTERY     = 4,
+    WIDGET_CUSTOM_TEXT = 5,
+    WIDGET_CLOCK       = 6,
+} kb_widget_type_t;
+
+#define WIDGET_MAX_CUSTOM_LEN  13   // 12 chars max + '\0'
+#define DISPLAY_MAX_WIDGETS     8
+
+typedef struct {
+    kb_widget_type_t type;
+    bool             enabled;
+    uint8_t          row;                          // 0–4 (chaque rangée = 8px)
+    uint8_t          col;                          // 0–11 (chaque colonne = 6px)
+    char             custom_text[WIDGET_MAX_CUSTOM_LEN];
+} kb_widget_t;
+
 // ── Config écran ──────────────────────────────────────────────
 typedef struct {
-    uint8_t  brightness;       // 0-255
-    uint16_t timeout_s;        // Extinction après N secondes
-    bool     show_battery;
-    bool     show_layer;
-    bool     show_profile;
-    bool     show_ble_status;
+    uint8_t     brightness;       // 0-255
+    uint16_t    timeout_s;        // Extinction après N secondes
+    kb_widget_t widgets[DISPLAY_MAX_WIDGETS];
+    uint8_t     widget_count;
+    // Référence pour le widget horloge : unix timestamp + uptime au moment du set_time
+    uint32_t    clock_base_unix_ts;
+    uint64_t    clock_base_uptime_ms;
 } kb_display_config_t;
 
 // ── Config power ─────────────────────────────────────────────
@@ -102,6 +148,8 @@ typedef struct {
     //   "yes"  → forcer présente
     //   "no"   → désactiver totalement
     char     battery_present[8];
+    uint8_t  debounce_press_scans;    // Scans consécutifs requis pour valider un appui (défaut : 3)
+    uint8_t  debounce_release_scans;  // Scans consécutifs requis pour valider un relâchement (défaut : 5)
 } kb_power_config_t;
 
 // ── Config complète ───────────────────────────────────────────

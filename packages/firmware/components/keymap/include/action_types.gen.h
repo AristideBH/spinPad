@@ -13,6 +13,7 @@
 #define ACTION_TYPE_LAYER_TG  0x03
 #define ACTION_TYPE_LAYER_TO  0x04
 #define ACTION_TYPE_MEDIA     0x05
+#define ACTION_TYPE_MACRO     0x06
 #define ACTION_TYPE_SPECIAL   0x0F
 
 // Media subcodes  (bits 11–0 when ACTION_TYPE_MEDIA)
