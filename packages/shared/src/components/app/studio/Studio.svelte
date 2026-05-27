@@ -1,10 +1,10 @@
 <script lang="ts">
   import { PersistedState } from "runed";
-  import * as Tabs from "./components/ui/tabs/index.js";
-  import DashboardTab from "./components/app/tabs/DashboardTab.svelte";
-  import KeypadTab from "./components/app/tabs/KeypadTab.svelte";
-  import SettingsTab from "./components/app/tabs/SettingsTab.svelte";
-  import { APP_CONFIG } from "./app.config.js";
+  import * as Tabs from "../../ui/tabs/index.js";
+  import DashboardTab from "./daskboard/DashboardTab.svelte";
+  import KeypadTab from "./keypad/KeypadTab.svelte";
+  import SettingsTab from "./settings/SettingsTab.svelte";
+  import { APP_CONFIG } from "../../../app.config.js";
 
   import {
     configState,
@@ -15,10 +15,13 @@
     canRedo,
     exportConfig,
     importConfig,
-  } from "./store/config.svelte.js";
-  import { serial } from "./serial/index.svelte.js";
-  import { devMode } from "./store/devMode.svelte.js";
-  import { startPolling, stopPolling } from "./store/deviceStatus.svelte.js";
+  } from "../../../store/config.svelte.js";
+  import { serial } from "../../../serial/index.svelte.js";
+  import { devMode } from "../../../store/devMode.svelte.js";
+  import {
+    startPolling,
+    stopPolling,
+  } from "../../../store/deviceStatus.svelte.js";
 
   // Démarrer le polling du statut device quand connecté ou en mode démo.
   // Le store route automatiquement vers le bon transport (serial / http / mock).
@@ -32,9 +35,9 @@
       return () => stopPolling();
     }
   });
-  import { Button } from "./components/ui/button/index.js";
-  import { Separator } from "./components/ui/separator/index.js";
-  import StatusCard from "./components/app/StatusCard.svelte";
+  import { Button } from "../../ui/button/index.js";
+  import { Separator } from "../../ui/separator/index.js";
+  import StatusCard from "../StatusCard.svelte";
   import { Toaster, toast } from "svelte-sonner";
   import {
     Save,
@@ -71,7 +74,7 @@
   );
 </script>
 
-<Toaster richColors position="bottom-right" />
+<Toaster theme="system" richColors position="bottom-right" />
 
 <svelte:head>
   <title>{APP_CONFIG.name} — Studio</title>

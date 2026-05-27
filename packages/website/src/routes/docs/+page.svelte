@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Studio from "$shared/Studio.svelte";
   import { useHeaderRight } from '$lib/header-right.svelte.js';
   import Search from './Search.svelte';
   
@@ -31,7 +30,7 @@
         ] as doc}
             <a
                 href={doc.href}
-                class="flex gap-4 p-4 transition-colors bg-gray-900 border border-gray-800 rounded-xl hover:border-spinpad/50 group"
+                class="flex gap-4 p-4 transition-colors border border-card bg-card rounded-xl hover:border-spinpad/50 group"
             >
                 <span class="text-2xl mt-0.5">{doc.icon}</span>
                 <div>

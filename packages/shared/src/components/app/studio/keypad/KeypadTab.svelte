@@ -2,10 +2,9 @@
   import {
     configState,
     updateConfig,
-    updateConfig,
     setKeyAction,
     setEncoderAction,
-  } from "../../../store/config.svelte.js";
+  } from "../../../../store/config.svelte.js";
   import {
     KEYCODES,
     KEYCODES_FLAT,
@@ -16,34 +15,31 @@
     MACRO_STEP_TYPE,
     MACRO_MAX_STEPS,
     MACRO_MAX_PER_PROFILE,
-    MACRO_STEP_TYPE,
-    MACRO_MAX_STEPS,
-    MACRO_MAX_PER_PROFILE,
-  } from "../../../constants/keycodes/index.js";
-  import type { MacroStep } from "../../../constants/keycodes/index.js";
-  import type { MacroStepType } from "../../../constants/config-schema.js";
-  import { Button } from "../../ui/button/index.js";
-  import { cn } from "../../../utils.js";
-  import { Input } from "../../ui/input/index.js";
+  } from "../../../../constants/keycodes/index.js";
+  import type { MacroStep } from "../../../../constants/keycodes/index.js";
+  import type { MacroStepType } from "../../../../constants/config-schema.js";
+  import { Button } from "../../../ui/button/index.js";
+  import { cn } from "../../../../utils.js";
+  import { Input } from "../../../ui/input/index.js";
   import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-  } from "../../ui/dialog/index.js";
+  } from "../../../ui/dialog/index.js";
   import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
-  } from "../../ui/select/index.js";
-  import { Label } from "../../ui/label/index.js";
-  import NotConnected from "../NotConnected.svelte";
+  } from "../../../ui/select/index.js";
+  import { Label } from "../../../ui/label/index.js";
+  import NotConnected from "../../NotConnected.svelte";
   import {
     serial,
     keyMonitor,
     onKeyEvent,
-  } from "../../../serial/index.svelte.js";
+  } from "../../../../serial/index.svelte.js";
   import { Activity } from "@lucide/svelte";
 
   let editingKey = $state<number | null>(null);
@@ -190,8 +186,8 @@
     ORIENT_DEG[configState.data?.orientation ?? 0] ?? 0,
   );
   const isTransposed = $derived(orientDeg === 90 || orientDeg === 270);
-  const CELL = 44;
-  const GAP = 6;
+  const CELL = 72;
+  const GAP = 12;
   const gridW = $derived(
     isTransposed ? 4 * CELL + 3 * GAP : 3 * CELL + 2 * GAP,
   );
@@ -342,6 +338,7 @@
         {trainingActive ? "Arrêter" : "Entraînement"}
       </Button>
     {/if}
+
     {#if profile}
       <div class="flex flex-col gap-1.5">
         <Label>Layer</Label>
@@ -370,48 +367,55 @@
     <!-- Outer bounding box adapts to rotated dimensions -->
     <div class="relative mb-6" style="width: {gridW}px; height: {gridH}px;">
       <div
-        class="inline-grid gap-1.5 transition-transform duration-300"
+        class="inline-grid transition-transform duration-300 keycap-grid dark"
         style="
-                    grid-template-rows: repeat(4, {CELL}px);
-                    grid-template-columns: repeat(3, {CELL}px);
-                    transform: rotate({orientDeg}deg);
-                    transform-origin: center center;
-                    position: absolute;
-                    top: 50%; left: 50%;
-                    translate: -50% -50%;
-                "
+              --keycap-size: {CELL}px;
+              --keycap-gap: {GAP}px;
+              gap: {GAP}px;
+              grid-template-rows: repeat(4, {CELL}px);
+              grid-template-columns: repeat(3, {CELL}px);
+              transform: rotate({orientDeg}deg);
+              transform-origin: center center;
+              position: absolute;
+              top: 50%; left: 50%;
+              translate: -50% -50%;
+              "
       >
         {#each KEY_LAYOUT as key}
           <button
             style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
             class={cn(
-              "relative rounded-md border text-[10px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 p-1 cursor-pointer hover:border-primary/50 overflow-hidden",
+              "keycap",
               editingKey === key.idx && editingField === "key"
-                ? "border-primary bg-primary/20"
-                : "bg-card",
+                ? "keycap--active"
+                : "",
+              key.sw === "SW1" || key.sw === "SW10" ? "keycap--alt" : "",
             )}
             onclick={() => openKeyPicker(key.idx)}
           >
-            <!-- Training flash overlay -->
+            <!-- Training flash overlay — not counter-rotated, fills the whole face -->
             {#if trainingActive}
               <div
-                class="absolute inset-0 transition-opacity duration-300 rounded-md pointer-events-none bg-emerald-400/60"
+                class="keycap-flash"
                 style="opacity: {keyFlashOpacity(key.idx)}"
               ></div>
               {#if keyPressCounts[key.idx] > 0}
-                <span
-                  class="absolute top-0.5 right-1 text-[7px] font-bold text-emerald-400"
-                  >{keyPressCounts[key.idx]}</span
-                >
+                <span class="keycap-count">{keyPressCounts[key.idx]}</span>
               {/if}
             {/if}
-            <span class="text-[8px] text-muted-foreground">{key.sw}</span>
-            <span class="leading-none"
-              >{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span
+            <!-- Labels counter-rotated so text stays upright at any device orientation -->
+            <div
+              class="keycap-labels"
+              style="transform: rotate({-orientDeg}deg)"
             >
-            {#if key.rowSpan === 2 || key.colSpan === 2}
-              <span class="text-[7px] text-muted-foreground/50">2u</span>
-            {/if}
+              <span class="keycap-sw">{key.sw}</span>
+              <span class="keycap-label"
+                >{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span
+              >
+              {#if key.rowSpan === 2 || key.colSpan === 2}
+                <span class="keycap-size-hint">2u</span>
+              {/if}
+            </div>
           </button>
         {/each}
       </div>
@@ -440,7 +444,7 @@
 
       <!-- CW / CCW / Press individuels -->
       <div class="flex gap-2">
-        {#each [{ field: "encoder_cw", label: "↻ CW", value: layer.encoder?.cw ?? 0 }, { field: "encoder_ccw", label: "↺ CCW", value: layer.encoder?.ccw ?? 0 }, { field: "encoder_press", label: "● Press", value: layer.encoder?.press ?? 0 }] as enc}
+        {#each [{ field: "encoder_cw", label: "↻ CW", value: layer.encoder?.cw ?? 0 }, { field: "encoder_ccw", label: "↺ CCW", value: layer.encoder?.ccw ?? 0 }] as enc}
           <button
             class={cn(
               "flex flex-col items-center gap-0.5 px-3 py-2 rounded-md border text-sm transition-all cursor-pointer hover:border-violet-500/50",
@@ -456,6 +460,7 @@
         {/each}
       </div>
     </div>
+
     <!-- Training stats panel -->
     {#if trainingActive}
       <div
@@ -676,3 +681,163 @@
     </DialogContent>
   </Dialog>
 {/if}
+
+<style>
+  /* ── Keycap CSS custom properties ────────────────────────────────
+     Override any of these on .keycap-grid (all keys) or on a
+     specific .keycap (single key) to customise the look.
+  ---------------------------------------------------------------- */
+  .keycap-grid {
+    /* Base keycap color — change this to theme the whole pad */
+    --keycap-color: var(--card);
+    /* Keycap side color */
+    --keycap-side-color: color-mix(
+      in oklch,
+      var(--keycap-color) 60%,
+      var(--background)
+    );
+    /* Active/selected keycap color */
+    --keycap-color-active: var(--card);
+    /* Side-wall height (3D depth effect) */
+    --keycap-depth: 4px;
+    /* Corner radius */
+    --keycap-radius: 10px;
+    /* Label font sizes */
+    --keycap-label-size: 10px;
+    --keycap-sw-size: 8px;
+  }
+
+  /* ── Keycap base ─────────────────────────────────────────────── */
+  .keycap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--keycap-radius);
+    background-color: var(--keycap-color);
+    /* Side walls rendered as a hard bottom shadow;
+       top-edge highlight adds the bevel effect */
+    box-shadow:
+      0 var(--keycap-depth) 0 var(--keycap-side-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.13),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    overflow: hidden;
+    /* Snappy press animation */
+    transition:
+      transform 60ms ease-out,
+      box-shadow 60ms ease-out;
+  }
+
+  /* Sharp circle with top-to-transparent gradient — simulates the
+     concave dish catching light from above */
+  .keycap::before {
+    content: "";
+    position: absolute;
+    --depress-offset: 8px;
+    width: calc(100% - var(--depress-offset));
+    height: calc(100% - var(--depress-offset));
+    aspect-ratio: 1;
+    border-radius: 500px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(
+      to top,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(0, 0, 0, 0.17) 100%
+    );
+    pointer-events: none;
+  }
+
+  .keycap:hover {
+    box-shadow:
+      0 var(--keycap-depth) 0 var(--keycap-side-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  }
+
+  .keycap:focus-visible {
+    outline: 1px solid var(--muted);
+    outline-offset: 3px;
+  }
+
+  /* Simulates pressing the key down onto the PCB */
+  .keycap:active {
+    transform: translateY(var(--keycap-depth));
+    box-shadow:
+      0 0 0 rgba(0, 0, 0, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  /* ── Active / selected key ───────────────────────────────────── */
+  .keycap--active {
+    --keycap-color: color-mix(
+      in oklch,
+      var(--keycap-color-active) 25%,
+      var(--card)
+    );
+    box-shadow:
+      0 var(--keycap-depth) 0 var(--keycap-side-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      0 0 0 1.5px var(--keycap-color-active);
+  }
+
+  .keycap--alt {
+    --keycap-color: var(--muted);
+  }
+
+  /* ── Label wrapper (counter-rotated) ────────────────────────────
+     transition: smooth label re-orientation on orientation change
+  ---------------------------------------------------------------- */
+  .keycap-labels {
+    position: relative; /* stacks above ::before in paint order */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: transform 300ms ease;
+  }
+
+  .keycap-label {
+    font-size: var(--keycap-label-size);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--foreground);
+  }
+
+  .keycap-sw {
+    font-size: var(--keycap-sw-size);
+    color: var(--muted-foreground);
+  }
+
+  .keycap-size-hint {
+    font-size: 7px;
+    color: color-mix(in oklch, var(--muted-foreground) 50%, transparent);
+  }
+
+  /* ── Training mode overlays ──────────────────────────────────── */
+  .keycap-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--keycap-radius);
+    background: oklch(0.7 0.17 150 / 0.6);
+    pointer-events: none;
+    transition: opacity 300ms;
+  }
+
+  .keycap-count {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 7px;
+    font-weight: 700;
+    color: oklch(0.7 0.17 150);
+    pointer-events: none;
+  }
+</style>

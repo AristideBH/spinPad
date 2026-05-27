@@ -6,6 +6,23 @@
         "moduleResolution": "bundler",
         "strict": true,
         "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true
-    }
+        "skipLibCheck": true,
+        "paths": {
+            "lib/*": [
+                "./src/lib/*"
+            ],
+            "components/*": [
+                "./src/lib/components/*"
+            ],
+            "utils/*": [
+                "./src/lib/utils/*"
+            ],
+            "ui/*": [
+                "./src/lib/components/ui/*"
+            ],
+            "hooks/*": [
+                "./src/lib/hooks/*"
+            ],
+        }
+    },
 }
