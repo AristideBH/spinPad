@@ -89,7 +89,7 @@ Quand tu es prêt à bumper les versions :
 pnpm version          # Bumpe les package.json + génère les CHANGELOG.md
 git add -A
 git commit -m "chore: release"
-git tag firmware/v$(cat packages/firmware/package.json | grep '"version"' | cut -d'"' -f4)
+git tag firmware/v$(node -p "require('./packages/firmware/package.json').version")
 git push && git push --tags
 ```
 

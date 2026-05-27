@@ -22,8 +22,8 @@
     }
   ],
   "settings": {
-    "idf.idfContainerPath": "${workspaceFolder:🔧 Firmware}",
-    "cmake.sourceDirectory": "${workspaceFolder:🔧 Firmware}",
+    "idf.idfContainerPath": "${workspaceFolder:💽 Firmware}",
+    "cmake.sourceDirectory": "${workspaceFolder:💽 Firmware}",
     "files.exclude": {
       "**/node_modules": true,
       "**/.svelte-kit": true,
