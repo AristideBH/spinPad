@@ -96,7 +96,7 @@ Aucun code firmware supplémentaire requis — le BLE HID standard suffit.
 - **Touches** : 10 switches dans une matrice 4×3 (2 cellules vides)
 - **Encodeur** : rotatif quadrature + bouton
 - **Écran** : SSD1306 72×40 I2C
-- **LEDs** : WS2812C par touche (×10 chaîne) + 1 LED statut batterie
+- **LEDs** : WS2812C par touche (×10 en chaîne) + 1 LED statut batterie
 - **Batterie** : LiPo avec ADC de mesure
 - **Connectivité** : USB HID + BLE HID (2 slots)
 
@@ -106,12 +106,13 @@ Voir [CONTRIBUTING.md](./CONTRIBUTING.md) pour le workflow de développement, le
 
 ## Licence
 
-Le logiciel SpinPad est distribué sous licence **[PolyForm Noncommercial 1.0.0](LICENSE)**.
+Ce projet utilise une double licence selon le composant :
 
-- Usage personnel, éducatif, et open-source : libre et gratuit
-- Usage commercial : interdit sans accord explicite de l'auteur
-- Toute redistribution doit inclure cette licence et l'avis de copyright
+| Composant | Licence |
+|---|---|
+| `packages/firmware/` | **[AGPL v3](packages/firmware/LICENSE)** — open source, copyleft fort |
+| Reste du projet (Studio, shared, website, tools) | **[PolyForm Noncommercial 1.0.0](LICENSE)** — usage non-commercial uniquement |
 
 Le matériel (PCB) est publié sous **CC BY-NC-SA 4.0** sur [OSHWLAB](https://oshwlab.com/aristide.bruneau/spinpad-v1).
 
-> Pour une demande de licence commerciale, ouvrir une issue ou contacter l'auteur directement.
+> Pour une demande de licence commerciale sur les composants PolyForm NC, ouvrir une issue ou contacter l'auteur directement.
