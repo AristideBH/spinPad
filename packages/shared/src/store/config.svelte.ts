@@ -1,57 +1,39 @@
 // ═══════════════════════════════════════════════════════════════
 //  store/config.svelte.ts — State global de la configuration SpinPad
 //
-//  Transport sélectionné au build :
+//  Transport sélectionné au build via store/transport.ts :
 //    VITE_TRANSPORT=http  → transport/http.ts   (Studio Mode embarqué)
 //    (défaut)             → store/serial.svelte.ts (WebSerial USB)
-//    VITE_DEV_MODE=true   → mock data (développement sans device)
+//    VITE_DEV_MODE=true   → transport/mock.ts (développement sans device)
 //
 //  Features :
 //    - Auto-save debounced (800ms) → transport.setConfig()
 //    - Undo / Redo via Runed StateHistory (Ctrl+Z / Ctrl+Y)
 //    - Import / Export au format .spinpad (JSON avec header)
+//
+//  Note : les raccourcis clavier Ctrl+Z/Y sont gérés dans Studio.svelte
+//  via <svelte:window onkeydown=...> pour isoler l'effet de bord UI.
 // ═══════════════════════════════════════════════════════════════
 
 import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
-import { devMode } from './devMode.svelte.js';
-import { MOCK_CONFIG } from '../mock/keyboard-config.js';
+import { activeTransport, transportMode as _transportMode } from './transport.js';
+import { AutoSave } from './auto-save.js';
 import { parseSpinpadFile, createSpinpadFile } from '../constants/config-migrations.js';
 import * as ops from '../constants/config-ops.js';
 import type { FullConfig } from '../constants/config-schema.js';
-import type { Transport } from '../types/transport.js';
 import type { Selection } from '../constants/config-ops.js';
-
-// ── Sélection du transport ────────────────────────────────────
-
-const USE_HTTP = import.meta.env.VITE_TRANSPORT === 'http';
-
-import * as serialTransport from './serial.svelte.js';
-import * as httpTransport   from '../transport/http.js';
-
-const transport = (USE_HTTP ? httpTransport : serialTransport) as Transport;
 
 // ─────────────────────────────────────────────────────────────
 //  AUTO-SAVE (debounce 800ms)
 // ─────────────────────────────────────────────────────────────
 
-let _saveTimer: ReturnType<typeof setTimeout> | null = null;
-
-function _scheduleSave(): void {
-  if (!browser) return;
-  if (_saveTimer) clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    _saveTimer = null;
-    _flushSave();
-  }, 800);
-}
-
 async function _flushSave(): Promise<void> {
-  if (!configState.data || devMode.active) return;
+  if (!configState.data) return;
   configState.isSaving = true;
   try {
-    await transport.setConfig(configState.data);
+    await activeTransport().setConfig(configState.data);
     configState.isDirty = false;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -62,6 +44,8 @@ async function _flushSave(): Promise<void> {
     configState.isSaving = false;
   }
 }
+
+const _autoSave = new AutoSave(_flushSave);
 
 // ─────────────────────────────────────────────────────────────
 //  STATE
@@ -85,8 +69,7 @@ class ConfigState {
   }
 
   get transportMode(): 'mock' | 'http' | 'serial' {
-    if (devMode.active) return 'mock';
-    return USE_HTTP ? 'http' : 'serial';
+    return _transportMode();
   }
 }
 
@@ -103,38 +86,19 @@ if (browser) {
     _history = new StateHistory(
       () => configState.data,
       (v) => {
-        configState.data    = v ? structuredClone(v) : null;
+        configState.data    = v ? $state.snapshot(v) as FullConfig : null;
         configState.isDirty = true;
-        _scheduleSave();
+        _autoSave.schedule();
       },
       { capacity: 50 },
     );
   });
 }
 
-export function undo(): void    { if (_history?.canUndo) _history.undo(); }
-export function redo(): void    { if (_history?.canRedo) _history.redo(); }
+export function undo(): void       { if (_history?.canUndo) _history.undo(); }
+export function redo(): void       { if (_history?.canRedo) _history.redo(); }
 export function canUndo(): boolean { return _history?.canUndo ?? false; }
 export function canRedo(): boolean { return _history?.canRedo ?? false; }
-
-// ─────────────────────────────────────────────────────────────
-//  RACCOURCIS CLAVIER
-// ─────────────────────────────────────────────────────────────
-
-if (browser) {
-  window.addEventListener('keydown', (e) => {
-    const tag = document.activeElement?.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-    if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
-      e.preventDefault();
-      undo();
-    } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-      e.preventDefault();
-      redo();
-    }
-  });
-}
 
 // ─────────────────────────────────────────────────────────────
 //  CHARGEMENT
@@ -144,14 +108,7 @@ export async function loadConfig(): Promise<void> {
   configState.isLoading = true;
   configState.loadError = null;
   try {
-    if (devMode.active) {
-      await new Promise<void>(r => setTimeout(r, 300));
-      configState.data               = structuredClone(MOCK_CONFIG) as FullConfig;
-      configState.activeProfileIndex = MOCK_CONFIG.active_profile ?? 0;
-      configState.isDirty            = false;
-      return;
-    }
-    const cfg = await transport.getConfig();
+    const cfg = await activeTransport().getConfig();
     configState.data               = cfg;
     configState.activeProfileIndex = cfg.active_profile ?? 0;
     configState.isDirty            = false;
@@ -170,14 +127,13 @@ export async function loadConfig(): Promise<void> {
 // ─────────────────────────────────────────────────────────────
 
 export async function saveConfig(): Promise<void> {
-  if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
-  await _flushSave();
+  await _autoSave.flush();
 }
 
 export async function factoryReset(): Promise<void> {
   configState.isLoading = true;
   try {
-    if (!devMode.active) await transport.factoryReset();
+    await activeTransport().factoryReset();
     await loadConfig();
     toast.success('Reset usine effectué');
   } catch (err) {
@@ -222,7 +178,7 @@ export async function importConfig(file: File): Promise<void> {
   configState.data               = parsed;
   configState.activeProfileIndex = parsed.active_profile ?? 0;
   configState.isDirty            = true;
-  _scheduleSave();
+  _autoSave.schedule();
   toast.success('Config importée', { description: file.name });
 }
 
@@ -243,7 +199,7 @@ export function updateConfig(path: string, value: unknown): void {
   obj[parts[parts.length - 1]] = value;
   configState.data    = cfg as FullConfig;
   configState.isDirty = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 export function setKeyAction(profileIdx: number, layerIdx: number, keyIndex: number, actionValue: number): void {
@@ -251,7 +207,7 @@ export function setKeyAction(profileIdx: number, layerIdx: number, keyIndex: num
   cfg.profiles[profileIdx].layers[layerIdx].keys[keyIndex] = actionValue;
   configState.data    = cfg;
   configState.isDirty = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 export function setEncoderAction(profileIdx: number, layerIdx: number, direction: 'cw' | 'ccw' | 'press', actionValue: number): void {
@@ -260,7 +216,7 @@ export function setEncoderAction(profileIdx: number, layerIdx: number, direction
   if (enc) enc[direction] = actionValue;
   configState.data    = cfg;
   configState.isDirty = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 export function addCombo(profileIdx: number, combo: unknown): void {
@@ -268,7 +224,7 @@ export function addCombo(profileIdx: number, combo: unknown): void {
   cfg.profiles[profileIdx].combos?.push(combo);
   configState.data    = cfg;
   configState.isDirty = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 export function removeCombo(profileIdx: number, comboIdx: number): void {
@@ -276,7 +232,7 @@ export function removeCombo(profileIdx: number, comboIdx: number): void {
   cfg.profiles[profileIdx].combos?.splice(comboIdx, 1);
   configState.data    = cfg;
   configState.isDirty = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -288,7 +244,7 @@ function _applyOp(result: ops.OpResult): void {
   configState.activeProfileIndex = result.selection.profile;
   configState.activeLayerIndex   = result.selection.layer;
   configState.isDirty            = true;
-  _scheduleSave();
+  _autoSave.schedule();
 }
 
 function _currentSelection(): Selection {

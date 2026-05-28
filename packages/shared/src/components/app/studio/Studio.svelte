@@ -2,14 +2,28 @@
   import { APP_CONFIG } from "../../../app.config.js";
   import { serial } from "../../../store/serial.svelte.js";
   import { devMode } from "../../../store/devMode.svelte.js";
+  import { undo, redo } from "../../../store/config.svelte.js";
   import { Toaster } from "svelte-sonner";
   import ConnectBanner from "./ConnectBanner.svelte";
   import Dashboard from "./dashboard/Dashboard.svelte";
   import KeypadTab from "./keypad/KeypadTab.svelte";
 
   const isOnline = $derived(serial.connected || devMode.active);
+
+  function handleKeydown(e: KeyboardEvent) {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+      e.preventDefault();
+      redo();
+    }
+  }
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
   <title>{APP_CONFIG.name} — Studio</title>

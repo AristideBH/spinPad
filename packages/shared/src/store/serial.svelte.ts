@@ -275,6 +275,7 @@ function _rpcCall<T>(
 // ─────────────────────────────────────────────────────────────
 
 export function getConfig(): Promise<FullConfig> {
+  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
   return _enqueueRpc(() => _rpcCall<FullConfig>(
     { cmd: 'get_config' },
     msg => {
@@ -285,6 +286,7 @@ export function getConfig(): Promise<FullConfig> {
 }
 
 export function setConfig(config: FullConfig): Promise<{ status: string }> {
+  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
   return _enqueueRpc(() => _rpcCall<{ status: string }>(
     { cmd: 'set_config', payload: config },
     msg => {
@@ -295,6 +297,7 @@ export function setConfig(config: FullConfig): Promise<{ status: string }> {
 }
 
 export function factoryReset(): Promise<{ status: string; msg: string }> {
+  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
   return _enqueueRpc(() => _rpcCall<{ status: string; msg: string }>(
     { cmd: 'factory_reset' },
     msg => {
@@ -306,6 +309,7 @@ export function factoryReset(): Promise<{ status: string; msg: string }> {
 }
 
 export function getDeviceStatus(): Promise<DeviceStatus> {
+  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
   return _enqueueRpc(() => _rpcCall<DeviceStatus>(
     { cmd: 'device_status' },
     msg => {

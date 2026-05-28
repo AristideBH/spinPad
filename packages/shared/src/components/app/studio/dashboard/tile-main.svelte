@@ -1,10 +1,14 @@
 <script lang="ts">
   import * as Card from '../../../ui/card/index.js';
   import { Badge } from '../../../ui/badge/index.js';
-  import { Button } from '../../../ui/button/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Trash2 } from '@lucide/svelte';
+  import { Button, buttonVariants } from '../../../ui/button/index.js';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Save, Settings2 } from '@lucide/svelte';
   import { deviceStatus } from '../../../../store/deviceStatus.svelte.js';
   import { disconnect, serial } from '../../../../store/serial.svelte.js';
+  import * as Drawer from '../../../../components/ui/drawer/index.js';
+  import SettingsTab from '../settings/SettingsTab.svelte';
+  import { cn } from '../../../../utils.js';
+
 
   import {
     loadConfig,
@@ -12,6 +16,7 @@
     configState,
     factoryReset,
   } from '../../../../store/config.svelte.js';
+  import { Spinner } from '../../../ui/spinner/index.js';
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
@@ -64,16 +69,45 @@
 
   <Card.Footer class="flex flex-wrap gap-2">
     <!-- Actions -->
+    <Button onclick={saveConfig}  disabled={!configState.isDirty} class="gap-1.5">
     {#if configState.isDirty}
-      <Button onclick={saveConfig} class="gap-1.5">💾 Sauvegarder</Button>
+      <Spinner /> Sauvergarde
+    {:else}
+      <Save class="size-4" /> Sauvegardé
     {/if}
+    </Button>
+    
     <Button variant="outline" onclick={loadConfig} class="gap-1.5">
       <RefreshCw class="size-4" /> Recharger
     </Button>
+
+    <Drawer.Root direction="right">
+      <Drawer.Trigger
+        class={cn(buttonVariants({ variant: 'outline' }), 'capitalize')}
+      >
+        <Settings2 /> Paramètres
+      </Drawer.Trigger>
+      <Drawer.Content>
+        <Drawer.Header>
+          <Drawer.Title>Settings</Drawer.Title>
+          <Drawer.Description>This action cannot be undone.</Drawer.Description>
+        </Drawer.Header>
+        <div class="w-full h-full max-w-5xl px-4 mx-auto overflow-y-auto">
+          <SettingsTab />
+        </div>
+
+        <Drawer.Footer>
+          <!-- <Button>Submit</Button>
+          <Drawer.Close>Cancel</Drawer.Close> -->
+        </Drawer.Footer>
+      </Drawer.Content>
+    </Drawer.Root>
+
     {#if serial.connected}
       <Button variant="outline" onclick={disconnect} class="gap-1.5">
         <LogOut class="size-4" /> Déconnecter
       </Button>
+      
       <Button
         variant="destructive"
         onclick={handleFactoryReset}
@@ -81,6 +115,8 @@
       >
         <Trash2 class="size-4" /> Reset usine
       </Button>
+      
+      
     {/if}
   </Card.Footer>
 </Card.Root>

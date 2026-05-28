@@ -227,7 +227,7 @@
     <!-- ══ Écran & Power ════════════════════════════════════════ -->
     <section>
       <h3 class="mb-4 text-base font-semibold">Écran & Power</h3>
-      <div class="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-1">
         <!-- Écran SSD1315 -->
         <Card>
           <CardHeader>
