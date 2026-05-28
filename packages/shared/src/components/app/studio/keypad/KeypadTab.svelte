@@ -1,46 +1,26 @@
 <script lang="ts">
-  import {
-    configState,
-    updateConfig,
-    setKeyAction,
-    setEncoderAction,
-  } from "../../../../store/config.svelte.js";
-  import { KEYCODES, KEYCODES_FLAT, getKeycodeLabel } from "../../../../constants/keycodes.js";
-  import { action, ACTION_TYPES, MEDIA_CODES } from "../../../../constants/action-types.js";
-  import {
-    MACRO_STEP_TYPE,
-    MACRO_MAX_STEPS,
-    MACRO_MAX_PER_PROFILE,
-  } from "../../../../constants/config-schema.js";
-  import type { MacroStep, MacroStepType } from "../../../../constants/config-schema.js";
-  import { Button } from "../../../ui/button/index.js";
-  import { cn } from "../../../../utils.js";
-  import { Input } from "../../../ui/input/index.js";
-  import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-  } from "../../../ui/dialog/index.js";
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-  } from "../../../ui/select/index.js";
-  import { Label } from "../../../ui/label/index.js";
-  import NotConnected from "../../NotConnected.svelte";
-  import {
-    serial,
-    keyMonitor,
-    onKeyEvent,
-  } from "../../../../store/serial.svelte.js";
-  import { Activity } from "@lucide/svelte";
+  import NotConnected from '$shared/components/app/NotConnected.svelte';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import { Button } from '$shared/components/ui/button/index.js';
+  import { Dialog, DialogContent, DialogHeader, DialogTitle } from '$shared/components/ui/dialog/index.js';
+  import { Input } from '$shared/components/ui/input/index.js';
+  import { Label } from '$shared/components/ui/label/index.js';
+  import { Select, SelectContent, SelectItem, SelectTrigger } from '$shared/components/ui/select/index.js';
+  import { action, ACTION_TYPES, MEDIA_CODES } from '$shared/constants/action-types.js';
+  import type { MacroStep, MacroStepType } from '$shared/constants/config-schema.js';
+  import { MACRO_MAX_PER_PROFILE, MACRO_MAX_STEPS, MACRO_STEP_TYPE } from '$shared/constants/config-schema.js';
+  import { getKeycodeLabel, KEYCODES, KEYCODES_FLAT, type Keycode } from '$shared/constants/keycodes.js';
+  import { configState, setEncoderAction, setKeyAction, updateConfig } from '$shared/store/config.svelte.js';
+  import { keyMonitor, onKeyEvent, serial } from '$shared/store/serial.svelte.js';
+  import { cn } from '$shared/utils.js';
+  import { Activity, ListVideo, SeparatorHorizontal, SeparatorVertical, Volume2, ZoomIn } from '@lucide/svelte';
 
   let editingKey = $state<number | null>(null);
   let editingField = $state<string | null>(null);
-  let searchQuery = $state("");
+  let searchQuery = $state('');
   let pickerOpen = $state(false);
+
+  const typedEntries = Object.entries(KEYCODES) as [string, Keycode[]][];
 
   // Local string state bound to the Select components (bits-ui requires strings)
   let profileValue = $state(String(configState.activeProfileIndex));
@@ -49,7 +29,7 @@
   // Sync profile selector → store; reset layer whenever profile changes
   $effect(() => {
     configState.activeProfileIndex = +profileValue;
-    layerValue = "0";
+    layerValue = '0';
     configState.activeLayerIndex = 0;
   });
 
@@ -58,111 +38,84 @@
     configState.activeLayerIndex = +layerValue;
   });
 
-  const profile = $derived(
-    configState.data?.profiles?.[configState.activeProfileIndex],
-  );
+  const profile = $derived(configState.data?.profiles?.[configState.activeProfileIndex]);
   const layer = $derived(profile?.layers?.[configState.activeLayerIndex]);
-  const profileLabel = $derived(profile?.name ?? "Profil");
-  const layerLabel = $derived(layer?.name ?? "Layer");
+  const profileLabel = $derived(profile?.name ?? 'Profil');
+  const layerLabel = $derived(layer?.name ?? 'Layer');
 
   const filteredKeycodes = $derived(
     searchQuery
-      ? KEYCODES_FLAT.filter((k) =>
-          k.label.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
+      ? KEYCODES_FLAT.filter((k: Keycode) => k.label.toLowerCase().includes(searchQuery.toLowerCase()))
       : null,
   );
 
   function openKeyPicker(keyIndex: number): void {
     editingKey = keyIndex;
-    editingField = "key";
-    searchQuery = "";
+    editingField = 'key';
+    searchQuery = '';
     pickerOpen = true;
   }
 
   function openEncoderPicker(field: string): void {
     editingKey = null;
     editingField = field;
-    searchQuery = "";
+    searchQuery = '';
     pickerOpen = true;
   }
 
-  function selectKeycode(kc: {
-    value: number;
-    label: string;
-    category: string;
-  }): void {
-    if (editingField === "key" && editingKey !== null) {
-      setKeyAction(
-        configState.activeProfileIndex,
-        configState.activeLayerIndex,
-        editingKey,
-        kc.value,
-      );
-    } else if (editingField === "encoder_cw") {
-      setEncoderAction(
-        configState.activeProfileIndex,
-        configState.activeLayerIndex,
-        "cw",
-        kc.value,
-      );
-    } else if (editingField === "encoder_ccw") {
-      setEncoderAction(
-        configState.activeProfileIndex,
-        configState.activeLayerIndex,
-        "ccw",
-        kc.value,
-      );
-    } else if (editingField === "encoder_press") {
-      setEncoderAction(
-        configState.activeProfileIndex,
-        configState.activeLayerIndex,
-        "press",
-        kc.value,
-      );
+  function selectKeycode(kc: { value: number; label: string; category: string }): void {
+    if (editingField === 'key' && editingKey !== null) {
+      setKeyAction(configState.activeProfileIndex, configState.activeLayerIndex, editingKey, kc.value);
+    } else if (editingField === 'encoder_cw') {
+      setEncoderAction(configState.activeProfileIndex, configState.activeLayerIndex, 'cw', kc.value);
+    } else if (editingField === 'encoder_ccw') {
+      setEncoderAction(configState.activeProfileIndex, configState.activeLayerIndex, 'ccw', kc.value);
+    } else if (editingField === 'encoder_press') {
+      setEncoderAction(configState.activeProfileIndex, configState.activeLayerIndex, 'press', kc.value);
     }
     pickerOpen = false;
   }
 
-  const CATEGORY_COLORS = {
-    letter: "bg-blue-950/80 hover:bg-blue-900/80",
-    special: "bg-slate-800/80 hover:bg-slate-700/80",
-    modifier: "bg-violet-950/80 hover:bg-violet-900/80",
-    layer: "bg-green-950/80 hover:bg-green-900/80",
-    media: "bg-orange-950/80 hover:bg-orange-900/80",
-    firmware: "bg-purple-950/80 hover:bg-purple-900/80",
-    macro: "bg-rose-950/80 hover:bg-rose-900/80",
+  const CATEGORY_COLORS: Record<string, string> = {
+    letter: 'bg-blue-950/80 hover:bg-blue-900/80',
+    number: 'bg-lime-950/80 hover:bg-lime-900/80',
+    special: 'bg-slate-800/80 hover:bg-slate-700/80',
+    modifier: 'bg-violet-950/80 hover:bg-violet-900/80',
+    layer: 'bg-green-950/80 hover:bg-green-900/80',
+    media: 'bg-orange-950/80 hover:bg-orange-900/80',
+    firmware: 'bg-purple-950/80 hover:bg-purple-900/80',
+    macro: 'bg-rose-950/80 hover:bg-rose-900/80',
   };
 
   // ── Encoder presets ───────────────────────────────────────────
   const ENCODER_PRESETS = [
     {
-      label: "Volume",
-      icon: "🔊",
+      label: 'Volume',
+      icon: Volume2,
       cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_VOL_UP),
       ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_VOL_DN),
     },
     {
-      label: "Scroll ↕",
-      icon: "↕",
+      label: 'Scroll Y',
+      icon: SeparatorHorizontal,
       cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_UP),
       ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_DN),
     },
     {
-      label: "Scroll ↔",
-      icon: "↔",
+      label: 'Scroll X',
+      icon: SeparatorVertical,
       cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_RIGHT),
       ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_SCRL_LEFT),
     },
     {
-      label: "Piste",
-      icon: "⏭",
+      label: 'Piste',
+      icon: ListVideo,
       cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_NEXT),
       ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_PREV),
     },
     {
-      label: "Zoom",
-      icon: "🔍",
+      label: 'Zoom',
+      icon: ZoomIn,
       cw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_ZOOM_IN),
       ccw: action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_ZOOM_OUT),
     },
@@ -171,24 +124,18 @@
   function applyEncoderPreset(preset: { cw: number; ccw: number }): void {
     const pi = configState.activeProfileIndex;
     const li = configState.activeLayerIndex;
-    setEncoderAction(pi, li, "cw", preset.cw);
-    setEncoderAction(pi, li, "ccw", preset.ccw);
+    setEncoderAction(pi, li, 'cw', preset.cw);
+    setEncoderAction(pi, li, 'ccw', preset.ccw);
   }
 
   // ── Orientation visuelle ───────────────────────────────────────
   const ORIENT_DEG = [0, 90, 180, 270];
-  const orientDeg = $derived(
-    ORIENT_DEG[configState.data?.orientation ?? 0] ?? 0,
-  );
+  const orientDeg = $derived(ORIENT_DEG[configState.data?.orientation ?? 0] ?? 0);
   const isTransposed = $derived(orientDeg === 90 || orientDeg === 270);
   const CELL = 72;
   const GAP = 12;
-  const gridW = $derived(
-    isTransposed ? 4 * CELL + 3 * GAP : 3 * CELL + 2 * GAP,
-  );
-  const gridH = $derived(
-    isTransposed ? 3 * CELL + 2 * GAP : 4 * CELL + 3 * GAP,
-  );
+  const gridW = $derived(isTransposed ? 4 * CELL + 3 * GAP : 3 * CELL + 2 * GAP);
+  const gridH = $derived(isTransposed ? 3 * CELL + 2 * GAP : 4 * CELL + 3 * GAP);
 
   // ── Live training mode ────────────────────────────────────────
   let trainingActive = $state(false);
@@ -204,7 +151,7 @@
       trainingCleanup = onKeyEvent((evt: { idx: number; state: string }) => {
         const idx: number = evt.idx;
         if (idx >= 0 && idx < 10) {
-          if (evt.state === "down") {
+          if (evt.state === 'down') {
             keyPressCounts[idx]++;
             keyFlash[idx] = Date.now();
           }
@@ -242,8 +189,7 @@
   let macroSteps = $state<MacroStep[]>([]);
 
   const macros = $derived<MacroStep[][]>(
-    (configState.data?.profiles?.[configState.activeProfileIndex]?.macros ??
-      []) as MacroStep[][],
+    (configState.data?.profiles?.[configState.activeProfileIndex]?.macros ?? []) as MacroStep[][],
   );
 
   function openMacroEditor(idx: number) {
@@ -258,8 +204,7 @@
     while (updated.length <= editingMacroIdx) updated.push([]);
     updated[editingMacroIdx] = macroSteps.slice(0, MACRO_MAX_STEPS);
     // Remove trailing empty macros to keep JSON lean
-    while (updated.length > 0 && updated[updated.length - 1].length === 0)
-      updated.pop();
+    while (updated.length > 0 && updated[updated.length - 1].length === 0) updated.pop();
     updateConfig(`profiles.${pi}.macros`, updated);
     macroEditorOpen = false;
   }
@@ -282,25 +227,23 @@
   }
 
   function macroStepLabel(s: MacroStep): string {
-    if (s.type === MACRO_STEP_TYPE.KEY_DOWN)
-      return `↓ ${getKeycodeLabel(s.keycode ?? 0)}`;
-    if (s.type === MACRO_STEP_TYPE.KEY_UP)
-      return `↑ ${getKeycodeLabel(s.keycode ?? 0)}`;
+    if (s.type === MACRO_STEP_TYPE.KEY_DOWN) return `↓ ${getKeycodeLabel(s.keycode ?? 0)}`;
+    if (s.type === MACRO_STEP_TYPE.KEY_UP) return `↑ ${getKeycodeLabel(s.keycode ?? 0)}`;
     return `⏱ ${s.delay ?? 0}ms`;
   }
 
   // Physical key layout — 4 rows × 3 cols, 10 switches
   const KEY_LAYOUT = [
-    { sw: "SW8", idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: "SW1", idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
-    { sw: "SW9", idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: "SW7", idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: "SW2", idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: "SW10", idx: 7, row: 3, col: 1, rowSpan: 2, colSpan: 1 },
-    { sw: "SW6", idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: "SW3", idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: "SW5", idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: "SW4", idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW8', idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW1', idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
+    { sw: 'SW9', idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW7', idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW2', idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW10', idx: 7, row: 3, col: 1, rowSpan: 2, colSpan: 1 },
+    { sw: 'SW6', idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW3', idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW5', idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW4', idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
   ];
 </script>
 
@@ -323,14 +266,14 @@
 
     {#if serial.connected}
       <Button
-        variant={trainingActive ? "default" : "outline"}
+        variant={trainingActive ? 'default' : 'outline'}
         size="sm"
         onclick={toggleTraining}
         class="gap-1.5 ml-auto"
         title="Mode entraînement : voir les touches pressées en temps réel"
       >
         <Activity class="size-3.5" />
-        {trainingActive ? "Arrêter" : "Entraînement"}
+        {trainingActive ? 'Arrêter' : 'Entraînement'}
       </Button>
     {/if}
 
@@ -355,7 +298,6 @@
       <p class="flex items-center gap-1 mb-2 text-xs text-muted-foreground">
         <span>Orientation</span>
         <span class="px-1 font-mono rounded bg-muted">{orientDeg}°</span>
-        <span>— vue depuis la face avant du SpinPad</span>
       </p>
     {/if}
 
@@ -380,33 +322,23 @@
           <button
             style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
             class={cn(
-              "keycap",
-              editingKey === key.idx && editingField === "key"
-                ? "keycap--active"
-                : "",
-              key.sw === "SW1" || key.sw === "SW10" ? "keycap--alt" : "",
+              'keycap',
+              editingKey === key.idx && editingField === 'key' ? 'keycap--active' : '',
+              key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
             )}
             onclick={() => openKeyPicker(key.idx)}
           >
             <!-- Training flash overlay — not counter-rotated, fills the whole face -->
             {#if trainingActive}
-              <div
-                class="keycap-flash"
-                style="opacity: {keyFlashOpacity(key.idx)}"
-              ></div>
+              <div class="keycap-flash" style="opacity: {keyFlashOpacity(key.idx)}"></div>
               {#if keyPressCounts[key.idx] > 0}
                 <span class="keycap-count">{keyPressCounts[key.idx]}</span>
               {/if}
             {/if}
             <!-- Labels counter-rotated so text stays upright at any device orientation -->
-            <div
-              class="keycap-labels"
-              style="transform: rotate({-orientDeg}deg)"
-            >
+            <div class="keycap-labels" style="transform: rotate({-orientDeg}deg)">
               <span class="keycap-sw">{key.sw}</span>
-              <span class="keycap-label"
-                >{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span
-              >
+              <span class="keycap-label">{getKeycodeLabel(layer.keys[key.idx] ?? 0)}</span>
               {#if key.rowSpan === 2 || key.colSpan === 2}
                 <span class="keycap-size-hint">2u</span>
               {/if}
@@ -419,33 +351,27 @@
     <!-- Encodeur -->
     <div class="mb-6">
       <p class="mb-2 text-sm font-medium text-muted-foreground">Encodeur</p>
-
-      <!-- Sets prédéfinis -->
-      <div class="flex flex-wrap gap-1.5 mb-3">
-        <span class="text-[10px] text-muted-foreground self-center ml-1"
-          >Sets rapides</span
-        >
+      <ButtonGroup.Root>
         {#each ENCODER_PRESETS as preset}
-          <button
-            class="flex items-center gap-1 px-2.5 py-1 rounded border text-xs font-medium bg-card hover:border-violet-500/60 transition-all cursor-pointer"
+          <Button
+            size="sm"
+            variant="outline"
             onclick={() => applyEncoderPreset(preset)}
             title="Appliquer le set {preset.label} (CW + CCW)"
           >
-            <span>{preset.icon}</span>
+            <preset.icon class="size-3" />
             <span>{preset.label}</span>
-          </button>
+          </Button>
         {/each}
-      </div>
+      </ButtonGroup.Root>
 
       <!-- CW / CCW / Press individuels -->
       <div class="flex gap-2">
-        {#each [{ field: "encoder_cw", label: "↻ CW", value: layer.encoder?.cw ?? 0 }, { field: "encoder_ccw", label: "↺ CCW", value: layer.encoder?.ccw ?? 0 }] as enc}
+        {#each [{ field: 'encoder_cw', label: '↻ CW', value: layer.encoder?.cw ?? 0 }, { field: 'encoder_ccw', label: '↺ CCW', value: layer.encoder?.ccw ?? 0 }] as enc}
           <button
             class={cn(
-              "flex flex-col items-center gap-0.5 px-3 py-2 rounded-md border text-sm transition-all cursor-pointer hover:border-violet-500/50",
-              editingField === enc.field
-                ? "border-violet-500 bg-violet-950/40"
-                : "bg-card",
+              'flex flex-col items-center gap-0.5 px-3 py-2 rounded-md border text-sm transition-all cursor-pointer hover:border-violet-500/50',
+              editingField === enc.field ? 'border-violet-500 bg-violet-950/40' : 'bg-card',
             )}
             onclick={() => openEncoderPicker(enc.field)}
           >
@@ -458,30 +384,20 @@
 
     <!-- Training stats panel -->
     {#if trainingActive}
-      <div
-        class="p-3 mt-4 border rounded-lg border-emerald-500/30 bg-emerald-500/5"
-      >
+      <div class="p-3 mt-4 border rounded-lg border-emerald-500/30 bg-emerald-500/5">
         <div class="flex items-center justify-between mb-2">
-          <span
-            class="text-xs font-semibold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5"
-          >
+          <span class="text-xs font-semibold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
             <Activity class="size-3" />
             Mode entraînement actif
           </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onclick={resetTrainingCounts}
-            class="h-6 text-xs text-muted-foreground"
-          >
+          <Button variant="ghost" size="sm" onclick={resetTrainingCounts} class="h-6 text-xs text-muted-foreground">
             Réinitialiser
           </Button>
         </div>
         <p class="text-xs text-muted-foreground">
-          Total : {keyPressCounts.reduce((a, b) => a + b, 0)} appuis · Touche la
-          plus utilisée : SW{keyPressCounts.indexOf(
+          Total : {keyPressCounts.reduce((a, b) => a + b, 0)} appuis · Touche la plus utilisée : SW{keyPressCounts.indexOf(
             Math.max(...keyPressCounts),
-          ) + 1 || "—"}
+          ) + 1 || '—'}
         </p>
       </div>
     {/if}
@@ -490,9 +406,7 @@
     <div class="mt-6">
       <div class="flex items-center justify-between mb-3">
         <h4 class="text-sm font-semibold">Macros</h4>
-        <span class="text-xs text-muted-foreground"
-          >{macros.length}/{MACRO_MAX_PER_PROFILE} utilisées</span
-        >
+        <span class="text-xs text-muted-foreground">{macros.length}/{MACRO_MAX_PER_PROFILE} utilisées</span>
       </div>
       <div class="grid grid-cols-4 gap-1.5">
         {#each Array.from({ length: Math.min(macros.length + 1, MACRO_MAX_PER_PROFILE) }, (_, i) => i) as i}
@@ -507,9 +421,7 @@
         {/each}
       </div>
       <p class="mt-2 text-xs text-muted-foreground">
-        Assigner une macro à une touche : choisir <span
-          class="px-1 font-mono rounded bg-muted">Macro N</span
-        > dans le sélecteur.
+        Assigner une macro à une touche : choisir <span class="px-1 font-mono rounded bg-muted">Macro N</span> dans le sélecteur.
       </p>
     </div>
   {/if}
@@ -523,17 +435,12 @@
 
       <div class="flex-1 pr-1 overflow-y-auto">
         {#if macroSteps.length === 0}
-          <p class="py-4 text-xs text-center text-muted-foreground">
-            Aucune étape. Ajoutez des actions ci-dessous.
-          </p>
+          <p class="py-4 text-xs text-center text-muted-foreground">Aucune étape. Ajoutez des actions ci-dessous.</p>
         {/if}
         <div class="flex flex-col gap-1 mb-3">
           {#each macroSteps as step, si}
-            <div
-              class="flex items-center gap-2 p-2 text-xs border rounded border-border"
-            >
-              <span class="w-4 text-center text-muted-foreground">{si + 1}</span
-              >
+            <div class="flex items-center gap-2 p-2 text-xs border rounded border-border">
+              <span class="w-4 text-center text-muted-foreground">{si + 1}</span>
               <select
                 class="bg-transparent border border-border rounded px-1 py-0.5 text-xs"
                 value={step.type}
@@ -555,10 +462,7 @@
                   value={step.delay ?? 50}
                   onchange={(e: Event) =>
                     updateMacroStep(si, {
-                      delay: Math.min(
-                        1000,
-                        Math.max(1, +(e.target as HTMLInputElement).value),
-                      ),
+                      delay: Math.min(1000, Math.max(1, +(e.target as HTMLInputElement).value)),
                     })}
                 />
                 <span class="text-muted-foreground">ms</span>
@@ -574,9 +478,7 @@
                       keycode: +(e.target as HTMLInputElement).value,
                     })}
                 />
-                <span class="flex-1 text-muted-foreground"
-                  >{getKeycodeLabel(action(0, step.keycode ?? 0))}</span
-                >
+                <span class="flex-1 text-muted-foreground">{getKeycodeLabel(action(0, step.keycode ?? 0))}</span>
               {/if}
               <button
                 type="button"
@@ -633,36 +535,26 @@
         <DialogTitle>Choisir une action</DialogTitle>
       </DialogHeader>
 
-      <Input
-        type="text"
-        placeholder="Rechercher un keycode…"
-        bind:value={searchQuery}
-        autofocus
-        class="shrink-0"
-      />
+      <Input type="text" placeholder="Rechercher un keycode…" bind:value={searchQuery} autofocus class="shrink-0" />
 
       <div class="flex-1 pr-1 mt-2 overflow-y-auto">
         {#if filteredKeycodes}
           <div class="flex flex-wrap gap-1.5">
             {#each filteredKeycodes as kc}
               <Button
-                class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[
-                  kc.category
-                ] ?? 'bg-card'}"
+                class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[kc.category] ?? 'bg-card'}"
                 onclick={() => selectKeycode(kc)}>{kc.label}</Button
               >
             {/each}
           </div>
         {:else}
-          {#each Object.entries(KEYCODES) as [cat, keys]}
+          {#each typedEntries as [cat, keys]}
             <div class="mb-4">
-            <Label class="mb-2 text-xs uppercase">{cat}</Label>
+              <Label class="mb-2 text-xs uppercase">{cat}</Label>
               <div class="flex flex-wrap gap-1.5">
                 {#each keys as kc}
                   <Button
-                    class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[
-                      kc.category
-                    ] ?? 'bg-card'}"
+                    class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[kc.category] ?? 'bg-card'}"
                     onclick={() => selectKeycode(kc)}>{kc.label}</Button
                   >
                 {/each}
@@ -677,18 +569,14 @@
 
 <style>
   /* ── Keycap CSS custom properties ────────────────────────────────
-     Override any of these on .keycap-grid (all keys) or on a
-     specific .keycap (single key) to customise the look.
+    Override any of these on .keycap-grid (all keys) or on a
+    specific .keycap (single key) to customise the look.
   ---------------------------------------------------------------- */
   .keycap-grid {
     /* Base keycap color — change this to theme the whole pad */
     --keycap-color: var(--card);
     /* Keycap side color */
-    --keycap-side-color: color-mix(
-      in oklch,
-      var(--keycap-color) 60%,
-      var(--background)
-    );
+    --keycap-side-color: color-mix(in oklch, var(--keycap-color) 60%, var(--background));
     /* Active/selected keycap color */
     --keycap-color-active: var(--card);
     /* Side-wall height (3D depth effect) */
@@ -724,7 +612,7 @@
   /* Sharp circle with top-to-transparent gradient — simulates the
      concave dish catching light from above */
   .keycap::before {
-    content: "";
+    content: '';
     position: absolute;
     --depress-offset: 8px;
     width: calc(100% - var(--depress-offset));
@@ -734,11 +622,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(
-      to top,
-      rgba(255, 255, 255, 0.035) 0%,
-      rgba(0, 0, 0, 0.17) 100%
-    );
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
     pointer-events: none;
   }
 
@@ -765,11 +649,7 @@
 
   /* ── Active / selected key ───────────────────────────────────── */
   .keycap--active {
-    --keycap-color: color-mix(
-      in oklch,
-      var(--keycap-color-active) 25%,
-      var(--card)
-    );
+    --keycap-color: color-mix(in oklch, var(--keycap-color-active) 25%, var(--card));
     box-shadow:
       0 var(--keycap-depth) 0 var(--keycap-side-color),
       inset 0 1px 0 rgba(255, 255, 255, 0.18),

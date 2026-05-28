@@ -6,7 +6,7 @@ import {
   action,
   getActionType,
   getActionValue,
-} from '../constants/action-types.js';
+} from '$shared/constants/action-types.js';
 
 describe('action encoding round-trip', () => {
   it('encodes and decodes ACTION_TYPE_KC', () => {

@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AutoSave } from '../store/auto-save.js';
+import { AutoSave } from '$shared/store/auto-save.js';
 
 describe('AutoSave', () => {
   beforeEach(() => { vi.useFakeTimers(); });

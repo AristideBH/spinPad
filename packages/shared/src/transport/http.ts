@@ -8,8 +8,8 @@
 //  Build embedded : VITE_TRANSPORT=http (voir build:embedded)
 // ═══════════════════════════════════════════════════════════════
 
-import type { FullConfig }    from '../constants/config-schema.js';
-import type { DeviceStatus }  from '../constants/device-status-schema.js';
+import type { FullConfig }    from '$shared/constants/config-schema.js';
+import type { DeviceStatus }  from '$shared/constants/device-status-schema.js';
 
 const BASE = '';   // Relatif à l'origine
 

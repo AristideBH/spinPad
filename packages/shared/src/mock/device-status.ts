@@ -6,8 +6,8 @@
 //  devMode.active === true.
 // ═══════════════════════════════════════════════════════════════
 
-import type { DeviceStatus } from '../constants/device-status-schema.js';
-import type { MockOptions }  from '../types/dev-mode.js';
+import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
+import type { MockOptions }  from '$shared/types/dev-mode.js';
 
 const FW_VERSION = '1.0.0';
 const FW_BUILD   = 'devmock';

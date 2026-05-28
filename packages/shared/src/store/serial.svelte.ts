@@ -8,9 +8,9 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { toast } from 'svelte-sonner';
-import type { FullConfig }   from '../constants/config-schema.js';
-import type { DeviceStatus } from '../constants/device-status-schema.js';
-import type { RpcQueueEntry, MessageHandler } from '../types/serial.js';
+import type { FullConfig }   from '$shared/constants/config-schema.js';
+import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
+import type { RpcQueueEntry, MessageHandler } from '$shared/types/serial.js';
 
 // WebSerial API n'est pas dans les lib TypeScript standard — types locaux.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PROFILE_ICON_W, PROFILE_ICON_H } from "../../../constants/config-schema.js";
-  import { base64ToGrid, getPixel } from "../../../constants/profile-icon.js";
+  import { PROFILE_ICON_W, PROFILE_ICON_H } from "$shared/constants/config-schema.js";
+  import { base64ToGrid, getPixel } from "$shared/constants/profile-icon.js";
 
   interface Props {
     value?: string; // base64

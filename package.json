@@ -11,13 +11,14 @@
     "build:studio": "pnpm --filter @spinpad/studio build",
     "build:embedded": "pnpm --filter @spinpad/studio build:embedded",
     "codegen": "pnpm --filter @spinpad/shared codegen",
-    "check": "pnpm --filter @spinpad/studio check",
+    "check:studio": "pnpm --filter @spinpad/studio check",
+    "check:shared": "pnpm --filter @spinpad/shared check",
     "changeset": "changeset",
     "version": "changeset version",
     "release:prepare": "changeset version && git add -A"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
+    "@changesets/cli": "^2.31.0",
     "eslint-plugin-svelte": "^3.18.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^4.0.1"

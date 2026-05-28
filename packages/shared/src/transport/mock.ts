@@ -9,16 +9,16 @@
 //    getDeviceStatus() → statut simulé selon devMode.battery/connection
 // ═══════════════════════════════════════════════════════════════
 
-import { devMode } from '../store/devMode.svelte.js';
-import { MOCK_CONFIG } from '../mock/keyboard-config.js';
+import { devMode } from '$shared/store/devMode.svelte.js';
+import { MOCK_CONFIG } from '$shared/mock/keyboard-config.js';
 import {
   makeMockDeviceStatus,
   tickMockDischarge,
   resetMockDischarge,
-} from '../mock/device-status.js';
-import type { FullConfig }   from '../constants/config-schema.js';
-import type { DeviceStatus } from '../constants/device-status-schema.js';
-import type { BatteryScenario } from '../types/dev-mode.js';
+} from '$shared/mock/device-status.js';
+import type { FullConfig }   from '$shared/constants/config-schema.js';
+import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
+import type { BatteryScenario } from '$shared/types/dev-mode.js';
 
 // ── Config transport ──────────────────────────────────────────
 

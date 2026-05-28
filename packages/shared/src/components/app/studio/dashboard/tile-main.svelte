@@ -1,13 +1,13 @@
 <script lang="ts">
-  import * as Card from '../../../ui/card/index.js';
-  import { Badge } from '../../../ui/badge/index.js';
-  import { Button, buttonVariants } from '../../../ui/button/index.js';
+  import * as Card from '$shared/components/ui/card/index.js';
+  import { Badge } from '$shared/components/ui/badge/index.js';
+  import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Save, Settings2 } from '@lucide/svelte';
-  import { deviceStatus } from '../../../../store/deviceStatus.svelte.js';
-  import { disconnect, serial } from '../../../../store/serial.svelte.js';
-  import * as Drawer from '../../../../components/ui/drawer/index.js';
-  import SettingsTab from '../settings/SettingsTab.svelte';
-  import { cn } from '../../../../utils.js';
+  import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
+  import { disconnect, serial } from '$shared/store/serial.svelte.js';
+  import * as Drawer from '$shared/components/ui/drawer/index.js';
+  import SettingsTab from '$shared/components/app/studio/settings/SettingsTab.svelte';
+  import { cn } from '$shared/utils.js';
 
 
   import {
@@ -15,8 +15,8 @@
     saveConfig,
     configState,
     factoryReset,
-  } from '../../../../store/config.svelte.js';
-  import { Spinner } from '../../../ui/spinner/index.js';
+  } from '$shared/store/config.svelte.js';
+  import { Spinner } from '$shared/components/ui/spinner/index.js';
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
@@ -71,7 +71,7 @@
     <!-- Actions -->
     <Button onclick={saveConfig}  disabled={!configState.isDirty} class="gap-1.5">
     {#if configState.isDirty}
-      <Spinner /> Sauvergarde
+      <Spinner /> Sauvegarde
     {:else}
       <Save class="size-4" /> Sauvegardé
     {/if}
@@ -96,10 +96,10 @@
           <SettingsTab />
         </div>
 
-        <Drawer.Footer>
-          <!-- <Button>Submit</Button>
-          <Drawer.Close>Cancel</Drawer.Close> -->
-        </Drawer.Footer>
+        <!-- <Drawer.Footer>
+          <Button>Submit</Button>
+          <Drawer.Close>Cancel</Drawer.Close>
+        </Drawer.Footer> -->
       </Drawer.Content>
     </Drawer.Root>
 
@@ -115,8 +115,6 @@
       >
         <Trash2 class="size-4" /> Reset usine
       </Button>
-      
-      
     {/if}
   </Card.Footer>
 </Card.Root>

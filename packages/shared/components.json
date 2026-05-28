@@ -1,14 +1,14 @@
 {
   "$schema": "https://shadcn-svelte.com/schema.json",
   "tailwind": {
-    "css": "src/app.css",
+    "css": "src/styles/index.css",
     "baseColor": "mist"
   },
   "aliases": {
-    "components": "$shared/components/",
-    "utils": "$shared/utils/",
-    "ui": "$shared/components/ui/",
-    "hooks": "$shared/hooks/",
+    "components": "$shared/components",
+    "utils": "$shared/utils",
+    "ui": "$shared/components/ui",
+    "hooks": "$shared/hooks",
     "lib": "$shared"
   },
   "typescript": true,

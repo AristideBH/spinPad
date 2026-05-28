@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import * as Breadcrumb from "../ui/breadcrumb/index.js";
-  import { safeCapitalize } from "../../utils";
+  import * as Breadcrumb from "$shared/components/ui/breadcrumb/index.js";
+  import { safeCapitalize } from "$shared/utils";
 
   type BreadcrumbItem = {
     label: string;

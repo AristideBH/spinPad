@@ -4,7 +4,7 @@ import {
   defaultConfig,
   CONFIG_NUM_KEYS,
   CONFIG_MAX_PROFILES,
-} from '../constants/config-schema.js';
+} from '$shared/constants/config-schema.js';
 
 describe('validateConfig', () => {
   it('accepts a complete default config', () => {

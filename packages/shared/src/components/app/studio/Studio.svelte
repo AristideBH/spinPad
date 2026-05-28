@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { APP_CONFIG } from "../../../app.config.js";
-  import { serial } from "../../../store/serial.svelte.js";
-  import { devMode } from "../../../store/devMode.svelte.js";
-  import { undo, redo } from "../../../store/config.svelte.js";
-  import { Toaster } from "svelte-sonner";
-  import ConnectBanner from "./ConnectBanner.svelte";
-  import Dashboard from "./dashboard/Dashboard.svelte";
-  import KeypadTab from "./keypad/KeypadTab.svelte";
+  import { APP_CONFIG } from '$shared/app.config.js';
+  import { redo, undo } from '$shared/store/config.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
+  import { serial } from '$shared/store/serial.svelte.js';
+  import { Toaster } from 'svelte-sonner';
+  import ConnectBanner from './ConnectBanner.svelte';
+  import Dashboard from './dashboard/Dashboard.svelte';
+  import KeypadTab from './keypad/KeypadTab.svelte';
 
   const isOnline = $derived(serial.connected || devMode.active);
 

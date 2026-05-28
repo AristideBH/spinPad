@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { deviceStatus } from '../../../../store/deviceStatus.svelte.js';
-  import * as Card from '../../../ui/card/index.js';
+  import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
+  import * as Card from '$shared/components/ui/card/index.js';
 
   import {
     BatteryFull,

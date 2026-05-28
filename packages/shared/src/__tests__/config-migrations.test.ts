@@ -4,8 +4,8 @@ import {
   createSpinpadFile,
   SPINPAD_FILE_TYPE,
   CURRENT_FORMAT_VERSION,
-} from '../constants/config-migrations.js';
-import { defaultConfig } from '../constants/config-schema.js';
+} from '$shared/constants/config-migrations.js';
+import { defaultConfig } from '$shared/constants/config-schema.js';
 
 describe('parseSpinpadFile', () => {
   it('parses a valid v1 wrapper', () => {

@@ -15,9 +15,8 @@ const config = {
             precompress: false,
         }),
 
-        // $lib → shared/src (studio n'a plus de lib propre)
+        // Studio n'a pas de src/lib propre — tout vit dans @spinpad/shared.
         alias: {
-            // $lib: 'src/lib',
             $shared: path.resolve('../shared/src'),
         },
     },

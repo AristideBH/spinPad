@@ -6,8 +6,8 @@
 //  le polling du statut (serial, http, mock).
 // ═══════════════════════════════════════════════════════════════
 
-import type { FullConfig } from '../constants/config-schema.js';
-import type { DeviceStatus } from '../constants/device-status-schema.js';
+import type { FullConfig } from '$shared/constants/config-schema.js';
+import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 
 /** Interface minimale d'un transport de config. */
 export interface Transport {

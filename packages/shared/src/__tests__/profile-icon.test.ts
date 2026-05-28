@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PROFILE_ICON_BYTES } from "../constants/config-schema.js";
+import { PROFILE_ICON_BYTES } from "$shared/constants/config-schema.js";
 import {
   emptyGrid,
   setPixel,
@@ -9,10 +9,10 @@ import {
   gridToBase64,
   base64ToGrid,
   isEmptyIcon,
-} from "../constants/profile-icon.js";
-import { PROFILE_ICON_LIBRARY } from "../constants/profile-icon-library.js";
-import { validateConfig } from "../constants/config-schema.js";
-import { BUILTIN_PROFILE_PRESETS, listProfilePresets } from "../constants/profile-presets.js";
+} from "$shared/constants/profile-icon.js";
+import { PROFILE_ICON_LIBRARY } from "$shared/constants/profile-icon-library.js";
+import { validateConfig } from "$shared/constants/config-schema.js";
+import { BUILTIN_PROFILE_PRESETS, listProfilePresets } from "$shared/constants/profile-presets.js";
 
 describe("profile-icon — codec", () => {
   it("produit exactement PROFILE_ICON_BYTES octets", () => {

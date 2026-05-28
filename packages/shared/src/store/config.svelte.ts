@@ -20,10 +20,10 @@ import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
 import { activeTransport, transportMode as _transportMode } from './transport.js';
 import { AutoSave } from './auto-save.js';
-import { parseSpinpadFile, createSpinpadFile } from '../constants/config-migrations.js';
-import * as ops from '../constants/config-ops.js';
-import type { FullConfig } from '../constants/config-schema.js';
-import type { Selection } from '../constants/config-ops.js';
+import { parseSpinpadFile, createSpinpadFile } from '$shared/constants/config-migrations.js';
+import * as ops from '$shared/constants/config-ops.js';
+import type { FullConfig } from '$shared/constants/config-schema.js';
+import type { Selection } from '$shared/constants/config-ops.js';
 
 // ─────────────────────────────────────────────────────────────
 //  AUTO-SAVE (debounce 800ms)

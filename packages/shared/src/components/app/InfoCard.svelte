@@ -1,5 +1,5 @@
 <script>
-  import { Card, CardContent } from "../ui/card/index.js";
+  import { Card, CardContent } from "$shared/components/ui/card/index.js";
 
   /** @type {string} */
   let { label, value } = $props();

@@ -27,30 +27,47 @@
     "files.exclude": {
       "**/node_modules": true,
       "**/.svelte-kit": true,
-      "**/build": false
+      "**/build": false,
     },
     "search.exclude": {
       "**/node_modules": true,
       "**/build": true,
       "**/.svelte-kit": true,
-      "**/managed_components": true
+      "**/managed_components": true,
     },
-    "[c]": {
-      "editor.defaultFormatter": "ms-vscode.cpp-devtools"
-    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[svelte]": {
-      "editor.defaultFormatter": "svelte.svelte-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "hide-files.files": [],
     "liveServer.settings.multiRootWorkspaceName": "🖌️ Studio",
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "[html]": {
+      "editor.defaultFormatter": "vscode.html-language-features",
+    },
+    "editor.formatOnPaste": true,
   },
   "extensions": {
     "recommendations": [
       "espressif.esp-idf-extension",
       "svelte.svelte-vscode",
+      "esbenp.prettier-vscode",
       "bradlc.vscode-tailwindcss",
-      "dbaeumer.vscode-eslint"
-    ]
+      "dbaeumer.vscode-eslint",
+    ],
+    "unwantedRecommendations": ["ardenivanov.svelte-intellisense"],
   }
 }

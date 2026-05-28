@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { defaultConfig, CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS } from "../constants/config-schema.js";
-import * as ops from "../constants/config-ops.js";
-import { BUILTIN_PROFILE_PRESETS } from "../constants/profile-presets.js";
+import { defaultConfig, CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS } from "$shared/constants/config-schema.js";
+import * as ops from "$shared/constants/config-ops.js";
+import { BUILTIN_PROFILE_PRESETS } from "$shared/constants/profile-presets.js";
 
 const sel = (profile = 0, layer = 0) => ({ profile, layer });
 
