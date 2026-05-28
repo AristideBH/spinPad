@@ -6,7 +6,7 @@
 //  les différentes branches de la DeviceStatusCard à chaud.
 // ═══════════════════════════════════════════════════════════════
 
-import type { BatteryScenario, ConnectionScenario } from '../types/dev-mode.js';
+import type { BatteryScenario, ConnectionScenario } from '$shared/types/dev-mode.js';
 
 class DevModeState {
   active     = $state(import.meta.env.VITE_DEV_MODE === 'true');

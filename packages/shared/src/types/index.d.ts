@@ -18,7 +18,7 @@ export type {
   WidgetType,
   MacroStep,
   MacroStepType,
-} from '../constants/config-schema.js';
+} from '$shared/constants/config-schema.js';
 
 // ── Device Status ────────────────────────────────────────────────
 export type {
@@ -30,17 +30,17 @@ export type {
   FirmwareInfo,
   ConnectionStatus,
   DeviceStatus,
-} from '../constants/device-status-schema.js';
+} from '$shared/constants/device-status-schema.js';
 
 // ── Icon ─────────────────────────────────────────────────────────
-export type { BoolGrid } from '../constants/profile-icon.js';
-export type { IconLibraryEntry } from '../constants/profile-icon-library.js';
+export type { BoolGrid } from '$shared/constants/profile-icon.js';
+export type { IconLibraryEntry } from '$shared/constants/profile-icon-library.js';
 
 // ── Presets ──────────────────────────────────────────────────────
 export type {
   ProfilePreset,
   ProfilePresetSource,
-} from '../constants/profile-presets.js';
+} from '$shared/constants/profile-presets.js';
 
 // ── Transport ────────────────────────────────────────────────────
 export type {

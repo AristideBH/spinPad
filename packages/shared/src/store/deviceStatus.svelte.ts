@@ -11,7 +11,7 @@
 
 import { browser } from '$app/environment';
 import { activeStatusTransport } from './transport.js';
-import type { DeviceStatus } from '../constants/device-status-schema.js';
+import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 
 class DeviceStatusState {
   data    = $state<DeviceStatus | null>(null);

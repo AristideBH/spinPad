@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { serial } from "../../store/serial.svelte.js";
-  import { devMode } from "../../store/devMode.svelte.js";
-  import { Spinner } from "../ui/spinner/index.js";
+  import { serial } from "$shared/store/serial.svelte.js";
+  import { devMode } from "$shared/store/devMode.svelte.js";
+  import { Spinner } from "$shared/components/ui/spinner/index.js";
 
-  import { Badge } from "../ui/badge/index.js";
-  import { configState, loadConfig } from "../../store/config.svelte";
-  import { Button } from "../ui/button";
+  import { Badge } from "$shared/components/ui/badge/index.js";
+  import { configState, loadConfig } from "$shared/store/config.svelte";
+  import { Button } from "$shared/components/ui/button";
   import { FlaskConical } from "@lucide/svelte";
 
   async function handleDevMode() {

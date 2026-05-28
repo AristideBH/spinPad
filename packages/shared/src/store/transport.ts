@@ -13,10 +13,10 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { devMode }          from './devMode.svelte.js';
-import * as mockTransport   from '../transport/mock.js';
-import * as httpTransport   from '../transport/http.js';
+import * as mockTransport   from '$shared/transport/mock.js';
+import * as httpTransport   from '$shared/transport/http.js';
 import * as serialTransport from './serial.svelte.js';
-import type { Transport, DeviceStatusTransport } from '../types/transport.js';
+import type { Transport, DeviceStatusTransport } from '$shared/types/transport.js';
 
 // Littéral de chaîne intentionnel — nécessaire pour le tree-shaking Vite.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

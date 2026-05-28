@@ -8,10 +8,13 @@
   import * as Sidebar from "$shared/components/ui/sidebar/index.js";
   import AppSidebar from "../lib/components/ui/app-sidebar.svelte";
 
+  import { PersistedState } from "runed";
   import { createHeaderRight } from "$lib/header-right.svelte.js";
   import { getBreadcrumbs } from "$lib/nav.js";
 
   let { children } = $props();
+
+  const sidebarOpen = new PersistedState('spinpad-sidebar-open', true);
 
   const headerRight = createHeaderRight();
   const breadcrumbs = $derived(getBreadcrumbs($page.url.pathname, $page.data?.title as string | undefined));
@@ -20,7 +23,7 @@
 <ModeWatcher defaultMode="dark" />
 
 
-<Sidebar.Provider>
+<Sidebar.Provider bind:open={sidebarOpen.current}>
   <AppSidebar />
   <Sidebar.Inset>
     <header class="sticky top-0 z-10 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl">

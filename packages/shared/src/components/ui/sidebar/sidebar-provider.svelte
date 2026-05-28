@@ -1,10 +1,8 @@
 <script lang="ts">
-	import * as Tooltip from "../tooltip/index.js";
-	import { cn, type WithElementRef } from "../../../utils.js";
+	import * as Tooltip from "$shared/components/ui/tooltip/index.js";
+	import { cn, type WithElementRef } from "$shared/utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
 	import {
-		SIDEBAR_COOKIE_MAX_AGE,
-		SIDEBAR_COOKIE_NAME,
 		SIDEBAR_WIDTH,
 		SIDEBAR_WIDTH_ICON,
 	} from "./constants.js";
@@ -28,9 +26,6 @@
 		setOpen: (value: boolean) => {
 			open = value;
 			onOpenChange(value);
-
-			// This sets the cookie to keep the sidebar state.
-			document.cookie = `${SIDEBAR_COOKIE_NAME}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
 		},
 	});
 </script>

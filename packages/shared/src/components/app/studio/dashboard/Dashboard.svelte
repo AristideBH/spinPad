@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { disconnect, serial } from '../../../../store/serial.svelte.js';
+  import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import {
     loadConfig,
     saveConfig,
     configState,
     factoryReset,
-  } from '../../../../store/config.svelte.js';
-  import { devMode } from '../../../../store/devMode.svelte.js';
-  import { refreshDeviceStatus } from '../../../../store/deviceStatus.svelte.js';
-  import { Button } from '../../../ui/button/index.js';
-  import { Badge } from '../../../ui/badge/index.js';
-  import { CardContent } from '../../../ui/card/index.js';
-  import * as Card from '../../../ui/card/index.js';
-  import InfoCard from '../../InfoCard.svelte';
+  } from '$shared/store/config.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
+  import { refreshDeviceStatus } from '$shared/store/deviceStatus.svelte.js';
+  import { Button } from '$shared/components/ui/button/index.js';
+  import { Badge } from '$shared/components/ui/badge/index.js';
+  import { CardContent } from '$shared/components/ui/card/index.js';
+  import * as Card from '$shared/components/ui/card/index.js';
+  import InfoCard from '$shared/components/app/InfoCard.svelte';
   import BatteryTile from './tile-battery.svelte';
-  import { Spinner } from '../../../ui/spinner/index.js';
-  import * as Item from '../../../ui/item/index.js';
+  import { Spinner } from '$shared/components/ui/spinner/index.js';
+  import * as Item from '$shared/components/ui/item/index.js';
   import { RefreshCw, LogOut, Trash2, FlaskConical } from '@lucide/svelte';
   import FirmwareTile from './tile-firmware.svelte';
   import MainTile from './tile-main.svelte';

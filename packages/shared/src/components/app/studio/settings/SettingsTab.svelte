@@ -2,32 +2,32 @@
   import {
     configState,
     updateConfig,
-  } from "../../../../store/config.svelte.js";
-  import { serial, setTime } from "../../../../store/serial.svelte.js";
+  } from "$shared/store/config.svelte.js";
+  import { serial, setTime } from "$shared/store/serial.svelte.js";
   import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
-  } from "../../../ui/card/index.js";
-  import { Input } from "../../../ui/input/index.js";
-  import { Slider } from "../../../ui/slider/index.js";
-  import { Switch } from "../../../ui/switch/index.js";
-  import { Label } from "../../../ui/label/index.js";
-  import { Badge } from "../../../ui/badge/index.js";
-  import { Button } from "../../../ui/button/index.js";
-  import SettingsField from "../../SettingsField.svelte";
-  import NotConnected from "../../NotConnected.svelte";
+  } from "$shared/components/ui/card/index.js";
+  import { Input } from "$shared/components/ui/input/index.js";
+  import { Slider } from "$shared/components/ui/slider/index.js";
+  import { Switch } from "$shared/components/ui/switch/index.js";
+  import { Label } from "$shared/components/ui/label/index.js";
+  import { Badge } from "$shared/components/ui/badge/index.js";
+  import { Button } from "$shared/components/ui/button/index.js";
+  import SettingsField from "$shared/components/app/SettingsField.svelte";
+  import NotConnected from "$shared/components/app/NotConnected.svelte";
   import {
     WIDGET_TYPE,
     WIDGET_LABELS,
     DISPLAY_MAX_WIDGETS,
     defaultWidgets,
-  } from "../../../../constants/config-schema.js";
+  } from "$shared/constants/config-schema.js";
   import type {
     WidgetConfig,
     WidgetType,
-  } from "../../../../constants/config-schema.js";
+  } from "$shared/constants/config-schema.js";
 
   // ── Orientation ───────────────────────────────────────────────
   const ORIENTATIONS = [

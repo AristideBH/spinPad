@@ -11,36 +11,47 @@
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types.js';
 
 const {
-  ACTION_TYPE_KC, ACTION_TYPE_MOD, ACTION_TYPE_LAYER_MO,
-  ACTION_TYPE_LAYER_TG, ACTION_TYPE_LAYER_TO,
-  ACTION_TYPE_MEDIA, ACTION_TYPE_SPECIAL, ACTION_TYPE_MACRO,
+  ACTION_TYPE_KC,
+  ACTION_TYPE_MOD,
+  ACTION_TYPE_LAYER_MO,
+  ACTION_TYPE_LAYER_TG,
+  ACTION_TYPE_LAYER_TO,
+  ACTION_TYPE_MEDIA,
+  ACTION_TYPE_SPECIAL,
+  ACTION_TYPE_MACRO,
 } = ACTION_TYPES;
 
 const {
-  MEDIA_VOL_UP, MEDIA_VOL_DN, MEDIA_MUTE, MEDIA_PLAY,
-  MEDIA_NEXT, MEDIA_PREV, MEDIA_SCRL_UP, MEDIA_SCRL_DN,
-  MEDIA_ZOOM_IN, MEDIA_ZOOM_OUT, MEDIA_SCRL_LEFT, MEDIA_SCRL_RIGHT,
+  MEDIA_VOL_UP,
+  MEDIA_VOL_DN,
+  MEDIA_MUTE,
+  MEDIA_PLAY,
+  MEDIA_NEXT,
+  MEDIA_PREV,
+  MEDIA_SCRL_UP,
+  MEDIA_SCRL_DN,
+  MEDIA_ZOOM_IN,
+  MEDIA_ZOOM_OUT,
+  MEDIA_SCRL_LEFT,
+  MEDIA_SCRL_RIGHT,
 } = MEDIA_CODES;
 
 const {
-  SPECIAL_BLE_SWITCH, SPECIAL_ORIENT_CW, SPECIAL_ORIENT_CCW,
-  SPECIAL_LED_BRIGHT_UP, SPECIAL_LED_BRIGHT_DN, SPECIAL_STUDIO_MODE,
+  SPECIAL_BLE_SWITCH,
+  SPECIAL_ORIENT_CW,
+  SPECIAL_ORIENT_CCW,
+  SPECIAL_LED_BRIGHT_UP,
+  SPECIAL_LED_BRIGHT_DN,
+  SPECIAL_STUDIO_MODE,
 } = SPECIAL_CODES;
 
 // ── Types ───────────────────────────────────────────────────────
 
-export type KeycodeCategory =
-  | 'letter'
-  | 'special'
-  | 'modifier'
-  | 'layer'
-  | 'media'
-  | 'firmware'
-  | 'macro';
+export type KeycodeCategory = 'letter' | 'special' | 'modifier' | 'layer' | 'media' | 'firmware' | 'macro' | 'number';
 
 export interface Keycode {
-  label:    string;
-  value:    number;
+  label: string;
+  value: number;
   category: KeycodeCategory;
 }
 
@@ -55,12 +66,12 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'D', value: action(ACTION_TYPE_KC, 0x07), category: 'letter' },
     { label: 'E', value: action(ACTION_TYPE_KC, 0x08), category: 'letter' },
     { label: 'F', value: action(ACTION_TYPE_KC, 0x09), category: 'letter' },
-    { label: 'G', value: action(ACTION_TYPE_KC, 0x0A), category: 'letter' },
-    { label: 'H', value: action(ACTION_TYPE_KC, 0x0B), category: 'letter' },
-    { label: 'I', value: action(ACTION_TYPE_KC, 0x0C), category: 'letter' },
-    { label: 'J', value: action(ACTION_TYPE_KC, 0x0D), category: 'letter' },
-    { label: 'K', value: action(ACTION_TYPE_KC, 0x0E), category: 'letter' },
-    { label: 'L', value: action(ACTION_TYPE_KC, 0x0F), category: 'letter' },
+    { label: 'G', value: action(ACTION_TYPE_KC, 0x0a), category: 'letter' },
+    { label: 'H', value: action(ACTION_TYPE_KC, 0x0b), category: 'letter' },
+    { label: 'I', value: action(ACTION_TYPE_KC, 0x0c), category: 'letter' },
+    { label: 'J', value: action(ACTION_TYPE_KC, 0x0d), category: 'letter' },
+    { label: 'K', value: action(ACTION_TYPE_KC, 0x0e), category: 'letter' },
+    { label: 'L', value: action(ACTION_TYPE_KC, 0x0f), category: 'letter' },
     { label: 'M', value: action(ACTION_TYPE_KC, 0x10), category: 'letter' },
     { label: 'N', value: action(ACTION_TYPE_KC, 0x11), category: 'letter' },
     { label: 'O', value: action(ACTION_TYPE_KC, 0x12), category: 'letter' },
@@ -71,44 +82,58 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'T', value: action(ACTION_TYPE_KC, 0x17), category: 'letter' },
     { label: 'U', value: action(ACTION_TYPE_KC, 0x18), category: 'letter' },
     { label: 'V', value: action(ACTION_TYPE_KC, 0x19), category: 'letter' },
-    { label: 'W', value: action(ACTION_TYPE_KC, 0x1A), category: 'letter' },
-    { label: 'X', value: action(ACTION_TYPE_KC, 0x1B), category: 'letter' },
-    { label: 'Y', value: action(ACTION_TYPE_KC, 0x1C), category: 'letter' },
-    { label: 'Z', value: action(ACTION_TYPE_KC, 0x1D), category: 'letter' },
+    { label: 'W', value: action(ACTION_TYPE_KC, 0x1a), category: 'letter' },
+    { label: 'X', value: action(ACTION_TYPE_KC, 0x1b), category: 'letter' },
+    { label: 'Y', value: action(ACTION_TYPE_KC, 0x1c), category: 'letter' },
+    { label: 'Z', value: action(ACTION_TYPE_KC, 0x1d), category: 'letter' },
+  ],
+
+  // ── Nombres ──────────────────────────────────────────────────
+  number: [
+    { label: '1', value: action(ACTION_TYPE_KC, 0x1e), category: 'number' },
+    { label: '2', value: action(ACTION_TYPE_KC, 0x1f), category: 'number' },
+    { label: '3', value: action(ACTION_TYPE_KC, 0x20), category: 'number' },
+    { label: '4', value: action(ACTION_TYPE_KC, 0x21), category: 'number' },
+    { label: '5', value: action(ACTION_TYPE_KC, 0x22), category: 'number' },
+    { label: '6', value: action(ACTION_TYPE_KC, 0x23), category: 'number' },
+    { label: '7', value: action(ACTION_TYPE_KC, 0x24), category: 'number' },
+    { label: '8', value: action(ACTION_TYPE_KC, 0x25), category: 'number' },
+    { label: '9', value: action(ACTION_TYPE_KC, 0x26), category: 'number' },
+    { label: '0', value: action(ACTION_TYPE_KC, 0x27), category: 'number' },
   ],
 
   // ── Touches spéciales ────────────────────────────────────────
   special: [
-    { label: 'None',  value: 0,                             category: 'special' },
-    { label: 'Esc',   value: action(ACTION_TYPE_KC, 0x29),  category: 'special' },
-    { label: 'Enter', value: action(ACTION_TYPE_KC, 0x28),  category: 'special' },
-    { label: 'Space', value: action(ACTION_TYPE_KC, 0x2C),  category: 'special' },
-    { label: 'Bksp',  value: action(ACTION_TYPE_KC, 0x2A),  category: 'special' },
-    { label: 'Tab',   value: action(ACTION_TYPE_KC, 0x2B),  category: 'special' },
-    { label: 'Del',   value: action(ACTION_TYPE_KC, 0x4C),  category: 'special' },
-    { label: 'F1',    value: action(ACTION_TYPE_KC, 0x3A),  category: 'special' },
-    { label: 'F2',    value: action(ACTION_TYPE_KC, 0x3B),  category: 'special' },
-    { label: 'F3',    value: action(ACTION_TYPE_KC, 0x3C),  category: 'special' },
-    { label: 'F4',    value: action(ACTION_TYPE_KC, 0x3D),  category: 'special' },
-    { label: 'F5',    value: action(ACTION_TYPE_KC, 0x3E),  category: 'special' },
-    { label: 'F6',    value: action(ACTION_TYPE_KC, 0x3F),  category: 'special' },
-    { label: 'F7',    value: action(ACTION_TYPE_KC, 0x40),  category: 'special' },
-    { label: 'F8',    value: action(ACTION_TYPE_KC, 0x41),  category: 'special' },
-    { label: 'F9',    value: action(ACTION_TYPE_KC, 0x42),  category: 'special' },
-    { label: 'F10',   value: action(ACTION_TYPE_KC, 0x43),  category: 'special' },
-    { label: 'F11',   value: action(ACTION_TYPE_KC, 0x44),  category: 'special' },
-    { label: 'F12',   value: action(ACTION_TYPE_KC, 0x45),  category: 'special' },
+    { label: 'None', value: 0, category: 'special' },
+    { label: 'Esc', value: action(ACTION_TYPE_KC, 0x29), category: 'special' },
+    { label: 'Enter', value: action(ACTION_TYPE_KC, 0x28), category: 'special' },
+    { label: 'Space', value: action(ACTION_TYPE_KC, 0x2c), category: 'special' },
+    { label: 'Bksp', value: action(ACTION_TYPE_KC, 0x2a), category: 'special' },
+    { label: 'Tab', value: action(ACTION_TYPE_KC, 0x2b), category: 'special' },
+    { label: 'Del', value: action(ACTION_TYPE_KC, 0x4c), category: 'special' },
+    { label: 'F1', value: action(ACTION_TYPE_KC, 0x3a), category: 'special' },
+    { label: 'F2', value: action(ACTION_TYPE_KC, 0x3b), category: 'special' },
+    { label: 'F3', value: action(ACTION_TYPE_KC, 0x3c), category: 'special' },
+    { label: 'F4', value: action(ACTION_TYPE_KC, 0x3d), category: 'special' },
+    { label: 'F5', value: action(ACTION_TYPE_KC, 0x3e), category: 'special' },
+    { label: 'F6', value: action(ACTION_TYPE_KC, 0x3f), category: 'special' },
+    { label: 'F7', value: action(ACTION_TYPE_KC, 0x40), category: 'special' },
+    { label: 'F8', value: action(ACTION_TYPE_KC, 0x41), category: 'special' },
+    { label: 'F9', value: action(ACTION_TYPE_KC, 0x42), category: 'special' },
+    { label: 'F10', value: action(ACTION_TYPE_KC, 0x43), category: 'special' },
+    { label: 'F11', value: action(ACTION_TYPE_KC, 0x44), category: 'special' },
+    { label: 'F12', value: action(ACTION_TYPE_KC, 0x45), category: 'special' },
   ],
 
   // ── Modificateurs ────────────────────────────────────────────
   modifiers: [
-    { label: 'L-Ctrl',  value: action(ACTION_TYPE_MOD, 0x01), category: 'modifier' },
+    { label: 'L-Ctrl', value: action(ACTION_TYPE_MOD, 0x01), category: 'modifier' },
     { label: 'L-Shift', value: action(ACTION_TYPE_MOD, 0x02), category: 'modifier' },
-    { label: 'L-Alt',   value: action(ACTION_TYPE_MOD, 0x04), category: 'modifier' },
-    { label: 'L-GUI',   value: action(ACTION_TYPE_MOD, 0x08), category: 'modifier' },
-    { label: 'R-Ctrl',  value: action(ACTION_TYPE_MOD, 0x10), category: 'modifier' },
+    { label: 'L-Alt', value: action(ACTION_TYPE_MOD, 0x04), category: 'modifier' },
+    { label: 'L-GUI', value: action(ACTION_TYPE_MOD, 0x08), category: 'modifier' },
+    { label: 'R-Ctrl', value: action(ACTION_TYPE_MOD, 0x10), category: 'modifier' },
     { label: 'R-Shift', value: action(ACTION_TYPE_MOD, 0x20), category: 'modifier' },
-    { label: 'R-Alt',   value: action(ACTION_TYPE_MOD, 0x40), category: 'modifier' },
+    { label: 'R-Alt', value: action(ACTION_TYPE_MOD, 0x40), category: 'modifier' },
   ],
 
   // ── Layers ───────────────────────────────────────────────────
@@ -127,34 +152,34 @@ export const KEYCODES: Record<string, Keycode[]> = {
 
   // ── Médias ───────────────────────────────────────────────────
   media: [
-    { label: 'Vol+',  value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_UP),    category: 'media' },
-    { label: 'Vol-',  value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_DN),    category: 'media' },
-    { label: 'Mute',  value: action(ACTION_TYPE_MEDIA, MEDIA_MUTE),      category: 'media' },
-    { label: 'Play',  value: action(ACTION_TYPE_MEDIA, MEDIA_PLAY),      category: 'media' },
-    { label: 'Next',  value: action(ACTION_TYPE_MEDIA, MEDIA_NEXT),      category: 'media' },
-    { label: 'Prev',  value: action(ACTION_TYPE_MEDIA, MEDIA_PREV),      category: 'media' },
-    { label: 'Scrl↑', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_UP),   category: 'media' },
-    { label: 'Scrl↓', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_DN),   category: 'media' },
+    { label: 'Vol+', value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_UP), category: 'media' },
+    { label: 'Vol-', value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_DN), category: 'media' },
+    { label: 'Mute', value: action(ACTION_TYPE_MEDIA, MEDIA_MUTE), category: 'media' },
+    { label: 'Play', value: action(ACTION_TYPE_MEDIA, MEDIA_PLAY), category: 'media' },
+    { label: 'Next', value: action(ACTION_TYPE_MEDIA, MEDIA_NEXT), category: 'media' },
+    { label: 'Prev', value: action(ACTION_TYPE_MEDIA, MEDIA_PREV), category: 'media' },
+    { label: 'Scrl↑', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_UP), category: 'media' },
+    { label: 'Scrl↓', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_DN), category: 'media' },
     { label: 'Scrl←', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_LEFT), category: 'media' },
-    { label: 'Scrl→', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_RIGHT),category: 'media' },
-    { label: 'Zoom+', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_IN),   category: 'media' },
-    { label: 'Zoom-', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_OUT),  category: 'media' },
+    { label: 'Scrl→', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_RIGHT), category: 'media' },
+    { label: 'Zoom+', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_IN), category: 'media' },
+    { label: 'Zoom-', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_OUT), category: 'media' },
   ],
 
   // ── Spéciaux firmware ────────────────────────────────────────
   firmware: [
-    { label: 'BLE Switch',  value: action(ACTION_TYPE_SPECIAL, SPECIAL_BLE_SWITCH),    category: 'firmware' },
-    { label: 'Studio Mode', value: action(ACTION_TYPE_SPECIAL, SPECIAL_STUDIO_MODE),   category: 'firmware' },
-    { label: 'Orient ↻',    value: action(ACTION_TYPE_SPECIAL, SPECIAL_ORIENT_CW),     category: 'firmware' },
-    { label: 'Orient ↺',    value: action(ACTION_TYPE_SPECIAL, SPECIAL_ORIENT_CCW),    category: 'firmware' },
-    { label: 'LED +',       value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_UP), category: 'firmware' },
-    { label: 'LED -',       value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
+    { label: 'BLE Switch', value: action(ACTION_TYPE_SPECIAL, SPECIAL_BLE_SWITCH), category: 'firmware' },
+    { label: 'Studio Mode', value: action(ACTION_TYPE_SPECIAL, SPECIAL_STUDIO_MODE), category: 'firmware' },
+    { label: 'Orient ↻', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ORIENT_CW), category: 'firmware' },
+    { label: 'Orient ↺', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ORIENT_CCW), category: 'firmware' },
+    { label: 'LED +', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_UP), category: 'firmware' },
+    { label: 'LED -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
   ],
 
   // ── Macros ────────────────────────────────────────────────────
   macros: Array.from({ length: 16 }, (_, i) => ({
-    label:    `Macro ${i}`,
-    value:    action(ACTION_TYPE_MACRO, i),
+    label: `Macro ${i}`,
+    value: action(ACTION_TYPE_MACRO, i),
     category: 'macro' as KeycodeCategory,
   })),
 };
@@ -165,10 +190,10 @@ export const KEYCODES_FLAT: Keycode[] = Object.values(KEYCODES).flat();
 /** Obtenir le label d'un keycode par valeur */
 export function getKeycodeLabel(value: number): string {
   if (value === 0) return '—';
-  const kc = KEYCODES_FLAT.find(k => k.value === value);
+  const kc = KEYCODES_FLAT.find((k) => k.value === value);
   if (kc) return kc.label;
   // Fallback pour macros non encore dans la table (index > 15)
-  const type = (value >> 12) & 0xF;
-  if (type === ACTION_TYPE_MACRO) return `Macro ${value & 0x0FFF}`;
+  const type = (value >> 12) & 0xf;
+  if (type === ACTION_TYPE_MACRO) return `Macro ${value & 0x0fff}`;
   return `0x${value.toString(16).toUpperCase()}`;
 }

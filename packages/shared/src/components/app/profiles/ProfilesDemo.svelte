@@ -9,16 +9,16 @@
     deleteLayer,
     editLayer,
     setProfileIcon,
-  } from "../../../store/config.svelte.js";
-  import { serial, connect, disconnect } from "../../../store/serial.svelte.js";
+  } from "$shared/store/config.svelte.js";
+  import { serial, connect, disconnect } from "$shared/store/serial.svelte.js";
   import {
     listProfilePresets,
     type ProfilePreset,
-  } from "../../../constants/profile-presets.js";
+  } from "$shared/constants/profile-presets.js";
   import {
     CONFIG_MAX_PROFILES,
     CONFIG_MAX_LAYERS,
-  } from "../../../constants/config-schema.js";
+  } from "$shared/constants/config-schema.js";
   import IconPreview from "./IconPreview.svelte";
   import IconEditor from "./IconEditor.svelte";
 

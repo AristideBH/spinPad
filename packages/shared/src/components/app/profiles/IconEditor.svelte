@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PROFILE_ICON_W, PROFILE_ICON_H } from "../../../constants/config-schema.js";
+  import { PROFILE_ICON_W, PROFILE_ICON_H } from "$shared/constants/config-schema.js";
   import {
     emptyGrid,
     getPixel,
@@ -14,8 +14,8 @@
     drawEllipse,
     drawEllipseFill,
     type BoolGrid,
-  } from "../../../constants/profile-icon.js";
-  import { PROFILE_ICON_LIBRARY } from "../../../constants/profile-icon-library.js";
+  } from "$shared/constants/profile-icon.js";
+  import { PROFILE_ICON_LIBRARY } from "$shared/constants/profile-icon-library.js";
   import {
     Pencil, Minus, Square, SquareDashed, Circle, Disc3,
     Trash2, FlipHorizontal2, Save, RotateCcw, Upload, Download, Copy, Check,

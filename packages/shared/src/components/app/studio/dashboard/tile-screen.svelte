@@ -1,11 +1,10 @@
 <script lang="ts">
-  import * as Card from '../../../ui/card/index.js';
-  import { Button } from '../../../ui/button/index.js';
+   import * as Card from '$shared/components/ui/card/index.js';
+  import { Button } from '$shared/components/ui/button/index.js';
   import { SlidersHorizontal } from '@lucide/svelte';
 
   async function handleScreenOption() {
    //TODO
-    alert('TODO');
     
   }
 </script>
@@ -18,7 +17,7 @@
         variant="ghost"
         class="gap-1.5"
         size="xs"
-        on:click={() => handleScreenOption() }
+        onclick={() => handleScreenOption() }
       >
         <SlidersHorizontal class="size-3" />
       </Button>

@@ -2,8 +2,8 @@
 //  mock/keyboard-config.ts — Configuration mock complète
 // ═══════════════════════════════════════════════════════════════
 
-import { action, ACTION_TYPES, MEDIA_CODES } from '../constants/action-types.js';
-import type { FullConfig } from '../constants/config-schema.js';
+import { action, ACTION_TYPES, MEDIA_CODES } from '$shared/constants/action-types.js';
+import type { FullConfig } from '$shared/constants/config-schema.js';
 
 // ── Action type constants ─────────────────────────────────────
 const {

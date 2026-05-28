@@ -17,14 +17,15 @@
     "codegen": "tsx scripts/codegen.mjs",
     "build": "tsx scripts/codegen.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "ui:add": "pnpm dlx shadcn-svelte@latest add"
   },
   "peerDependencies": {
     "svelte": ">=5.0.0"
   },
   "dependencies": {
-    "@internationalized/date": "^3.12.1",
-    "@lucide/svelte": "^1.16.0",
+    "@internationalized/date": "^3.12.2",
+    "@lucide/svelte": "^1.17.0",
     "bits-ui": "^2.18.1",
     "clsx": "^2.1.1",
     "mode-watcher": "^1.1.0",
@@ -36,6 +37,8 @@
   },
   "devDependencies": {
     "@types/w3c-web-serial": "^1.0.8",
+    "shadcn-svelte": "^1.2.7",
+    "tailwindcss": "^4.3.0",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.7"

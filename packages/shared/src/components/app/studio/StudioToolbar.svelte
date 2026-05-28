@@ -1,4 +1,15 @@
 <script lang="ts">
+import { cn } from '$shared/utils.js';
+    import {
+    Save,
+    Undo2,
+    Redo2,
+    Upload,
+    Download,
+    LoaderCircle,
+    Check,
+    Info,
+  } from '@lucide/svelte';
   import {
     configState,
     undo,
@@ -7,13 +18,10 @@
     canRedo,
     exportConfig,
     importConfig,
-  } from '../../../store/config.svelte.js';
-  import { serial } from '../../../store/serial.svelte.js';
-  import { devMode } from '../../../store/devMode.svelte.js';
-  import {
-    startPolling,
-    stopPolling,
-  } from '../../../store/deviceStatus.svelte.js';
+  } from '$shared/store/config.svelte.js';
+  import { serial } from '$shared/store/serial.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
+  import {    startPolling,    stopPolling,  } from '$shared/store/deviceStatus.svelte.js';
 
   // Démarrer le polling du statut device quand connecté ou en mode démo.
   // Le store route automatiquement vers le bon transport (serial / http / mock).
@@ -27,21 +35,12 @@
       return () => stopPolling();
     }
   });
-  import { Button,  } from '../../ui/button/index.js';
-  import { Separator } from '../../ui/separator/index.js';
-  import StatusCard from '../StatusCard.svelte';
+  import { Button,  } from '$shared/components/ui/button/index.js';
+  import { Separator } from '$shared/components/ui/separator/index.js';
+  import StatusCard from '$shared/components/app/StatusCard.svelte';
   import { toast } from 'svelte-sonner';
-  import {
-    Save,
-    Undo2,
-    Redo2,
-    Upload,
-    Download,
-    LoaderCircle,
-    Check,
-    Info,
-  } from '@lucide/svelte';
-  import { cn } from '../../../utils.js';
+
+  
 
   let fileInput = $state<HTMLInputElement | null>(null);
 

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import * as Card from '../../../ui/card/index.js';
+  import * as Card from '$shared/components/ui/card/index.js';
   import { Cpu, Clock } from '@lucide/svelte';
-  import { deviceStatus } from '../../../../store/deviceStatus.svelte.js';
+  import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
 
-  import { loadConfig, factoryReset } from '../../../../store/config.svelte.js';
+  import { loadConfig, factoryReset } from '$shared/store/config.svelte.js';
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
