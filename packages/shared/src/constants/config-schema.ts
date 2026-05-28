@@ -10,10 +10,22 @@
 
 // ── Constantes structurelles ────────────────────────────────────
 
+// Source de vérité unique : ces constantes sont aussi émises en C
+// (config_limits.gen.h) par scripts/codegen.mjs → ne pas dupliquer côté firmware.
 export const CONFIG_NUM_KEYS       = 10;   // SW1–SW10
-export const CONFIG_NUM_PROFILES   = 4;
-export const CONFIG_NUM_LAYERS     = 4;    // par profil
+export const CONFIG_MAX_PROFILES   = 4;
+export const CONFIG_MAX_LAYERS     = 8;    // par profil (cap réel firmware)
+export const CONFIG_NAME_MAX_LEN   = 32;   // octets, '\0' inclus → 31 chars utiles
 export const CONFIG_FORMAT_VERSION = 1;
+
+// Bornes basses pour la CRUD (un profil/layer minimum)
+export const MIN_PROFILES = 1;
+export const MIN_LAYERS    = 1;
+
+// Icône de profil : 24×24 monochrome 1bpp → 72 octets, transportée en base64
+export const PROFILE_ICON_W     = 24;
+export const PROFILE_ICON_H     = 24;
+export const PROFILE_ICON_BYTES = (PROFILE_ICON_W * PROFILE_ICON_H) / 8; // 72
 
 // ── Widget OLED ─────────────────────────────────────────────────
 
@@ -87,8 +99,9 @@ export interface LayerConfig {
 
 export interface ProfileConfig {
   name:          string;
-  layers:        LayerConfig[];  // length = CONFIG_NUM_LAYERS
+  layers:        LayerConfig[];  // 1..CONFIG_MAX_LAYERS
   layer_count?:  number;
+  icon?:         string;         // base64 d'un bitmap 24×24 1bpp (PROFILE_ICON_BYTES octets)
   combos?:       unknown[];
   combo_count?:  number;
   macros?:       MacroStep[][];  // up to MACRO_MAX_PER_PROFILE, each up to MACRO_MAX_STEPS
@@ -96,7 +109,7 @@ export interface ProfileConfig {
 
 export interface FullConfig {
   active_profile: number;
-  profiles:       ProfileConfig[];   // length = CONFIG_NUM_PROFILES
+  profiles:       ProfileConfig[];   // 1..CONFIG_MAX_PROFILES
   version?:       number;
   profile_count?: number;
   display: {
@@ -143,8 +156,9 @@ export function defaultKeyAction(): number {
   return 0x0000; // KC_NONE
 }
 
-export function defaultLayer(): LayerConfig {
+export function defaultLayer(name = 'Base'): LayerConfig {
   return {
+    name,
     keys:        Array(CONFIG_NUM_KEYS).fill(0) as number[],
     encoder_cw:  0,
     encoder_ccw: 0,
@@ -154,14 +168,15 @@ export function defaultLayer(): LayerConfig {
 export function defaultProfile(): ProfileConfig {
   return {
     name:   'Profile',
-    layers: Array.from({ length: CONFIG_NUM_LAYERS }, defaultLayer),
+    icon:   '',                       // pas d'icône par défaut (les presets en fournissent une)
+    layers: [defaultLayer('Base')],   // un seul layer au départ — ajout à la demande
   };
 }
 
 export function defaultConfig(): FullConfig {
   return {
     active_profile: 0,
-    profiles: Array.from({ length: CONFIG_NUM_PROFILES }, (_, i) => ({
+    profiles: Array.from({ length: CONFIG_MAX_PROFILES }, (_, i) => ({
       ...defaultProfile(),
       name: `Profile ${i + 1}`,
     })),
@@ -205,11 +220,11 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
 
   const config: FullConfig = {
     active_profile: typeof r.active_profile === 'number'
-      ? Math.min(Math.max(r.active_profile, 0), CONFIG_NUM_PROFILES - 1)
+      ? Math.min(Math.max(r.active_profile, 0), CONFIG_MAX_PROFILES - 1)
       : defaults.active_profile,
 
-    profiles: Array.isArray(r.profiles)
-      ? (r.profiles as unknown[]).slice(0, CONFIG_NUM_PROFILES).map((p, i) =>
+    profiles: Array.isArray(r.profiles) && r.profiles.length > 0
+      ? (r.profiles as unknown[]).slice(0, CONFIG_MAX_PROFILES).map((p, i) =>
           mergeProfile(p, defaults.profiles[i]))
       : defaults.profiles,
 
@@ -250,15 +265,17 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
   return { ok: true, config };
 }
 
-function mergeProfile(raw: unknown, def: ProfileConfig): ProfileConfig {
+function mergeProfile(raw: unknown, def: ProfileConfig = defaultProfile()): ProfileConfig {
   if (typeof raw !== 'object' || raw === null) return def;
   const r = raw as Record<string, unknown>;
+  const layers = Array.isArray(r.layers) && r.layers.length > 0
+    ? (r.layers as unknown[]).slice(0, CONFIG_MAX_LAYERS).map((l, i) =>
+        mergeLayer(l, def.layers[i]))
+    : def.layers;
   return {
     name:   typeof r.name === 'string' ? r.name : def.name,
-    layers: Array.isArray(r.layers)
-      ? (r.layers as unknown[]).slice(0, CONFIG_NUM_LAYERS).map((l, i) =>
-          mergeLayer(l, def.layers[i]))
-      : def.layers,
+    icon:   typeof r.icon === 'string' ? r.icon : (def.icon ?? ''),
+    layers,
     macros: Array.isArray(r.macros)
       ? (r.macros as unknown[]).slice(0, MACRO_MAX_PER_PROFILE).map(m =>
           Array.isArray(m) ? (m as MacroStep[]).slice(0, MACRO_MAX_STEPS) : [])
@@ -266,10 +283,11 @@ function mergeProfile(raw: unknown, def: ProfileConfig): ProfileConfig {
   };
 }
 
-function mergeLayer(raw: unknown, def: LayerConfig): LayerConfig {
+function mergeLayer(raw: unknown, def: LayerConfig = defaultLayer()): LayerConfig {
   if (typeof raw !== 'object' || raw === null) return def;
   const r = raw as Record<string, unknown>;
   return {
+    name: typeof r.name === 'string' ? r.name : def.name,
     keys: Array.isArray(r.keys)
       ? (r.keys as unknown[]).slice(0, CONFIG_NUM_KEYS).map(k =>
           typeof k === 'number' ? k : 0)

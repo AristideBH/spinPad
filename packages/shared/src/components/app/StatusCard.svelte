@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { serial } from "../../serial/index.svelte.js";
+  import { serial } from "../../store/serial.svelte.js";
   import { devMode } from "../../store/devMode.svelte.js";
   import { Spinner } from "../ui/spinner/index.js";
 

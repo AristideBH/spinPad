@@ -3,7 +3,7 @@
     configState,
     updateConfig,
   } from "../../../../store/config.svelte.js";
-  import { serial, setTime } from "../../../../serial/index.svelte.js";
+  import { serial, setTime } from "../../../../store/serial.svelte.js";
   import {
     Card,
     CardContent,

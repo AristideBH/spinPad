@@ -5,19 +5,14 @@
     setKeyAction,
     setEncoderAction,
   } from "../../../../store/config.svelte.js";
+  import { KEYCODES, KEYCODES_FLAT, getKeycodeLabel } from "../../../../constants/keycodes.js";
+  import { action, ACTION_TYPES, MEDIA_CODES } from "../../../../constants/action-types.js";
   import {
-    KEYCODES,
-    KEYCODES_FLAT,
-    getKeycodeLabel,
-    action,
-    ACTION_TYPES,
-    MEDIA_CODES,
     MACRO_STEP_TYPE,
     MACRO_MAX_STEPS,
     MACRO_MAX_PER_PROFILE,
-  } from "../../../../constants/keycodes/index.js";
-  import type { MacroStep } from "../../../../constants/keycodes/index.js";
-  import type { MacroStepType } from "../../../../constants/config-schema.js";
+  } from "../../../../constants/config-schema.js";
+  import type { MacroStep, MacroStepType } from "../../../../constants/config-schema.js";
   import { Button } from "../../../ui/button/index.js";
   import { cn } from "../../../../utils.js";
   import { Input } from "../../../ui/input/index.js";
@@ -39,7 +34,7 @@
     serial,
     keyMonitor,
     onKeyEvent,
-  } from "../../../../serial/index.svelte.js";
+  } from "../../../../store/serial.svelte.js";
   import { Activity } from "@lucide/svelte";
 
   let editingKey = $state<number | null>(null);

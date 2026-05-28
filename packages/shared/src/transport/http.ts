@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  transport/http.js — Transport HTTP pour Studio Mode embarqué
+//  transport/http.ts — Transport HTTP pour Studio Mode embarqué
 //
 //  Utilisé quand l'app est servie directement depuis le SpinPad.
 //  Les requêtes sont relatives (pas de base URL) car l'origine
@@ -8,58 +8,41 @@
 //  Build embedded : VITE_TRANSPORT=http (voir build:embedded)
 // ═══════════════════════════════════════════════════════════════
 
-const BASE = '';   // Relatif à l'origine — pas de URL absolue nécessaire
+import type { FullConfig }    from '../constants/config-schema.js';
+import type { DeviceStatus }  from '../constants/device-status-schema.js';
 
-/**
- * Récupérer la config complète depuis le device.
- * @returns {Promise<object>}
- */
-export async function getConfig() {
+const BASE = '';   // Relatif à l'origine
+
+export async function getConfig(): Promise<FullConfig> {
   const r = await fetch(`${BASE}/api/config`);
   if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du chargement de la config`);
-  return r.json();
+  return r.json() as Promise<FullConfig>;
 }
 
-/**
- * Envoyer la config complète au device.
- * @param {object} data - Config complète (doit correspondre au schéma JSON firmware)
- * @returns {Promise<{ok: boolean}>}
- */
-export async function setConfig(data) {
+export async function setConfig(data: FullConfig): Promise<{ ok: boolean }> {
   const r = await fetch(`${BASE}/api/config`, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body:    JSON.stringify(data),
   });
   if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors de la sauvegarde`);
-  return r.json();
+  return r.json() as Promise<{ ok: boolean }>;
 }
 
-/**
- * Remettre le device à sa configuration d'usine.
- * @returns {Promise<{ok: boolean}>}
- */
-export async function factoryReset() {
+export async function factoryReset(): Promise<{ ok: boolean }> {
   const r = await fetch(`${BASE}/api/factory_reset`, { method: 'POST' });
   if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du factory reset`);
-  return r.json();
+  return r.json() as Promise<{ ok: boolean }>;
 }
 
-/**
- * Récupérer le statut device live (batterie, connexion, version).
- * @returns {Promise<import('../constants/device-status-schema.js').DeviceStatus>}
- */
-export async function getDeviceStatus() {
+export async function getDeviceStatus(): Promise<DeviceStatus> {
   const r = await fetch(`${BASE}/api/status`);
   if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du chargement du statut`);
-  return r.json();
+  return r.json() as Promise<DeviceStatus>;
 }
 
-/**
- * Vérifier si le device est joignable via HTTP.
- * @returns {Promise<boolean>}
- */
-export async function ping() {
+/** Vérifie si le device est joignable via HTTP. */
+export async function ping(): Promise<boolean> {
   try {
     const r = await fetch(`${BASE}/api/config`, { method: 'HEAD' });
     return r.ok;

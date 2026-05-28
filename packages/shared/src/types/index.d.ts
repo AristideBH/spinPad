@@ -1,0 +1,62 @@
+// ═══════════════════════════════════════════════════════════════
+//  types/index.ts — Réexports centralisés de tous les types SpinPad
+//
+//  Usage depuis n'importe où dans le monorepo :
+//    import type { FullConfig, DeviceStatus, SerialStateSnapshot } from '@spinpad/shared/types';
+//
+//  Les types source restent dans leurs modules (config-schema.ts,
+//  device-status-schema.ts, etc.) pour éviter les dépendances
+//  circulaires. Ce fichier est uniquement un barrel de réexport.
+// ═══════════════════════════════════════════════════════════════
+
+// ── Config ───────────────────────────────────────────────────────
+export type {
+  LayerConfig,
+  ProfileConfig,
+  FullConfig,
+  WidgetConfig,
+  WidgetType,
+  MacroStep,
+  MacroStepType,
+} from '../constants/config-schema.js';
+
+// ── Device Status ────────────────────────────────────────────────
+export type {
+  BatteryStatus,
+  BatteryAbsent,
+  BatteryPresent,
+  BatterySource,
+  BatteryPresentConfig,
+  FirmwareInfo,
+  ConnectionStatus,
+  DeviceStatus,
+} from '../constants/device-status-schema.js';
+
+// ── Icon ─────────────────────────────────────────────────────────
+export type { BoolGrid } from '../constants/profile-icon.js';
+export type { IconLibraryEntry } from '../constants/profile-icon-library.js';
+
+// ── Presets ──────────────────────────────────────────────────────
+export type {
+  ProfilePreset,
+  ProfilePresetSource,
+} from '../constants/profile-presets.js';
+
+// ── Transport ────────────────────────────────────────────────────
+export type {
+  Transport,
+  DeviceStatusTransport,
+} from './transport.js';
+
+// ── Serial ───────────────────────────────────────────────────────
+export type {
+  RpcQueueEntry,
+  MessageHandler,
+} from './serial.js';
+
+// ── Dev Mode ─────────────────────────────────────────────────────
+export type {
+  BatteryScenario,
+  ConnectionScenario,
+  MockOptions,
+} from './dev-mode.js';

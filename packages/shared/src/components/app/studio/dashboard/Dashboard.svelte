@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { disconnect, serial } from '../../../../serial/index.svelte.js';
+  import { disconnect, serial } from '../../../../store/serial.svelte.js';
   import {
     loadConfig,
     saveConfig,

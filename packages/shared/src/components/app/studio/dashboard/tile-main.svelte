@@ -4,7 +4,7 @@
   import { Button } from '../../../ui/button/index.js';
   import { Usb, Bluetooth, RefreshCw, LogOut, Trash2 } from '@lucide/svelte';
   import { deviceStatus } from '../../../../store/deviceStatus.svelte.js';
-  import { disconnect, serial } from '../../../../serial/index.svelte.js';
+  import { disconnect, serial } from '../../../../store/serial.svelte.js';
 
   import {
     loadConfig,

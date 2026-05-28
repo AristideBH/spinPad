@@ -1,6 +1,6 @@
 <script lang="ts">
   import { APP_CONFIG } from "../../../app.config.js";
-  import { serial } from "../../../serial/index.svelte.js";
+  import { serial } from "../../../store/serial.svelte.js";
   import { devMode } from "../../../store/devMode.svelte.js";
   import { Toaster } from "svelte-sonner";
   import ConnectBanner from "./ConnectBanner.svelte";

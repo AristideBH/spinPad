@@ -10,11 +10,12 @@
 #include <stdbool.h>
 #include "esp_err.h"
 
-#define CONFIG_MAX_PROFILES     4
-#define CONFIG_MAX_LAYERS       8
+// Limites structurelles : source de vérité unique dans config-schema.ts,
+// générées par `pnpm codegen` (CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS,
+// CONFIG_NAME_MAX_LEN, CONFIG_NUM_KEYS, PROFILE_ICON_*).
+#include "config_limits.gen.h"
+
 #define CONFIG_MAX_COMBOS      16
-#define CONFIG_NAME_MAX_LEN    32
-#define CONFIG_NUM_KEYS        10  // Doit correspondre à KB_NUM_KEYS dans kb_config.h
 
 // Macro step definitions
 #define MACRO_MAX_STEPS           32   // Pas par macro
@@ -59,6 +60,7 @@ typedef struct {
 // ── Un profil : plusieurs layers + combos + macros ───────────
 typedef struct {
     char        name[CONFIG_NAME_MAX_LEN]; // Ex: "Default", "Gaming", "Dev"
+    uint8_t     icon[PROFILE_ICON_BYTES];  // Bitmap 24×24 1bpp (0 = pas d'icône)
     uint8_t     layer_count;
     kb_layer_t  layers[CONFIG_MAX_LAYERS];
     uint8_t     combo_count;

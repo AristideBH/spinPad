@@ -3,8 +3,7 @@ import {
   validateConfig,
   defaultConfig,
   CONFIG_NUM_KEYS,
-  CONFIG_NUM_PROFILES,
-  CONFIG_NUM_LAYERS,
+  CONFIG_MAX_PROFILES,
 } from '../constants/config-schema.js';
 
 describe('validateConfig', () => {
@@ -32,7 +31,7 @@ describe('validateConfig', () => {
     const result = validateConfig({ ...defaultConfig(), active_profile: 999 });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.config.active_profile).toBe(CONFIG_NUM_PROFILES - 1);
+    expect(result.config.active_profile).toBe(CONFIG_MAX_PROFILES - 1);
   });
 
   it('clamps orientation to 0–3', () => {
@@ -73,7 +72,7 @@ describe('validateConfig', () => {
     const result = validateConfig(cfg);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.config.profiles.length).toBeLessThanOrEqual(CONFIG_NUM_PROFILES);
+    expect(result.config.profiles.length).toBeLessThanOrEqual(CONFIG_MAX_PROFILES);
   });
 
   it('layer keys default to 0 when missing', () => {

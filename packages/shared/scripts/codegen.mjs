@@ -11,6 +11,16 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/constants/action-types.ts';
+import {
+  CONFIG_NUM_KEYS,
+  CONFIG_MAX_PROFILES,
+  CONFIG_MAX_LAYERS,
+  CONFIG_NAME_MAX_LEN,
+  CONFIG_FORMAT_VERSION,
+  PROFILE_ICON_W,
+  PROFILE_ICON_H,
+  PROFILE_ICON_BYTES,
+} from '../src/constants/config-schema.ts';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,6 +30,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(
   __dirname,
   '../../firmware/components/keymap/include/action_types.gen.h'
+);
+
+const OUT_LIMITS = resolve(
+  __dirname,
+  '../../firmware/components/config_store/include/config_limits.gen.h'
 );
 
 function toHex(n) {
@@ -58,3 +73,30 @@ const lines = [
 
 writeFileSync(OUT, lines.join('\n') + '\n', 'utf8');
 console.log(`✅  Generated: ${OUT}`);
+
+// ── config_limits.gen.h ─────────────────────────────────────────
+// Constantes structurelles partagées entre le schéma TS (source de vérité)
+// et les structs firmware (config_store.h).
+const limitsLines = [
+  '// AUTO-GENERATED — do not edit manually',
+  '// Source: packages/shared/src/constants/config-schema.ts',
+  '// Run:   pnpm codegen',
+  '//',
+  '// Limites structurelles de la config, source de vérité unique côté TS.',
+  '#pragma once',
+  '',
+  `#define CONFIG_MAX_PROFILES   ${CONFIG_MAX_PROFILES}`,
+  `#define CONFIG_MAX_LAYERS     ${CONFIG_MAX_LAYERS}`,
+  `#define CONFIG_NAME_MAX_LEN   ${CONFIG_NAME_MAX_LEN}`,
+  `#define CONFIG_NUM_KEYS       ${CONFIG_NUM_KEYS}  // Doit correspondre à KB_NUM_KEYS dans kb_config.h`,
+  `#define CONFIG_FORMAT_VERSION ${CONFIG_FORMAT_VERSION}`,
+  '',
+  '// Icône de profil : bitmap 24×24 monochrome 1bpp',
+  `#define PROFILE_ICON_W        ${PROFILE_ICON_W}`,
+  `#define PROFILE_ICON_H        ${PROFILE_ICON_H}`,
+  `#define PROFILE_ICON_BYTES    ${PROFILE_ICON_BYTES}`,
+  '',
+];
+
+writeFileSync(OUT_LIMITS, limitsLines.join('\n') + '\n', 'utf8');
+console.log(`✅  Generated: ${OUT_LIMITS}`);

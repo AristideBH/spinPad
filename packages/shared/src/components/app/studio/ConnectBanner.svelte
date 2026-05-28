@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { connect, serial } from '../../../serial/index.svelte.js';
+  import { connect, serial } from '../../../store/serial.svelte.js';
   import { loadConfig } from '../../../store/config.svelte.js';
   import { Button } from '../../ui/button/index.js';
   import { PlugZap, FlaskConical } from '@lucide/svelte';

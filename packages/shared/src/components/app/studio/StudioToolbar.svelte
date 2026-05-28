@@ -9,7 +9,7 @@
     exportConfig,
     importConfig,
   } from '../../../store/config.svelte.js';
-  import { serial } from '../../../serial/index.svelte.js';
+  import { serial } from '../../../store/serial.svelte.js';
   import { devMode } from '../../../store/devMode.svelte.js';
   import {
     startPolling,

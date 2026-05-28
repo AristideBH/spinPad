@@ -17,6 +17,7 @@
 #include "nvs.h"
 #include "cJSON.h"
 #include "esp_log.h"
+#include "mbedtls/base64.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -53,14 +54,14 @@ static void apply_defaults(void)
     // Layer 0 : Base
     strncpy(p->layers[0].name, "Base", CONFIG_NAME_MAX_LEN - 1);
     // Remplir avec KC_NONE — l'utilisateur configurera via l'app
-    for (int k = 0; k < 20; k++) p->layers[0].keys[k] = KC_NONE;
+    for (int k = 0; k < CONFIG_NUM_KEYS; k++) p->layers[0].keys[k] = KC_NONE;
     p->layers[0].encoder_cw    = KC_VOLU;
     p->layers[0].encoder_ccw   = KC_VOLD;
     p->layers[0].encoder_press = KC_MUTE;
 
     // Layer 1 : Fn (momentary via MO(1))
     strncpy(p->layers[1].name, "Fn", CONFIG_NAME_MAX_LEN - 1);
-    for (int k = 0; k < 20; k++) p->layers[1].keys[k] = KC_NONE;
+    for (int k = 0; k < CONFIG_NUM_KEYS; k++) p->layers[1].keys[k] = KC_NONE;
     p->layers[1].encoder_cw    = KC_SCRL_U;
     p->layers[1].encoder_ccw   = KC_SCRL_D;
     p->layers[1].encoder_press = KC_NONE;
@@ -231,6 +232,17 @@ static esp_err_t parse_json_to_config(const char *json_str)
                 strncpy(kp->name, pname->valuestring, CONFIG_NAME_MAX_LEN - 1);
             }
 
+            // ── Icône du profil (base64 → 72 octets 1bpp) ──
+            memset(kp->icon, 0, PROFILE_ICON_BYTES);
+            cJSON *picon = cJSON_GetObjectItem(prof, "icon");
+            if (cJSON_IsString(picon) && picon->valuestring[0]) {
+                size_t olen = 0;
+                // Décodage tolérant : on ignore une icône mal formée.
+                mbedtls_base64_decode(kp->icon, PROFILE_ICON_BYTES, &olen,
+                                      (const unsigned char *)picon->valuestring,
+                                      strlen(picon->valuestring));
+            }
+
             // ── Layers du profil ──────────────────────────
             cJSON *layers = cJSON_GetObjectItem(prof, "layers");
             if (cJSON_IsArray(layers)) {
@@ -250,7 +262,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
                     // Tableau de keycodes
                     cJSON *keys = cJSON_GetObjectItem(layer, "keys");
                     if (cJSON_IsArray(keys)) {
-                        for (int k = 0; k < 20 && k < cJSON_GetArraySize(keys); k++) {
+                        for (int k = 0; k < CONFIG_NUM_KEYS && k < cJSON_GetArraySize(keys); k++) {
                             cJSON *kc = cJSON_GetArrayItem(keys, k);
                             if (cJSON_IsNumber(kc)) {
                                 kl->keys[k] = (uint16_t)kc->valuedouble;
@@ -552,6 +564,20 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
         cJSON *prof = cJSON_CreateObject();
         cJSON_AddStringToObject(prof, "name", kp->name);
 
+        // Icône → base64 (uniquement si non vide, pour économiser de la place)
+        bool icon_set = false;
+        for (int bi = 0; bi < PROFILE_ICON_BYTES; bi++) {
+            if (kp->icon[bi]) { icon_set = true; break; }
+        }
+        if (icon_set) {
+            unsigned char icon_b64[128];  // 72 o → 96 chars + marge
+            size_t b64_len = 0;
+            if (mbedtls_base64_encode(icon_b64, sizeof(icon_b64), &b64_len,
+                                      kp->icon, PROFILE_ICON_BYTES) == 0) {
+                cJSON_AddStringToObject(prof, "icon", (const char *)icon_b64);
+            }
+        }
+
         cJSON *layers = cJSON_AddArrayToObject(prof, "layers");
         for (int l = 0; l < kp->layer_count; l++) {
             kb_layer_t *kl = &kp->layers[l];
@@ -559,7 +585,7 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
             cJSON_AddStringToObject(layer, "name", kl->name);
 
             cJSON *keys = cJSON_CreateArray();
-            for (int k = 0; k < 20; k++) {
+            for (int k = 0; k < CONFIG_NUM_KEYS; k++) {
                 cJSON_AddItemToArray(keys, cJSON_CreateNumber(kl->keys[k]));
             }
             cJSON_AddItemToObject(layer, "keys", keys);

@@ -18,6 +18,7 @@ export const navTree: NavItem[] = [
 		children: [
 			{ title: 'Studio', url: '/studio/' },
 			{ title: 'Flasher', url: '/flash/' },
+			{ title: 'Profiles Demo', url: '/demo/' }
 		]
 	},
 	{
