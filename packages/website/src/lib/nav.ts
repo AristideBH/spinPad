@@ -34,6 +34,9 @@ export const navTree: NavItem[] = [
 			{ title: 'Bluetooth', url: '/docs/ble/' },
 			{ title: 'Compiler', url: '/docs/firmware-build/' }
 		]
+	}, {
+		title: 'Store',
+		url: '/store/'
 	}
 ];
 

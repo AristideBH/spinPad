@@ -11,7 +11,7 @@
   import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
   import type { ComponentProps } from "svelte";
   import { navTree } from "$lib/nav.js";
-  import { WrenchIcon } from "@lucide/svelte";
+  import { WrenchIcon, ShoppingCart } from "@lucide/svelte";
 
   let {
     ref = $bindable(null),
@@ -26,6 +26,7 @@
   let docsOpen = $derived($page.url.pathname.startsWith("/docs"));
   let toolsOpen = $derived($page.url.pathname.startsWith("/studio") || $page.url.pathname.startsWith("/flash"));
   let isHome = $derived($page.url.pathname === "/");
+  let isShop = $derived($page.url.pathname === "/shop/");
   let isStudio = $derived($page.url.pathname.startsWith("/studio"));
   let isFlash = $derived($page.url.pathname.startsWith("/flash"));
 </script>
@@ -63,6 +64,13 @@
           <Sidebar.MenuButton isActive={isHome} tooltipContent="Accueil">
             {#snippet child({ props })}
               <a href="/" {...props}><HomeIcon /><span>Accueil</span></a>
+            {/snippet}
+          </Sidebar.MenuButton>
+        </Sidebar.MenuItem>
+        <Sidebar.MenuItem>
+          <Sidebar.MenuButton isActive={isShop} tooltipContent="Shop">
+            {#snippet child({ props })}
+              <a href="/shop/" {...props}><ShoppingCart /><span>Shop</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
