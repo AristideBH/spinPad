@@ -1,16 +1,16 @@
 <script lang="ts">
-  import "../app.css";
-  import { ModeWatcher } from "mode-watcher";
-  import { page } from "$app/stores";
+  import '../app.css';
+  import { ModeWatcher } from 'mode-watcher';
+  import { page } from '$app/stores';
 
-  import * as Breadcrumb from "$shared/components/ui/breadcrumb/index.js";
-  import { Separator } from "$shared/components/ui/separator/index.js";
-  import * as Sidebar from "$shared/components/ui/sidebar/index.js";
-  import AppSidebar from "../lib/components/ui/app-sidebar.svelte";
+  import * as Breadcrumb from '$shared/components/ui/breadcrumb/index.js';
+  import { Separator } from '$shared/components/ui/separator/index.js';
+  import * as Sidebar from '$shared/components/ui/sidebar/index.js';
+  import AppSidebar from '../lib/components/ui/app-sidebar.svelte';
 
-  import { PersistedState } from "runed";
-  import { createHeaderRight } from "$lib/header-right.svelte.js";
-  import { getBreadcrumbs } from "$lib/nav.js";
+  import { PersistedState } from 'runed';
+  import { createHeaderRight } from '$lib/header-right.svelte.js';
+  import { getBreadcrumbs } from '$lib/nav.js';
 
   let { children } = $props();
 
@@ -22,11 +22,12 @@
 
 <ModeWatcher defaultMode="dark" />
 
-
 <Sidebar.Provider bind:open={sidebarOpen.current}>
   <AppSidebar />
   <Sidebar.Inset>
-    <header class="sticky top-0 z-10 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl">
+    <header
+      class="sticky top-0 z-10 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl"
+    >
       <!-- Left: trigger + breadcrumbs -->
       <div class="flex items-center min-w-0 gap-2">
         <Sidebar.Trigger class="-ms-1" />
@@ -38,7 +39,7 @@
                 {#if i > 0}
                   <Breadcrumb.Separator class="hidden md:block" />
                 {/if}
-                <Breadcrumb.Item class={i < breadcrumbs.length - 1 ? "hidden md:block" : ""}>
+                <Breadcrumb.Item class={i < breadcrumbs.length - 1 ? 'hidden md:block' : ''}>
                   {#if crumb.current}
                     <Breadcrumb.Page>{crumb.title}</Breadcrumb.Page>
                   {:else}
@@ -59,8 +60,8 @@
         </div>
       {/if}
     </header>
-    <div class="@container/main flex flex-1 flex-col  gap-4 md:gap-6">
-          {@render children()}
+    <div class="@container/main flex flex-1 flex-col gap-4 md:gap-6">
+      {@render children()}
     </div>
   </Sidebar.Inset>
 </Sidebar.Provider>

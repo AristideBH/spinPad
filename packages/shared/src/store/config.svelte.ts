@@ -15,6 +15,7 @@
 //  via <svelte:window onkeydown=...> pour isoler l'effet de bord UI.
 // ═══════════════════════════════════════════════════════════════
 
+// @ts-expect-error - shared workspace n'est pas un dossier Svelte, works because is used in website workspace
 import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
@@ -52,13 +53,13 @@ const _autoSave = new AutoSave(_flushSave);
 // ─────────────────────────────────────────────────────────────
 
 class ConfigState {
-  data               = $state<FullConfig | null>(null);
+  data = $state<FullConfig | null>(null);
   activeProfileIndex = $state(0);
-  activeLayerIndex   = $state(0);
-  isDirty            = $state(false);
-  isLoading          = $state(false);
-  isSaving           = $state(false);
-  loadError          = $state<string | null>(null);
+  activeLayerIndex = $state(0);
+  isDirty = $state(false);
+  isLoading = $state(false);
+  isSaving = $state(false);
+  loadError = $state<string | null>(null);
 
   get activeProfile() {
     return this.data?.profiles?.[this.activeProfileIndex] ?? null;
@@ -86,7 +87,7 @@ if (browser) {
     _history = new StateHistory(
       () => configState.data,
       (v) => {
-        configState.data    = v ? $state.snapshot(v) as FullConfig : null;
+        configState.data = v ? ($state.snapshot(v) as FullConfig) : null;
         configState.isDirty = true;
         _autoSave.schedule();
       },
@@ -95,10 +96,18 @@ if (browser) {
   });
 }
 
-export function undo(): void       { if (_history?.canUndo) _history.undo(); }
-export function redo(): void       { if (_history?.canRedo) _history.redo(); }
-export function canUndo(): boolean { return _history?.canUndo ?? false; }
-export function canRedo(): boolean { return _history?.canRedo ?? false; }
+export function undo(): void {
+  if (_history?.canUndo) _history.undo();
+}
+export function redo(): void {
+  if (_history?.canRedo) _history.redo();
+}
+export function canUndo(): boolean {
+  return _history?.canUndo ?? false;
+}
+export function canRedo(): boolean {
+  return _history?.canRedo ?? false;
+}
 
 // ─────────────────────────────────────────────────────────────
 //  CHARGEMENT
@@ -109,9 +118,9 @@ export async function loadConfig(): Promise<void> {
   configState.loadError = null;
   try {
     const cfg = await activeTransport().getConfig();
-    configState.data               = cfg;
+    configState.data = cfg;
     configState.activeProfileIndex = cfg.active_profile ?? 0;
-    configState.isDirty            = false;
+    configState.isDirty = false;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     configState.loadError = msg;
@@ -153,11 +162,11 @@ export async function factoryReset(): Promise<void> {
 export function exportConfig(): void {
   if (!configState.data) return;
   const wrapper = createSpinpadFile(configState.data);
-  const blob    = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
-  const url     = URL.createObjectURL(blob);
-  const a       = document.createElement('a');
-  a.href         = url;
-  a.download     = `spinpad-config-${new Date().toISOString().slice(0, 10)}.spinpad`;
+  const blob = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `spinpad-config-${new Date().toISOString().slice(0, 10)}.spinpad`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -175,9 +184,9 @@ export async function importConfig(file: File): Promise<void> {
   } catch (err) {
     throw new Error(`Fichier invalide : ${err instanceof Error ? err.message : String(err)}`);
   }
-  configState.data               = parsed;
+  configState.data = parsed;
   configState.activeProfileIndex = parsed.active_profile ?? 0;
-  configState.isDirty            = true;
+  configState.isDirty = true;
   _autoSave.schedule();
   toast.success('Config importée', { description: file.name });
 }
@@ -188,7 +197,7 @@ export async function importConfig(file: File): Promise<void> {
 
 export function updateConfig(path: string, value: unknown): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cfg   = $state.snapshot(configState.data) as any;
+  const cfg = $state.snapshot(configState.data) as any;
   const parts = path.split('.');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let obj: any = cfg;
@@ -197,7 +206,7 @@ export function updateConfig(path: string, value: unknown): void {
     obj = obj[parts[i]];
   }
   obj[parts[parts.length - 1]] = value;
-  configState.data    = cfg as FullConfig;
+  configState.data = cfg as FullConfig;
   configState.isDirty = true;
   _autoSave.schedule();
 }
@@ -205,16 +214,21 @@ export function updateConfig(path: string, value: unknown): void {
 export function setKeyAction(profileIdx: number, layerIdx: number, keyIndex: number, actionValue: number): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   cfg.profiles[profileIdx].layers[layerIdx].keys[keyIndex] = actionValue;
-  configState.data    = cfg;
+  configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();
 }
 
-export function setEncoderAction(profileIdx: number, layerIdx: number, direction: 'cw' | 'ccw' | 'press', actionValue: number): void {
+export function setEncoderAction(
+  profileIdx: number,
+  layerIdx: number,
+  direction: 'cw' | 'ccw' | 'press',
+  actionValue: number,
+): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   const enc = cfg.profiles[profileIdx].layers[layerIdx].encoder;
   if (enc) enc[direction] = actionValue;
-  configState.data    = cfg;
+  configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();
 }
@@ -222,7 +236,7 @@ export function setEncoderAction(profileIdx: number, layerIdx: number, direction
 export function addCombo(profileIdx: number, combo: unknown): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   cfg.profiles[profileIdx].combos?.push(combo);
-  configState.data    = cfg;
+  configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();
 }
@@ -230,7 +244,7 @@ export function addCombo(profileIdx: number, combo: unknown): void {
 export function removeCombo(profileIdx: number, comboIdx: number): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   cfg.profiles[profileIdx].combos?.splice(comboIdx, 1);
-  configState.data    = cfg;
+  configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();
 }
@@ -240,10 +254,10 @@ export function removeCombo(profileIdx: number, comboIdx: number): void {
 // ─────────────────────────────────────────────────────────────
 
 function _applyOp(result: ops.OpResult): void {
-  configState.data               = result.config;
+  configState.data = result.config;
   configState.activeProfileIndex = result.selection.profile;
-  configState.activeLayerIndex   = result.selection.layer;
-  configState.isDirty            = true;
+  configState.activeLayerIndex = result.selection.layer;
+  configState.isDirty = true;
   _autoSave.schedule();
 }
 
@@ -252,7 +266,7 @@ function _currentSelection(): Selection {
 }
 
 export function addProfile(template?: ops.ProfileTemplate): void {
-  const tpl = template ? $state.snapshot(template) as ops.ProfileTemplate : undefined;
+  const tpl = template ? ($state.snapshot(template) as ops.ProfileTemplate) : undefined;
   _applyOp(ops.addProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), tpl));
 }
 
@@ -273,7 +287,9 @@ export function deleteLayer(profileIdx: number, layerIdx: number): void {
 }
 
 export function editLayer(profileIdx: number, layerIdx: number, patch: ops.LayerPatch): void {
-  _applyOp(ops.editLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, layerIdx, patch));
+  _applyOp(
+    ops.editLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, layerIdx, patch),
+  );
 }
 
 export function setProfileIcon(profileIdx: number, iconBase64: string): void {
