@@ -8,26 +8,21 @@
     href: string;
   };
 
-  let breadcrumbs = $state<BreadcrumbItem[]>();
-
-  $effect(() => {
-    const routeId = page.route && page.route.id ? page.route.id : "";
+  const breadcrumbs = $derived.by<BreadcrumbItem[]>(() => {
+    const routeId = page.route?.id ?? "";
     const segments =
       routeId.length > 0 ? routeId.substring(1).split("/").filter(Boolean) : [];
     const crumbs: BreadcrumbItem[] = [];
     let path = "";
     for (const segment of segments) {
       path += `/${segment}`;
-      crumbs.push({
-        label: safeCapitalize(segment),
-        href: path,
-      });
+      crumbs.push({ label: safeCapitalize(segment), href: path });
     }
-    breadcrumbs = crumbs;
+    return crumbs;
   });
 </script>
 
-{#if breadcrumbs}
+{#if breadcrumbs.length}
   <Breadcrumb.Root>
     <Breadcrumb.List>
       {#each breadcrumbs as item, i}

@@ -24,12 +24,19 @@ export class KeypadContext {
   readonly profile = $derived(
     configState.data?.profiles?.[configState.activeProfileIndex] as ProfileConfig | undefined,
   );
-  readonly layer = $derived(
-    this.profile?.layers?.[configState.activeLayerIndex] as LayerConfig | undefined,
-  );
-  readonly orientDeg = $derived(
-    ([0, 90, 180, 270] as const)[configState.data?.orientation ?? 0] ?? 0,
-  );
+  readonly layer = $derived(this.profile?.layers?.[configState.activeLayerIndex] as LayerConfig | undefined);
+  readonly orientDeg = $derived(([0, 90, 180, 270] as const)[configState.data?.orientation ?? 0] ?? 0);
+
+  readonly profile_count = $derived(configState.data?.profiles?.length);
+  readonly active_profile = $derived(configState.activeProfileIndex);
+
+  getActiveProfile(): ProfileConfig | undefined {
+    return configState.data?.profiles?.[configState.activeProfileIndex ?? 0];
+  }
+
+  getBleActiveSlotName(): string | undefined {
+    return configState.data?.ble?.slot_names?.[configState.data?.ble?.active_slot ?? 0];
+  }
 
   // ── Picker methods ────────────────────────────────────────────
   openKeyPicker(keyIndex: number): void {
@@ -83,6 +90,20 @@ export class KeypadContext {
     this.trainingActive = false;
     this.#trainingCleanup?.();
     this.#trainingCleanup = null;
+  }
+
+  resetLayer(): void {
+    const pi = configState.activeProfileIndex;
+    const li = configState.activeLayerIndex;
+    if (pi === null || li === null) return;
+    const layer = this.layer;
+    if (!layer) return;
+    for (let i = 0; i < layer.keys.length; i++) {
+      setKeyAction(pi, li, i, 0);
+    }
+    // setEncoderAction(pi, li, 'cw', 0);
+    // setEncoderAction(pi, li, 'ccw', 0);
+    // setEncoderAction(pi, li, 'press', 0);
   }
 
   resetTrainingCounts(): void {

@@ -9,7 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "$shared": ["./src"],
-      "$shared/*": ["./src/*"]
+      "$shared/*": ["./src/*"],
+      "$lib": ["./src"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.svelte"]

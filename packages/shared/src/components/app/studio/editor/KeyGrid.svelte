@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Label } from '$shared/components/ui/label/index.js';
   import { getKeycodeLabel } from '$shared/constants/keycodes.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
@@ -12,24 +13,27 @@
   const gridH = $derived(isTransposed ? 3 * CELL + 2 * GAP : 4 * CELL + 3 * GAP);
 
   const KEY_LAYOUT = [
-    { sw: 'SW8',  idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW1',  idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
-    { sw: 'SW9',  idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW7',  idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW2',  idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW8', idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW1', idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
+    { sw: 'SW9', idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW7', idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW2', idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
     { sw: 'SW10', idx: 7, row: 3, col: 1, rowSpan: 2, colSpan: 1 },
-    { sw: 'SW6',  idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW3',  idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW5',  idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW4',  idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW6', idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW3', idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW5', idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
+    { sw: 'SW4', idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
   ] as const;
 </script>
 
 {#if ctx.layer}
-  <div class="relative mb-6" style="width: {gridW}px; height: {gridH}px;">
-    <div
-      class="inline-grid transition-transform duration-300 keycap-grid dark"
-      style="
+  <div class="flex flex-col gap-3 keycap-grid">
+    <Label>Clavier</Label>
+
+    <div class="relative dark" style="width: {gridW}px; height: {gridH}px;">
+      <div
+        class="inline-grid transition-transform duration-300 keycap-grid"
+        style="
         --keycap-size: {CELL}px;
         --keycap-gap: {GAP}px;
         gap: {GAP}px;
@@ -41,32 +45,33 @@
         top: 50%; left: 50%;
         translate: -50% -50%;
       "
-    >
-      {#each KEY_LAYOUT as key}
-        <button
-          style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
-          class={cn(
-            'keycap',
-            ctx.editingKey === key.idx && ctx.editingField === 'key' ? 'keycap--active' : '',
-            key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
-          )}
-          onclick={() => ctx.openKeyPicker(key.idx)}
-        >
-          {#if ctx.trainingActive}
-            <div class="keycap-flash" style="opacity: {ctx.keyFlashOpacity(key.idx)}"></div>
-            {#if ctx.keyPressCounts[key.idx] > 0}
-              <span class="keycap-count">{ctx.keyPressCounts[key.idx]}</span>
+      >
+        {#each KEY_LAYOUT as key}
+          <button
+            style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
+            class={cn(
+              'keycap',
+              ctx.editingKey === key.idx && ctx.editingField === 'key' ? 'keycap--active' : '',
+              key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
+            )}
+            onclick={() => ctx.openKeyPicker(key.idx)}
+          >
+            {#if ctx.trainingActive}
+              <div class="keycap-flash" style="opacity: {ctx.keyFlashOpacity(key.idx)}"></div>
+              {#if ctx.keyPressCounts[key.idx] > 0}
+                <span class="keycap-count">{ctx.keyPressCounts[key.idx]}</span>
+              {/if}
             {/if}
-          {/if}
-          <div class="keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
-            <span class="keycap-sw">{key.sw}</span>
-            <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0)}</span>
-            {#if key.rowSpan === 2 || key.colSpan === 2}
-              <span class="keycap-size-hint">2u</span>
-            {/if}
-          </div>
-        </button>
-      {/each}
+            <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
+              <span class="keycap-sw">{key.sw}</span>
+              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0)}</span>
+              {#if key.rowSpan === 2 || key.colSpan === 2}
+                <span class="keycap-size-hint">2u</span>
+              {/if}
+            </div>
+          </button>
+        {/each}
+      </div>
     </div>
   </div>
 {/if}
@@ -80,6 +85,10 @@
     --keycap-radius: 10px;
     --keycap-label-size: 10px;
     --keycap-sw-size: 8px;
+    filter: drop-shadow(
+        0px calc(var(--keycap-depth) * 2) 5px color-mix(in oklch, var(--color-background) 5%, transparent)
+      )
+      drop-shadow(0px 1px 0.75px var(--color-background));
   }
 
   .keycap {
@@ -99,10 +108,10 @@
       box-shadow 60ms ease-out;
   }
 
-  .keycap::before {
+  .keycap::after {
     content: '';
     position: absolute;
-    --depress-offset: 8px;
+    --depress-offset: 10px;
     width: calc(100% - var(--depress-offset));
     height: calc(100% - var(--depress-offset));
     aspect-ratio: 1;
@@ -122,7 +131,7 @@
   }
 
   .keycap:focus-visible {
-    outline: 1px solid var(--muted);
+    outline: 2px solid var(--color-foreground);
     outline-offset: 3px;
   }
 
@@ -181,7 +190,7 @@
     position: absolute;
     inset: 0;
     border-radius: var(--keycap-radius);
-    background: oklch(0.7 0.17 150 / 0.6);
+    background: var(--chart-5);
     pointer-events: none;
     transition: opacity 300ms;
   }
@@ -192,7 +201,7 @@
     right: 4px;
     font-size: 7px;
     font-weight: 700;
-    color: oklch(0.7 0.17 150);
+    color: hsl(var(--chart-5));
     pointer-events: none;
   }
 </style>

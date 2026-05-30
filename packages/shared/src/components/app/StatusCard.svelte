@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { serial } from "$shared/store/serial.svelte.js";
-  import { devMode } from "$shared/store/devMode.svelte.js";
-  import { Spinner } from "$shared/components/ui/spinner/index.js";
+  import { serial } from '$shared/store/serial.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
+  import { Spinner } from '$shared/components/ui/spinner/index.js';
 
-  import { Badge } from "$shared/components/ui/badge/index.js";
-  import { configState, loadConfig } from "$shared/store/config.svelte";
-  import { Button } from "$shared/components/ui/button";
-  import { FlaskConical } from "@lucide/svelte";
+  import { Badge } from '$shared/components/ui/badge/index.js';
+  import { configState, loadConfig } from '$shared/store/config.svelte';
+  import { Button, buttonVariants } from '$shared/components/ui/button';
+  import * as Popover from '$shared/components/ui/popover/index.js';
+  import { FlaskConical } from '@lucide/svelte';
+  import { cn } from '$shared/utils';
+
+  import * as Card from '$shared/components/ui/card/index.js';
+  import DemoSettings from './studio/DemoSettings.svelte';
 
   async function handleDevMode() {
     devMode.active = !devMode.active;
@@ -16,15 +21,15 @@
 </script>
 
 <!-- Dev mode toggle (visible si non connecté et non actif) -->
-{#if !serial.connected}
-  <Button
-    variant="ghost"
-    size="icon"
-    onclick={handleDevMode}
-    class="text-muted-foreground hover:text-blue-400 gap-1.5"
-  >
-    <FlaskConical class="{devMode.active ? 'text-blue-400' : ''} size-4" />
-  </Button>
+{#if !serial.connected && devMode.active}
+  <Popover.Root>
+    <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
+      <FlaskConical class="size-4" />
+    </Popover.Trigger>
+    <Popover.Content class="w-80">
+      <DemoSettings />
+    </Popover.Content>
+  </Popover.Root>
 {/if}
 
 <Badge variant="secondary">
@@ -49,8 +54,7 @@
     {:else if configState.loadError}
       Erreur
     {:else}
-      {serial.connected ? "Connecté" : "Non connecté"}
+      {serial.connected ? 'Connecté' : 'Non connecté'}
     {/if}
   {/if}
 </Badge>
-

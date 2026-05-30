@@ -131,6 +131,24 @@ export async function loadConfig(): Promise<void> {
   }
 }
 
+// Garde idempotente pour le `{await}` du gate Studio : ne relance pas un
+// chargement si la config est déjà là ou déjà en vol. Throw en cas d'échec
+// pour que <svelte:boundary> affiche le snippet `failed`.
+let _loadPromise: Promise<void> | null = null;
+
+export function ensureConfigLoaded(): Promise<void> {
+  if (configState.data) return Promise.resolve();
+  if (!_loadPromise) {
+    _loadPromise = (async () => {
+      await loadConfig();
+      if (configState.loadError) throw new Error(configState.loadError);
+    })().finally(() => {
+      _loadPromise = null;
+    });
+  }
+  return _loadPromise;
+}
+
 // ─────────────────────────────────────────────────────────────
 //  SAUVEGARDE MANUELLE
 // ─────────────────────────────────────────────────────────────

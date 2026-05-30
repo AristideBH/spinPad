@@ -202,6 +202,27 @@ export function drawEllipseFill(g: BoolGrid, x0: number, y0: number, x1: number,
   }
 }
 
+/**
+ * Peint le fond plein puis les pixels allumés d'une grille sur un contexte 2D.
+ * Partagé par l'éditeur d'icône et la preview (cell = taille d'un pixel en px).
+ */
+export function fillIconPixels(
+  ctx: CanvasRenderingContext2D,
+  grid: BoolGrid,
+  cell: number,
+  totalW: number,
+  totalH: number,
+  bg = '#0a0a0a',
+  fg = '#e5e5e5',
+): void {
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, totalW, totalH);
+  ctx.fillStyle = fg;
+  for (let y = 0; y < PROFILE_ICON_H; y++)
+    for (let x = 0; x < PROFILE_ICON_W; x++)
+      if (getPixel(grid, x, y)) ctx.fillRect(x * cell, y * cell, cell, cell);
+}
+
 /** Bitmap PNG-agnostique : convertit une grille en ImageData (NxN, blanc sur transparent). */
 export function gridToImageData(grid: BoolGrid, scale = 1): ImageData {
   const w = PROFILE_ICON_W * scale;

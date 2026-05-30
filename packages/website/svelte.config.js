@@ -8,6 +8,11 @@ export default {
         vitePreprocess(),
         mdsvex({ extensions: ['.md'] }),
     ],
+    // `await` dans les composants + <svelte:boundary pending> (expérimental,
+    // requiert Svelte ≥5.36 ; le flag disparaît en Svelte 6).
+    compilerOptions: {
+        experimental: { async: true },
+    },
     kit: {
         adapter: adapter({
             pages: 'build',

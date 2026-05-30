@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from '$shared/components/ui/button/index.js';
+  import AddButton from '$shared/components/app/AddButton.svelte';
   import { Dialog, DialogContent, DialogHeader, DialogTitle } from '$shared/components/ui/dialog/index.js';
   import { action } from '$shared/constants/action-types.js';
   import {
@@ -140,23 +141,17 @@
       </div>
 
       <div class="flex gap-1.5 flex-wrap">
-        <button
-          type="button"
-          class="px-2 py-1 text-xs transition-colors border border-dashed rounded border-border hover:border-primary/60 hover:bg-accent"
+        <AddButton
           onclick={() => addMacroStep(MACRO_STEP_TYPE.KEY_DOWN)}
-          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Key Down</button
+          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Key Down</AddButton
         >
-        <button
-          type="button"
-          class="px-2 py-1 text-xs transition-colors border border-dashed rounded border-border hover:border-primary/60 hover:bg-accent"
+        <AddButton
           onclick={() => addMacroStep(MACRO_STEP_TYPE.KEY_UP)}
-          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Key Up</button
+          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Key Up</AddButton
         >
-        <button
-          type="button"
-          class="px-2 py-1 text-xs transition-colors border border-dashed rounded border-border hover:border-primary/60 hover:bg-accent"
+        <AddButton
           onclick={() => addMacroStep(MACRO_STEP_TYPE.DELAY_MS)}
-          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Délai</button
+          disabled={macroSteps.length >= MACRO_MAX_STEPS}>+ Délai</AddButton
         >
       </div>
       <p class="mt-2 text-xs text-muted-foreground">

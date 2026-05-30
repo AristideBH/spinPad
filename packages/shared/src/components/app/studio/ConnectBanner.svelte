@@ -19,8 +19,9 @@
   }
 </script>
 
-
-<Empty.Root>
+<Empty.Root
+  class="absolute left-0 right-0 z-10 pt-48 mx-auto top-0 bottom-0 bg-linear-to-b from-transparent to-background from-30% to-80%"
+>
   <Empty.Header>
     <Empty.Media variant="icon">
       <FolderCodeIcon />
@@ -34,7 +35,7 @@
       Connecter le clavier
     </Button>
     {#if serial.error}
-      <Alert.Root variant="destructive" >
+      <Alert.Root variant="destructive">
         <Alert.Title>Erreur</Alert.Title>
         <Alert.Description>{serial.error}</Alert.Description>
       </Alert.Root>

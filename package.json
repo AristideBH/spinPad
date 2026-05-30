@@ -22,5 +22,8 @@
     "eslint-plugin-svelte": "^3.18.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^4.0.1"
+  },
+  "dependencies": {
+    "bits-ui": "^2.18.1"
   }
 }

@@ -6,6 +6,12 @@ const BUILD_DIR = process.env.VITE_BUILD_DIR || 'build';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+    // `await` dans les composants + <svelte:boundary pending> (expérimental,
+    // requiert Svelte ≥5.36 ; le flag disparaît en Svelte 6).
+    compilerOptions: {
+        experimental: { async: true },
+    },
+
     kit: {
         // adapter-static : génère des fichiers HTML/JS/CSS statiques
         adapter: adapter({

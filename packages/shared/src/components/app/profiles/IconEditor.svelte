@@ -2,12 +2,12 @@
   import { PROFILE_ICON_W, PROFILE_ICON_H } from "$shared/constants/config-schema.js";
   import {
     emptyGrid,
-    getPixel,
     setPixel,
     gridToBase64,
     base64ToGrid,
     gridToImageData,
     imageDataToGrid,
+    fillIconPixels,
     drawLine,
     drawRect,
     drawRectFill,
@@ -45,8 +45,6 @@
   let synced  = $state<string | undefined>(undefined);
   let dirty   = $state(false);                    // modifié depuis dernier Save
   let tool    = $state<Tool>("pen");
-  let canvas  = $state<HTMLCanvasElement | null>(null);
-  let preview = $state<HTMLCanvasElement | null>(null);
   let fileInput = $state<HTMLInputElement | null>(null);
 
   // Import threshold
@@ -73,18 +71,12 @@
     }
   });
 
-  // ── Rendu éditeur ────────────────────────────────────────────
-  $effect(() => {
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+  // ── Rendu éditeur (attachment : re-run sur grid/cell/px/py) ──
+  const renderEditor = (el: HTMLCanvasElement) => {
+    const ctx = el.getContext("2d");
     if (!ctx) return;
 
-    ctx.fillStyle = "#0a0a0a";
-    ctx.fillRect(0, 0, px, py);
-    ctx.fillStyle = "#e5e5e5";
-    for (let y = 0; y < H; y++)
-      for (let x = 0; x < W; x++)
-        if (getPixel(grid, x, y)) ctx.fillRect(x * cell, y * cell, cell, cell);
+    fillIconPixels(ctx, grid, cell, px, py);
 
     // Grille
     ctx.strokeStyle = "rgba(255,255,255,0.07)";
@@ -105,15 +97,14 @@
     ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, py); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(px, cy); ctx.stroke();
     ctx.setLineDash([]);
-  });
+  };
 
-  // ── Rendu preview taille réelle ──────────────────────────────
-  $effect(() => {
-    if (!preview) return;
-    const ctx = preview.getContext("2d");
+  // ── Rendu preview taille réelle (attachment : re-run sur grid) ──
+  const renderPreview = (el: HTMLCanvasElement) => {
+    const ctx = el.getContext("2d");
     if (!ctx) return;
     ctx.putImageData(gridToImageData(grid, 1), 0, 0);
-  });
+  };
 
   // ── Interaction ───────────────────────────────────────────────
   let drawing  = $state(false);
@@ -122,10 +113,10 @@
   let baseGrid: BoolGrid = emptyGrid();
 
   function cellAt(e: PointerEvent): { x: number; y: number } | null {
-    if (!canvas) return null;
-    const rect  = canvas.getBoundingClientRect();
-    const scaleX = canvas.width  / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const el = e.currentTarget as HTMLCanvasElement;
+    const rect  = el.getBoundingClientRect();
+    const scaleX = el.width  / rect.width;
+    const scaleY = el.height / rect.height;
     const x = Math.floor(((e.clientX - rect.left) * scaleX) / cell);
     const y = Math.floor(((e.clientY - rect.top)  * scaleY) / cell);
     if (x < 0 || x >= W || y < 0 || y >= H) return null;
@@ -159,7 +150,7 @@
       grid  = next;
       dirty = true;
     }
-    canvas?.setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -338,7 +329,7 @@
   <div class="flex items-start gap-3">
     <!-- Canvas principal -->
     <canvas
-      bind:this={canvas}
+      {@attach renderEditor}
       width={px}
       height={py}
       class="border rounded cursor-crosshair border-border touch-none select-none"
@@ -354,7 +345,7 @@
     <div class="flex flex-col items-center gap-1">
       <span class="text-[9px] text-muted-foreground">24×24</span>
       <canvas
-        bind:this={preview}
+        {@attach renderPreview}
         width={W}
         height={H}
         class="border border-border rounded"

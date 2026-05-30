@@ -26,7 +26,7 @@
   <AppSidebar />
   <Sidebar.Inset>
     <header
-      class="sticky top-0 z-10 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl"
+      class="sticky top-0 z-20 flex items-center w-full h-16 max-w-5xl gap-8 px-4 mx-auto border-b shrink-0 border-border/50 bg-background rounded-t-2xl"
     >
       <!-- Left: trigger + breadcrumbs -->
       <div class="flex items-center min-w-0 gap-2">
@@ -55,7 +55,7 @@
       <!-- Right: dynamic slot for per-page toolbar content -->
       {#if headerRight.current}
         {@const HeaderRightComponent = headerRight.current.component}
-        <div class="flex items-center w-full gap-2 ms-auto container/main">
+        <div class="relative flex items-center w-full gap-2 ms-auto container/main">
           <HeaderRightComponent {...headerRight.current.props} />
         </div>
       {/if}
