@@ -4,8 +4,9 @@
     {
       "name": "Studio",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@spinpad/studio", "dev"],
-      "port": 5173
+      "runtimeArgs": ["--filter", "@spinpad/studio", "dev", "--port", "5180", "--strictPort"],
+      "port": 5180,
+      "autoPort": false
     },
     {
       "name": "Website",

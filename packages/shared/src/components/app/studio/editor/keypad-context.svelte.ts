@@ -92,11 +92,11 @@ export class KeypadContext {
     this.#trainingCleanup = null;
   }
 
-  resetLayer(): void {
+  resetLayer(layerIdx: number = configState.activeLayerIndex): void {
     const pi = configState.activeProfileIndex;
-    const li = configState.activeLayerIndex;
+    const li = layerIdx;
     if (pi === null || li === null) return;
-    const layer = this.layer;
+    const layer = this.profile?.layers?.[li];
     if (!layer) return;
     for (let i = 0; i < layer.keys.length; i++) {
       setKeyAction(pi, li, i, 0);
