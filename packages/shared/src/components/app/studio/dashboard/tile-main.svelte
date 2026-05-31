@@ -56,7 +56,7 @@
   </Card.Header>
 
   <Card.Footer class="flex flex-wrap gap-2">
-    <Button variant="outline" onclick={handleFactoryReset} class="gap-1.5">
+    <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
       <Lightbulb /> LED
     </Button>
     <MacroManager />
@@ -67,7 +67,7 @@
       </Drawer.Trigger>
       <Drawer.Content>
         <Drawer.Header>
-          <Drawer.Title>Settings</Drawer.Title>
+          <Drawer.Title>Paramètres</Drawer.Title>
           <!-- <Drawer.Description>This action cannot be undone.</Drawer.Description> -->
         </Drawer.Header>
 
@@ -92,8 +92,8 @@
         </Button>
 
         <!-- <Button variant="destructive" onclick={handleFactoryReset} class="gap-1.5">
-        <Trash2 class="size-4" /> Reset usine
-      </Button> -->
+          <Trash2 class="size-4" /> Reset usine
+        </Button> -->
       {/if}
     </ButtonGroup.Root>
   </Card.Footer>

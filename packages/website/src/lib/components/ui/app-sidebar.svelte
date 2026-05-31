@@ -68,9 +68,9 @@
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isShop} tooltipContent="Shop">
+          <Sidebar.MenuButton isActive={isShop} tooltipContent="Boutique">
             {#snippet child({ props })}
-              <a href="/shop/" {...props}><ShoppingCart /><span>Shop</span></a>
+              <a href="/shop/" {...props}><ShoppingCart /><span>Boutique</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
@@ -95,9 +95,9 @@
         <Collapsible.Root open={toolsOpen}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
-              <Sidebar.MenuButton tooltipContent="Tools">
+              <Sidebar.MenuButton tooltipContent="Outils">
                 {#snippet child({ props: btnProps })}
-                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Tools</span></a>
+                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Outils</span></a>
                 {/snippet}
               </Sidebar.MenuButton>
               <Collapsible.Trigger>

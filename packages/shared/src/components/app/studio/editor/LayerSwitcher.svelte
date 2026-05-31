@@ -40,7 +40,8 @@
   }
 </script>
 
-{#if ctx.profile}
+<pre>{JSON.stringify(ctx, null, 2)}</pre>
+<!-- {#if ctx.profile}
   <div class="flex flex-col gap-3 keycap-grid grow min-w-[180px] max-w-[200px]">
     <Label class="ml-2">Layers</Label>
 
@@ -112,4 +113,4 @@
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
-{/if}
+{/if} -->

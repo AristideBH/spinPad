@@ -33,13 +33,6 @@
       : null,
   );
 
-  const handleShare = () => {
-    if (!ctx.layer) return;
-    const dataStr = JSON.stringify(ctx.layer);
-    navigator.clipboard.writeText(dataStr);
-    ctx.pickerOpen = false;
-  };
-
   let fileInput = $state<HTMLInputElement | null>(null);
 
   function onImportClick() {
@@ -97,40 +90,35 @@
         </Dialog.Trigger>
         <Dialog.Content class="sm:max-w-md">
           <Dialog.Header>
-            <Dialog.Title>Import/Export Profiles</Dialog.Title>
-            <Dialog.Description>Anyone who has this link will be able to view this.</Dialog.Description>
+            <Dialog.Title>Importer / Exporter</Dialog.Title>
+            <Dialog.Description>Sauvegardez ou chargez une configuration au format .spinpad.</Dialog.Description>
           </Dialog.Header>
           <div class="flex items-center gap-2">
-            <!-- Import / Export -->
             <Button
-              size="icon"
-              variant="ghost"
+              variant="outline"
               onclick={onImportClick}
               title="Importer une config (.spinpad)"
               disabled={!configState.data}
+              class="gap-1.5"
             >
-              <Upload class="size-4" />
+              <Upload class="size-4" /> Importer
             </Button>
 
             <Button
-              size="icon"
-              variant="ghost"
+              variant="outline"
               onclick={exportConfig}
               title="Exporter la config (.spinpad)"
               disabled={!configState.data}
+              class="gap-1.5"
             >
-              <Download class="size-4" />
+              <Download class="size-4" /> Exporter
             </Button>
 
             <!-- Hidden file input for import -->
             <input bind:this={fileInput} type="file" accept=".spinpad,.json" class="hidden" onchange={onFileSelected} />
-            <div class="grid flex-1 gap-2">
-              <Label for="link" class="sr-omnly">Link</Label>
-              <Input id="link" defaultValue="https://shadcn-svelte.com/docs/installation" />
-            </div>
           </div>
           <Dialog.Footer class="sm:justify-start">
-            <Dialog.Close class={buttonVariants({ variant: 'secondary' })}>Close</Dialog.Close>
+            <Dialog.Close class={buttonVariants({ variant: 'secondary' })}>Fermer</Dialog.Close>
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Root>

@@ -45,7 +45,9 @@
   ] as const;
 </script>
 
-{#if ctx.layer}
+<pre>{JSON.stringify(ctx, null, 2)}</pre>
+
+<!-- {#if ctx.layer}
   <div class="flex flex-col gap-3 keycap-grid">
     <Label>Clavier</Label>
 
@@ -81,7 +83,7 @@
             {#if ctx.trainingActive}
               <div class="keycap-flash" style="opacity: {ctx.keyFlashOpacity(key.idx)}"></div>
             {/if}
-            <!-- Counter-rotated overlay: stays upright + screen-top-right at any orientation. -->
+          
             <div class="keycap-overlay" style="transform: rotate({-ctx.orientDeg}deg)">
               {#if ctx.trainingActive && ctx.keyPressCounts[key.idx] > 0}
                 <span class="keycap-count">{ctx.keyPressCounts[key.idx]}</span>
@@ -106,7 +108,7 @@
       </div>
     </div>
   </div>
-{/if}
+{/if} -->
 
 <style>
   .keycap-grid {

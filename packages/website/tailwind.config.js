@@ -4,7 +4,7 @@ export default {
     theme: {
         extend: {
             colors: {
-                spinpad: { DEFAULT: '#7C3AED', light: '#A78BFA', dark: '#4C1D95' },
+                spinpad: { DEFAULT: '#06B6D4', light: '#22D3EE', dark: '#0E7490' },
             },
         },
     },
