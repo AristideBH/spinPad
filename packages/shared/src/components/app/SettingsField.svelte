@@ -1,5 +1,5 @@
-<script>
-  import { Label } from "$shared/components/ui/label/index.js";
+<script lang="ts">
+  import { Label } from '$shared/components/ui/label/index.js';
 
   /** @type {{ label: string, description?: string, children: import('svelte').Snippet }} */
   let { label, description, children } = $props();

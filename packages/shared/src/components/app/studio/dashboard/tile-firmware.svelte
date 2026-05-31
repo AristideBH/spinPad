@@ -28,22 +28,17 @@
   const fwDirty = $derived(data?.fw?.dirty === true);
 
   async function handleFactoryReset() {
-    if (
-      !confirm(
-        'Remettre la config à zéro ? Toutes les modifications seront perdues.',
-      )
-    )
-      return;
+    if (!confirm('Remettre la config à zéro ? Toutes les modifications seront perdues.')) return;
     await factoryReset();
     await loadConfig();
   }
 </script>
 
-<Card.Root class="@container/card ">
-  <Card.Header>
+<Card.Root class="@container/card  @lg/main:row-span-2 @4xl/main:row-span-1">
+  <Card.Header class="h-full">
     <Card.Description>Firmware</Card.Description>
     <!-- Actions -->
-    <div class="flex items-center gap-1.5 mb-1">
+    <div class="flex items-center gap-1.5 mb-1 mt-auto">
       <Cpu class="size-3.5 text-muted-foreground" />
       <span class="text-base font-semibold tabular-nums">v{fwVersion}</span>
       <span

@@ -9,7 +9,12 @@
 #define CONFIG_MAX_LAYERS     8
 #define CONFIG_NAME_MAX_LEN   32
 #define CONFIG_NUM_KEYS       10  // Doit correspondre à KB_NUM_KEYS dans kb_config.h
-#define CONFIG_FORMAT_VERSION 1
+#define CONFIG_FORMAT_VERSION 2
+
+// Macros globales (partagées par tous les profils)
+#define MACRO_COUNT           16
+#define MACRO_MAX_STEPS       32
+#define MACRO_NAME_MAX_LEN    17
 
 // Icône de profil : bitmap 24×24 monochrome 1bpp
 #define PROFILE_ICON_W        24

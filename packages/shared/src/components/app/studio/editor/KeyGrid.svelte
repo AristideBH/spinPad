@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
   import { getKeycodeLabel } from '$shared/constants/keycodes.js';
+  import { configState } from '$shared/store/config.svelte.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
 
@@ -64,7 +65,7 @@
             {/if}
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
               <span class="keycap-sw">{key.sw}</span>
-              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0)}</span>
+              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span>
               {#if key.rowSpan === 2 || key.colSpan === 2}
                 <span class="keycap-size-hint">2u</span>
               {/if}

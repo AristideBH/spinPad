@@ -7,7 +7,7 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { cn } from '$shared/utils.js';
-  import { MoreVertical, Plus } from '@lucide/svelte';
+  import { BrushCleaning, ListRestart, MoreVertical, Plus } from '@lucide/svelte';
 
   const ctx = getKeypadContext();
 
@@ -35,6 +35,17 @@
             <RadioGroup.Item value={String(i)} title={l.name} id="l-{i}" />
             {l.name}
           </Label>
+
+          <Button
+            variant="outline"
+            size="icon-sm"
+            class="ml-auto"
+            title="Réinitialiser la couche"
+            onclick={() => ctx.resetLayer()}
+            disabled={!ctx.layer}
+          >
+            <BrushCleaning />
+          </Button>
           <Button variant="outline" class="ml-auto" size="icon-sm" title="Éditer le layer">
             <MoreVertical />
           </Button>

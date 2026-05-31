@@ -5,15 +5,32 @@ import {
   SPINPAD_FILE_TYPE,
   CURRENT_FORMAT_VERSION,
 } from '$shared/constants/config-migrations.js';
-import { defaultConfig } from '$shared/constants/config-schema.js';
+import { defaultConfig, MACRO_COUNT } from '$shared/constants/config-schema.js';
 
 describe('parseSpinpadFile', () => {
-  it('parses a valid v1 wrapper', () => {
+  it('parses a current-version wrapper without migration', () => {
     const cfg = defaultConfig();
     const wrapper = createSpinpadFile(cfg);
     const result = parseSpinpadFile(wrapper);
-    expect(result.fromVersion).toBe(1);
+    expect(result.fromVersion).toBe(CURRENT_FORMAT_VERSION);
     expect(result.config).toEqual(cfg);
+  });
+
+  it('migrates v1 → v2 : drops per-profile macros, inits global slots', () => {
+    const cfg = defaultConfig() as Record<string, unknown> & { profiles: Record<string, unknown>[] };
+    // Simule un ancien profil v1 avec des macros locales
+    cfg.profiles[0].macros = [[{ type: 0, keycode: 0x04 }]];
+    delete (cfg as Record<string, unknown>).macros;
+    const wrapper = {
+      _type: SPINPAD_FILE_TYPE,
+      _format_version: 1,
+      config: cfg,
+    };
+    const { config, fromVersion } = parseSpinpadFile(wrapper);
+    expect(fromVersion).toBe(1);
+    expect(config.profiles[0]).not.toHaveProperty('macros');
+    expect(config.macros).toHaveLength(MACRO_COUNT);
+    expect(config.macros.every((m) => m.steps.length === 0)).toBe(true);
   });
 
   it('throws on non-object input', () => {

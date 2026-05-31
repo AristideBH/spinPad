@@ -8,9 +8,10 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { toast } from 'svelte-sonner';
-import type { FullConfig }   from '$shared/constants/config-schema.js';
+import type { FullConfig } from '$shared/constants/config-schema.js';
 import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 import type { RpcQueueEntry, MessageHandler } from '$shared/types/serial.js';
+import { devMode } from './devMode.svelte';
 
 // WebSerial API n'est pas dans les lib TypeScript standard — types locaux.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,9 +22,9 @@ type SerialPort = any;
 // ─────────────────────────────────────────────────────────────
 
 class SerialState {
-  connected        = $state(false);
-  error            = $state<string | null>(null);
-  reconnecting     = $state(false);
+  connected = $state(false);
+  error = $state<string | null>(null);
+  reconnecting = $state(false);
   reconnectAttempt = $state(0);
 }
 export const serial = new SerialState();
@@ -33,20 +34,20 @@ export const serial = new SerialState();
 // ─────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let port:       any = null;
+let port: any = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let writer:     any = null;
+let writer: any = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let reader:     any = null;
-let readBuffer  = '';
+let reader: any = null;
+let readBuffer = '';
 
 let _reconnectTimer: ReturnType<typeof setInterval> | null = null;
-const RECONNECT_INTERVAL_MS  = 2000;
+const RECONNECT_INTERVAL_MS = 2000;
 const RECONNECT_MAX_ATTEMPTS = 15;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _startReconnect(savedPort: any): void {
-  serial.reconnecting     = true;
+  serial.reconnecting = true;
   serial.reconnectAttempt = 0;
 
   _reconnectTimer = setInterval(async () => {
@@ -58,12 +59,12 @@ function _startReconnect(savedPort: any): void {
     try {
       await savedPort.open({ baudRate: 115200 });
       _stopReconnect();
-      port   = savedPort;
+      port = savedPort;
       writer = port.writable!.getWriter();
       port.addEventListener('disconnect', _handleUnexpectedDisconnect);
       startReading();
       serial.connected = true;
-      serial.error     = null;
+      serial.error = null;
       toast.success('Reconnecté');
     } catch {
       // Périphérique pas encore disponible
@@ -72,12 +73,15 @@ function _startReconnect(savedPort: any): void {
 }
 
 function _stopReconnect(): void {
-  if (_reconnectTimer) { clearInterval(_reconnectTimer); _reconnectTimer = null; }
-  serial.reconnecting     = false;
+  if (_reconnectTimer) {
+    clearInterval(_reconnectTimer);
+    _reconnectTimer = null;
+  }
+  serial.reconnecting = false;
   serial.reconnectAttempt = 0;
 }
 
-const encoder        = new TextEncoder();
+const encoder = new TextEncoder();
 const messageHandlers = new Set<MessageHandler>();
 
 // ─────────────────────────────────────────────────────────────
@@ -131,7 +135,7 @@ export async function connect(): Promise<boolean> {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    port = await (navigator as any).serial.requestPort({ filters: [{ usbVendorId: 0x303A }] });
+    port = await (navigator as any).serial.requestPort({ filters: [{ usbVendorId: 0x303a }] });
     await port.open({ baudRate: 115200 });
 
     port.addEventListener('disconnect', _handleUnexpectedDisconnect);
@@ -140,7 +144,7 @@ export async function connect(): Promise<boolean> {
     startReading();
 
     serial.connected = true;
-    serial.error     = null;
+    serial.error = null;
     toast.success('Clavier connecté');
     return true;
   } catch (err) {
@@ -159,7 +163,7 @@ function _handleUnexpectedDisconnect(): void {
   _cancelQueuedRpcs('Déconnecté');
   writer = null;
   reader = null;
-  port   = null;
+  port = null;
   serial.connected = false;
   toast.warning('Clavier déconnecté — tentative de reconnexion…');
   if (savedPort) _startReconnect(savedPort);
@@ -170,16 +174,29 @@ export async function disconnect(): Promise<void> {
   _cancelQueuedRpcs('Déconnecté');
   readBuffer = '';
 
-  try { if (writer) await writer.close(); } catch { /* port déjà fermé */ }
+  try {
+    if (writer) await writer.close();
+  } catch {
+    /* port déjà fermé */
+  }
   writer = null;
 
-  try { if (reader) reader.cancel(); } catch { /* reader déjà annulé */ }
+  try {
+    if (reader) reader.cancel();
+  } catch {
+    /* reader déjà annulé */
+  }
   reader = null;
 
-  try { if (port) await port.close(); } catch { /* port déjà fermé */ }
+  try {
+    if (port) await port.close();
+  } catch {
+    /* port déjà fermé */
+  }
   port = null;
 
   serial.connected = false;
+  devMode.active = false;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -197,7 +214,7 @@ async function startReading(): Promise<void> {
 
       readBuffer += decoder.decode(value);
       const lines = readBuffer.split('\n');
-      readBuffer  = lines.pop()!;
+      readBuffer = lines.pop()!;
 
       for (const line of lines) {
         if (line.trim()) handleIncomingMessage(line.trim());
@@ -217,7 +234,7 @@ async function startReading(): Promise<void> {
 function handleIncomingMessage(line: string): void {
   try {
     const msg = JSON.parse(line) as unknown;
-    messageHandlers.forEach(handler => handler(msg));
+    messageHandlers.forEach((handler) => handler(msg));
   } catch {
     console.warn('Message non-JSON reçu:', line);
   }
@@ -262,7 +279,7 @@ function _rpcCall<T>(
       }
     });
 
-    sendRaw(JSON.stringify(command)).catch(err => {
+    sendRaw(JSON.stringify(command)).catch((err) => {
       clearTimeout(timer);
       cleanup?.();
       reject(err);
@@ -276,71 +293,77 @@ function _rpcCall<T>(
 
 export function getConfig(): Promise<FullConfig> {
   if (!serial.connected) return Promise.reject(new Error('Non connecté'));
-  return _enqueueRpc(() => _rpcCall<FullConfig>(
-    { cmd: 'get_config' },
-    msg => {
+  return _enqueueRpc(() =>
+    _rpcCall<FullConfig>({ cmd: 'get_config' }, (msg) => {
       const m = msg as Record<string, unknown>;
       return m['version'] !== undefined && m['profiles'] !== undefined;
-    },
-  ));
+    }),
+  );
 }
 
 export function setConfig(config: FullConfig): Promise<{ status: string }> {
   if (!serial.connected) return Promise.reject(new Error('Non connecté'));
-  return _enqueueRpc(() => _rpcCall<{ status: string }>(
-    { cmd: 'set_config', payload: config },
-    msg => {
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string }>({ cmd: 'set_config', payload: config }, (msg) => {
       const m = msg as Record<string, unknown>;
       return m['status'] === 'ok' && !m['msg'];
-    },
-  ));
+    }),
+  );
 }
 
 export function factoryReset(): Promise<{ status: string; msg: string }> {
   if (!serial.connected) return Promise.reject(new Error('Non connecté'));
-  return _enqueueRpc(() => _rpcCall<{ status: string; msg: string }>(
-    { cmd: 'factory_reset' },
-    msg => {
-      const m = msg as Record<string, unknown>;
-      return m['status'] === 'ok' && m['msg'] === 'factory_reset';
-    },
-    10000,
-  ));
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string; msg: string }>(
+      { cmd: 'factory_reset' },
+      (msg) => {
+        const m = msg as Record<string, unknown>;
+        return m['status'] === 'ok' && m['msg'] === 'factory_reset';
+      },
+      10000,
+    ),
+  );
 }
 
 export function getDeviceStatus(): Promise<DeviceStatus> {
   if (!serial.connected) return Promise.reject(new Error('Non connecté'));
-  return _enqueueRpc(() => _rpcCall<DeviceStatus>(
-    { cmd: 'device_status' },
-    msg => {
-      const m = msg as Record<string, unknown>;
-      return m != null && m['fw'] !== undefined && m['connection'] !== undefined;
-    },
-    2000,
-  ));
+  return _enqueueRpc(() =>
+    _rpcCall<DeviceStatus>(
+      { cmd: 'device_status' },
+      (msg) => {
+        const m = msg as Record<string, unknown>;
+        return m != null && m['fw'] !== undefined && m['connection'] !== undefined;
+      },
+      2000,
+    ),
+  );
 }
 
 export function keyMonitor(enable: boolean): Promise<{ status: string }> {
-  return _enqueueRpc(() => _rpcCall<{ status: string }>(
-    { cmd: 'key_monitor', enable },
-    msg => (msg as Record<string, unknown>)['status'] === 'ok',
-    3000,
-  ));
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string }>(
+      { cmd: 'key_monitor', enable },
+      (msg) => (msg as Record<string, unknown>)['status'] === 'ok',
+      3000,
+    ),
+  );
 }
 
 /** S'abonne aux événements de touche bruts (sans passer par la file RPC). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function onKeyEvent(handler: (msg: any) => void): () => void {
-  return onMessage(msg => {
+  return onMessage((msg) => {
     const m = msg as Record<string, unknown>;
     if (m && m['event'] === 'key') handler(m);
   });
 }
 
 export function setTime(unixTs: number): Promise<{ status: string }> {
-  return _enqueueRpc(() => _rpcCall<{ status: string }>(
-    { cmd: 'set_time', ts: unixTs },
-    msg => (msg as Record<string, unknown>)['status'] === 'ok',
-    2000,
-  ));
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string }>(
+      { cmd: 'set_time', ts: unixTs },
+      (msg) => (msg as Record<string, unknown>)['status'] === 'ok',
+      2000,
+    ),
+  );
 }

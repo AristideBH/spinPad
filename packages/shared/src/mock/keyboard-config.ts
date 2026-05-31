@@ -63,7 +63,7 @@ const ZOOM_OUT= action(TYPE_MEDIA, MEDIA_ZOOM_OUT);
 //   [       ]     [ SW5 ] [ SW4 ]
 
 export const MOCK_CONFIG: FullConfig = {
-  version:        1,
+  version:        2,
   active_profile: 0,
   profile_count:  2,
 
@@ -143,6 +143,24 @@ export const MOCK_CONFIG: FullConfig = {
       combo_count: 0,
       combos:      [],
     },
+  ],
+
+  // ── Macros globales (partagées par tous les profils) ──────────
+  // 16 slots fixes ; les premiers sont remplis pour la démo.
+  macros: [
+    { name: 'Salut', steps: [
+      { type: 0, keycode: 0x0b }, { type: 1, keycode: 0x0b }, // H
+      { type: 0, keycode: 0x04 }, { type: 1, keycode: 0x04 }, // A
+      { type: 0, keycode: 0x0f }, { type: 1, keycode: 0x0f }, // L
+      { type: 0, keycode: 0x18 }, { type: 1, keycode: 0x18 }, // U
+      { type: 0, keycode: 0x17 }, { type: 1, keycode: 0x17 }, // T
+    ] },
+    { name: 'Entrée x2', steps: [
+      { type: 0, keycode: 0x28 }, { type: 1, keycode: 0x28 },
+      { type: 2, delay: 100 },
+      { type: 0, keycode: 0x28 }, { type: 1, keycode: 0x28 },
+    ] },
+    ...Array.from({ length: 14 }, () => ({ name: '', steps: [] as unknown[] })),
   ],
 
   ble: {

@@ -292,7 +292,7 @@ static void send_action(uint16_t action, bool pressed)
 
     case ACTION_TYPE_MACRO:
         // Lancer la macro en arrière-plan à l'appui uniquement
-        if (pressed && value < MACRO_MAX_PER_PROFILE) {
+        if (pressed && value < MACRO_COUNT) {
             keymap_play_macro((uint8_t)value);
         }
         break;
@@ -534,16 +534,15 @@ bool keymap_get_monitor(void) { return g_monitor_enabled; }
 //  Chaque appui sur une touche macro lance une tâche éphémère
 //  qui joue les étapes dans l'ordre, puis se termine.
 // ─────────────────────────────────────────────────────────────
-typedef struct { uint8_t macro_idx; uint8_t profile; } MacroTaskArg;
+typedef struct { uint8_t macro_idx; } MacroTaskArg;
 
 static void macro_task(void *pvArg)
 {
     MacroTaskArg *arg = (MacroTaskArg *)pvArg;
     const kb_config_t *cfg = config_store_get();
-    const kb_profile_t *profile = &cfg->profiles[arg->profile];
 
-    if (arg->macro_idx >= profile->macro_count) goto done;
-    const kb_macro_t *macro = &profile->macros[arg->macro_idx];
+    if (arg->macro_idx >= MACRO_COUNT) goto done;
+    const kb_macro_t *macro = &cfg->macros[arg->macro_idx];
 
     for (int si = 0; si < macro->step_count; si++) {
         const kb_macro_step_t *step = &macro->steps[si];
@@ -574,10 +573,9 @@ done:
 void keymap_play_macro(uint8_t macro_idx)
 {
     const kb_config_t *cfg = config_store_get();
-    uint8_t profile = cfg->active_profile;
 
-    if (macro_idx >= cfg->profiles[profile].macro_count) {
-        ESP_LOGW(TAG, "Macro %d inexistante (profil %d)", macro_idx, profile);
+    if (macro_idx >= MACRO_COUNT || cfg->macros[macro_idx].step_count == 0) {
+        ESP_LOGW(TAG, "Macro %d inexistante ou vide", macro_idx);
         return;
     }
 
@@ -587,7 +585,6 @@ void keymap_play_macro(uint8_t macro_idx)
         return;
     }
     arg->macro_idx = macro_idx;
-    arg->profile   = profile;
 
     // Tâche éphémère, priorité 4 (légèrement au-dessus du scan)
     // Stack 1024 mots = 4KB, suffisant pour des appels HID simples

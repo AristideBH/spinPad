@@ -9,7 +9,7 @@
 import type { BatteryScenario, ConnectionScenario } from '$shared/types/dev-mode.js';
 
 class DevModeState {
-  active     = $state(import.meta.env.VITE_DEV_MODE === 'true');
+  active     = $state(false);
   battery    = $state<BatteryScenario>('present');
   connection = $state<ConnectionScenario>('usb');
 }

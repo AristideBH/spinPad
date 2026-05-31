@@ -1,27 +1,21 @@
 <script lang="ts">
-  import { cn } from '$shared/utils.js';
-  import { Save, Undo2, Redo2, Upload, Download, LoaderCircle, Check, Info } from '@lucide/svelte';
-  import {
-    configState,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    exportConfig,
-    importConfig,
-    saveConfig,
-  } from '$shared/store/config.svelte.js';
+  import { Undo2, Redo2, Check, FlaskConical, Info } from '@lucide/svelte';
+  import { configState, undo, redo, canUndo, canRedo } from '$shared/store/config.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import { startPolling, stopPolling } from '$shared/store/deviceStatus.svelte.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
-  import { Separator } from '$shared/components/ui/separator/index.js';
-  import StatusCard from '$shared/components/app/StatusCard.svelte';
-  import { toast } from 'svelte-sonner';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import { Spinner } from '$shared/components/ui/spinner';
+  import * as Popover from '$shared/components/ui/popover/index.js';
+  import DemoSettings from './DemoSettings.svelte';
+  import { cn } from '$shared';
+  import Badge from '$shared/components/ui/badge/badge.svelte';
 
   // Démarrer le polling du statut device quand connecté ou en mode démo.
   // Le store route automatiquement vers le bon transport (serial / http / mock).
   $effect(() => {
+    //@ts-expect-error - Vite injecte la variable d'env à la compilation, elle n'existe pas à l'exécution
     const shouldPoll = serial.connected || devMode.active || import.meta.env.VITE_TRANSPORT === 'http';
     if (shouldPoll) {
       startPolling(5000);
@@ -29,84 +23,45 @@
     }
   });
 
-  let fileInput = $state<HTMLInputElement | null>(null);
-
-  function onImportClick() {
-    fileInput?.click();
-  }
-
-  async function onFileSelected(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    try {
-      await importConfig(file);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[import]', msg);
-      toast.error('Import échoué', { description: msg });
-    }
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  }
-
   const isOnline = $derived(serial.connected || devMode.active);
 </script>
 
 {#if isOnline}
   <!-- Undo / Redo -->
-  <Button size="icon" variant="ghost" onclick={undo} disabled={!canUndo()} title="Annuler (Ctrl+Z)">
-    <Undo2 class="size-4" />
-  </Button>
-  <Button size="icon" variant="ghost" onclick={redo} disabled={!canRedo()} title="Rétablir (Ctrl+Y)">
-    <Redo2 class="size-4" />
-  </Button>
-
-  <Separator orientation="vertical" />
-
-  <!-- Import / Export -->
-  <Button
-    size="icon"
-    variant="ghost"
-    onclick={onImportClick}
-    title="Importer une config (.spinpad)"
-    disabled={!configState.data}
-  >
-    <Upload class="size-4" />
-  </Button>
-
-  <Button
-    size="icon"
-    variant="ghost"
-    onclick={exportConfig}
-    title="Exporter la config (.spinpad)"
-    disabled={!configState.data}
-  >
-    <Download class="size-4" />
-  </Button>
+  <ButtonGroup.Root>
+    <Button size="icon" variant="outline" onclick={undo} disabled={!canUndo()} title="Annuler (Ctrl+Z)">
+      <Undo2 class="size-4" />
+    </Button>
+    <Button size="icon" variant="outline" onclick={redo} disabled={!canRedo()} title="Rétablir (Ctrl+Y)">
+      <Redo2 class="size-4" />
+    </Button>
+  </ButtonGroup.Root>
+  <div class="grow"></div>
 
   <!-- Auto-save indicator / Force save -->
-  {#if configState.isSaving}
-    <Button size="sm" variant="ghost" class="gap-1.5 text-muted-foreground" disabled>
-      <LoaderCircle class="size-4 animate-spin" />
-      Sauvegarde…
-    </Button>
-  {:else if configState.isDirty}
-    <Button size="sm" onclick={saveConfig} class="gap-1.5">
-      <Save class="size-4" />
-      Sauvegarder
-    </Button>
+  {#if configState.isDirty}
+    <Badge variant="ghost" class="gap-1.5">
+      <Spinner /> Sauvegarde
+    </Badge>
   {:else}
-    <Button size="sm" variant="ghost" class="gap-1.5 text-muted-foreground" disabled>
-      <Check class="size-4" />
-      Sauvegardé
-    </Button>
+    <Badge variant="ghost" class="gap-1.5 text-muted-foreground">
+      <Check /> Sauvegardé
+    </Badge>
   {/if}
 
-  <!-- Hidden file input for import -->
-  <input bind:this={fileInput} type="file" accept=".spinpad,.json" class="hidden" onchange={onFileSelected} />
+  <!-- Dev mode toggle (visible dès que le mode démo est actif) -->
+  {#if devMode.active}
+    <Popover.Root>
+      <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
+        <FlaskConical class="size-4" />
+      </Popover.Trigger>
+      <Popover.Content class="w-80">
+        <DemoSettings />
+      </Popover.Content>
+    </Popover.Root>
+  {/if}
+
+  <Button size="icon" variant="outline" title="Aide & documentation" href="./docs/studio-mode/">
+    <Info class="size-4" />
+  </Button>
 {/if}
-
-<div class="grow"></div>
-
-<StatusCard />
