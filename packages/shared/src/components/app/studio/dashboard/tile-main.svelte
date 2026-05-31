@@ -56,28 +56,13 @@
   </Card.Header>
 
   <Card.Footer class="flex flex-wrap gap-2">
-    <ButtonGroup.Root>
-      <Button variant="outline" size="icon" onclick={loadConfig}>
-        <RefreshCw />
-      </Button>
-      {#if serial.connected}
-        <Button variant="outline" onclick={disconnect} class="ms-auto gap-1.5">
-          <LogOut class="size-4" /> Déconnecter
-        </Button>
-
-        <!-- <Button variant="destructive" onclick={handleFactoryReset} class="gap-1.5">
-        <Trash2 class="size-4" /> Reset usine
-      </Button> -->
-      {/if}
-    </ButtonGroup.Root>
-
     <Button variant="outline" onclick={handleFactoryReset} class="gap-1.5">
       <Lightbulb /> LED
     </Button>
     <MacroManager />
 
     <Drawer.Root direction="right">
-      <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'ms-auto')}>
+      <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), '')}>
         <Settings2 /> Paramètres
       </Drawer.Trigger>
       <Drawer.Content>
@@ -96,5 +81,20 @@
         </Drawer.Footer> -->
       </Drawer.Content>
     </Drawer.Root>
+
+    <ButtonGroup.Root class="ms-auto">
+      <Button variant="outline" size="icon" onclick={loadConfig}>
+        <RefreshCw />
+      </Button>
+      {#if serial.connected}
+        <Button variant="outline" onclick={disconnect} class="ms-auto gap-1.5">
+          <LogOut class="size-4" /> Déconnecter
+        </Button>
+
+        <!-- <Button variant="destructive" onclick={handleFactoryReset} class="gap-1.5">
+        <Trash2 class="size-4" /> Reset usine
+      </Button> -->
+      {/if}
+    </ButtonGroup.Root>
   </Card.Footer>
 </Card.Root>
