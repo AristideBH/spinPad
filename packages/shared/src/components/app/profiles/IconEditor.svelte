@@ -20,6 +20,8 @@
     Pencil, Minus, Square, SquareDashed, Circle, Disc3,
     Trash2, FlipHorizontal2, Save, RotateCcw, Upload, Download, Copy, Check,
   } from "@lucide/svelte";
+  import { Input } from "$shared/components/ui/input/index.js";
+  import { Slider } from "$shared/components/ui/slider/index.js";
 
   interface Props {
     value?: string;           // base64 courante (prop externe)
@@ -390,25 +392,21 @@
     <input bind:this={fileInput} type="file" accept="image/*" class="hidden" onchange={importFile} />
 
     <!-- Threshold import -->
-    <label class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-      Seuil import
-      <input
-        type="range" min="0" max="255" step="1"
-        bind:value={threshold}
-        class="w-20 accent-primary"
-      />
+    <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+      <span>Seuil import</span>
+      <Slider type="single" min={0} max={255} step={1} bind:value={threshold} class="w-20" />
       <span class="w-6 text-right tabular-nums">{threshold}</span>
-    </label>
+    </div>
   </div>
 
   <!-- ── Champ base64 ── -->
   <div class="flex items-center gap-2">
-    <input
+    <Input
       type="text"
       readonly
       value={currentBase64}
-      class="flex-1 min-w-0 px-2 py-1 text-[10px] font-mono border rounded border-border bg-muted text-muted-foreground truncate"
-      onclick={(e) => (e.target as HTMLInputElement).select()}
+      class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
+      onclick={(e: Event) => (e.target as HTMLInputElement).select()}
     />
     <button
       type="button"

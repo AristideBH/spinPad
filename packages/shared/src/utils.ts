@@ -55,7 +55,7 @@ export function scrollShadow(node: HTMLElement) {
       return;
     }
 
-    console.log('Scroll position:', node.scrollLeft, 'Max scroll:', maxScroll);
+    // console.log('Scroll position:', node.scrollLeft, 'Max scroll:', maxScroll);
 
     const currentScroll = node.scrollLeft / maxScroll;
 

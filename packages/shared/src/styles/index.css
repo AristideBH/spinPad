@@ -12,7 +12,7 @@
  *   @source "../../shared/src";
  */
 
-@import "./fonts.css";
+@import './fonts.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -43,9 +43,9 @@
     --radius: 0.625rem;
     --chart-1: oklch(0.715 0.132 215);
     --chart-2: oklch(0.609 0.126 218);
-    --chart-3: oklch(0.520 0.110 221);
-    --chart-4: oklch(0.450 0.095 224);
-    --chart-5: oklch(0.715 0.140 210);
+    --chart-3: oklch(0.52 0.11 221);
+    --chart-4: oklch(0.45 0.095 224);
+    --chart-5: oklch(0.715 0.14 210);
     --sidebar: oklch(0.987 0.002 197.1);
     --sidebar-foreground: oklch(0.148 0.004 228.8);
     --sidebar-primary: oklch(0.218 0.008 223.9);
@@ -78,9 +78,9 @@
     --ring: oklch(0.56 0.021 213.5);
     --chart-1: oklch(0.715 0.132 215);
     --chart-2: oklch(0.609 0.126 218);
-    --chart-3: oklch(0.520 0.110 221);
-    --chart-4: oklch(0.450 0.095 224);
-    --chart-5: oklch(0.715 0.140 210);
+    --chart-3: oklch(0.52 0.11 221);
+    --chart-4: oklch(0.45 0.095 224);
+    --chart-5: oklch(0.715 0.14 210);
     --sidebar: oklch(0.218 0.008 223.9);
     --sidebar-foreground: oklch(0.987 0.002 197.1);
     --sidebar-primary: oklch(0.52 0.115 221);
@@ -152,4 +152,18 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+> *[data-slot='card'] {
+  background-image: linear-gradient(to top, color-mix(in srgb, var(--primary) 5%, transparent), var(--card));
+  box-shadow: var(--shadow-xs); /* Or your specific xs shadow values */
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  > *[data-slot='card'] {
+    background-color: var(--card);
+    /* Optional: Disable the linear gradient in dark mode if desired */
+    /* background-image: none; */
+  }
 }

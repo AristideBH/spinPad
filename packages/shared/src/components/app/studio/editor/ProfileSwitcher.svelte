@@ -30,6 +30,13 @@
   let layerValue = $state(String(configState.activeLayerIndex));
   let profileCount = $derived(() => configState.data?.profile_count ?? 0);
 
+  // Sync STORE → LOCAL (lecture seule) : reflète les changements programmatiques
+  // de profil — reset au premier profil lors d'un rechargement de config, undo/redo, etc.
+  // N'écrit jamais dans le store, donc pas de boucle ni de reset de layer parasite.
+  $effect(() => {
+    profileValue = String(configState.activeProfileIndex);
+  });
+
   // Écriture LOCAL → STORE à la sélection (jamais via $effect : un effet
   // se déclencherait au montage et réinitialiserait le layer à 0 par erreur).
   function onProfileChange(v: string) {

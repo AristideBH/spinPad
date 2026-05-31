@@ -27,6 +27,13 @@
     await loadConfig();
   }
 
+  async function handleReload() {
+    await loadConfig();
+    // Recharge depuis le device puis re-sélectionne le premier profil (et son premier layer).
+    configState.activeProfileIndex = 0;
+    configState.activeLayerIndex = 0;
+  }
+
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
 </script>
 
@@ -83,7 +90,7 @@
     </Drawer.Root>
 
     <ButtonGroup.Root class="ms-auto">
-      <Button variant="outline" size="icon" onclick={loadConfig}>
+      <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>
       {#if serial.connected}

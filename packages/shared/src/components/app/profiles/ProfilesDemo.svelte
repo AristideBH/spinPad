@@ -21,6 +21,7 @@
   } from "$shared/constants/config-schema.js";
   import IconPreview from "./IconPreview.svelte";
   import IconEditor from "./IconEditor.svelte";
+  import { Input } from "$shared/components/ui/input/index.js";
 
   // ── Presets disponibles (builtin + futures sources) ──
   let presets = $state<ProfilePreset[]>([]);
@@ -139,10 +140,10 @@
           <button onclick={() => selectProfile(i)} title="Sélectionner">
             <IconPreview value={profile.icon ?? ""} size={40} />
           </button>
-          <input
-            class="px-2 py-1 text-sm bg-transparent border rounded border-border"
+          <Input
+            class="w-auto"
             value={profile.name}
-            onchange={(e) => editProfile(i, { name: (e.target as HTMLInputElement).value })}
+            onchange={(e: Event) => editProfile(i, { name: (e.target as HTMLInputElement).value })}
           />
           <span class="text-xs text-muted-foreground">{profile.layers.length} layer(s)</span>
           <div class="flex gap-1 ml-auto">
@@ -185,10 +186,10 @@
         {#each activeProfile.layers as layer, li (li)}
           <div class="flex items-center gap-2 p-2 border rounded border-border">
             <span class="font-mono text-xs text-muted-foreground">L{li}</span>
-            <input
-              class="px-2 py-1 text-sm bg-transparent border rounded border-border"
+            <Input
+              class="w-auto"
               value={layer.name ?? ""}
-              onchange={(e) =>
+              onchange={(e: Event) =>
                 editLayer(activeIdx, li, { name: (e.target as HTMLInputElement).value })}
             />
             <div class="flex gap-1 ml-auto">

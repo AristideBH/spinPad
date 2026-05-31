@@ -77,7 +77,7 @@
   <img
     src="/static/img/spinpad.png"
     alt="Le macropad SpinPad"
-    class="w-full border shadow-sm aspect-[5/4] object-cover rounded-2xl border-border"
+    class="object-cover w-full border shadow-sm aspect-5/4 rounded-2xl border-border"
   />
 </section>
 

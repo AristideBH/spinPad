@@ -7,6 +7,9 @@
   import { Label } from '$shared/components/ui/label/index.js';
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
+  import * as Select from '$shared/components/ui/select/index.js';
+  import { Kbd } from '$shared/components/ui/kbd/index.js';
+  import { Field, FieldLabel } from '$shared/components/ui/field/index.js';
   import SettingsField from '$shared/components/app/SettingsField.svelte';
   import NotConnected from '$shared/components/app/NotConnected.svelte';
   import OptionGrid from '$shared/components/app/OptionGrid.svelte';
@@ -139,14 +142,14 @@
             >
           </CardHeader>
           <CardContent class="pt-0">
-            <div class="flex flex-col gap-1.5">
-              <Label>Nom diffusé en Bluetooth</Label>
+            <Field>
+              <FieldLabel>Nom diffusé en Bluetooth</FieldLabel>
               <Input
                 value={data.ble?.device_name}
                 oninput={(e: Event) => updateConfig('ble.device_name', (e.target as HTMLInputElement).value)}
                 maxlength={31}
               />
-            </div>
+            </Field>
           </CardContent>
         </Card>
 
@@ -158,19 +161,19 @@
           </CardHeader>
           <CardContent class="flex flex-col gap-4 pt-0">
             {#each [0, 1] as slotIdx}
-              <div class="flex flex-col gap-1.5">
-                <div class="flex items-center gap-2">
+              <Field>
+                <FieldLabel class="flex items-center gap-2">
                   <Badge variant={slotIdx === 0 ? 'default' : 'secondary'}>Slot {slotIdx}</Badge>
-                  <Label class="text-xs text-muted-foreground">
+                  <span class="text-xs font-normal text-muted-foreground">
                     {slotIdx === 0 ? 'Premier appareil' : 'Second appareil'}
-                  </Label>
-                </div>
+                  </span>
+                </FieldLabel>
                 <Input
                   value={data.ble?.slot_names?.[slotIdx]}
                   oninput={(e: Event) =>
                     updateConfig(`ble.slot_names.${slotIdx}`, (e.target as HTMLInputElement).value)}
                 />
-              </div>
+              </Field>
             {/each}
 
             <p class="p-3 text-xs leading-relaxed rounded-md text-muted-foreground bg-muted/50">
@@ -263,18 +266,22 @@
                   <div class="flex flex-col gap-2 p-2 text-sm border rounded-lg border-border">
                     <div class="flex items-center gap-2">
                       <Switch checked={w.enabled} onCheckedChange={(v: boolean) => updateWidget(i, { enabled: v })} />
-                      <select
-                        class="flex-1 px-2 py-1 text-sm bg-transparent border rounded border-border"
-                        value={w.type}
-                        onchange={(e: Event) =>
-                          updateWidget(i, {
-                            type: +(e.target as HTMLSelectElement).value as WidgetType,
-                          })}
+                      <Select.Root
+                        type="single"
+                        value={String(w.type)}
+                        onValueChange={(v) => {
+                          if (v !== undefined) updateWidget(i, { type: +v as WidgetType });
+                        }}
                       >
-                        {#each WIDGET_TYPE_OPTIONS as opt}
-                          <option value={opt.value}>{opt.label}</option>
-                        {/each}
-                      </select>
+                        <Select.Trigger class="flex-1 h-8 text-sm">
+                          {WIDGET_LABELS[w.type] ?? 'Type'}
+                        </Select.Trigger>
+                        <Select.Content>
+                          {#each WIDGET_TYPE_OPTIONS as opt}
+                            <Select.Item value={String(opt.value)}>{opt.label}</Select.Item>
+                          {/each}
+                        </Select.Content>
+                      </Select.Root>
                       <span class="text-xs text-muted-foreground">R{w.row} C{w.col}</span>
                       <button
                         type="button"
@@ -284,11 +291,11 @@
                     </div>
                     <div class="flex items-center gap-2">
                       <Label class="w-8 text-xs text-muted-foreground">Ligne</Label>
-                      <input
+                      <Input
                         type="number"
-                        min="0"
-                        max="4"
-                        class="w-14 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-right"
+                        min={0}
+                        max={4}
+                        class="text-xs text-right w-14 h-7"
                         value={w.row}
                         onchange={(e: Event) =>
                           updateWidget(i, {
@@ -296,11 +303,11 @@
                           })}
                       />
                       <Label class="w-8 text-xs text-muted-foreground">Col</Label>
-                      <input
+                      <Input
                         type="number"
-                        min="0"
-                        max="11"
-                        class="w-14 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-right"
+                        min={0}
+                        max={11}
+                        class="text-xs text-right w-14 h-7"
                         value={w.col}
                         onchange={(e: Event) =>
                           updateWidget(i, {
@@ -308,11 +315,11 @@
                           })}
                       />
                       {#if w.type === WIDGET_TYPE.CUSTOM_TEXT}
-                        <input
+                        <Input
                           type="text"
-                          maxlength="12"
+                          maxlength={12}
                           placeholder="Texte (12 max)"
-                          class="flex-1 rounded border border-border bg-transparent px-2 py-0.5 text-xs"
+                          class="flex-1 text-xs h-7"
                           value={w.custom_text ?? ''}
                           oninput={(e: Event) =>
                             updateWidget(i, {
@@ -420,7 +427,7 @@
               {/snippet}
             </OptionGrid>
             <p class="mt-3 text-xs text-muted-foreground">
-              Astuce : la touche <kbd class="px-1 text-xs rounded bg-muted">Rotate CW/CCW</kbd>
+              Astuce : la touche <Kbd>Rotate CW/CCW</Kbd>
               dans le keymap change l'orientation directement depuis le SpinPad.
             </p>
           </CardContent>

@@ -1,5 +1,9 @@
 <script lang="ts">
   import { Skeleton } from '$shared/components/ui/skeleton/index.js';
+  import { Input } from '$shared/components/ui/input/index.js';
+  import { Switch } from '$shared/components/ui/switch/index.js';
+  import { Kbd } from '$shared/components/ui/kbd/index.js';
+  import { Field, FieldLabel } from '$shared/components/ui/field/index.js';
 
   // ── State ─────────────────────────────────────────────────────────────
   type Phase = 'idle' | 'connecting' | 'erasing' | 'flashing' | 'done' | 'error';
@@ -157,7 +161,7 @@
 </script>
 
 <svelte:head>
-  <title>Flash firmware — SpinPad</title>
+  <title>Flash firmware : SpinPad</title>
 </svelte:head>
 
 <div class="max-w-2xl px-4 py-8 mx-auto">
@@ -165,7 +169,7 @@
   <div class="mb-8">
     <h1 class="mb-1 text-2xl font-bold">SpinPad Flasher</h1>
     <p class="text-sm text-muted-foreground">
-      Flashez le firmware de votre SpinPad via WebSerial — Chrome / Edge requis.
+      Flashez le firmware de votre SpinPad via WebSerial. Chrome / Edge requis.
     </p>
   </div>
 
@@ -259,42 +263,38 @@
     <h2 class="font-semibold">Fichiers à flasher</h2>
 
     <!-- Firmware -->
-    <div>
-      <label class="block mb-1 text-sm text-foreground" for="firmware-input">
-        Firmware <span class="text-muted-foreground">(factory.bin — offset 0x10000)</span>
-        <span class="ml-1 text-red-400">*</span>
-      </label>
-      <input
+    <Field>
+      <FieldLabel for="firmware-input">
+        Firmware <span class="font-normal text-muted-foreground">(factory.bin, offset 0x10000)</span>
+        <span class="ml-1 text-destructive">*</span>
+      </FieldLabel>
+      <Input
         id="firmware-input"
         type="file"
         accept=".bin"
-        class="block w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0
-               file:bg-secondary file:text-foreground file:cursor-pointer file:hover:bg-secondary/80
-               text-muted-foreground cursor-pointer"
-        onchange={(e) => (firmwareFile = (e.target as HTMLInputElement).files?.[0] ?? null)}
+        onchange={(e: Event) => (firmwareFile = (e.target as HTMLInputElement).files?.[0] ?? null)}
       />
       {#if firmwareFile}
-        <p class="mt-1 text-xs text-green-400">✓ {firmwareFile.name} ({(firmwareFile.size / 1024).toFixed(0)} KB)</p>
+        <p class="mt-1 text-xs text-emerald-500">✓ {firmwareFile.name} ({(firmwareFile.size / 1024).toFixed(0)} KB)</p>
       {/if}
-    </div>
+    </Field>
 
     <!-- SPIFFS (optionnel) -->
-    <div>
-      <label class="flex items-center gap-2 mb-2 text-sm cursor-pointer text-foreground">
-        <input type="checkbox" bind:checked={flashSpiffs} class="accent-blue-500" />
-        Flasher le Studio (SPIFFS — offset 0x310000)
-      </label>
+    <div class="space-y-2">
+      <Field orientation="horizontal" class="gap-2">
+        <Switch id="flash-spiffs" bind:checked={flashSpiffs} />
+        <FieldLabel for="flash-spiffs" class="font-normal">
+          Flasher le Studio (SPIFFS, offset 0x310000)
+        </FieldLabel>
+      </Field>
       {#if flashSpiffs}
-        <input
+        <Input
           type="file"
           accept=".bin"
-          class="block w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0
-                 file:bg-secondary file:text-foreground file:cursor-pointer file:hover:bg-secondary/80
-                 text-muted-foreground cursor-pointer"
-          onchange={(e) => (spiffsFile = (e.target as HTMLInputElement).files?.[0] ?? null)}
+          onchange={(e: Event) => (spiffsFile = (e.target as HTMLInputElement).files?.[0] ?? null)}
         />
         {#if spiffsFile}
-          <p class="mt-1 text-xs text-green-400">✓ {spiffsFile.name} ({(spiffsFile.size / 1024).toFixed(0)} KB)</p>
+          <p class="mt-1 text-xs text-emerald-500">✓ {spiffsFile.name} ({(spiffsFile.size / 1024).toFixed(0)} KB)</p>
         {/if}
       {/if}
     </div>
@@ -378,7 +378,7 @@
 
   <!-- Footer note -->
   <p class="mt-6 text-xs text-muted-foreground">
-    Maintenez <kbd class="px-1 rounded bg-secondary">BOOT</kbd> appuyé pendant la connexion si le SpinPad ne passe pas automatiquement
+    Maintenez <Kbd>BOOT</Kbd> appuyé pendant la connexion si le SpinPad ne passe pas automatiquement
     en mode flash.
   </p>
 </div>

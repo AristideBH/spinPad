@@ -45,9 +45,7 @@
   ] as const;
 </script>
 
-<pre>{JSON.stringify(ctx, null, 2)}</pre>
-
-<!-- {#if ctx.layer}
+{#if ctx.layer}
   <div class="flex flex-col gap-3 keycap-grid">
     <Label>Clavier</Label>
 
@@ -83,7 +81,7 @@
             {#if ctx.trainingActive}
               <div class="keycap-flash" style="opacity: {ctx.keyFlashOpacity(key.idx)}"></div>
             {/if}
-          
+
             <div class="keycap-overlay" style="transform: rotate({-ctx.orientDeg}deg)">
               {#if ctx.trainingActive && ctx.keyPressCounts[key.idx] > 0}
                 <span class="keycap-count">{ctx.keyPressCounts[key.idx]}</span>
@@ -98,7 +96,8 @@
             </div>
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
               <span class="keycap-sw">{key.sw}</span>
-              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span>
+              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span
+              >
               {#if key.rowSpan === 2 || key.colSpan === 2}
                 <span class="keycap-size-hint">2u</span>
               {/if}
@@ -108,7 +107,7 @@
       </div>
     </div>
   </div>
-{/if} -->
+{/if}
 
 <style>
   .keycap-grid {

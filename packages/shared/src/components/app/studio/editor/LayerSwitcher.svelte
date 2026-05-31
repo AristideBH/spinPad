@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
+  import { Input } from '$shared/components/ui/input/index.js';
   import { configState, deleteLayer, editLayer } from '$shared/store/config.svelte.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
@@ -9,7 +10,9 @@
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { cn } from '$shared/utils.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
-  import { BrushCleaning, MoreVertical, Trash2 } from '@lucide/svelte';
+  import { BrushCleaning, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
+  import * as Kbd from '$shared/components/ui/kbd/index.js';
+  import * as InputGroup from '$shared/components/ui/input-group/index.js';
 
   const ctx = getKeypadContext();
 
@@ -40,8 +43,7 @@
   }
 </script>
 
-<pre>{JSON.stringify(ctx, null, 2)}</pre>
-<!-- {#if ctx.profile}
+{#if ctx.profile}
   <div class="flex flex-col gap-3 keycap-grid grow min-w-[180px] max-w-[200px]">
     <Label class="ml-2">Layers</Label>
 
@@ -69,16 +71,20 @@
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end" class="w-48">
               <div class="px-1.5 py-1">
-                <input
-                  class="w-full px-2 py-1 text-sm bg-transparent border rounded outline-none border-border focus:ring-1 focus:ring-ring"
-                  value={l.name ?? ''}
-                  placeholder="Nom du layer"
-                  onkeydown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
-                  }}
-                  onchange={(e) => rename(i, (e.currentTarget as HTMLInputElement).value)}
-                />
+                <InputGroup.Root class="h-7">
+                  <InputGroup.Input
+                    placeholder="Nom du layer"
+                    value={l.name ?? ''}
+                    onkeydown={(e: KeyboardEvent) => {
+                      e.stopPropagation();
+                      if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
+                    }}
+                    onchange={(e: Event) => rename(i, (e.currentTarget as HTMLInputElement).value)}
+                  />
+                  <InputGroup.Addon align="inline-end">
+                    <Kbd.Root>⏎</Kbd.Root>
+                  </InputGroup.Addon>
+                </InputGroup.Root>
               </div>
               <DropdownMenu.Separator />
               <DropdownMenu.Item onSelect={() => ctx.resetLayer(i)}>
@@ -113,4 +119,4 @@
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
-{/if} -->
+{/if}

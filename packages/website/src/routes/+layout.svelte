@@ -17,7 +17,9 @@
   const sidebarOpen = new PersistedState('spinpad-sidebar-open', true);
 
   const headerRight = createHeaderRight();
-  const breadcrumbs = $derived(getBreadcrumbs($page.url.pathname, $page.data?.title as string | undefined));
+  const breadcrumbs = $derived(
+    getBreadcrumbs($page.url.pathname, $page.data?.title as string | undefined)
+  );
 </script>
 
 <ModeWatcher defaultMode="dark" />
