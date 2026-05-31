@@ -188,7 +188,7 @@
       <h3 class="mb-4 text-base font-semibold">Écran & Power</h3>
       <div class="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-1">
         <!-- Écran SSD1315 -->
-        <Card class="hidden">
+        <Card class="">
           <CardHeader>
             <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
               >Écran SSD1315</CardTitle
@@ -205,7 +205,7 @@
               />
             </div>
 
-            <SettingsField label="Extinction après (s)">
+            <SettingsField label="Extinction après (s)" description="Durée d'inactivité avant extinction de l'écran">
               {#snippet children()}
                 <Input
                   type="number"

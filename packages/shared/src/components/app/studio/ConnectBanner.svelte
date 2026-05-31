@@ -15,6 +15,7 @@
 
   async function handleDevMode() {
     devMode.active = true;
+    serial.connected = true; // mock serial branché pour l'UI réservée WebSerial
     await loadConfig();
   }
 </script>

@@ -42,7 +42,7 @@ static void apply_defaults(void)
     // memset met tout à zéro (équivalent à initialiser toutes les valeurs à 0/false)
     memset(&g_config, 0, sizeof(kb_config_t));
 
-    g_config.version        = 1;
+    g_config.version        = CONFIG_FORMAT_VERSION;
     g_config.profile_count  = 1;
     g_config.active_profile = 0;
 
@@ -314,41 +314,52 @@ static esp_err_t parse_json_to_config(const char *json_str)
                 }
             }
 
-            // ── Macros du profil ───────────────────────────
-            cJSON *macros = cJSON_GetObjectItem(prof, "macros");
-            if (cJSON_IsArray(macros)) {
-                int mcount = cJSON_GetArraySize(macros);
-                if (mcount > MACRO_MAX_PER_PROFILE) mcount = MACRO_MAX_PER_PROFILE;
-                kp->macro_count = (uint8_t)mcount;
+        }
+    }
 
-                for (int mi = 0; mi < mcount; mi++) {
-                    cJSON *macro = cJSON_GetArrayItem(macros, mi);
-                    kb_macro_t *km = &kp->macros[mi];
-                    km->step_count = 0;
+    // ── Macros globales (niveau racine, partagées par tous les profils) ──
+    cJSON *macros = cJSON_GetObjectItem(root, "macros");
+    if (cJSON_IsArray(macros)) {
+        int mcount = cJSON_GetArraySize(macros);
+        if (mcount > MACRO_COUNT) mcount = MACRO_COUNT;
+        g_config.macro_count = (uint8_t)mcount;
 
-                    if (!cJSON_IsArray(macro)) continue;
-                    int scount = cJSON_GetArraySize(macro);
-                    if (scount > MACRO_MAX_STEPS) scount = MACRO_MAX_STEPS;
+        for (int mi = 0; mi < mcount; mi++) {
+            cJSON *macro = cJSON_GetArrayItem(macros, mi);
+            kb_macro_t *km = &g_config.macros[mi];
+            km->step_count = 0;
+            km->name[0] = '\0';
 
-                    for (int si = 0; si < scount; si++) {
-                        cJSON *step = cJSON_GetArrayItem(macro, si);
-                        kb_macro_step_t *ks = &km->steps[km->step_count];
-                        cJSON *stype = cJSON_GetObjectItem(step, "type");
-                        if (!cJSON_IsNumber(stype)) continue;
-                        ks->type = (kb_macro_step_type_t)(int)stype->valuedouble;
-                        if (ks->type == MACRO_STEP_DELAY_MS) {
-                            cJSON *delay = cJSON_GetObjectItem(step, "delay");
-                            if (cJSON_IsNumber(delay)) {
-                                uint16_t d = (uint16_t)delay->valuedouble;
-                                ks->keycode_or_delay = d > 1000 ? 1000 : d;
-                            }
-                        } else {
-                            cJSON *kc = cJSON_GetObjectItem(step, "keycode");
-                            if (cJSON_IsNumber(kc)) ks->keycode_or_delay = (uint16_t)kc->valuedouble;
-                        }
-                        km->step_count++;
+            if (!cJSON_IsObject(macro)) continue;
+
+            cJSON *name = cJSON_GetObjectItem(macro, "name");
+            if (cJSON_IsString(name) && name->valuestring) {
+                strncpy(km->name, name->valuestring, MACRO_NAME_MAX_LEN - 1);
+                km->name[MACRO_NAME_MAX_LEN - 1] = '\0';
+            }
+
+            cJSON *steps = cJSON_GetObjectItem(macro, "steps");
+            if (!cJSON_IsArray(steps)) continue;
+            int scount = cJSON_GetArraySize(steps);
+            if (scount > MACRO_MAX_STEPS) scount = MACRO_MAX_STEPS;
+
+            for (int si = 0; si < scount; si++) {
+                cJSON *step = cJSON_GetArrayItem(steps, si);
+                kb_macro_step_t *ks = &km->steps[km->step_count];
+                cJSON *stype = cJSON_GetObjectItem(step, "type");
+                if (!cJSON_IsNumber(stype)) continue;
+                ks->type = (kb_macro_step_type_t)(int)stype->valuedouble;
+                if (ks->type == MACRO_STEP_DELAY_MS) {
+                    cJSON *delay = cJSON_GetObjectItem(step, "delay");
+                    if (cJSON_IsNumber(delay)) {
+                        uint16_t d = (uint16_t)delay->valuedouble;
+                        ks->keycode_or_delay = d > 1000 ? 1000 : d;
                     }
+                } else {
+                    cJSON *kc = cJSON_GetObjectItem(step, "keycode");
+                    if (cJSON_IsNumber(kc)) ks->keycode_or_delay = (uint16_t)kc->valuedouble;
                 }
+                km->step_count++;
             }
         }
     }
@@ -612,25 +623,28 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
             cJSON_AddItemToArray(combos, combo);
         }
 
-        cJSON *macros_out = cJSON_AddArrayToObject(prof, "macros");
-        for (int mi = 0; mi < kp->macro_count; mi++) {
-            kb_macro_t *km = &kp->macros[mi];
-            cJSON *macro_arr = cJSON_CreateArray();
-            for (int si = 0; si < km->step_count; si++) {
-                kb_macro_step_t *ks = &km->steps[si];
-                cJSON *step = cJSON_CreateObject();
-                cJSON_AddNumberToObject(step, "type", (int)ks->type);
-                if (ks->type == MACRO_STEP_DELAY_MS) {
-                    cJSON_AddNumberToObject(step, "delay", ks->keycode_or_delay);
-                } else {
-                    cJSON_AddNumberToObject(step, "keycode", ks->keycode_or_delay);
-                }
-                cJSON_AddItemToArray(macro_arr, step);
-            }
-            cJSON_AddItemToArray(macros_out, macro_arr);
-        }
-
         cJSON_AddItemToArray(profiles, prof);
+    }
+
+    // ── Macros globales (niveau racine) ───────────────────────
+    cJSON *macros_out = cJSON_AddArrayToObject(root, "macros");
+    for (int mi = 0; mi < MACRO_COUNT; mi++) {
+        kb_macro_t *km = &g_config.macros[mi];
+        cJSON *macro_obj = cJSON_CreateObject();
+        cJSON_AddStringToObject(macro_obj, "name", km->name);
+        cJSON *steps_arr = cJSON_AddArrayToObject(macro_obj, "steps");
+        for (int si = 0; si < km->step_count; si++) {
+            kb_macro_step_t *ks = &km->steps[si];
+            cJSON *step = cJSON_CreateObject();
+            cJSON_AddNumberToObject(step, "type", (int)ks->type);
+            if (ks->type == MACRO_STEP_DELAY_MS) {
+                cJSON_AddNumberToObject(step, "delay", ks->keycode_or_delay);
+            } else {
+                cJSON_AddNumberToObject(step, "keycode", ks->keycode_or_delay);
+            }
+            cJSON_AddItemToArray(steps_arr, step);
+        }
+        cJSON_AddItemToArray(macros_out, macro_obj);
     }
 
     // Sérialiser en string (non formatté pour économiser de la place)

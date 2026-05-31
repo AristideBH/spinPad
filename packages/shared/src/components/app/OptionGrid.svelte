@@ -1,18 +1,18 @@
 <script lang="ts" generics="T extends { value: string | number; label: string }">
-  import type { Snippet } from "svelte";
+  import type { Snippet } from 'svelte';
 
   let {
     options,
     value,
     onSelect,
-    gridClass = "grid grid-cols-3 gap-2",
-    buttonClass = "py-2 text-xs",
+    gridClass = 'grid grid-cols-3 gap-2',
+    buttonClass = 'py-2 text-xs',
     emphasizeSelected = false,
     item,
   }: {
     options: T[];
     value: string | number;
-    onSelect: (value: T["value"]) => void;
+    onSelect: (value: T['value']) => void;
     gridClass?: string;
     buttonClass?: string;
     emphasizeSelected?: boolean;
@@ -25,12 +25,12 @@
     <button
       type="button"
       class={[
-        "border rounded-lg transition-colors",
+        'border rounded-lg transition-colors',
         buttonClass,
         value === o.value
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border hover:border-primary/50 hover:bg-accent",
-        value === o.value && emphasizeSelected && "font-semibold",
+          ? 'border-primary bg-primary/10 text-primary'
+          : 'border-border hover:border-primary/50 hover:bg-accent',
+        value === o.value && emphasizeSelected && 'font-semibold',
       ]}
       onclick={() => onSelect(o.value)}
     >

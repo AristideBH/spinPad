@@ -15,7 +15,8 @@
 //  via <svelte:window onkeydown=...> pour isoler l'effet de bord UI.
 // ═══════════════════════════════════════════════════════════════
 
-// @ts-expect-error - shared workspace n'est pas un dossier Svelte, works because is used in website workspace
+// @ts-ignore - shared workspace n'est pas un dossier Svelte ; résolu au runtime par
+// l'alias Vite des workspaces studio/website (résolution variable selon le check).
 import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
@@ -23,7 +24,16 @@ import { activeTransport, transportMode as _transportMode } from './transport.js
 import { AutoSave } from './auto-save.js';
 import { parseSpinpadFile, createSpinpadFile } from '$shared/constants/config-migrations.js';
 import * as ops from '$shared/constants/config-ops.js';
-import type { FullConfig } from '$shared/constants/config-schema.js';
+import {
+  defaultConfig,
+  defaultMacros,
+  MACRO_MAX_STEPS,
+  MACRO_NAME_MAX_LEN,
+  type FullConfig,
+  type MacroDef,
+  type MacroStep,
+} from '$shared/constants/config-schema.js';
+import { serial } from './serial.svelte.js';
 import type { Selection } from '$shared/constants/config-ops.js';
 
 // ─────────────────────────────────────────────────────────────
@@ -117,6 +127,15 @@ export async function loadConfig(): Promise<void> {
   configState.isLoading = true;
   configState.loadError = null;
   try {
+    // Pas de device branché (hors mode démo / HTTP) → prévisualiser la config
+    // par défaut au lieu d'échouer sur "Non connecté".
+    if (_transportMode() === 'serial' && !serial.connected) {
+      const cfg = defaultConfig();
+      configState.data = cfg;
+      configState.activeProfileIndex = cfg.active_profile ?? 0;
+      configState.isDirty = false;
+      return;
+    }
     const cfg = await activeTransport().getConfig();
     configState.data = cfg;
     configState.activeProfileIndex = cfg.active_profile ?? 0;
@@ -262,6 +281,45 @@ export function addCombo(profileIdx: number, combo: unknown): void {
 export function removeCombo(profileIdx: number, comboIdx: number): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   cfg.profiles[profileIdx].combos?.splice(comboIdx, 1);
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  MUTATIONS MACROS (globales — index 0..MACRO_COUNT-1)
+// ─────────────────────────────────────────────────────────────
+
+function _ensureMacros(cfg: FullConfig): MacroDef[] {
+  if (!Array.isArray(cfg.macros)) cfg.macros = defaultMacros();
+  return cfg.macros;
+}
+
+export function setMacroName(idx: number, name: string): void {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  const macros = _ensureMacros(cfg);
+  if (!macros[idx]) return;
+  macros[idx].name = name.slice(0, MACRO_NAME_MAX_LEN - 1);
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+}
+
+export function setMacroSteps(idx: number, steps: MacroStep[]): void {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  const macros = _ensureMacros(cfg);
+  if (!macros[idx]) return;
+  macros[idx].steps = ($state.snapshot(steps) as MacroStep[]).slice(0, MACRO_MAX_STEPS);
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+}
+
+export function clearMacro(idx: number): void {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  const macros = _ensureMacros(cfg);
+  if (!macros[idx]) return;
+  macros[idx] = { name: '', steps: [] };
   configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();

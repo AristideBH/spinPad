@@ -1,6 +1,7 @@
 <script lang="ts">
   import { loadConfig, factoryReset } from '$shared/store/config.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
+  import { serial } from '$shared/store/serial.svelte.js';
   import { refreshDeviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as Card from '$shared/components/ui/card/index.js';
@@ -9,6 +10,7 @@
 
   async function handleDevMode() {
     devMode.active = false;
+    serial.connected = false; // couper le mock serial en quittant la démo
     await loadConfig();
   }
 
@@ -31,6 +33,14 @@
   }
   function setConn(v: ConnScenario) {
     devMode.connection = v;
+    refreshDeviceStatus();
+  }
+
+  // Mock serial : bascule serial.connected pour ajuster l'UI réservée
+  // au transport WebSerial (mode training, sync heure, key monitor…)
+  // sans device physique branché.
+  function setSerial(connected: boolean) {
+    serial.connected = connected;
     refreshDeviceStatus();
   }
 </script>
@@ -60,6 +70,17 @@
               {s.label}
             </Button>
           {/each}
+        </ButtonGroup.Root>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="w-20 text-xs text-muted-foreground">Serial</span>
+        <ButtonGroup.Root>
+          <Button variant={serial.connected ? 'default' : 'outline'} size="sm" onclick={() => setSerial(true)}>
+            Connecté
+          </Button>
+          <Button variant={!serial.connected ? 'default' : 'outline'} size="sm" onclick={() => setSerial(false)}>
+            Déconnecté
+          </Button>
         </ButtonGroup.Root>
       </div>
       <Button variant="outline" size="sm" onclick={handleDevMode}>Quitter le mode démo</Button>

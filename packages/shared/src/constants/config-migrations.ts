@@ -15,10 +15,10 @@
 //  }
 // ═══════════════════════════════════════════════════════════════
 
-import type { FullConfig } from './config-schema.js';
+import { defaultMacros, type FullConfig } from './config-schema.js';
 
 export const SPINPAD_FILE_TYPE = 'spinpad-config';
-export const CURRENT_FORMAT_VERSION = 1;
+export const CURRENT_FORMAT_VERSION = 2;
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -47,8 +47,18 @@ export interface FileMeta {
 // Chaque clé est la version SOURCE (avant migration).
 
 export const migrations: Record<number, MigrationFn> = {
-  // Version 1 → identité (version courante, pas de migration nécessaire)
-  1: (cfg) => cfg,
+  // v1 → v2 : macros passées du niveau profil au niveau global (clean slate).
+  // On supprime les anciennes macros par profil et on initialise 16 slots vides.
+  1: (cfg) => {
+    const profiles = Array.isArray(cfg.profiles)
+      ? cfg.profiles.map((p) => {
+          const { macros: _drop, ...rest } = p as FullConfig['profiles'][number] & { macros?: unknown };
+          void _drop;
+          return rest;
+        })
+      : cfg.profiles;
+    return { ...cfg, profiles, macros: defaultMacros() };
+  },
 };
 
 // ── Helpers ────────────────────────────────────────────────────

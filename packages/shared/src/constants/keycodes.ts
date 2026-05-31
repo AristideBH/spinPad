@@ -9,6 +9,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types.js';
+import { MACRO_COUNT, isMacroUsed, type MacroDef } from './config-schema.js';
 
 const {
   ACTION_TYPE_KC,
@@ -176,24 +177,49 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'LED -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
   ],
 
-  // ── Macros ────────────────────────────────────────────────────
-  macros: Array.from({ length: 16 }, (_, i) => ({
-    label: `Macro ${i}`,
-    value: action(ACTION_TYPE_MACRO, i),
-    category: 'macro' as KeycodeCategory,
-  })),
 };
 
-/** Table à plat pour la recherche par valeur ou label */
+/** Table à plat pour la recherche par valeur ou label (hors macros, qui sont dynamiques) */
 export const KEYCODES_FLAT: Keycode[] = Object.values(KEYCODES).flat();
 
-/** Obtenir le label d'un keycode par valeur */
-export function getKeycodeLabel(value: number): string {
+// ── Macros (dynamiques, dépendent de la config) ────────────────
+
+/** Nom d'affichage d'un slot macro (son `name`, sinon "Macro N"). */
+export function macroLabel(idx: number, macros?: MacroDef[]): string {
+  const name = macros?.[idx]?.name?.trim();
+  return name && name.length > 0 ? name : `Macro ${idx}`;
+}
+
+/**
+ * Keycodes des macros à proposer dans le picker : uniquement les slots
+ * utilisés (≥ 1 étape), libellés par leur nom.
+ */
+export function macroKeycodes(macros?: MacroDef[]): Keycode[] {
+  const out: Keycode[] = [];
+  for (let i = 0; i < MACRO_COUNT; i++) {
+    if (!isMacroUsed(macros?.[i])) continue;
+    out.push({ label: macroLabel(i, macros), value: action(ACTION_TYPE_MACRO, i), category: 'macro' });
+  }
+  return out;
+}
+
+/** Groupes de keycodes pour le picker, macros résolues depuis la config. */
+export function keycodeGroups(macros?: MacroDef[]): Record<string, Keycode[]> {
+  const used = macroKeycodes(macros);
+  return used.length > 0 ? { ...KEYCODES, macros: used } : { ...KEYCODES };
+}
+
+/** Table à plat incluant les macros utilisées (pour la recherche). */
+export function keycodesFlat(macros?: MacroDef[]): Keycode[] {
+  return [...KEYCODES_FLAT, ...macroKeycodes(macros)];
+}
+
+/** Obtenir le label d'un keycode par valeur (macros résolues par nom si fournies). */
+export function getKeycodeLabel(value: number, macros?: MacroDef[]): string {
   if (value === 0) return '—';
+  const type = (value >> 12) & 0xf;
+  if (type === ACTION_TYPE_MACRO) return macroLabel(value & 0x0fff, macros);
   const kc = KEYCODES_FLAT.find((k) => k.value === value);
   if (kc) return kc.label;
-  // Fallback pour macros non encore dans la table (index > 15)
-  const type = (value >> 12) & 0xf;
-  if (type === ACTION_TYPE_MACRO) return `Macro ${value & 0x0fff}`;
   return `0x${value.toString(16).toUpperCase()}`;
 }

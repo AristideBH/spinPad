@@ -2,6 +2,7 @@
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import { getKeycodeLabel } from '$shared/constants/keycodes.js';
+  import { configState } from '$shared/store/config.svelte.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import type { EncoderKnob } from './encoder.svelte.js';
@@ -28,7 +29,7 @@
       onclick={() => ctx.openEncoderPicker(enc.field)}
     >
       <span class="text-2xl leading-none text-muted-foreground">{enc.label}</span>
-      <span class="knobkey-label">{getKeycodeLabel(enc.value)}</span>
+      <span class="knobkey-label">{getKeycodeLabel(enc.value, configState.data?.macros)}</span>
     </Button>
   {/each}
 </ButtonGroup.Root>

@@ -1,37 +1,37 @@
 <script lang="ts">
-  import * as Collapsible from "$shared/components/ui/collapsible/index.js";
-  import * as Sidebar from "$shared/components/ui/sidebar/index.js";
-  import { page } from "$app/stores";
-  import HomeIcon from "@lucide/svelte/icons/house";
-  import Palette from "@lucide/svelte/icons/Palette";
-  import ZapIcon from "@lucide/svelte/icons/zap";
-  import BookOpenIcon from "@lucide/svelte/icons/book-open";
-  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
-  import LifeBuoyIcon from "@lucide/svelte/icons/life-buoy";
-  import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-  import type { ComponentProps } from "svelte";
-  import { navTree } from "$lib/nav.js";
-  import { WrenchIcon, ShoppingCart } from "@lucide/svelte";
+  import * as Collapsible from '$shared/components/ui/collapsible/index.js';
+  import * as Sidebar from '$shared/components/ui/sidebar/index.js';
+  import { page } from '$app/state';
+  import HomeIcon from '@lucide/svelte/icons/house';
+  import Palette from '@lucide/svelte/icons/Palette';
+  import ZapIcon from '@lucide/svelte/icons/zap';
+  import BookOpenIcon from '@lucide/svelte/icons/book-open';
+  import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+  import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
+  import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+  import type { ComponentProps } from 'svelte';
+  import { navTree } from '$lib/nav.js';
+  import { WrenchIcon, ShoppingCart } from '@lucide/svelte';
 
-  let {
-    ref = $bindable(null),
-    ...restProps
-  }: ComponentProps<typeof Sidebar.Root> = $props();
+  let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
-  const docsItem = navTree.find((n) => n.url === "/docs/")!;
+  const docsItem = navTree.find((n) => n.url === '/docs/')!;
   const docsChildren = docsItem.children ?? [];
-  const toolsItem = navTree.find((n) => n.url === "/studio/") || navTree.find((n) => n.url === "/flash/")!;
+  const toolsItem =
+    navTree.find((n) => n.url === '/studio/') || navTree.find((n) => n.url === '/flash/')!;
   const toolsChildren = toolsItem.children ?? [];
 
-  let docsOpen = $derived($page.url.pathname.startsWith("/docs"));
-  let toolsOpen = $derived($page.url.pathname.startsWith("/studio") || $page.url.pathname.startsWith("/flash"));
-  let isHome = $derived($page.url.pathname === "/");
-  let isShop = $derived($page.url.pathname === "/shop/");
-  let isStudio = $derived($page.url.pathname.startsWith("/studio"));
-  let isFlash = $derived($page.url.pathname.startsWith("/flash"));
+  let docsOpen = $derived(page.url.pathname.startsWith('/docs'));
+  let toolsOpen = $derived(
+    page.url.pathname.startsWith('/studio') || page.url.pathname.startsWith('/flash')
+  );
+  let isHome = $derived(page.url.pathname === '/');
+  let isShop = $derived(page.url.pathname === '/shop/');
+  let isStudio = $derived(page.url.pathname.startsWith('/studio'));
+  let isFlash = $derived(page.url.pathname.startsWith('/flash'));
 </script>
 
-<Sidebar.Root bind:ref variant="inset" {...restProps}>
+<Sidebar.Root bind:ref variant="inset" collapsible="icon" {...restProps}>
   <!-- ── Header / Logo ─────────────────────────────── -->
   <Sidebar.Header>
     <Sidebar.Menu>
@@ -114,7 +114,7 @@
                     <Sidebar.MenuSubItem>
                       <Sidebar.MenuSubButton
                         href={item.url}
-                        isActive={$page.url.pathname === item.url}
+                        isActive={page.url.pathname === item.url}
                       >
                         {item.title}
                       </Sidebar.MenuSubButton>
@@ -148,7 +148,7 @@
                     <Sidebar.MenuSubItem>
                       <Sidebar.MenuSubButton
                         href={item.url}
-                        isActive={$page.url.pathname === item.url}
+                        isActive={page.url.pathname === item.url}
                       >
                         {item.title}
                       </Sidebar.MenuSubButton>

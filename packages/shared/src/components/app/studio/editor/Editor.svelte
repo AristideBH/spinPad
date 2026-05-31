@@ -3,19 +3,19 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import * as Card from '$shared/components/ui/card/index.js';
-  import { KEYCODES, KEYCODES_FLAT, type Keycode } from '$shared/constants/keycodes.js';
+  import { keycodeGroups, keycodesFlat, type Keycode } from '$shared/constants/keycodes.js';
+  import { configState, exportConfig, importConfig } from '$shared/store/config.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
-  import { Activity, ListRestart, Share } from '@lucide/svelte';
+  import { Activity, Download, Share, Upload } from '@lucide/svelte';
   import { createKeypadContext } from '../editor/keypad-context.svelte.js';
   import KeyGrid from '../editor/KeyGrid.svelte';
-  import Macros from '../editor/Macros.svelte';
   import ProfileSwitcher from '../editor/ProfileSwitcher.svelte';
   import TrainingPanel from '../editor/TrainingPanel.svelte';
   import Encoder from '../editor/Encoder.svelte';
   import LayerSwitcher from '../editor/LayerSwitcher.svelte';
-  import InfoCard from '../../InfoCard.svelte';
   import * as Dialog from '$shared/components/ui/dialog/index.js';
-  import * as Item from '$shared/components/ui/item/index.js';
+  import { toast } from 'svelte-sonner';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
 
   const ctx = createKeypadContext();
 
@@ -24,10 +24,12 @@
     if (!serial.connected && ctx.trainingActive) ctx.stopTraining();
   });
 
-  const typedEntries = Object.entries(KEYCODES) as [string, Keycode[]][];
+  const typedEntries = $derived(Object.entries(keycodeGroups(configState.data?.macros)) as [string, Keycode[]][]);
   const filteredKeycodes = $derived(
     ctx.searchQuery
-      ? KEYCODES_FLAT.filter((k: Keycode) => k.label.toLowerCase().includes(ctx.searchQuery.toLowerCase()))
+      ? keycodesFlat(configState.data?.macros).filter((k: Keycode) =>
+          k.label.toLowerCase().includes(ctx.searchQuery.toLowerCase()),
+        )
       : null,
   );
 
@@ -37,6 +39,27 @@
     navigator.clipboard.writeText(dataStr);
     ctx.pickerOpen = false;
   };
+
+  let fileInput = $state<HTMLInputElement | null>(null);
+
+  function onImportClick() {
+    fileInput?.click();
+  }
+
+  async function onFileSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      await importConfig(file);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[import]', msg);
+      toast.error('Import échoué', { description: msg });
+    }
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
 
   const CATEGORY_COLORS: Record<string, string> = {
     letter: 'bg-blue-950/80 hover:bg-blue-900/80',
@@ -51,8 +74,10 @@
 </script>
 
 <Card.Root size="sm">
-  <Card.Header class="flex items-start gap-2">
+  <Card.Header class="flex items-start gap-1.5">
     <ProfileSwitcher />
+
+    <ButtonGroup.Root orientation="vertical" aria-label="Media controls" class="h-fit"></ButtonGroup.Root>
     <Card.Action class="flex flex-col items-center h-full gap-2 ml-auto">
       {#if serial.connected}
         <Button
@@ -66,16 +91,6 @@
         </Button>
       {/if}
 
-      <Button
-        variant="outline"
-        size="icon-lg"
-        title="Réinitialiser la couche"
-        onclick={() => ctx.resetLayer()}
-        disabled={!ctx.layer}
-      >
-        <ListRestart />
-      </Button>
-
       <Dialog.Root>
         <Dialog.Trigger class={buttonVariants({ variant: 'outline', size: 'icon-lg' })} title="Import/Export">
           <Share />
@@ -86,8 +101,31 @@
             <Dialog.Description>Anyone who has this link will be able to view this.</Dialog.Description>
           </Dialog.Header>
           <div class="flex items-center gap-2">
+            <!-- Import / Export -->
+            <Button
+              size="icon"
+              variant="ghost"
+              onclick={onImportClick}
+              title="Importer une config (.spinpad)"
+              disabled={!configState.data}
+            >
+              <Upload class="size-4" />
+            </Button>
+
+            <Button
+              size="icon"
+              variant="ghost"
+              onclick={exportConfig}
+              title="Exporter la config (.spinpad)"
+              disabled={!configState.data}
+            >
+              <Download class="size-4" />
+            </Button>
+
+            <!-- Hidden file input for import -->
+            <input bind:this={fileInput} type="file" accept=".spinpad,.json" class="hidden" onchange={onFileSelected} />
             <div class="grid flex-1 gap-2">
-              <Label for="link" class="sr-only">Link</Label>
+              <Label for="link" class="sr-omnly">Link</Label>
               <Input id="link" defaultValue="https://shadcn-svelte.com/docs/installation" />
             </div>
           </div>
@@ -113,17 +151,11 @@
       <TrainingPanel />
       <!-- <Macros /> -->
 
-      <div class="flex gap-12 p-6 border grow rounded-2xl justify-evenly">
+      <div class="flex flex-wrap gap-12 p-6 border grow rounded-2xl justify-evenly">
         <KeyGrid />
         <Encoder />
       </div>
     {/if}
-  </Card.Content>
-  <Card.Content>
-    <!-- <pre>{JSON.stringify(ctx.getActiveProfile(ctx.active_profile), null, 2)}</pre> -->
-    <!-- <InfoCard label="Profils" value={ctx.profile_count ?? ctx.profile_count} />
-    <InfoCard label="Profil actif" value={ctx.getActiveProfile()?.name} />
-    <InfoCard label="BLE Device" value={ctx.getBleActiveSlotName() ?? 'Non connecté'} /> -->
   </Card.Content>
 </Card.Root>
 

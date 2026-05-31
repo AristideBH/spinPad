@@ -16,7 +16,7 @@ export const CONFIG_NUM_KEYS       = 10;   // SW1–SW10
 export const CONFIG_MAX_PROFILES   = 4;
 export const CONFIG_MAX_LAYERS     = 8;    // par profil (cap réel firmware)
 export const CONFIG_NAME_MAX_LEN   = 32;   // octets, '\0' inclus → 31 chars utiles
-export const CONFIG_FORMAT_VERSION = 1;
+export const CONFIG_FORMAT_VERSION = 2;
 
 // Bornes basses pour la CRUD (un profil/layer minimum)
 export const MIN_PROFILES = 1;
@@ -84,8 +84,31 @@ export interface MacroStep {
   delay?:   number;   // ms, max 1000 (DELAY_MS)
 }
 
-export const MACRO_MAX_STEPS    = 32;
-export const MACRO_MAX_PER_PROFILE = 16;
+export const MACRO_MAX_STEPS   = 32;
+export const MACRO_COUNT        = 16;   // slots globaux fixes (index 0..15 dans ACTION_TYPE_MACRO)
+export const MACRO_NAME_MAX_LEN = 17;   // octets, '\0' inclus → 16 chars utiles
+
+/**
+ * Une macro globale (partagée par tous les profils). Un slot vide a
+ * `steps.length === 0` ; son `name` peut rester vide (fallback "Macro N").
+ */
+export interface MacroDef {
+  name:  string;
+  steps: MacroStep[];   // up to MACRO_MAX_STEPS
+}
+
+export function defaultMacro(): MacroDef {
+  return { name: '', steps: [] };
+}
+
+export function defaultMacros(): MacroDef[] {
+  return Array.from({ length: MACRO_COUNT }, defaultMacro);
+}
+
+/** True si le slot contient au moins une étape (donc "utilisé"). */
+export function isMacroUsed(m: MacroDef | undefined): boolean {
+  return !!m && m.steps.length >= 1;
+}
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -104,12 +127,12 @@ export interface ProfileConfig {
   icon?:         string;         // base64 d'un bitmap 24×24 1bpp (PROFILE_ICON_BYTES octets)
   combos?:       unknown[];
   combo_count?:  number;
-  macros?:       MacroStep[][];  // up to MACRO_MAX_PER_PROFILE, each up to MACRO_MAX_STEPS
 }
 
 export interface FullConfig {
   active_profile: number;
   profiles:       ProfileConfig[];   // 1..CONFIG_MAX_PROFILES
+  macros:         MacroDef[];        // MACRO_COUNT slots globaux fixes
   version?:       number;
   profile_count?: number;
   display: {
@@ -180,6 +203,7 @@ export function defaultConfig(): FullConfig {
       ...defaultProfile(),
       name: `Profile ${i + 1}`,
     })),
+    macros: defaultMacros(),
     display: {
       brightness: 200,
       timeout_s:  60,
@@ -227,6 +251,8 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
       ? (r.profiles as unknown[]).slice(0, CONFIG_MAX_PROFILES).map((p, i) =>
           mergeProfile(p, defaults.profiles[i]))
       : defaults.profiles,
+
+    macros: mergeMacros(r.macros),
 
     display: {
       brightness: (r.display as any)?.brightness ?? defaults.display.brightness,
@@ -276,11 +302,25 @@ function mergeProfile(raw: unknown, def: ProfileConfig = defaultProfile()): Prof
     name:   typeof r.name === 'string' ? r.name : def.name,
     icon:   typeof r.icon === 'string' ? r.icon : (def.icon ?? ''),
     layers,
-    macros: Array.isArray(r.macros)
-      ? (r.macros as unknown[]).slice(0, MACRO_MAX_PER_PROFILE).map(m =>
-          Array.isArray(m) ? (m as MacroStep[]).slice(0, MACRO_MAX_STEPS) : [])
-      : undefined,
   };
+}
+
+/** Normalise les macros globales en MACRO_COUNT slots fixes. */
+function mergeMacros(raw: unknown): MacroDef[] {
+  const out = defaultMacros();
+  if (!Array.isArray(raw)) return out;
+  for (let i = 0; i < MACRO_COUNT && i < raw.length; i++) {
+    const m = raw[i] as Record<string, unknown> | null;
+    if (typeof m !== 'object' || m === null) continue;
+    const steps = Array.isArray(m.steps)
+      ? (m.steps as MacroStep[]).slice(0, MACRO_MAX_STEPS)
+      : [];
+    out[i] = {
+      name:  typeof m.name === 'string' ? m.name.slice(0, MACRO_NAME_MAX_LEN - 1) : '',
+      steps,
+    };
+  }
+  return out;
 }
 
 function mergeLayer(raw: unknown, def: LayerConfig = defaultLayer()): LayerConfig {

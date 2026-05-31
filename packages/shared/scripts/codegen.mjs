@@ -20,6 +20,9 @@ import {
   PROFILE_ICON_W,
   PROFILE_ICON_H,
   PROFILE_ICON_BYTES,
+  MACRO_COUNT,
+  MACRO_MAX_STEPS,
+  MACRO_NAME_MAX_LEN,
 } from '../src/constants/config-schema.ts';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -90,6 +93,11 @@ const limitsLines = [
   `#define CONFIG_NAME_MAX_LEN   ${CONFIG_NAME_MAX_LEN}`,
   `#define CONFIG_NUM_KEYS       ${CONFIG_NUM_KEYS}  // Doit correspondre à KB_NUM_KEYS dans kb_config.h`,
   `#define CONFIG_FORMAT_VERSION ${CONFIG_FORMAT_VERSION}`,
+  '',
+  '// Macros globales (partagées par tous les profils)',
+  `#define MACRO_COUNT           ${MACRO_COUNT}`,
+  `#define MACRO_MAX_STEPS       ${MACRO_MAX_STEPS}`,
+  `#define MACRO_NAME_MAX_LEN    ${MACRO_NAME_MAX_LEN}`,
   '',
   '// Icône de profil : bitmap 24×24 monochrome 1bpp',
   `#define PROFILE_ICON_W        ${PROFILE_ICON_W}`,

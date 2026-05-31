@@ -2,33 +2,17 @@
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import * as Card from '$shared/components/ui/card/index.js';
 
-  import {
-    BatteryFull,
-    BatteryMedium,
-    BatteryLow,
-    BatteryWarning,
-    Battery,
-  } from '@lucide/svelte';
+  import { BatteryFull, BatteryMedium, BatteryLow, BatteryWarning, Battery } from '@lucide/svelte';
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
 
   // ── Batterie ─────────────────────────────────────────────────
   const batteryPresent = $derived(data?.battery?.present === true);
-  const batteryPct = $derived(
-    batteryPresent && data?.battery && data.battery.present
-      ? data.battery.percent
-      : 0,
-  );
-  const batteryMv = $derived(
-    batteryPresent && data?.battery && data.battery.present
-      ? data.battery.voltage_mv
-      : 0,
-  );
+  const batteryPct = $derived(batteryPresent && data?.battery && data.battery.present ? data.battery.percent : 0);
+  const batteryMv = $derived(batteryPresent && data?.battery && data.battery.present ? data.battery.voltage_mv : 0);
   const batterySource = $derived(
-    batteryPresent && data?.battery && data.battery.present
-      ? data.battery.source
-      : 'auto',
+    batteryPresent && data?.battery && data.battery.present ? data.battery.source : 'auto',
   );
 
   const batteryColorClass = $derived.by(() => {
@@ -55,32 +39,25 @@
   );
 </script>
 
-<Card.Root class="@container/card flex flex-col">
-  <Card.Header>
+<Card.Root class="@container/card flex flex-col  @lg/main:row-span-2 @4xl/main:row-span-1">
+  <Card.Header class="h-full">
     <Card.Description>Batterie</Card.Description>
     <Card.Action>
       <BatteryIcon class="size-4 text-muted-foreground" />
     </Card.Action>
 
-    <div class="flex flex-col gap-1">
+    <div class="flex flex-col gap-1 mt-auto">
       {#if !batteryPresent}
-        <p class="text-base font-medium text-muted-foreground">
-          Pas de batterie
-        </p>
+        <p class="text-base font-medium text-muted-foreground">Pas de batterie</p>
         <p class="text-xs text-muted-foreground">
-          {batterySource === 'forced_no'
-            ? 'Désactivée par configuration'
-            : 'Mode USB-only'}
+          {batterySource === 'forced_no' ? 'Désactivée par configuration' : 'Mode USB-only'}
         </p>
       {:else}
         <div class="flex items-baseline gap-2 mb-2">
           <span class="text-2xl font-bold tabular-nums"
-            >{batteryPct}<span class="text-sm text-muted-foreground">%</span
-            ></span
+            >{batteryPct}<span class="text-sm text-muted-foreground">%</span></span
           >
-          <span class="text-xs text-muted-foreground tabular-nums"
-            >{(batteryMv / 1000).toFixed(2)}V</span
-          >
+          <span class="text-xs text-muted-foreground tabular-nums">{(batteryMv / 1000).toFixed(2)}V</span>
         </div>
         <div class="w-full h-2 overflow-hidden rounded-full bg-muted">
           <div

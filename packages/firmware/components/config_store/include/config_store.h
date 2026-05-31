@@ -18,8 +18,7 @@
 #define CONFIG_MAX_COMBOS      16
 
 // Macro step definitions
-#define MACRO_MAX_STEPS           32   // Pas par macro
-#define MACRO_MAX_PER_PROFILE     16   // Macros par profil
+// MACRO_COUNT, MACRO_MAX_STEPS, MACRO_NAME_MAX_LEN proviennent de config_limits.gen.h
 
 typedef enum {
     MACRO_STEP_KEY_DOWN = 0,
@@ -33,6 +32,7 @@ typedef struct {
 } kb_macro_step_t;
 
 typedef struct {
+    char            name[MACRO_NAME_MAX_LEN];  // Nom convivial (vide → "Macro N")
     uint8_t         step_count;
     kb_macro_step_t steps[MACRO_MAX_STEPS];
 } kb_macro_t;
@@ -65,8 +65,6 @@ typedef struct {
     kb_layer_t  layers[CONFIG_MAX_LAYERS];
     uint8_t     combo_count;
     kb_combo_t  combos[CONFIG_MAX_COMBOS];
-    uint8_t     macro_count;
-    kb_macro_t  macros[MACRO_MAX_PER_PROFILE];
 } kb_profile_t;
 
 // ── Orientation globale ───────────────────────────────────────
@@ -161,6 +159,8 @@ typedef struct {
     uint8_t             active_profile;
     kb_orientation_t    orientation;     // Rotation globale (0/90/180/270°)
     kb_profile_t        profiles[CONFIG_MAX_PROFILES];
+    uint8_t             macro_count;     // Macros globales utilisées (<= MACRO_COUNT)
+    kb_macro_t          macros[MACRO_COUNT];
     kb_ble_config_t     ble;
     kb_display_config_t display;
     kb_encoder_config_t encoder;
