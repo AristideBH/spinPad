@@ -1,5 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
 //  mock/keyboard-config.ts — Configuration mock complète
+//
+//  4 profils riches pour tester le frontend en devMode (VITE_DEV_MODE).
+//  Chaque layer est entièrement keymappé (pas de KC_NONE) et chaque
+//  layer porte un binding encodeur distinct pour exercer l'UI.
 // ═══════════════════════════════════════════════════════════════
 
 import { action, ACTION_TYPES, MEDIA_CODES } from '$shared/constants/action-types.js';
@@ -10,26 +14,37 @@ const {
   ACTION_TYPE_KC: TYPE_KC, ACTION_TYPE_MOD: TYPE_MOD,
   ACTION_TYPE_LAYER_MO: TYPE_MO, ACTION_TYPE_LAYER_TG: TYPE_TG,
   ACTION_TYPE_LAYER_TO: TYPE_TO, ACTION_TYPE_MEDIA: TYPE_MEDIA,
+  ACTION_TYPE_MACRO: TYPE_MACRO,
 } = ACTION_TYPES;
 const {
   MEDIA_VOL_UP, MEDIA_VOL_DN, MEDIA_MUTE, MEDIA_PLAY,
-  MEDIA_NEXT, MEDIA_PREV, MEDIA_SCRL_UP, MEDIA_SCRL_DN,
-  MEDIA_ZOOM_IN, MEDIA_ZOOM_OUT,
+  MEDIA_NEXT, MEDIA_PREV, MEDIA_STOP, MEDIA_SCRL_UP, MEDIA_SCRL_DN,
+  MEDIA_ZOOM_IN, MEDIA_ZOOM_OUT, MEDIA_BRIGHT_UP, MEDIA_BRIGHT_DN,
+  MEDIA_APP_BROWSER, MEDIA_APP_FILES, MEDIA_APP_CALC, MEDIA_APP_SCRSHOT,
 } = MEDIA_CODES;
 
 // ── Helpers ───────────────────────────────────────────────────
-const KC  = (v: number) => action(TYPE_KC,    v);
-const MOD = (v: number) => action(TYPE_MOD,   v);
-const MO  = (v: number) => action(TYPE_MO,    v);
-const TG  = (v: number) => action(TYPE_TG,    v);
-const TO  = (v: number) => action(TYPE_TO,    v);
+const KC    = (v: number) => action(TYPE_KC,    v);
+const MOD   = (v: number) => action(TYPE_MOD,   v);
+const MO    = (v: number) => action(TYPE_MO,    v);
+const TG    = (v: number) => action(TYPE_TG,    v);
+const TO    = (v: number) => action(TYPE_TO,    v);
+const MEDIA = (v: number) => action(TYPE_MEDIA, v);
+const MACRO = (v: number) => action(TYPE_MACRO, v);
 
 // Modifiers
 const LCTRL  = MOD(0x01);
 const LSHIFT = MOD(0x02);
 const LALT   = MOD(0x04);
+const LGUI   = MOD(0x08);
 
-// Keys
+// Letters / keys
+const A = KC(0x04); const C = KC(0x06); const D = KC(0x07);
+const E = KC(0x08); const F = KC(0x09); const N = KC(0x11);
+const R = KC(0x15); const S = KC(0x16); const T = KC(0x17);
+const V = KC(0x19); const W = KC(0x1A); const X = KC(0x1B);
+const Y = KC(0x1C); const Z = KC(0x1D);
+
 const ESC   = KC(0x29);
 const ENTER = KC(0x28);
 const TAB   = KC(0x2B);
@@ -37,21 +52,34 @@ const BKSP  = KC(0x2A);
 const SPACE = KC(0x2C);
 const DEL   = KC(0x4C);
 
+// Navigation
+const RIGHT = KC(0x4F); const LEFT = KC(0x50);
+const DOWN  = KC(0x51); const UP   = KC(0x52);
+const HOME  = KC(0x4A); const END  = KC(0x4D);
+const PGUP  = KC(0x4B); const PGDN = KC(0x4E);
+
 // F-keys
 const F1 = KC(0x3A); const F2 = KC(0x3B); const F3 = KC(0x3C);
 const F4 = KC(0x3D); const F5 = KC(0x3E); const F6 = KC(0x3F);
 
 // Media
-const VOL_UP  = action(TYPE_MEDIA, MEDIA_VOL_UP);
-const VOL_DN  = action(TYPE_MEDIA, MEDIA_VOL_DN);
-const MUTE    = action(TYPE_MEDIA, MEDIA_MUTE);
-const PLAY    = action(TYPE_MEDIA, MEDIA_PLAY);
-const NEXT    = action(TYPE_MEDIA, MEDIA_NEXT);
-const PREV    = action(TYPE_MEDIA, MEDIA_PREV);
-const SCRL_UP = action(TYPE_MEDIA, MEDIA_SCRL_UP);
-const SCRL_DN = action(TYPE_MEDIA, MEDIA_SCRL_DN);
-const ZOOM_IN = action(TYPE_MEDIA, MEDIA_ZOOM_IN);
-const ZOOM_OUT= action(TYPE_MEDIA, MEDIA_ZOOM_OUT);
+const VOL_UP  = MEDIA(MEDIA_VOL_UP);
+const VOL_DN  = MEDIA(MEDIA_VOL_DN);
+const MUTE    = MEDIA(MEDIA_MUTE);
+const PLAY    = MEDIA(MEDIA_PLAY);
+const NEXT    = MEDIA(MEDIA_NEXT);
+const PREV    = MEDIA(MEDIA_PREV);
+const STOP    = MEDIA(MEDIA_STOP);
+const SCRL_UP = MEDIA(MEDIA_SCRL_UP);
+const SCRL_DN = MEDIA(MEDIA_SCRL_DN);
+const ZOOM_IN = MEDIA(MEDIA_ZOOM_IN);
+const ZOOM_OUT= MEDIA(MEDIA_ZOOM_OUT);
+const BRT_UP  = MEDIA(MEDIA_BRIGHT_UP);
+const BRT_DN  = MEDIA(MEDIA_BRIGHT_DN);
+const BROWSER = MEDIA(MEDIA_APP_BROWSER);
+const FILES   = MEDIA(MEDIA_APP_FILES);
+const CALC    = MEDIA(MEDIA_APP_CALC);
+const SCRSHOT = MEDIA(MEDIA_APP_SCRSHOT);
 
 // ── Key index order ───────────────────────────────────────────
 // keys[0..9] = [SW1, SW8, SW2, SW7, SW9, SW3, SW6, SW10, SW4, SW5]
@@ -65,23 +93,23 @@ const ZOOM_OUT= action(TYPE_MEDIA, MEDIA_ZOOM_OUT);
 export const MOCK_CONFIG: FullConfig = {
   version:        2,
   active_profile: 0,
-  profile_count:  2,
+  profile_count:  4,
 
   profiles: [
 
     // ══════════════════════════════════════════════════════════
-    //  PROFILE 1 — "Shortcuts"
-    //  Demonstrates: MO (hold SW1 for Fn) + TG (toggle SW10 for Media)
+    //  PROFILE 1 — "Productivity"
+    //  Base + Fn (hold SW1, MO) + Nav (toggle, TG)
     // ══════════════════════════════════════════════════════════
     {
-      name:        'Shortcuts',
+      name:        'Productivity',
       layer_count: 3,
       layers: [
         {
           name: 'Base',
           keys: [
-            MO(1),  ESC,    BKSP,  TAB,   ENTER,
-            LCTRL,  LSHIFT, TG(2), LALT,  SPACE,
+            MO(1),  C,      V,      X,      Z,
+            LCTRL,  LSHIFT, TG(2),  LGUI,   SPACE,
           ],
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
           encoder_cw:  VOL_UP,
@@ -90,20 +118,53 @@ export const MOCK_CONFIG: FullConfig = {
         {
           name: 'Fn',
           keys: [
-            0,     DEL,   F2,   F3,   F4,
-            F5,    F6,    0,    0,    0,
+            0,      F1,     F2,     F3,     F4,
+            F5,     F6,     SCRSHOT, FILES,  BROWSER,
+          ],
+          encoder: { cw: BRT_UP, ccw: BRT_DN, press: 0 },
+          encoder_cw:  BRT_UP,
+          encoder_ccw: BRT_DN,
+        },
+        {
+          name: 'Nav',
+          keys: [
+            TO(0),  UP,     PGUP,   HOME,   END,
+            LEFT,   DOWN,   RIGHT,  PGDN,   ENTER,
+          ],
+          encoder: { cw: SCRL_DN, ccw: SCRL_UP, press: ENTER },
+          encoder_cw:  SCRL_DN,
+          encoder_ccw: SCRL_UP,
+        },
+      ],
+      combo_count: 0,
+      combos:      [],
+    },
+
+    // ══════════════════════════════════════════════════════════
+    //  PROFILE 2 — "Creative"
+    //  Base (design-app shortcuts) + Tools (hold SW1, MO)
+    // ══════════════════════════════════════════════════════════
+    {
+      name:        'Creative',
+      layer_count: 2,
+      layers: [
+        {
+          name: 'Base',
+          keys: [
+            MO(1),  Z,      Y,      C,      V,
+            LCTRL,  LSHIFT, LALT,   S,      SPACE,
           ],
           encoder: { cw: ZOOM_IN, ccw: ZOOM_OUT, press: 0 },
           encoder_cw:  ZOOM_IN,
           encoder_ccw: ZOOM_OUT,
         },
         {
-          name: 'Media',
+          name: 'Tools',
           keys: [
-            TO(0), PLAY,    NEXT, PREV, MUTE,
-            SCRL_UP, SCRL_DN, TO(0), VOL_DN, VOL_UP,
+            0,      W,      E,      R,      T,
+            F,      D,      N,      A,      DEL,
           ],
-          encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: PLAY },
+          encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: 0 },
           encoder_cw:  SCRL_UP,
           encoder_ccw: SCRL_DN,
         },
@@ -113,7 +174,41 @@ export const MOCK_CONFIG: FullConfig = {
     },
 
     // ══════════════════════════════════════════════════════════
-    //  PROFILE 2 — "Gaming"
+    //  PROFILE 3 — "Media"
+    //  Base (transport) + Stream (toggle, TG)
+    // ══════════════════════════════════════════════════════════
+    {
+      name:        'Media',
+      layer_count: 2,
+      layers: [
+        {
+          name: 'Base',
+          keys: [
+            PLAY,   PREV,   NEXT,   STOP,   MUTE,
+            VOL_DN, VOL_UP, TG(1),  SCRL_DN, SCRL_UP,
+          ],
+          encoder: { cw: VOL_UP, ccw: VOL_DN, press: PLAY },
+          encoder_cw:  VOL_UP,
+          encoder_ccw: VOL_DN,
+        },
+        {
+          name: 'Stream',
+          keys: [
+            TO(0),  MUTE,   MACRO(0), MACRO(1), BROWSER,
+            CALC,   BRT_DN, BRT_UP,   SCRSHOT,  PLAY,
+          ],
+          encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: MUTE },
+          encoder_cw:  SCRL_UP,
+          encoder_ccw: SCRL_DN,
+        },
+      ],
+      combo_count: 0,
+      combos:      [],
+    },
+
+    // ══════════════════════════════════════════════════════════
+    //  PROFILE 4 — "Gaming"
+    //  WASD + Menu (toggle, TG)
     // ══════════════════════════════════════════════════════════
     {
       name:        'Gaming',
@@ -122,7 +217,7 @@ export const MOCK_CONFIG: FullConfig = {
         {
           name: 'WASD',
           keys: [
-            TG(1),  KC(0x1D), KC(0x08), KC(0x09), KC(0x16),
+            TG(1),  KC(0x1A), KC(0x04), KC(0x16), KC(0x07),
             TAB,    SPACE,    LSHIFT,   LCTRL,    LALT,
           ],
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
@@ -132,8 +227,8 @@ export const MOCK_CONFIG: FullConfig = {
         {
           name: 'Menu',
           keys: [
-            TG(1), ESC, F1,    F2,    F3,
-            F4,    F5,  F6,    ENTER, 0,
+            TG(1),  ESC,    F1,     F2,     F3,
+            F4,     F5,     F6,     ENTER,  0,
           ],
           encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: ENTER },
           encoder_cw:  SCRL_UP,
