@@ -28,4 +28,14 @@ Make sure to follow DCO guidelines from workflow when submitting PR. > Marked as
 
 ## Agent skills
 
-[généré par /setup-matt-pocock-skills — issue tracker, triage labels, domain docs]
+### Issue tracker
+
+Issues and PRDs live as GitHub issues in `AristideBH/spinPad`, managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles, using the default label strings (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
