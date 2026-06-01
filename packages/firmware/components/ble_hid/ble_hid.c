@@ -257,22 +257,35 @@ static int gap_event_handler(struct ble_gap_event *event, void *arg)
 // ─────────────────────────────────────────────────────────────
 
 static uint8_t g_ble_keyboard_report[8] = {0};
+// Modificateur apporté par la touche de chaque slot (cf. usb_hid.c).
+static uint8_t g_ble_report_mod[8] = {0};
 
 // Attribut handle du rapport HID (obtenu lors de l'init du service HID)
 static uint16_t g_kb_report_handle = 0;
 static uint16_t g_consumer_report_handle = 0;
 
+// report[0] = union des modificateurs apportés par les touches encore tenues.
+static void ble_hid_refresh_modifier(void)
+{
+    uint8_t mod = 0;
+    for (int i = 2; i < 8; i++) {
+        if (g_ble_keyboard_report[i] != 0) mod |= g_ble_report_mod[i];
+    }
+    g_ble_keyboard_report[0] = mod;
+}
+
 void ble_hid_key_press(uint8_t keycode, uint8_t modifier)
 {
     if (g_ble_state != BLE_STATE_CONNECTED) return;
 
-    g_ble_keyboard_report[0] = modifier;
     for (int i = 2; i < 8; i++) {
         if (g_ble_keyboard_report[i] == 0) {
             g_ble_keyboard_report[i] = keycode;
+            g_ble_report_mod[i]      = modifier;
             break;
         }
     }
+    ble_hid_refresh_modifier();
 
     // Envoyer la notification HID via GATT
     struct os_mbuf *om = ble_hs_mbuf_from_flat(g_ble_keyboard_report, 8);
@@ -286,9 +299,11 @@ void ble_hid_key_release(uint8_t keycode)
     for (int i = 2; i < 8; i++) {
         if (g_ble_keyboard_report[i] == keycode) {
             g_ble_keyboard_report[i] = 0;
+            g_ble_report_mod[i]      = 0;
             break;
         }
     }
+    ble_hid_refresh_modifier();
 
     struct os_mbuf *om = ble_hs_mbuf_from_flat(g_ble_keyboard_report, 8);
     if (om) ble_gatts_notify_custom(g_conn_handle, g_kb_report_handle, om);

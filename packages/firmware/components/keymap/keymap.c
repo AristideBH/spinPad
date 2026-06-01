@@ -229,16 +229,23 @@ static void send_action(uint16_t action, bool pressed)
 
     switch (type) {
 
-    case ACTION_TYPE_KC:
-        // Keycode standard : envoyer via USB HID ou BLE HID
+    case ACTION_TYPE_KC: {
+        // Keycode standard : usage HID (bits 7–0) + nibble modificateur (bits 11–8).
+        // Le nibble permet d'envoyer un symbole « shifté » (ex : Shift+1 = '!')
+        // depuis une seule touche, sans macro ni modificateur physique maintenu.
+        // Il est combiné (OR) avec g_modifier_state (modificateurs SpinPad tenus).
+        uint8_t kc   = (uint8_t)(value & 0xFF);
+        uint8_t kmod = (uint8_t)((value >> 8) & 0x0F);
         if (pressed) {
-            usb_hid_key_press((uint8_t)value, g_modifier_state);
-            ble_hid_key_press((uint8_t)value, g_modifier_state);
+            uint8_t mods = g_modifier_state | kmod;
+            usb_hid_key_press(kc, mods);
+            ble_hid_key_press(kc, mods);
         } else {
-            usb_hid_key_release((uint8_t)value);
-            ble_hid_key_release((uint8_t)value);
+            usb_hid_key_release(kc);
+            ble_hid_key_release(kc);
         }
         break;
+    }
 
     case ACTION_TYPE_MOD:
         // Modificateur : mettre à jour le byte de modificateur

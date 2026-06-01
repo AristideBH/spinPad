@@ -93,6 +93,10 @@ static const char *string_desc_arr[] = {
 
 static bool              g_mounted    = false;
 static uint8_t           g_keyboard_report[8] = {0};
+// Modificateur apporté par la touche de chaque slot (index 2–7), pour pouvoir
+// recomposer report[0] quand une touche « modifiée » est relâchée alors qu'une
+// autre reste tenue.
+static uint8_t           g_report_mod[8] = {0};
 static uint8_t           g_cdc_rx_buf[CONFIG_JSON_MAX_SIZE];
 static size_t            g_cdc_rx_len = 0;
 static usb_phy_handle_t  g_phy        = NULL;
@@ -135,17 +139,28 @@ esp_err_t usb_hid_init(void)
     return ESP_OK;
 }
 
+// report[0] = union des modificateurs apportés par les touches encore tenues.
+static void usb_hid_refresh_modifier(void)
+{
+    uint8_t mod = 0;
+    for (int i = 2; i < 8; i++) {
+        if (g_keyboard_report[i] != 0) mod |= g_report_mod[i];
+    }
+    g_keyboard_report[0] = mod;
+}
+
 void usb_hid_key_press(uint8_t keycode, uint8_t modifier)
 {
     if (!g_mounted) return;
 
-    g_keyboard_report[0] = modifier;
     for (int i = 2; i < 8; i++) {
         if (g_keyboard_report[i] == 0) {
             g_keyboard_report[i] = keycode;
+            g_report_mod[i]      = modifier;
             break;
         }
     }
+    usb_hid_refresh_modifier();
     tud_hid_n_report(0, REPORT_ID_KEYBOARD, g_keyboard_report, sizeof(g_keyboard_report));
 }
 
@@ -156,9 +171,11 @@ void usb_hid_key_release(uint8_t keycode)
     for (int i = 2; i < 8; i++) {
         if (g_keyboard_report[i] == keycode) {
             g_keyboard_report[i] = 0;
+            g_report_mod[i]      = 0;
             break;
         }
     }
+    usb_hid_refresh_modifier();
     tud_hid_n_report(0, REPORT_ID_KEYBOARD, g_keyboard_report, sizeof(g_keyboard_report));
 }
 
