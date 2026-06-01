@@ -16,6 +16,7 @@
   import { BrushCleaning, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
+  import { fly } from 'svelte/transition';
 
   const ctx = getKeypadContext();
 
@@ -52,9 +53,8 @@
 </script>
 
 {#if ctx.profile}
-  <div class="flex flex-col gap-3 keycap-grid grow min-w-[180px] max-w-[200px]">
+  <div class="flex flex-col gap-3 keycap-grid">
     <Label class="ml-2">Layers</Label>
-
     <RadioGroup.Root bind:value={layerValue} onValueChange={onLayerChange} class="flex flex-col gap-1 ">
       <Sortable
         items={(ctx.profile.layers ?? []) as LayerConfig[]}
@@ -65,7 +65,7 @@
         onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
       >
         {#snippet children({ item: l, index: i, handlePointerDown })}
-          <ButtonGroup.Root class="w-full border rounded-lg ">
+          <ButtonGroup.Root class="w-full border rounded-lg">
             <Button
               class={cn('flex items-center justify-center ps-1 pe-0 border-0! cursor-grab touch-none')}
               title="Réordonner"
@@ -74,7 +74,6 @@
               onpointerdown={handlePointerDown}
             >
               <GripVertical class="size-3.5" />
-
               <span class={cn('w-0.5 h-full rounded-none shrink-0', layerColor(i))}></span>
             </Button>
             <Label
@@ -85,6 +84,7 @@
               for="l-{i}"
             >
               <RadioGroup.Item class="hidden" value={String(i)} title={l.name} id="l-{i}" />
+
               {l.name}
             </Label>
 

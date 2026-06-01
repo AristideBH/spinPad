@@ -22,7 +22,14 @@ import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
 import { activeTransport, transportMode as _transportMode } from './transport.js';
 import { AutoSave } from './auto-save.js';
-import { parseSpinpadFile, createSpinpadFile } from '$shared/constants/config-migrations.js';
+import {
+  parseSpinpadFile,
+  createSpinpadFile,
+  parseProfilesFile,
+  createProfilesFile,
+  SPINPAD_FILE_TYPE,
+  SPINPAD_PROFILES_FILE_TYPE,
+} from '$shared/constants/config-migrations.js';
 import * as ops from '$shared/constants/config-ops.js';
 import {
   defaultConfig,
@@ -218,6 +225,9 @@ export async function importConfig(file: File): Promise<void> {
   let parsed: FullConfig;
   try {
     const raw = JSON.parse(text) as Record<string, unknown>;
+    if (raw['_type'] === SPINPAD_PROFILES_FILE_TYPE) {
+      throw new Error('Ce fichier contient des profils — utilise « Importer profils ».');
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parsed = (raw['_type'] ? parseSpinpadFile(raw) : raw) as any as FullConfig;
   } catch (err) {
@@ -228,6 +238,62 @@ export async function importConfig(file: File): Promise<void> {
   configState.isDirty = true;
   _autoSave.schedule();
   toast.success('Config importée', { description: file.name });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  IMPORT / EXPORT profils (.spinpad-profiles)
+// ─────────────────────────────────────────────────────────────
+
+function _filenameSafe(s: string): string {
+  return s.replace(/[^a-z0-9_-]+/gi, '_').slice(0, 40) || 'profiles';
+}
+
+export function exportProfiles(indices: number[]): void {
+  if (!configState.data || indices.length === 0) return;
+  const all = configState.data.profiles;
+  const selected = indices
+    .filter((i) => i >= 0 && i < all.length)
+    .map((i) => structuredClone($state.snapshot(all[i])));
+  if (selected.length === 0) return;
+  const wrapper = createProfilesFile(selected);
+  const blob = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const stem =
+    selected.length === 1
+      ? _filenameSafe(selected[0].name ?? 'profile')
+      : `profiles-${selected.length}`;
+  a.download = `spinpad-${stem}-${new Date().toISOString().slice(0, 10)}.spinpad-profiles`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast.success(`${selected.length} profil(s) exporté(s)`);
+}
+
+export async function importProfiles(file: File): Promise<void> {
+  const text = await file.text();
+  let profiles;
+  try {
+    const raw = JSON.parse(text) as Record<string, unknown>;
+    if (raw['_type'] === SPINPAD_FILE_TYPE) {
+      throw new Error('Ce fichier contient une config complète — utilise « Importer config ».');
+    }
+    profiles = parseProfilesFile(raw).profiles;
+  } catch (err) {
+    throw new Error(`Fichier invalide : ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (!configState.data) throw new Error('Aucune config chargée.');
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  cfg.profiles = profiles;
+  if (cfg.active_profile >= profiles.length) cfg.active_profile = 0;
+  configState.data = cfg;
+  configState.activeProfileIndex = cfg.active_profile;
+  configState.activeLayerIndex = 0;
+  configState.isDirty = true;
+  _autoSave.schedule();
+  toast.success(`${profiles.length} profil(s) importé(s)`, { description: file.name });
 }
 
 // ─────────────────────────────────────────────────────────────

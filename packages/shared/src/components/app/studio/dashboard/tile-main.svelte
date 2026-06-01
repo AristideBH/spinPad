@@ -1,14 +1,13 @@
 <script lang="ts">
   import * as Card from '$shared/components/ui/card/index.js';
   import { Badge } from '$shared/components/ui/badge/index.js';
-  import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
+  import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Settings2, Lightbulb } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
-  import * as Drawer from '$shared/components/ui/drawer/index.js';
+  import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
   import SettingsTab from '$shared/components/app/studio/settings/SettingsTab.svelte';
-  import { cn } from '$shared/utils.js';
   import { loadConfig, factoryReset, configState } from '$shared/store/config.svelte.js';
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
   import StatusCard from '../../StatusCard.svelte';
@@ -35,6 +34,8 @@
   }
 
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
+
+  let settingsOpen = $state(false);
 </script>
 
 <Card.Root class="@container/card col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2">
@@ -68,21 +69,20 @@
     </Button>
     <MacroManager />
 
-    <Drawer.Root direction="right">
-      <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'me-auto')}>
-        <Settings2 /> Paramètres
-      </Drawer.Trigger>
-      <Drawer.Content>
-        <Drawer.Header>
-          <Drawer.Title>Paramètres</Drawer.Title>
-          <Drawer.Description>Toutes les options sont sauvegardées automatiquement.</Drawer.Description>
-        </Drawer.Header>
-
-        <div class="w-full h-full max-w-5xl px-4 mx-auto overflow-y-auto">
-          <SettingsTab />
-        </div>
-      </Drawer.Content>
-    </Drawer.Root>
+    <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
+      <Settings2 /> Paramètres
+    </Button>
+    <ResponsiveSheet
+      bind:open={settingsOpen}
+      title="Paramètres"
+      description="Toutes les options sont sauvegardées automatiquement."
+      srOnlyTitle={false}
+      desktopClass="w-full sm:max-w-2xl"
+    >
+      <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
+        <SettingsTab />
+      </div>
+    </ResponsiveSheet>
 
     <ButtonGroup.Root class="">
       <Button variant="outline" size="icon" onclick={handleReload}>

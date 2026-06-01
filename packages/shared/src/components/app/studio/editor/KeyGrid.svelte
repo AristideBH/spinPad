@@ -68,7 +68,15 @@
 
 {#if ctx.layer}
   <div class="flex flex-col gap-3 keycap-grid">
-    <Label>Clavier</Label>
+    <span class="flex flex-row items-baseline justify-between gap-1">
+      <Label>Clavier</Label>
+      {#if ctx.orientDeg !== 0}
+        <p class="flex items-center gap-1 mb-2 text-xs text-muted-foreground">
+          <span>Orientation</span>
+          <span class="px-1 font-mono rounded bg-muted">{ctx.orientDeg}°</span>
+        </p>
+      {/if}
+    </span>
 
     <div class="relative dark" style="width: {gridW}px; height: {gridH}px;">
       <div
@@ -117,8 +125,7 @@
             </div>
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
               <span class="keycap-sw">{key.sw}</span>
-              <span
-                class={cn('keycap-label', layoutMismatch(ctx.layer.keys[key.idx] ?? 0) && 'keycap-label--mismatch')}
+              <span class={cn('keycap-label', layoutMismatch(ctx.layer.keys[key.idx] ?? 0) && 'keycap-label--mismatch')}
                 >{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span
               >
               {#if key.rowSpan === 2 || key.colSpan === 2}
