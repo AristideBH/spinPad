@@ -20,7 +20,7 @@ export function safeCapitalize(str: string) {
 }
 
 export function scrollShadow(node: HTMLElement) {
-  console.log('Attaching scroll shadow to', node);
+  // console.log('Attaching scroll shadow to', node);
   // 1. Configuration des styles structurels du conteneur
   node.style.position = 'relative';
   node.style.overflowX = 'auto';
