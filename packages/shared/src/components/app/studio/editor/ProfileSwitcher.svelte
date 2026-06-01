@@ -2,8 +2,7 @@
   import { Label } from '$shared/components/ui/label/index.js';
   import { Select, SelectContent, SelectItem, SelectTrigger } from '$shared/components/ui/select/index.js';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
-
-  import { configState, editProfile } from '$shared/store/config.svelte.js';
+  import { configState, editProfile, exportProfiles, importProfiles } from '$shared/store/config.svelte.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import type { ProfileConfig } from '$shared/constants/config-schema.js';
@@ -16,6 +15,7 @@
   import {
     Archive,
     ChevronDown,
+    Download,
     Edit,
     GripVertical,
     MailCheck,
@@ -23,10 +23,15 @@
     MoreVertical,
     Plus,
     Settings2,
+    Share,
     TextCursor,
     Trash,
+    Upload,
   } from '@lucide/svelte';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import * as Dialog from '$shared/components/ui/dialog/index.js';
+  import { toast } from 'svelte-sonner';
 
   let profileValue = $state(String(configState.activeProfileIndex));
   let layerValue = $state(String(configState.activeLayerIndex));
@@ -60,12 +65,55 @@
     layerValue = '0';
     configState.activeLayerIndex = 0;
   }
+
+  let fileInput = $state<HTMLInputElement | null>(null);
+  let selectedExport = $state<Set<number>>(new Set());
+  let dialogOpen = $state(false);
+
+  const profileList = $derived(configState.data?.profiles ?? []);
+  const allSelected = $derived(profileList.length > 0 && selectedExport.size === profileList.length);
+
+  function toggleSelect(i: number) {
+    const next = new Set(selectedExport);
+    if (next.has(i)) next.delete(i);
+    else next.add(i);
+    selectedExport = next;
+  }
+
+  function toggleAll() {
+    selectedExport = allSelected ? new Set() : new Set(profileList.map((_, i) => i));
+  }
+
+  function onImportClick() {
+    fileInput?.click();
+  }
+
+  async function onFileSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      await importProfiles(file);
+      dialogOpen = false;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[import-profiles]', msg);
+      toast.error('Import échoué', { description: msg });
+    }
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  function onExportClick() {
+    if (selectedExport.size === 0) return;
+    exportProfiles([...selectedExport].sort((a, b) => a - b));
+  }
 </script>
 
 <ScrollArea
   orientation="horizontal"
   bind:viewportRef={viewport}
-  class="flex flex-row relative w-full gap-2  rounded-xl bg-background/50 items-start border shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)] [&_[data-slot=scroll-area-viewport]]:snap-x [&_[data-slot=scroll-area-viewport]]:scroll-px-2"
+  class="profiles flex flex-row relative w-full gap-2 rounded-xl bg-background/50 items-start border shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)] **:data-[slot=scroll-area-viewport]:snap-x **:data-[slot=scroll-area-viewport]:scroll-px-2"
   {@attach scrollShadow}
 >
   <RadioGroup.Root
@@ -85,16 +133,16 @@
     >
       {#snippet children({ item: prof, index: i, handlePointerDown })}
         {@const isActive = i === Number(profileValue)}
-        <Label for="p-{i}" class="block cursor-pointer snap-center">
+        <Label for="p-{i}" class="block h-full cursor-pointer snap-center">
           <RadioGroup.Item hidden disabled={isActive} value={String(i)} title={prof.name} id="p-{i}" />
           <Item.Root
             variant="outline"
             class={cn(
-              'h-full w-full py-3 group transition-colors duration-200',
+              'h-full w-full py-3 group transition-colors duration-200 items-center',
               isActive ? 'bg-primary text-primary-foreground' : 'bg-card ',
             )}
           >
-            <Item.Media>
+            <Item.Media class="self-center! mb-1.5 me-2 gap-1">
               <button
                 type="button"
                 class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
@@ -102,7 +150,7 @@
                 onpointerdown={handlePointerDown}
                 onclick={(e) => e.preventDefault()}
               >
-                <GripVertical class="size-4" />
+                <GripVertical class="size-3.5" />
               </button>
               <div
                 class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0"
@@ -124,36 +172,103 @@
         </Label>
       {/snippet}
     </Sortable>
+
+    <div class="flex flex-col items-center gap-2 ms-auto">
+      <ButtonGroup.Root orientation="vertical">
+        <Button variant="secondary" size="icon">
+          <Plus />
+        </Button>
+        <Dialog.Root bind:open={dialogOpen}>
+          <Dialog.Trigger
+            class={cn('pt-3 pb-3.5', buttonVariants({ variant: 'secondary', size: 'xs' }))}
+            title="Importer / Exporter profils"
+          >
+            <Share />
+          </Dialog.Trigger>
+          <Dialog.Content class="sm:max-w-md">
+            <Dialog.Header>
+              <Dialog.Title>Profils — importer / exporter</Dialog.Title>
+              <Dialog.Description class="text-balance">
+                Sauvegarde ou charge des profils (.spinpad-profiles). L'import écrase les profils actuels.
+              </Dialog.Description>
+            </Dialog.Header>
+
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-muted-foreground">À exporter</span>
+                <Button variant="ghost" size="sm" onclick={toggleAll} disabled={profileList.length === 0}>
+                  {allSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
+                </Button>
+              </div>
+              <div class="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
+                {#each profileList as p, i (i)}
+                  {@const checked = selectedExport.has(i)}
+                  <button
+                    type="button"
+                    onclick={() => toggleSelect(i)}
+                    class={[
+                      'flex items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors',
+                      checked ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50',
+                    ].join(' ')}
+                  >
+                    <span
+                      class={[
+                        'flex size-4 shrink-0 items-center justify-center rounded-sm border',
+                        checked ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground',
+                      ].join(' ')}
+                      aria-hidden="true"
+                    >
+                      {#if checked}✓{/if}
+                    </span>
+                    <span class="flex-1 truncate">{p.name?.trim() || `Profil ${i + 1}`}</span>
+                    <span class="text-xs text-muted-foreground">{p.layers?.length ?? 0} layer(s)</span>
+                  </button>
+                {/each}
+              </div>
+
+              <div class="flex gap-2 pt-2 border-t border-border">
+                <Button
+                  variant="outline"
+                  onclick={onImportClick}
+                  title="Importer des profils (.spinpad-profiles)"
+                  disabled={!configState.data}
+                  class="gap-1.5"
+                >
+                  <Upload class="size-4" /> Importer
+                </Button>
+                <Button
+                  onclick={onExportClick}
+                  title="Exporter les profils sélectionnés"
+                  disabled={selectedExport.size === 0}
+                  class="gap-1.5 "
+                >
+                  <Download class="size-4" /> Exporter ({selectedExport.size})
+                </Button>
+              </div>
+
+              <input
+                bind:this={fileInput}
+                type="file"
+                accept=".spinpad-profiles,.json"
+                class="hidden"
+                onchange={onFileSelected}
+              />
+            </div>
+          </Dialog.Content>
+        </Dialog.Root>
+      </ButtonGroup.Root>
+      <p class="text-xs leading-none text-muted">{profileCount()}/{8}</p>
+    </div>
   </RadioGroup.Root>
-  <!-- <Button
-    variant="outline"
-    class="sticky ml-auto h-auto! right-0 self-stretch bg-muted!  z-10
-      [&>div]:bg-green! [&>div]:hover:bg-green-600!
-    "
-    size="icon"
-    title="Ajouter un profil"
-  >
-    <Plus />
-  </Button> -->
 </ScrollArea>
 
 <style>
-  :global(.scroller) {
-    display: flex;
-    gap: 15px;
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-
-  :global(.item) {
-    flex: 0 0 100px;
-    height: 100px;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  :global(.profiles .svlt-grid-item) {
+    &:not(.svlt-grid-active) {
+      height: 100% !important;
+    }
+    & > label {
+      height: inherit;
+    }
   }
 </style>

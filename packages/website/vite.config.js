@@ -7,20 +7,21 @@ import path from 'path';
 // que SvelteKit injecte dans Vite. Vite résout nativement .js → .ts.
 
 export default defineConfig({
-    plugins: [
-        tailwindcss(),
-        sveltekit(),
-    ],
-    // SharedArrayBuffer requis par esptool-js (flash tool)
-    server: {
-        host: '127.0.0.1',
-        headers: {
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
-        },
-        fs: {
-            // Autorise l'accès aux sources de shared (hors racine de l'app)
-            allow: [path.resolve('../..')],
-        },
+  plugins: [tailwindcss(), sveltekit()],
+  // SharedArrayBuffer requis par esptool-js (flash tool)
+  server: {
+    host: '127.0.0.1',
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
     },
+    fs: {
+      // Autorise l'accès aux sources de shared (hors racine de l'app)
+      allow: [path.resolve('../..')],
+    },
+  },
+  optimizeDeps: {
+    // Explicitly pre-bundle heavy libraries on server start
+    include: ['@lucide/svelte'],
+  },
 });

@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { configState, updateConfig } from '$shared/store/config.svelte.js';
+  import { configState, updateConfig, exportConfig, importConfig } from '$shared/store/config.svelte.js';
+  import { Download, Upload } from '@lucide/svelte';
+  import { toast } from 'svelte-sonner';
   import { serial, setTime } from '$shared/store/serial.svelte.js';
   import { Card, CardContent, CardHeader, CardTitle } from '$shared/components/ui/card/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
@@ -46,6 +48,26 @@
   });
 
   const SENS_LABELS = ['', '1× (standard)', '2× (réactif)', '3×', '4× (max)'] as const;
+
+  // ── Backup global ─────────────────────────────────────────────
+  let backupFileInput = $state<HTMLInputElement | null>(null);
+
+  function onBackupImportClick() {
+    backupFileInput?.click();
+  }
+
+  async function onBackupFileSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      await importConfig(file);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[backup-import]', msg);
+      toast.error('Import échoué', { description: msg });
+    }
+    if (backupFileInput) backupFileInput.value = '';
+  }
 
   // ── Conditions dérivées ───────────────────────────────────────
   // $derived garantit la réactivité sans boucle d'effet.
@@ -565,6 +587,46 @@
           </CardContent>
         </Card>
       </div>
+    </section>
+
+    <!-- ══ Sauvegarde globale ════════════════════════════════ -->
+    <section class="flex flex-col gap-3">
+      <h2 class="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Sauvegarde</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Config complète</CardTitle>
+        </CardHeader>
+        <CardContent class="flex flex-col gap-3">
+          <p class="text-xs text-muted-foreground">
+            Exporte ou importe la configuration entière (.spinpad). L'import écrase la config actuelle.
+          </p>
+          <div class="flex gap-2">
+            <Button
+              variant="outline"
+              onclick={onBackupImportClick}
+              disabled={!configState.data}
+              class="gap-1.5"
+            >
+              <Upload class="size-4" /> Importer
+            </Button>
+            <Button
+              variant="outline"
+              onclick={exportConfig}
+              disabled={!configState.data}
+              class="gap-1.5"
+            >
+              <Download class="size-4" /> Exporter
+            </Button>
+            <input
+              bind:this={backupFileInput}
+              type="file"
+              accept=".spinpad,.json"
+              class="hidden"
+              onchange={onBackupFileSelected}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </section>
   </div>
 {/if}

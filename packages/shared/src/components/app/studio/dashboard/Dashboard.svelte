@@ -11,5 +11,5 @@
   <ScreenTile />
   <BatteryTile />
   <FirmwareTile />
-  <StatsTile />
+  <!-- <StatsTile /> -->
 </section>

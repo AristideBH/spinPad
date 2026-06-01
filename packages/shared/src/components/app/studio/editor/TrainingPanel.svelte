@@ -8,10 +8,10 @@
 
 {#if ctx.trainingActive}
   <div class="p-3 mt-4 border rounded-lg border-emerald-500/30 bg-emerald-500/5">
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-xs font-semibold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+    <div class="flex flex-wrap items-center justify-between mb-2">
+      <span class="text-xs font-semibold uppercase tracking-widest flex items-center gap-1.5">
         <Activity class="size-3" />
-        Mode entraînement actif
+        Training Mode
       </span>
       <Button
         variant="ghost"
@@ -19,11 +19,11 @@
         onclick={() => ctx.resetTrainingCounts()}
         class="h-6 text-xs text-muted-foreground"
       >
-        Réinitialiser
+        Reset
       </Button>
     </div>
     <p class="text-xs text-muted-foreground">
-      Total : {ctx.keyPressCounts.reduce((a, b) => a + b, 0)} appuis · Touche la plus utilisée : SW{ctx.keyPressCounts.indexOf(
+      Total : {ctx.keyPressCounts.reduce((a, b) => a + b, 0)} presses · Most used key : SW{ctx.keyPressCounts.indexOf(
         Math.max(...ctx.keyPressCounts),
       ) + 1 || '—'}
     </p>

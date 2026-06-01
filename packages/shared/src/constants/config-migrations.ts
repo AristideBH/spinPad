@@ -15,10 +15,12 @@
 //  }
 // ═══════════════════════════════════════════════════════════════
 
-import { defaultMacros, type FullConfig } from './config-schema.js';
+import { defaultMacros, type FullConfig, type ProfileConfig } from './config-schema.js';
 
 export const SPINPAD_FILE_TYPE = 'spinpad-config';
+export const SPINPAD_PROFILES_FILE_TYPE = 'spinpad-profiles';
 export const CURRENT_FORMAT_VERSION = 2;
+export const CURRENT_PROFILES_FORMAT_VERSION = 1;
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -105,4 +107,56 @@ export function createSpinpadFile(config: FullConfig, meta: FileMeta = {}): Spin
     _studio_version:   meta.studioVersion   ?? 'unknown',
     config,
   };
+}
+
+// ── Profile bundle (subset of profiles, no global settings) ────
+
+export interface SpinpadProfilesWrapper {
+  _type:             string;
+  _format_version:   number;
+  _created_at:       string;
+  _firmware_version: string;
+  _studio_version:   string;
+  profiles:          ProfileConfig[];
+}
+
+export interface ProfilesParseResult {
+  profiles:    ProfileConfig[];
+  fromVersion: number;
+}
+
+export function createProfilesFile(
+  profiles: ProfileConfig[],
+  meta: FileMeta = {},
+): SpinpadProfilesWrapper {
+  return {
+    _type:             SPINPAD_PROFILES_FILE_TYPE,
+    _format_version:   CURRENT_PROFILES_FORMAT_VERSION,
+    _created_at:       new Date().toISOString(),
+    _firmware_version: meta.firmwareVersion ?? 'unknown',
+    _studio_version:   meta.studioVersion   ?? 'unknown',
+    profiles,
+  };
+}
+
+export function parseProfilesFile(raw: unknown): ProfilesParseResult {
+  if (!raw || typeof raw !== 'object') {
+    throw new Error('Fichier invalide : pas un objet JSON.');
+  }
+  const r = raw as Record<string, unknown>;
+  if (r._type !== SPINPAD_PROFILES_FILE_TYPE) {
+    throw new Error(
+      `Fichier non reconnu (type: "${r._type}"). Attendu : "${SPINPAD_PROFILES_FILE_TYPE}".`,
+    );
+  }
+  const fileVersion = Number(r._format_version) || 1;
+  if (fileVersion > CURRENT_PROFILES_FORMAT_VERSION) {
+    throw new Error(
+      `Format profiles v${fileVersion} trop récent — mettre à jour Studio pour ouvrir ce fichier.`,
+    );
+  }
+  if (!Array.isArray(r.profiles) || r.profiles.length === 0) {
+    throw new Error('Fichier profiles vide ou invalide.');
+  }
+  return { profiles: r.profiles as ProfileConfig[], fromVersion: fileVersion };
 }
