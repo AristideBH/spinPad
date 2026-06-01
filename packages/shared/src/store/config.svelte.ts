@@ -27,6 +27,8 @@ import * as ops from '$shared/constants/config-ops.js';
 import {
   defaultConfig,
   defaultMacros,
+  isMacroUsed,
+  MACRO_COUNT,
   MACRO_MAX_STEPS,
   MACRO_NAME_MAX_LEN,
   type FullConfig,
@@ -313,6 +315,35 @@ export function setMacroSteps(idx: number, steps: MacroStep[]): void {
   configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();
+}
+
+/**
+ * Crée une macro dans le premier slot libre à partir d'étapes fournies.
+ * Retourne l'index du slot, ou `null` si tous les slots sont occupés.
+ * Utilisé par le live-record quand un combo (modificateur + touche) est capturé.
+ */
+export function createMacroFromSteps(name: string, steps: MacroStep[]): number | null {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  const macros = _ensureMacros(cfg);
+  let slot = -1;
+  for (let i = 0; i < MACRO_COUNT; i++) {
+    if (!isMacroUsed(macros[i])) {
+      slot = i;
+      break;
+    }
+  }
+  if (slot < 0) {
+    toast.error('Tous les slots de macro sont utilisés');
+    return null;
+  }
+  macros[slot] = {
+    name: name.slice(0, MACRO_NAME_MAX_LEN - 1),
+    steps: ($state.snapshot(steps) as MacroStep[]).slice(0, MACRO_MAX_STEPS),
+  };
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+  return slot;
 }
 
 export function clearMacro(idx: number): void {

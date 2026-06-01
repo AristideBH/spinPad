@@ -32,12 +32,26 @@ export const MEDIA_CODES = {
   MEDIA_PLAY:        0x04,
   MEDIA_NEXT:        0x05,
   MEDIA_PREV:        0x06,
+  MEDIA_STOP:        0x07,
   MEDIA_SCRL_UP:     0x10,
   MEDIA_SCRL_DN:     0x11,
-  MEDIA_ZOOM_IN:     0x20,
-  MEDIA_ZOOM_OUT:    0x21,
   MEDIA_SCRL_LEFT:   0x12,
   MEDIA_SCRL_RIGHT:  0x13,
+  MEDIA_ZOOM_IN:     0x20,
+  MEDIA_ZOOM_OUT:    0x21,
+  MEDIA_BRIGHT_UP:   0x22,   // luminosité écran hôte
+  MEDIA_BRIGHT_DN:   0x23,
+  // ── Lancement d'applications (Consumer AL_* / AC_*) ──────────
+  //  Le firmware mappe ces sous-codes vers l'usage Consumer réel.
+  MEDIA_APP_CALC:    0x30,   // AL_Calculator
+  MEDIA_APP_MAIL:    0x31,   // AL_Email_Reader
+  MEDIA_APP_BROWSER: 0x32,   // AL_Internet_Browser
+  MEDIA_APP_SEARCH:  0x33,   // AC_Search
+  MEDIA_APP_FILES:   0x34,   // AL_File_Browser
+  MEDIA_APP_CALENDAR:0x35,   // AL_Calendar
+  MEDIA_APP_PLAYER:  0x36,   // AL_Media_Player
+  MEDIA_APP_LOCK:    0x37,   // AL_Screen_Lock
+  MEDIA_APP_SCRSHOT: 0x38,   // Capture d'écran (raccourci OS, mappé firmware)
 } as const satisfies Record<string, number>;
 
 export type MediaCode = keyof typeof MEDIA_CODES;
@@ -51,6 +65,9 @@ export const SPECIAL_CODES = {
   SPECIAL_LED_BRIGHT_UP: 0x04,   // Augmenter la luminosité des LEDs
   SPECIAL_LED_BRIGHT_DN: 0x05,   // Diminuer la luminosité des LEDs
   SPECIAL_STUDIO_MODE:   0x06,   // Activer/désactiver le Studio Mode
+  SPECIAL_ENC_SENS_UP:   0x07,   // Sensibilité encodeur +
+  SPECIAL_ENC_SENS_DN:   0x08,   // Sensibilité encodeur -
+  SPECIAL_SLEEP:         0x09,   // Mettre le device en veille
 } as const satisfies Record<string, number>;
 
 export type SpecialCode = keyof typeof SPECIAL_CODES;

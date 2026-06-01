@@ -9,7 +9,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types.js';
-import { MACRO_COUNT, isMacroUsed, type MacroDef } from './config-schema.js';
+import { MACRO_COUNT, MACRO_STEP_TYPE, isMacroUsed, type MacroDef, type MacroStep } from './config-schema.js';
 
 const {
   ACTION_TYPE_KC,
@@ -29,12 +29,24 @@ const {
   MEDIA_PLAY,
   MEDIA_NEXT,
   MEDIA_PREV,
+  MEDIA_STOP,
   MEDIA_SCRL_UP,
   MEDIA_SCRL_DN,
   MEDIA_ZOOM_IN,
   MEDIA_ZOOM_OUT,
   MEDIA_SCRL_LEFT,
   MEDIA_SCRL_RIGHT,
+  MEDIA_BRIGHT_UP,
+  MEDIA_BRIGHT_DN,
+  MEDIA_APP_CALC,
+  MEDIA_APP_MAIL,
+  MEDIA_APP_BROWSER,
+  MEDIA_APP_SEARCH,
+  MEDIA_APP_FILES,
+  MEDIA_APP_CALENDAR,
+  MEDIA_APP_PLAYER,
+  MEDIA_APP_LOCK,
+  MEDIA_APP_SCRSHOT,
 } = MEDIA_CODES;
 
 const {
@@ -44,11 +56,27 @@ const {
   SPECIAL_LED_BRIGHT_UP,
   SPECIAL_LED_BRIGHT_DN,
   SPECIAL_STUDIO_MODE,
+  SPECIAL_ENC_SENS_UP,
+  SPECIAL_ENC_SENS_DN,
+  SPECIAL_SLEEP,
 } = SPECIAL_CODES;
 
 // ── Types ───────────────────────────────────────────────────────
 
-export type KeycodeCategory = 'letter' | 'special' | 'modifier' | 'layer' | 'media' | 'firmware' | 'macro' | 'number';
+export type KeycodeCategory =
+  | 'letter'
+  | 'number'
+  | 'function'
+  | 'symbol'
+  | 'nav'
+  | 'keypad'
+  | 'special'
+  | 'modifier'
+  | 'layer'
+  | 'media'
+  | 'app'
+  | 'firmware'
+  | 'macro';
 
 export interface Keycode {
   label: string;
@@ -103,7 +131,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: '0', value: action(ACTION_TYPE_KC, 0x27), category: 'number' },
   ],
 
-  // ── Touches spéciales ────────────────────────────────────────
+  // ── Touches spéciales / édition ──────────────────────────────
   special: [
     { label: 'None', value: 0, category: 'special' },
     { label: 'Esc', value: action(ACTION_TYPE_KC, 0x29), category: 'special' },
@@ -111,19 +139,69 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Space', value: action(ACTION_TYPE_KC, 0x2c), category: 'special' },
     { label: 'Bksp', value: action(ACTION_TYPE_KC, 0x2a), category: 'special' },
     { label: 'Tab', value: action(ACTION_TYPE_KC, 0x2b), category: 'special' },
-    { label: 'Del', value: action(ACTION_TYPE_KC, 0x4c), category: 'special' },
-    { label: 'F1', value: action(ACTION_TYPE_KC, 0x3a), category: 'special' },
-    { label: 'F2', value: action(ACTION_TYPE_KC, 0x3b), category: 'special' },
-    { label: 'F3', value: action(ACTION_TYPE_KC, 0x3c), category: 'special' },
-    { label: 'F4', value: action(ACTION_TYPE_KC, 0x3d), category: 'special' },
-    { label: 'F5', value: action(ACTION_TYPE_KC, 0x3e), category: 'special' },
-    { label: 'F6', value: action(ACTION_TYPE_KC, 0x3f), category: 'special' },
-    { label: 'F7', value: action(ACTION_TYPE_KC, 0x40), category: 'special' },
-    { label: 'F8', value: action(ACTION_TYPE_KC, 0x41), category: 'special' },
-    { label: 'F9', value: action(ACTION_TYPE_KC, 0x42), category: 'special' },
-    { label: 'F10', value: action(ACTION_TYPE_KC, 0x43), category: 'special' },
-    { label: 'F11', value: action(ACTION_TYPE_KC, 0x44), category: 'special' },
-    { label: 'F12', value: action(ACTION_TYPE_KC, 0x45), category: 'special' },
+    { label: 'Caps', value: action(ACTION_TYPE_KC, 0x39), category: 'special' },
+    { label: 'PrtSc', value: action(ACTION_TYPE_KC, 0x46), category: 'special' },
+    { label: 'ScrLk', value: action(ACTION_TYPE_KC, 0x47), category: 'special' },
+    { label: 'Pause', value: action(ACTION_TYPE_KC, 0x48), category: 'special' },
+    { label: 'Menu', value: action(ACTION_TYPE_KC, 0x65), category: 'special' },
+  ],
+
+  // ── Touches de fonction ──────────────────────────────────────
+  function: Array.from({ length: 24 }, (_, i) => ({
+    label: `F${i + 1}`,
+    // F1–F12 = 0x3a–0x45 ; F13–F24 = 0x68–0x73
+    value: action(ACTION_TYPE_KC, i < 12 ? 0x3a + i : 0x68 + (i - 12)),
+    category: 'function' as KeycodeCategory,
+  })),
+
+  // ── Navigation ───────────────────────────────────────────────
+  navigation: [
+    { label: '←', value: action(ACTION_TYPE_KC, 0x50), category: 'nav' },
+    { label: '↓', value: action(ACTION_TYPE_KC, 0x51), category: 'nav' },
+    { label: '↑', value: action(ACTION_TYPE_KC, 0x52), category: 'nav' },
+    { label: '→', value: action(ACTION_TYPE_KC, 0x4f), category: 'nav' },
+    { label: 'Home', value: action(ACTION_TYPE_KC, 0x4a), category: 'nav' },
+    { label: 'End', value: action(ACTION_TYPE_KC, 0x4d), category: 'nav' },
+    { label: 'PgUp', value: action(ACTION_TYPE_KC, 0x4b), category: 'nav' },
+    { label: 'PgDn', value: action(ACTION_TYPE_KC, 0x4e), category: 'nav' },
+    { label: 'Ins', value: action(ACTION_TYPE_KC, 0x49), category: 'nav' },
+    { label: 'Del', value: action(ACTION_TYPE_KC, 0x4c), category: 'nav' },
+  ],
+
+  // ── Symboles / ponctuation (positions US) ────────────────────
+  symbols: [
+    { label: '-', value: action(ACTION_TYPE_KC, 0x2d), category: 'symbol' },
+    { label: '=', value: action(ACTION_TYPE_KC, 0x2e), category: 'symbol' },
+    { label: '[', value: action(ACTION_TYPE_KC, 0x2f), category: 'symbol' },
+    { label: ']', value: action(ACTION_TYPE_KC, 0x30), category: 'symbol' },
+    { label: '\\', value: action(ACTION_TYPE_KC, 0x31), category: 'symbol' },
+    { label: ';', value: action(ACTION_TYPE_KC, 0x33), category: 'symbol' },
+    { label: "'", value: action(ACTION_TYPE_KC, 0x34), category: 'symbol' },
+    { label: '`', value: action(ACTION_TYPE_KC, 0x35), category: 'symbol' },
+    { label: ',', value: action(ACTION_TYPE_KC, 0x36), category: 'symbol' },
+    { label: '.', value: action(ACTION_TYPE_KC, 0x37), category: 'symbol' },
+    { label: '/', value: action(ACTION_TYPE_KC, 0x38), category: 'symbol' },
+  ],
+
+  // ── Pavé numérique ───────────────────────────────────────────
+  keypad: [
+    { label: 'Num', value: action(ACTION_TYPE_KC, 0x53), category: 'keypad' },
+    { label: 'KP/', value: action(ACTION_TYPE_KC, 0x54), category: 'keypad' },
+    { label: 'KP*', value: action(ACTION_TYPE_KC, 0x55), category: 'keypad' },
+    { label: 'KP-', value: action(ACTION_TYPE_KC, 0x56), category: 'keypad' },
+    { label: 'KP+', value: action(ACTION_TYPE_KC, 0x57), category: 'keypad' },
+    { label: 'KP↵', value: action(ACTION_TYPE_KC, 0x58), category: 'keypad' },
+    { label: 'KP1', value: action(ACTION_TYPE_KC, 0x59), category: 'keypad' },
+    { label: 'KP2', value: action(ACTION_TYPE_KC, 0x5a), category: 'keypad' },
+    { label: 'KP3', value: action(ACTION_TYPE_KC, 0x5b), category: 'keypad' },
+    { label: 'KP4', value: action(ACTION_TYPE_KC, 0x5c), category: 'keypad' },
+    { label: 'KP5', value: action(ACTION_TYPE_KC, 0x5d), category: 'keypad' },
+    { label: 'KP6', value: action(ACTION_TYPE_KC, 0x5e), category: 'keypad' },
+    { label: 'KP7', value: action(ACTION_TYPE_KC, 0x5f), category: 'keypad' },
+    { label: 'KP8', value: action(ACTION_TYPE_KC, 0x60), category: 'keypad' },
+    { label: 'KP9', value: action(ACTION_TYPE_KC, 0x61), category: 'keypad' },
+    { label: 'KP0', value: action(ACTION_TYPE_KC, 0x62), category: 'keypad' },
+    { label: 'KP.', value: action(ACTION_TYPE_KC, 0x63), category: 'keypad' },
   ],
 
   // ── Modificateurs ────────────────────────────────────────────
@@ -135,6 +213,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'R-Ctrl', value: action(ACTION_TYPE_MOD, 0x10), category: 'modifier' },
     { label: 'R-Shift', value: action(ACTION_TYPE_MOD, 0x20), category: 'modifier' },
     { label: 'R-Alt', value: action(ACTION_TYPE_MOD, 0x40), category: 'modifier' },
+    { label: 'R-GUI', value: action(ACTION_TYPE_MOD, 0x80), category: 'modifier' },
   ],
 
   // ── Layers ───────────────────────────────────────────────────
@@ -163,8 +242,24 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Scrl↓', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_DN), category: 'media' },
     { label: 'Scrl←', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_LEFT), category: 'media' },
     { label: 'Scrl→', value: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_RIGHT), category: 'media' },
+    { label: 'Stop', value: action(ACTION_TYPE_MEDIA, MEDIA_STOP), category: 'media' },
     { label: 'Zoom+', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_IN), category: 'media' },
     { label: 'Zoom-', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_OUT), category: 'media' },
+    { label: 'Lum+', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_UP), category: 'media' },
+    { label: 'Lum-', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_DN), category: 'media' },
+  ],
+
+  // ── Lancement d'applications (Consumer Control) ──────────────
+  apps: [
+    { label: 'Calc', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_CALC), category: 'app' },
+    { label: 'Mail', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_MAIL), category: 'app' },
+    { label: 'Navigateur', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_BROWSER), category: 'app' },
+    { label: 'Recherche', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_SEARCH), category: 'app' },
+    { label: 'Fichiers', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_FILES), category: 'app' },
+    { label: 'Agenda', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_CALENDAR), category: 'app' },
+    { label: 'Lecteur', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_PLAYER), category: 'app' },
+    { label: 'Verrouiller', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_LOCK), category: 'app' },
+    { label: 'Capture', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_SCRSHOT), category: 'app' },
   ],
 
   // ── Spéciaux firmware ────────────────────────────────────────
@@ -175,6 +270,9 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Orient ↺', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ORIENT_CCW), category: 'firmware' },
     { label: 'LED +', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_UP), category: 'firmware' },
     { label: 'LED -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
+    { label: 'Sens +', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_UP), category: 'firmware' },
+    { label: 'Sens -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_DN), category: 'firmware' },
+    { label: 'Veille', value: action(ACTION_TYPE_SPECIAL, SPECIAL_SLEEP), category: 'firmware' },
   ],
 
 };
@@ -212,6 +310,137 @@ export function keycodeGroups(macros?: MacroDef[]): Record<string, Keycode[]> {
 /** Table à plat incluant les macros utilisées (pour la recherche). */
 export function keycodesFlat(macros?: MacroDef[]): Keycode[] {
   return [...KEYCODES_FLAT, ...macroKeycodes(macros)];
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LIVE-RECORD — KeyboardEvent (clavier hôte) → keycode firmware
+//
+//  Mappe `KeyboardEvent.code` vers un usage HID, puis retrouve le
+//  Keycode correspondant dans la table. Utilisé par le picker en
+//  mode "enregistrement direct".
+// ═══════════════════════════════════════════════════════════════
+
+/** `KeyboardEvent.code` → usage HID (sous-code 12 bits, type KC). */
+const CODE_TO_HID: Record<string, number> = (() => {
+  const m: Record<string, number> = {};
+  // Lettres A–Z → 0x04–0x1d
+  for (let i = 0; i < 26; i++) m[`Key${String.fromCharCode(65 + i)}`] = 0x04 + i;
+  // Chiffres 1–9,0 → 0x1e–0x27
+  for (let i = 1; i <= 9; i++) m[`Digit${i}`] = 0x1e + (i - 1);
+  m['Digit0'] = 0x27;
+  // F1–F12 → 0x3a–0x45 ; F13–F24 → 0x68–0x73
+  for (let i = 1; i <= 12; i++) m[`F${i}`] = 0x3a + (i - 1);
+  for (let i = 13; i <= 24; i++) m[`F${i}`] = 0x68 + (i - 13);
+  // Pavé numérique 1–9,0
+  for (let i = 1; i <= 9; i++) m[`Numpad${i}`] = 0x59 + (i - 1);
+  m['Numpad0'] = 0x62;
+  Object.assign(m, {
+    // Édition / spéciales
+    Escape: 0x29,
+    Enter: 0x28,
+    Space: 0x2c,
+    Backspace: 0x2a,
+    Tab: 0x2b,
+    CapsLock: 0x39,
+    PrintScreen: 0x46,
+    ScrollLock: 0x47,
+    Pause: 0x48,
+    ContextMenu: 0x65,
+    // Navigation
+    Insert: 0x49,
+    Home: 0x4a,
+    PageUp: 0x4b,
+    Delete: 0x4c,
+    End: 0x4d,
+    PageDown: 0x4e,
+    ArrowRight: 0x4f,
+    ArrowLeft: 0x50,
+    ArrowDown: 0x51,
+    ArrowUp: 0x52,
+    // Symboles / ponctuation
+    Minus: 0x2d,
+    Equal: 0x2e,
+    BracketLeft: 0x2f,
+    BracketRight: 0x30,
+    Backslash: 0x31,
+    Semicolon: 0x33,
+    Quote: 0x34,
+    Backquote: 0x35,
+    Comma: 0x36,
+    Period: 0x37,
+    Slash: 0x38,
+    // Pavé numérique (opérateurs)
+    NumLock: 0x53,
+    NumpadDivide: 0x54,
+    NumpadMultiply: 0x55,
+    NumpadSubtract: 0x56,
+    NumpadAdd: 0x57,
+    NumpadEnter: 0x58,
+    NumpadDecimal: 0x63,
+  });
+  return m;
+})();
+
+/** `KeyboardEvent.code` d'un modificateur → bit MOD (sous-code, type MOD). */
+const MOD_CODE_TO_BIT: Record<string, number> = {
+  ControlLeft: 0x01,
+  ShiftLeft: 0x02,
+  AltLeft: 0x04,
+  MetaLeft: 0x08,
+  ControlRight: 0x10,
+  ShiftRight: 0x20,
+  AltRight: 0x40,
+  MetaRight: 0x08, // pas de R-GUI dans la table → fallback L-GUI
+};
+
+/** True si `code` est une touche modificatrice (Ctrl/Shift/Alt/Meta). */
+export function isModifierCode(code: string): boolean {
+  return code in MOD_CODE_TO_BIT;
+}
+
+/** Retrouver un Keycode par sa valeur d'action encodée. */
+function findByValue(value: number): Keycode | null {
+  return KEYCODES_FLAT.find((k) => k.value === value) ?? null;
+}
+
+/**
+ * Mappe un KeyboardEvent vers le Keycode (non-modificateur) à assigner.
+ * - touche modificatrice seule → le Keycode MOD correspondant
+ * - touche supportée → le Keycode KC correspondant
+ * - sinon → null (touche non supportée)
+ */
+export function keyEventToKeycode(e: KeyboardEvent): Keycode | null {
+  if (isModifierCode(e.code)) {
+    return findByValue(action(ACTION_TYPE_MOD, MOD_CODE_TO_BIT[e.code]));
+  }
+  const hid = CODE_TO_HID[e.code];
+  if (hid === undefined) return null;
+  return findByValue(action(ACTION_TYPE_KC, hid));
+}
+
+/** Keycodes des modificateurs maintenus pendant l'événement (côté gauche). */
+export function eventModifierKeycodes(e: KeyboardEvent): Keycode[] {
+  const out: Keycode[] = [];
+  if (e.ctrlKey) out.push(findByValue(action(ACTION_TYPE_MOD, 0x01))!);
+  if (e.shiftKey) out.push(findByValue(action(ACTION_TYPE_MOD, 0x02))!);
+  if (e.altKey) out.push(findByValue(action(ACTION_TYPE_MOD, 0x04))!);
+  if (e.metaKey) out.push(findByValue(action(ACTION_TYPE_MOD, 0x08))!);
+  return out.filter(Boolean);
+}
+
+/**
+ * Construit les étapes d'une macro pour un combo (modificateurs + touche).
+ * Convention identique à MacroManager : `step.keycode = value & 0x0fff`.
+ *   [MOD_DOWN…, KEY_DOWN, KEY_UP, …MOD_UP]
+ */
+export function buildComboMacroSteps(mods: Keycode[], key: Keycode): MacroStep[] {
+  const sub = (k: Keycode) => k.value & 0x0fff;
+  return [
+    ...mods.map((m) => ({ type: MACRO_STEP_TYPE.KEY_DOWN, keycode: sub(m) })),
+    { type: MACRO_STEP_TYPE.KEY_DOWN, keycode: sub(key) },
+    { type: MACRO_STEP_TYPE.KEY_UP, keycode: sub(key) },
+    ...[...mods].reverse().map((m) => ({ type: MACRO_STEP_TYPE.KEY_UP, keycode: sub(m) })),
+  ];
 }
 
 /** Obtenir le label d'un keycode par valeur (macros résolues par nom si fournies). */
