@@ -3,14 +3,32 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Settings2, Lightbulb } from '@lucide/svelte';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Settings2, Lightbulb, Activity, Check, ChevronDown } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
   import SettingsTab from '$shared/components/app/studio/settings/SettingsTab.svelte';
   import { loadConfig, factoryReset, configState } from '$shared/store/config.svelte.js';
+  import { testMode } from '$shared/store/testMode.svelte.js';
+  import { trainingMode } from '$shared/store/trainingMode.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
+  import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
   import StatusCard from '../../StatusCard.svelte';
+
+  type LiveMode = 'off' | 'test' | 'training';
+  const liveModeLabel = $derived<LiveMode>(
+    testMode.active ? 'test' : trainingMode.active ? 'training' : 'off',
+  );
+
+  async function setLiveMode(mode: LiveMode) {
+    if (mode === 'test') await testMode.start();
+    else if (mode === 'training') await trainingMode.start();
+    else {
+      await testMode.stop();
+      await trainingMode.stop();
+    }
+  }
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
@@ -36,6 +54,14 @@
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
 
   let settingsOpen = $state(false);
+
+  // Stop live modes when device disconnects (unless devMode is on).
+  $effect(() => {
+    if (!serial.connected && !devMode.active) {
+      if (testMode.active) testMode.stop();
+      if (trainingMode.active) trainingMode.stop();
+    }
+  });
 </script>
 
 <Card.Root class="@container/card col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2">
@@ -68,6 +94,39 @@
       <Lightbulb /> LED
     </Button>
     <MacroManager />
+
+    {#if serial.connected || devMode.active}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <Button
+              {...props}
+              variant={liveModeLabel === 'off' ? 'outline' : 'default'}
+              class="gap-1.5"
+              title="Mode live"
+            >
+              <Activity class="size-4" />
+              {liveModeLabel === 'off' ? 'Live' : liveModeLabel === 'test' ? 'Test' : 'Training'}
+              <ChevronDown class="size-3.5" />
+            </Button>
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="start" class="min-w-44">
+          <DropdownMenu.Item onclick={() => setLiveMode('off')}>
+            {#if liveModeLabel === 'off'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
+            Off
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={() => setLiveMode('test')}>
+            {#if liveModeLabel === 'test'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
+            Test <span class="ms-auto text-[10px] text-muted-foreground">visualiser</span>
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onclick={() => setLiveMode('training')}>
+            {#if liveModeLabel === 'training'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
+            Training <span class="ms-auto text-[10px] text-muted-foreground">configurer</span>
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    {/if}
 
     <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
       <Settings2 /> Paramètres

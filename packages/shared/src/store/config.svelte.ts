@@ -338,21 +338,26 @@ export function setEncoderAction(
   _autoSave.schedule();
 }
 
-export function addCombo(profileIdx: number, combo: unknown): void {
-  const cfg = $state.snapshot(configState.data) as FullConfig;
-  cfg.profiles[profileIdx].combos?.push(combo);
-  configState.data = cfg;
-  configState.isDirty = true;
-  _autoSave.schedule();
-}
-
-export function removeCombo(profileIdx: number, comboIdx: number): void {
-  const cfg = $state.snapshot(configState.data) as FullConfig;
-  cfg.profiles[profileIdx].combos?.splice(comboIdx, 1);
-  configState.data = cfg;
-  configState.isDirty = true;
-  _autoSave.schedule();
-}
+// Combo mutations dormant — firmware still supports chord combos but the
+// frontend editor has been deferred (see issue #16). Kept here as commented
+// reference for future UI work; round-trip through JSON parse/serialize is
+// unaffected.
+//
+// export function addCombo(profileIdx: number, combo: unknown): void {
+//   const cfg = $state.snapshot(configState.data) as FullConfig;
+//   cfg.profiles[profileIdx].combos?.push(combo);
+//   configState.data = cfg;
+//   configState.isDirty = true;
+//   _autoSave.schedule();
+// }
+//
+// export function removeCombo(profileIdx: number, comboIdx: number): void {
+//   const cfg = $state.snapshot(configState.data) as FullConfig;
+//   cfg.profiles[profileIdx].combos?.splice(comboIdx, 1);
+//   configState.data = cfg;
+//   configState.isDirty = true;
+//   _autoSave.schedule();
+// }
 
 // ─────────────────────────────────────────────────────────────
 //  MUTATIONS MACROS (globales — index 0..MACRO_COUNT-1)

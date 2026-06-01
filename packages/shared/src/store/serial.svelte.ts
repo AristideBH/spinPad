@@ -349,6 +349,21 @@ export function keyMonitor(enable: boolean): Promise<{ status: string }> {
   );
 }
 
+/**
+ * Active/désactive le mode training côté firmware : tant qu'il est ON,
+ * les actions assignées aux touches/encoder ne s'exécutent PAS (le device
+ * continue à streamer les events du monitor pour le studio).
+ */
+export function trainingModeCmd(enable: boolean): Promise<{ status: string }> {
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string }>(
+      { cmd: 'training_mode', enable },
+      (msg) => (msg as Record<string, unknown>)['status'] === 'ok',
+      3000,
+    ),
+  );
+}
+
 /** S'abonne aux événements de touche bruts (sans passer par la file RPC). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function onKeyEvent(handler: (msg: any) => void): () => void {

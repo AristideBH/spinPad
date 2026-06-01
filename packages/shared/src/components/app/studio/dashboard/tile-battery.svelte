@@ -2,10 +2,24 @@
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import * as Card from '$shared/components/ui/card/index.js';
 
-  import { BatteryFull, BatteryMedium, BatteryLow, BatteryWarning, Battery } from '@lucide/svelte';
+  import { BatteryFull, BatteryMedium, BatteryLow, BatteryWarning, Battery, Moon } from '@lucide/svelte';
 
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
+
+  // ── Veille (issue #14) ───────────────────────────────────────
+  const stats = $derived(data?.stats ?? null);
+  const sleepPct = $derived.by(() => {
+    if (!stats) return null;
+    const total = stats.deep_sleep_s + stats.awake_s;
+    return total > 0 ? Math.round((stats.deep_sleep_s / total) * 100) : 0;
+  });
+  function formatDuration(s: number): string {
+    const h = Math.floor(s / 3600);
+    if (h >= 24) return `${Math.floor(h / 24)}j ${h % 24}h`;
+    const m = Math.floor((s % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
 
   // ── Batterie ─────────────────────────────────────────────────
   const batteryPresent = $derived(data?.battery?.present === true);
@@ -30,13 +44,6 @@
     return BatteryWarning;
   });
 
-  const batterySourceLabel = $derived(
-    batterySource === 'forced_yes'
-      ? 'forcée présente'
-      : batterySource === 'forced_no'
-        ? 'forcée absente'
-        : 'auto-détectée',
-  );
 </script>
 
 <Card.Root class="@container/card flex flex-col  @lg/main:row-span-2 @4xl/main:row-span-1">
@@ -65,11 +72,11 @@
             style="width: {batteryPct}%"
           ></div>
         </div>
-        <!-- <p
-          class="text-[10px] text-muted-foreground uppercase tracking-wider mt-1.5"
-        >
-          Source : {batterySourceLabel}
-        </p> -->
+        {#if stats && sleepPct !== null}
+          <p class="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground tabular-nums">
+            <Moon class="size-3" /> Veille {sleepPct}% · {formatDuration(stats.deep_sleep_s)}
+          </p>
+        {/if}
       {/if}
     </div>
   </Card.Header>

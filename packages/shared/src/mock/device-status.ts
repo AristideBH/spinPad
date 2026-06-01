@@ -8,6 +8,7 @@
 
 import type { DeviceStatus, DeviceStats } from '$shared/constants/device-status-schema.js';
 import type { MockOptions }  from '$shared/types/dev-mode.js';
+import { configState } from '$shared/store/config.svelte.js';
 
 const FW_VERSION = '1.0.0';
 const FW_BUILD   = 'devmock';
@@ -47,25 +48,35 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
   };
 }
 
-/** Stats mock qui progressent doucement à chaque lecture (dev mode). */
+/**
+ * Stats mock — snapshot figé. On régénère uniquement quand le nombre de
+ * profils dans la config change, pour que la répartition par profil reste
+ * cohérente avec ce qui est chargé dans l'UI.
+ */
 function makeMockStats(): DeviceStats {
-  _statReads++;
-  const cw = 1840 + _statReads * 2;
-  const ccw = 1610 + _statReads;
-  return {
-    total_keypresses:       28473 + _statReads * 3,
-    per_profile_keypresses: [14210, 9120, 5143],
-    encoder_steps_total:    cw + ccw,
-    encoder_steps_cw:       cw,
-    encoder_steps_ccw:      ccw,
-    deep_sleep_s:           412000,
-    awake_s:                98000,
-    macros_played:          612 + _statReads,
-    since_unix_ts:          1_700_000_000,
-  };
+  const profCount = Math.max(1, configState.data?.profiles?.length ?? 4);
+  if (!_cachedStats || _cachedProfCount !== profCount) {
+    _cachedProfCount = profCount;
+    // Distribution décroissante plausible (le profil 1 reste le plus utilisé).
+    const weights = Array.from({ length: profCount }, (_, i) => Math.round(14210 / (i + 1)));
+    const total = weights.reduce((a, b) => a + b, 0);
+    _cachedStats = {
+      total_keypresses:       total,
+      per_profile_keypresses: weights,
+      encoder_steps_total:    3450,
+      encoder_steps_cw:       1840,
+      encoder_steps_ccw:      1610,
+      deep_sleep_s:           412000,
+      awake_s:                98000,
+      macros_played:          612,
+      since_unix_ts:          1_700_000_000,
+    };
+  }
+  return _cachedStats;
 }
 
-let _statReads = 0;
+let _cachedStats: DeviceStats | null = null;
+let _cachedProfCount = 0;
 
 const START_TS = Date.now();
 
