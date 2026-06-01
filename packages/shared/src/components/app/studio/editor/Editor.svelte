@@ -1,14 +1,12 @@
 <script lang="ts">
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
-  import { Input } from '$shared/components/ui/input/index.js';
-  import { Label } from '$shared/components/ui/label/index.js';
   import * as Card from '$shared/components/ui/card/index.js';
-  import { keycodeGroups, keycodesFlat, type Keycode } from '$shared/constants/keycodes.js';
   import { configState, exportConfig, importConfig } from '$shared/store/config.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
   import { Activity, Download, Share, Upload } from '@lucide/svelte';
   import { createKeypadContext } from '../editor/keypad-context.svelte.js';
   import KeyGrid from '../editor/KeyGrid.svelte';
+  import KeycodePicker from '../editor/KeycodePicker.svelte';
   import ProfileSwitcher from '../editor/ProfileSwitcher.svelte';
   import TrainingPanel from '../editor/TrainingPanel.svelte';
   import Encoder from '../editor/Encoder.svelte';
@@ -23,15 +21,6 @@
   $effect(() => {
     if (!serial.connected && ctx.trainingActive) ctx.stopTraining();
   });
-
-  const typedEntries = $derived(Object.entries(keycodeGroups(configState.data?.macros)) as [string, Keycode[]][]);
-  const filteredKeycodes = $derived(
-    ctx.searchQuery
-      ? keycodesFlat(configState.data?.macros).filter((k: Keycode) =>
-          k.label.toLowerCase().includes(ctx.searchQuery.toLowerCase()),
-        )
-      : null,
-  );
 
   let fileInput = $state<HTMLInputElement | null>(null);
 
@@ -54,16 +43,6 @@
     }
   }
 
-  const CATEGORY_COLORS: Record<string, string> = {
-    letter: 'bg-blue-950/80 hover:bg-blue-900/80',
-    number: 'bg-lime-950/80 hover:bg-lime-900/80',
-    special: 'bg-slate-800/80 hover:bg-slate-700/80',
-    modifier: 'bg-violet-950/80 hover:bg-violet-900/80',
-    layer: 'bg-green-950/80 hover:bg-green-900/80',
-    media: 'bg-orange-950/80 hover:bg-orange-900/80',
-    firmware: 'bg-purple-950/80 hover:bg-purple-900/80',
-    macro: 'bg-rose-950/80 hover:bg-rose-900/80',
-  };
 </script>
 
 <Card.Root size="sm">
@@ -147,40 +126,5 @@
   </Card.Content>
 </Card.Root>
 
-<!-- Keycode Picker Dialog -->
-<Dialog.Root bind:open={ctx.pickerOpen}>
-  <Dialog.Content class="max-w-lg max-h-[80vh] flex flex-col">
-    <Dialog.Header>
-      <Dialog.Title>Choisir une action</Dialog.Title>
-    </Dialog.Header>
-
-    <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} autofocus class="shrink-0" />
-
-    <div class="flex-1 pr-1 mt-2 overflow-y-auto">
-      {#if filteredKeycodes}
-        <div class="flex flex-wrap gap-1.5">
-          {#each filteredKeycodes as kc}
-            <Button
-              class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[kc.category] ?? 'bg-card'}"
-              onclick={() => ctx.selectKeycode(kc)}>{kc.label}</Button
-            >
-          {/each}
-        </div>
-      {:else}
-        {#each typedEntries as [cat, keys]}
-          <div class="mb-4">
-            <Label class="mb-2 text-xs uppercase">{cat}</Label>
-            <div class="flex flex-wrap gap-1.5">
-              {#each keys as kc}
-                <Button
-                  class="text-foreground text-xs cursor-pointer {CATEGORY_COLORS[kc.category] ?? 'bg-card'}"
-                  onclick={() => ctx.selectKeycode(kc)}>{kc.label}</Button
-                >
-              {/each}
-            </div>
-          </div>
-        {/each}
-      {/if}
-    </div>
-  </Dialog.Content>
-</Dialog.Root>
+<!-- Keycode Picker (two-stage : menu → live-record / liste) -->
+<KeycodePicker />

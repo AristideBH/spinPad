@@ -6,7 +6,7 @@
 //  devMode.active === true.
 // ═══════════════════════════════════════════════════════════════
 
-import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
+import type { DeviceStatus, DeviceStats } from '$shared/constants/device-status-schema.js';
 import type { MockOptions }  from '$shared/types/dev-mode.js';
 
 const FW_VERSION = '1.0.0';
@@ -43,8 +43,29 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
       studio_mode: false,
     },
     battery: batteryStatus,
+    stats: makeMockStats(),
   };
 }
+
+/** Stats mock qui progressent doucement à chaque lecture (dev mode). */
+function makeMockStats(): DeviceStats {
+  _statReads++;
+  const cw = 1840 + _statReads * 2;
+  const ccw = 1610 + _statReads;
+  return {
+    total_keypresses:       28473 + _statReads * 3,
+    per_profile_keypresses: [14210, 9120, 5143],
+    encoder_steps_total:    cw + ccw,
+    encoder_steps_cw:       cw,
+    encoder_steps_ccw:      ccw,
+    deep_sleep_s:           412000,
+    awake_s:                98000,
+    macros_played:          612 + _statReads,
+    since_unix_ts:          1_700_000_000,
+  };
+}
+
+let _statReads = 0;
 
 const START_TS = Date.now();
 
