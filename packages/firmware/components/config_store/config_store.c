@@ -106,7 +106,9 @@ static void apply_defaults(void)
         TO(0),     KC_UP,     KC_PGUP,   KC_HOME,   KC_END,
         KC_LEFT,   KC_DOWN,   KC_RIGHT,  KC_PGDN,   KC_ENTER,
     }, KC_SCRL_D, KC_SCRL_U, KC_ENTER);
-    p->combo_count = 0;
+    // SW4 + SW5 → macro "Salut"
+    p->combo_count = 1;
+    p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_MACRO0, .window_ms = 50, .active = true };
 
     // ══════════════════════════════════════════════════════════
     //  PROFIL 2 — "Creative" : Base + Tools (MO)
@@ -122,7 +124,9 @@ static void apply_defaults(void)
         KC_NONE,   KC_W,      KC_E,      KC_R,      KC_T,
         KC_F,      KC_D,      KC_N,      KC_A,      KC_DEL,
     }, KC_SCRL_U, KC_SCRL_D, KC_NONE);
-    p->combo_count = 0;
+    // SW4 + SW5 → screenshot
+    p->combo_count = 1;
+    p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_SCRSHOT, .window_ms = 50, .active = true };
 
     // ══════════════════════════════════════════════════════════
     //  PROFIL 3 — "Media" : Base + Stream (TG)
@@ -138,7 +142,9 @@ static void apply_defaults(void)
         TO(0),     KC_MUTE,   KC_MACRO0, KC_MACRO1, KC_APP_BROW,
         KC_APP_CALC, KC_BRT_DN, KC_BRT_UP, KC_SCRSHOT, KC_PLAY,
     }, KC_SCRL_U, KC_SCRL_D, KC_MUTE);
-    p->combo_count = 0;
+    // SW4 + SW5 → mute
+    p->combo_count = 1;
+    p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_MUTE, .window_ms = 50, .active = true };
 
     // ══════════════════════════════════════════════════════════
     //  PROFIL 4 — "Gaming" : WASD + Menu (TG)
@@ -154,7 +160,9 @@ static void apply_defaults(void)
         TG(1),     KC_ESC,    KC_F1,     KC_F2,     KC_F3,
         KC_F4,     KC_F5,     KC_F6,     KC_ENTER,  KC_NONE,
     }, KC_SCRL_U, KC_SCRL_D, KC_ENTER);
-    p->combo_count = 0;
+    // SW4 + SW5 → Enter
+    p->combo_count = 1;
+    p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_ENTER, .window_ms = 50, .active = true };
 
     // ── Macros globales de démo (référencées par Media/Stream) ──
     g_config.macro_count = 2;

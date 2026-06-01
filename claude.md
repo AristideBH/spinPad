@@ -23,8 +23,10 @@ Generates a Svelte Playground link with the provided code.
 After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
 
 Some rules to follow:
-Your always use the /caveman skill to reduce token usage and provide concise answers.
-Make sure to follow DCO guidelines from workflow when submitting PR. > Marked as AristideBH + Claude Co-authored
+
+- You always use the /caveman skill to reduce token usage and provide concise answers.
+- Make sure to follow DCO guidelines from workflow when submitting PR. > Marked as AristideBH + Claude Co-authored
+- Do NOT overuse the browser testing ability. Only use it when necessary to verify specific information that cannot be confidently answered from the documentation or your training data.
 
 ## Agent skills
 
