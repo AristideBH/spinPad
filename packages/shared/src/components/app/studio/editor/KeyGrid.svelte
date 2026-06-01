@@ -1,12 +1,33 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
-  import { getKeycodeLabel } from '$shared/constants/keycodes.js';
+  import { getKeycodeLabel, hidUsageToCode } from '$shared/constants/keycodes.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
   import { configState } from '$shared/store/config.svelte.js';
+  import { KeyboardLayout } from '$shared/lib/hooks/keyboard-layout.svelte.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
 
   const ctx = getKeypadContext();
+  const layout = new KeyboardLayout();
+
+  /**
+   * Vrai si le label US affiché diverge du glyphe réel de la disposition hôte
+   * (AZERTY, QWERTZ…) pour cette touche. Le keycode reste positionnel (correct
+   * au runtime) ; on signale juste que l'étiquette ne correspond pas au clavier.
+   * Limité aux keycodes simples à un caractère (lettres, chiffres, symboles).
+   */
+  function layoutMismatch(value: number): boolean {
+    if (!layout.map) return false; // disposition inconnue → ne rien signaler
+    if (((value >> 12) & 0xf) !== 0) return false; // type ACTION_TYPE_KC uniquement
+    if ((value & 0x0f00) !== 0) return false; // ignorer les keycodes « modifiés » (shift…)
+    const code = hidUsageToCode(value & 0xff);
+    if (!code) return false;
+    const host = layout.map.get(code);
+    if (!host || host.length !== 1) return false;
+    const us = getKeycodeLabel(value);
+    if (us.length !== 1) return false;
+    return host.toUpperCase() !== us.toUpperCase();
+  }
 
   const CELL = 72;
   const GAP = 12;
@@ -96,7 +117,9 @@
             </div>
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
               <span class="keycap-sw">{key.sw}</span>
-              <span class="keycap-label">{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span
+              <span
+                class={cn('keycap-label', layoutMismatch(ctx.layer.keys[key.idx] ?? 0) && 'keycap-label--mismatch')}
+                >{getKeycodeLabel(ctx.layer.keys[key.idx] ?? 0, configState.data?.macros)}</span
               >
               {#if key.rowSpan === 2 || key.colSpan === 2}
                 <span class="keycap-size-hint">2u</span>
@@ -207,6 +230,14 @@
     font-weight: 600;
     line-height: 1;
     color: var(--foreground);
+  }
+
+  /* Label US ≠ glyphe de la disposition hôte → souligné pointillé. */
+  .keycap-label--mismatch {
+    text-decoration: underline dashed;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
   }
 
   .keycap-sw {

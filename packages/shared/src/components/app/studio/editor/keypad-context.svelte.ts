@@ -86,16 +86,27 @@ export class KeypadContext {
     this.pickerStage = stage;
   }
 
-  /** Libellé de la cible en cours d'édition (touche SWx + action actuelle, ou champ encodeur). */
-  readonly editTargetLabel = $derived.by(() => {
+  /** Cible en cours d'édition : nom de la touche SWx, champ encodeur, ou invite par défaut. */
+  readonly editTargetSw = $derived.by(() => {
     if (this.editingField === 'key' && this.editingKey !== null) {
-      const sw = SW_BY_IDX[this.editingKey] ?? `Touche ${this.editingKey}`;
-      const current = getKeycodeLabel(this.layer?.keys?.[this.editingKey] ?? 0, configState.data?.macros);
-      return `${sw} · ${current}`;
+      return SW_BY_IDX[this.editingKey] ?? `Touche ${this.editingKey}`;
     }
     if (this.editingField) return ENCODER_FIELD_LABEL[this.editingField] ?? this.editingField;
     return 'Choisir une action';
   });
+
+  /** Action actuellement assignée à la cible (uniquement en édition de touche), sinon null. */
+  readonly editTargetCurrent = $derived.by(() => {
+    if (this.editingField === 'key' && this.editingKey !== null) {
+      return getKeycodeLabel(this.layer?.keys?.[this.editingKey] ?? 0, configState.data?.macros);
+    }
+    return null;
+  });
+
+  /** Libellé texte complet (pour les titres accessibles sr-only). */
+  readonly editTargetLabel = $derived(
+    this.editTargetCurrent ? `${this.editTargetSw} · ${this.editTargetCurrent}` : this.editTargetSw,
+  );
 
   selectKeycode(kc: KeycodeOption): void {
     const pi = configState.activeProfileIndex;
