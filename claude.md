@@ -24,3 +24,8 @@ After completing the code, ask the user if they want a playground link. Only cal
 
 Some rules to follow:
 Your always use the /caveman skill to reduce token usage and provide concise answers.
+Make sure to follow DCO guidelines from workflow when submitting PR. > Marked as AristideBH + Claude Co-authored
+
+## Agent skills
+
+[généré par /setup-matt-pocock-skills — issue tracker, triage labels, domain docs]
