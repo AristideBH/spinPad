@@ -34,8 +34,48 @@ static kb_config_t g_config;
 static bool g_initialized = false;
 
 // ─────────────────────────────────────────────────────────────
+//  Keycodes supplémentaires pour les profils par défaut
+//  (non définis dans keymap.h — encodés directement)
+// ─────────────────────────────────────────────────────────────
+#define KC_F6        ACTION(ACTION_TYPE_KC, 0x3F)
+#define KC_RIGHT     ACTION(ACTION_TYPE_KC, 0x4F)
+#define KC_LEFT      ACTION(ACTION_TYPE_KC, 0x50)
+#define KC_DOWN      ACTION(ACTION_TYPE_KC, 0x51)
+#define KC_UP        ACTION(ACTION_TYPE_KC, 0x52)
+#define KC_HOME      ACTION(ACTION_TYPE_KC, 0x4A)
+#define KC_END       ACTION(ACTION_TYPE_KC, 0x4D)
+#define KC_PGUP      ACTION(ACTION_TYPE_KC, 0x4B)
+#define KC_PGDN      ACTION(ACTION_TYPE_KC, 0x4E)
+#define KC_STOP      ACTION(ACTION_TYPE_MEDIA, 0x07)
+#define KC_BRT_UP    ACTION(ACTION_TYPE_MEDIA, 0x22)
+#define KC_BRT_DN    ACTION(ACTION_TYPE_MEDIA, 0x23)
+#define KC_APP_CALC  ACTION(ACTION_TYPE_MEDIA, 0x30)
+#define KC_APP_BROW  ACTION(ACTION_TYPE_MEDIA, 0x32)
+#define KC_APP_FILE  ACTION(ACTION_TYPE_MEDIA, 0x34)
+#define KC_SCRSHOT   ACTION(ACTION_TYPE_MEDIA, 0x38)
+#define KC_MACRO0    ACTION(ACTION_TYPE_MACRO, 0x00)
+#define KC_MACRO1    ACTION(ACTION_TYPE_MACRO, 0x01)
+
+// Remplir un layer : nom, 10 keycodes, et les 3 actions d'encodeur.
+static void set_layer(kb_layer_t *l, const char *name,
+                      const uint16_t keys[CONFIG_NUM_KEYS],
+                      uint16_t cw, uint16_t ccw, uint16_t press)
+{
+    strncpy(l->name, name, CONFIG_NAME_MAX_LEN - 1);
+    for (int k = 0; k < CONFIG_NUM_KEYS; k++) l->keys[k] = keys[k];
+    l->encoder_cw    = cw;
+    l->encoder_ccw   = ccw;
+    l->encoder_press = press;
+}
+
+// ─────────────────────────────────────────────────────────────
 //  CONFIG PAR DÉFAUT
 //  Appliquée quand aucune config n'existe en NVS
+//
+//  4 profils riches (miroir de mock/keyboard-config.ts) : un
+//  nouveau board démarre directement avec des layouts utiles et
+//  de quoi exercer toute l'UI de config.
+//  Ordre des touches : [SW1, SW8, SW2, SW7, SW9, SW3, SW6, SW10, SW4, SW5]
 // ─────────────────────────────────────────────────────────────
 static void apply_defaults(void)
 {
@@ -43,31 +83,103 @@ static void apply_defaults(void)
     memset(&g_config, 0, sizeof(kb_config_t));
 
     g_config.version        = CONFIG_FORMAT_VERSION;
-    g_config.profile_count  = 1;
+    g_config.profile_count  = 4;
     g_config.active_profile = 0;
 
-    // ── Profil par défaut ──────────────────────────────────
-    kb_profile_t *p = &g_config.profiles[0];
-    strncpy(p->name, "Default", CONFIG_NAME_MAX_LEN - 1);
-    p->layer_count = 2;
+    kb_profile_t *p;
 
-    // Layer 0 : Base
-    strncpy(p->layers[0].name, "Base", CONFIG_NAME_MAX_LEN - 1);
-    // Remplir avec KC_NONE — l'utilisateur configurera via l'app
-    for (int k = 0; k < CONFIG_NUM_KEYS; k++) p->layers[0].keys[k] = KC_NONE;
-    p->layers[0].encoder_cw    = KC_VOLU;
-    p->layers[0].encoder_ccw   = KC_VOLD;
-    p->layers[0].encoder_press = KC_MUTE;
-
-    // Layer 1 : Fn (momentary via MO(1))
-    strncpy(p->layers[1].name, "Fn", CONFIG_NAME_MAX_LEN - 1);
-    for (int k = 0; k < CONFIG_NUM_KEYS; k++) p->layers[1].keys[k] = KC_NONE;
-    p->layers[1].encoder_cw    = KC_SCRL_U;
-    p->layers[1].encoder_ccw   = KC_SCRL_D;
-    p->layers[1].encoder_press = KC_NONE;
-
-    // Pas de combos par défaut
+    // ══════════════════════════════════════════════════════════
+    //  PROFIL 1 — "Productivity" : Base + Fn (MO) + Nav (TG)
+    // ══════════════════════════════════════════════════════════
+    p = &g_config.profiles[0];
+    strncpy(p->name, "Productivity", CONFIG_NAME_MAX_LEN - 1);
+    p->layer_count = 3;
+    set_layer(&p->layers[0], "Base", (const uint16_t[]){
+        MO(1),     KC_C,      KC_V,      KC_X,      KC_Z,
+        MOD_LCTRL, MOD_LSHIFT, TG(2),    MOD_LGUI,  KC_SPACE,
+    }, KC_VOLU, KC_VOLD, KC_MUTE);
+    set_layer(&p->layers[1], "Fn", (const uint16_t[]){
+        KC_NONE,   KC_F1,     KC_F2,     KC_F3,     KC_F4,
+        KC_F5,     KC_F6,     KC_SCRSHOT, KC_APP_FILE, KC_APP_BROW,
+    }, KC_BRT_UP, KC_BRT_DN, KC_NONE);
+    set_layer(&p->layers[2], "Nav", (const uint16_t[]){
+        TO(0),     KC_UP,     KC_PGUP,   KC_HOME,   KC_END,
+        KC_LEFT,   KC_DOWN,   KC_RIGHT,  KC_PGDN,   KC_ENTER,
+    }, KC_SCRL_D, KC_SCRL_U, KC_ENTER);
     p->combo_count = 0;
+
+    // ══════════════════════════════════════════════════════════
+    //  PROFIL 2 — "Creative" : Base + Tools (MO)
+    // ══════════════════════════════════════════════════════════
+    p = &g_config.profiles[1];
+    strncpy(p->name, "Creative", CONFIG_NAME_MAX_LEN - 1);
+    p->layer_count = 2;
+    set_layer(&p->layers[0], "Base", (const uint16_t[]){
+        MO(1),     KC_Z,      KC_Y,      KC_C,      KC_V,
+        MOD_LCTRL, MOD_LSHIFT, MOD_LALT, KC_S,      KC_SPACE,
+    }, KC_ZOOM_IN, KC_ZOOM_OUT, KC_NONE);
+    set_layer(&p->layers[1], "Tools", (const uint16_t[]){
+        KC_NONE,   KC_W,      KC_E,      KC_R,      KC_T,
+        KC_F,      KC_D,      KC_N,      KC_A,      KC_DEL,
+    }, KC_SCRL_U, KC_SCRL_D, KC_NONE);
+    p->combo_count = 0;
+
+    // ══════════════════════════════════════════════════════════
+    //  PROFIL 3 — "Media" : Base + Stream (TG)
+    // ══════════════════════════════════════════════════════════
+    p = &g_config.profiles[2];
+    strncpy(p->name, "Media", CONFIG_NAME_MAX_LEN - 1);
+    p->layer_count = 2;
+    set_layer(&p->layers[0], "Base", (const uint16_t[]){
+        KC_PLAY,   KC_PREV,   KC_NEXT,   KC_STOP,   KC_MUTE,
+        KC_VOLD,   KC_VOLU,   TG(1),     KC_SCRL_D, KC_SCRL_U,
+    }, KC_VOLU, KC_VOLD, KC_PLAY);
+    set_layer(&p->layers[1], "Stream", (const uint16_t[]){
+        TO(0),     KC_MUTE,   KC_MACRO0, KC_MACRO1, KC_APP_BROW,
+        KC_APP_CALC, KC_BRT_DN, KC_BRT_UP, KC_SCRSHOT, KC_PLAY,
+    }, KC_SCRL_U, KC_SCRL_D, KC_MUTE);
+    p->combo_count = 0;
+
+    // ══════════════════════════════════════════════════════════
+    //  PROFIL 4 — "Gaming" : WASD + Menu (TG)
+    // ══════════════════════════════════════════════════════════
+    p = &g_config.profiles[3];
+    strncpy(p->name, "Gaming", CONFIG_NAME_MAX_LEN - 1);
+    p->layer_count = 2;
+    set_layer(&p->layers[0], "WASD", (const uint16_t[]){
+        TG(1),     KC_W,      KC_A,      KC_S,      KC_D,
+        KC_TAB,    KC_SPACE,  MOD_LSHIFT, MOD_LCTRL, MOD_LALT,
+    }, KC_VOLU, KC_VOLD, KC_MUTE);
+    set_layer(&p->layers[1], "Menu", (const uint16_t[]){
+        TG(1),     KC_ESC,    KC_F1,     KC_F2,     KC_F3,
+        KC_F4,     KC_F5,     KC_F6,     KC_ENTER,  KC_NONE,
+    }, KC_SCRL_U, KC_SCRL_D, KC_ENTER);
+    p->combo_count = 0;
+
+    // ── Macros globales de démo (référencées par Media/Stream) ──
+    g_config.macro_count = 2;
+    // Macro 0 : "Salut" → tape H A L U T
+    strncpy(g_config.macros[0].name, "Salut", MACRO_NAME_MAX_LEN - 1);
+    {
+        const uint16_t letters[] = { 0x0B, 0x04, 0x0F, 0x18, 0x17 }; // H A L U T
+        kb_macro_t *m = &g_config.macros[0];
+        m->step_count = 0;
+        for (size_t i = 0; i < sizeof(letters) / sizeof(letters[0]); i++) {
+            m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_DOWN, letters[i] };
+            m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_UP,   letters[i] };
+        }
+    }
+    // Macro 1 : "Entrée x2" → Enter, pause 100ms, Enter
+    strncpy(g_config.macros[1].name, "Entree x2", MACRO_NAME_MAX_LEN - 1);
+    {
+        kb_macro_t *m = &g_config.macros[1];
+        m->step_count = 0;
+        m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_DOWN, 0x28 };
+        m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_UP,   0x28 };
+        m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_DELAY_MS, 100 };
+        m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_DOWN, 0x28 };
+        m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_UP,   0x28 };
+    }
 
     // ── Orientation ────────────────────────────────────────
     g_config.orientation = ORIENTATION_0;
