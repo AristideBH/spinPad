@@ -3,6 +3,7 @@
   import * as Drawer from '$shared/components/ui/drawer/index.js';
   import * as Item from '$shared/components/ui/item/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
+  import { Kbd } from '$shared/components/ui/kbd/index.js';
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
   import { HasFinePointer } from '$shared/lib/hooks/pointer.svelte.js';
   import { configState } from '$shared/store/config.svelte.js';
@@ -29,7 +30,13 @@
       </Button>
     {/if}
     <div class="min-w-0 text-left">
-      <p class="font-mono text-sm font-semibold truncate">{ctx.editTargetLabel}</p>
+      <p class="flex items-center gap-1.5 font-mono text-sm font-semibold truncate">
+        <span class="truncate">{ctx.editTargetSw}</span>
+        {#if ctx.editTargetCurrent}
+          <span class="text-muted-foreground" aria-hidden="true">·</span>
+          <Kbd class="shrink-0">{ctx.editTargetCurrent}</Kbd>
+        {/if}
+      </p>
       {#if subtitle}<p class="text-xs truncate text-muted-foreground">{subtitle}</p>{/if}
     </div>
   </div>

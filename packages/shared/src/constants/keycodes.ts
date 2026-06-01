@@ -84,6 +84,25 @@ export interface Keycode {
   category: KeycodeCategory;
 }
 
+// ── Keycodes avec modificateur (ex : Shift+1 = '!') ─────────────
+//
+//  Convention d'encodage (type = ACTION_TYPE_KC) :
+//    bits 7–0  = usage HID
+//    bits 11–8 = nibble modificateur (Ctrl=1, Shift=2, Alt=4, GUI=8)
+//
+//  ⚠️  Support firmware DIFFÉRÉ : le handler ACTION_TYPE_KC de keymap.c
+//  ignore encore les bits 11–8 (cast `(uint8_t)value`). Tant que la PR
+//  firmware « modded-keycode » n'est pas livrée, ces entrées s'enverront
+//  comme la touche de base (sans Shift) sur le matériel.
+
+/** Nibble modificateur Shift gauche (aligné sur ACTION_TYPE_MOD). */
+const KC_MOD_SHIFT = 0x02;
+
+/** Encode un keycode HID avec un nibble modificateur dans les bits 11–8. */
+function modKc(usage: number, mod: number): number {
+  return action(ACTION_TYPE_KC, ((mod & 0x0f) << 8) | (usage & 0xff));
+}
+
 // ── Table principale ────────────────────────────────────────────
 
 export const KEYCODES: Record<string, Keycode[]> = {
@@ -181,6 +200,28 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: ',', value: action(ACTION_TYPE_KC, 0x36), category: 'symbol' },
     { label: '.', value: action(ACTION_TYPE_KC, 0x37), category: 'symbol' },
     { label: '/', value: action(ACTION_TYPE_KC, 0x38), category: 'symbol' },
+    // ── Symboles « shiftés » (Shift + touche de base) ──────────
+    { label: '!', value: modKc(0x1e, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '@', value: modKc(0x1f, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '#', value: modKc(0x20, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '$', value: modKc(0x21, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '%', value: modKc(0x22, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '^', value: modKc(0x23, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '&', value: modKc(0x24, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '*', value: modKc(0x25, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '(', value: modKc(0x26, KC_MOD_SHIFT), category: 'symbol' },
+    { label: ')', value: modKc(0x27, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '_', value: modKc(0x2d, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '+', value: modKc(0x2e, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '{', value: modKc(0x2f, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '}', value: modKc(0x30, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '|', value: modKc(0x31, KC_MOD_SHIFT), category: 'symbol' },
+    { label: ':', value: modKc(0x33, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '"', value: modKc(0x34, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '~', value: modKc(0x35, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '<', value: modKc(0x36, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '>', value: modKc(0x37, KC_MOD_SHIFT), category: 'symbol' },
+    { label: '?', value: modKc(0x38, KC_MOD_SHIFT), category: 'symbol' },
   ],
 
   // ── Pavé numérique ───────────────────────────────────────────
@@ -380,6 +421,20 @@ const CODE_TO_HID: Record<string, number> = (() => {
   });
   return m;
 })();
+
+/** Inverse de CODE_TO_HID : usage HID → `KeyboardEvent.code` (1er code gagnant). */
+const HID_TO_CODE: Record<number, string> = (() => {
+  const m: Record<number, string> = {};
+  for (const [code, hid] of Object.entries(CODE_TO_HID)) {
+    if (!(hid in m)) m[hid] = code;
+  }
+  return m;
+})();
+
+/** `KeyboardEvent.code` physique correspondant à un usage HID, sinon null. */
+export function hidUsageToCode(usage: number): string | null {
+  return HID_TO_CODE[usage] ?? null;
+}
 
 /** `KeyboardEvent.code` d'un modificateur → bit MOD (sous-code, type MOD). */
 const MOD_CODE_TO_BIT: Record<string, number> = {

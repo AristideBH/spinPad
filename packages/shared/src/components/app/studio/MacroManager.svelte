@@ -18,9 +18,9 @@
   } from '$shared/constants/config-schema.js';
   import { KEYCODES, getKeycodeLabel, type Keycode } from '$shared/constants/keycodes.js';
   import { configState, setMacroName, setMacroSteps, clearMacro } from '$shared/store/config.svelte.js';
+  import { macroManager } from '$shared/store/macroManager.svelte.js';
 
   // ── État local ────────────────────────────────────────────────
-  let drawerOpen = $state(false);
   let selected = $state(0);
   let draftName = $state('');
   let draftSteps = $state<MacroStep[]>([]);
@@ -138,11 +138,15 @@
   // Ne dépend pas du brouillon → pas de boucle, et n'écrase pas pendant l'édition
   // (les mutations du brouillon ne changent pas `macros`).
   $effect(() => {
-    if (drawerOpen) load(selected);
+    if (!macroManager.open) return;
+    // Slot demandé par un appelant externe (toast, lien…) sinon sélection courante.
+    const idx = macroManager.requestedIndex ?? selected;
+    if (macroManager.requestedIndex !== null) macroManager.requestedIndex = null;
+    load(idx);
   });
 </script>
 
-<Drawer.Root direction="right" bind:open={drawerOpen}>
+<Drawer.Root direction="right" bind:open={macroManager.open}>
   <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'gap-1.5')} title="Gérer les macros">
     <Zap class="size-4" /> Macros
   </Drawer.Trigger>

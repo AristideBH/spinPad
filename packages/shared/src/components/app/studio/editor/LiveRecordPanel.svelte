@@ -9,6 +9,7 @@
   } from '$shared/constants/keycodes.js';
   import type { MacroStep } from '$shared/constants/config-schema.js';
   import { createMacroFromSteps } from '$shared/store/config.svelte.js';
+  import { macroManager } from '$shared/store/macroManager.svelte.js';
   import { KeyboardLayout } from '$shared/lib/hooks/keyboard-layout.svelte.js';
   import { Keyboard, Zap } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
@@ -89,8 +90,17 @@
 
   function confirmCombo() {
     if (!combo) return;
-    const idx = createMacroFromSteps(combo.label, combo.steps);
-    if (idx !== null) ctx.assignMacro(idx); // ferme le picker
+    const label = combo.label;
+    const idx = createMacroFromSteps(label, combo.steps);
+    if (idx !== null) {
+      ctx.assignMacro(idx); // ferme le picker
+      toast.success(`Macro créée : ${label}`, {
+        action: {
+          label: 'Réglages',
+          onClick: () => macroManager.openAt(idx),
+        },
+      });
+    }
     combo = null;
   }
 
