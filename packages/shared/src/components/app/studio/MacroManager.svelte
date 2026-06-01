@@ -52,6 +52,7 @@
   let pickerOpen = $state(false);
   let pickerSearch = $state('');
   let pickerStage = $state<'menu' | 'record' | 'list'>('menu');
+  let pickerMode: 'tap' | 'hold' | 'release' = $state('tap');
   const pickerTitle = $derived(
     pickerMode === 'tap' ? 'Touche à taper' : pickerMode === 'hold' ? 'Touche à maintenir' : 'Touche à relâcher',
   );
@@ -157,7 +158,6 @@
     pickerSearch ? pickerFlat.filter((k) => k.label.toLowerCase().includes(pickerSearch.toLowerCase())) : null,
   );
 
-  let pickerMode: 'tap' | 'hold' | 'release' = $state('tap');
   function openPicker(mode: 'tap' | 'hold' | 'release') {
     pickerMode = mode;
     pickerSearch = '';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
   import * as Drawer from '$shared/components/ui/drawer/index.js';
   import * as Sheet from '$shared/components/ui/sheet/index.js';
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
@@ -47,7 +47,8 @@
     children,
   }: Props = $props();
 
-  const isMobile = new IsMobile(breakpoint);
+  // breakpoint est une prop "configure-once" : valeur initiale uniquement.
+  const isMobile = new IsMobile(untrack(() => breakpoint));
 </script>
 
 {#snippet drawerBody()}
