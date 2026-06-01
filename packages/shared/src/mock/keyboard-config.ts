@@ -136,8 +136,9 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_ccw: SCRL_UP,
         },
       ],
-      combo_count: 0,
-      combos:      [],
+      // SW4 + SW5 → macro "Salut"
+      combo_count: 1,
+      combos:      [{ keys: [8, 9], action: MACRO(0), window_ms: 50 }],
     },
 
     // ══════════════════════════════════════════════════════════
@@ -169,8 +170,9 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_ccw: SCRL_DN,
         },
       ],
-      combo_count: 0,
-      combos:      [],
+      // SW4 + SW5 → screenshot
+      combo_count: 1,
+      combos:      [{ keys: [8, 9], action: SCRSHOT, window_ms: 50 }],
     },
 
     // ══════════════════════════════════════════════════════════
@@ -202,8 +204,9 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_ccw: SCRL_DN,
         },
       ],
-      combo_count: 0,
-      combos:      [],
+      // SW4 + SW5 → mute
+      combo_count: 1,
+      combos:      [{ keys: [8, 9], action: MUTE, window_ms: 50 }],
     },
 
     // ══════════════════════════════════════════════════════════
@@ -235,8 +238,9 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_ccw: SCRL_DN,
         },
       ],
-      combo_count: 0,
-      combos:      [],
+      // SW4 + SW5 → Enter
+      combo_count: 1,
+      combos:      [{ keys: [8, 9], action: ENTER, window_ms: 50 }],
     },
   ],
 
@@ -258,19 +262,32 @@ export const MOCK_CONFIG: FullConfig = {
     ...Array.from({ length: 14 }, () => ({ name: '', steps: [] as unknown[] })),
   ],
 
+  macro_count: 2,
+
   ble: {
     device_name: 'SpinPad',
+    slot_names:  ['PC', 'HomeAssistant'],
+    active_slot: 0,
   },
 
   display: {
-    brightness: 180,
-    timeout_s:  30,
+    brightness:   180,
+    timeout_s:    30,
+    widget_count: 4,
+    widgets: [
+      { type: 1, enabled: true, row: 0, col: 0, custom_text: '' }, // BLE status
+      { type: 2, enabled: true, row: 1, col: 0, custom_text: '' }, // Layer
+      { type: 3, enabled: true, row: 2, col: 0, custom_text: '' }, // Profile
+      { type: 4, enabled: true, row: 3, col: 0, custom_text: '' }, // Battery
+    ],
   },
 
   power: {
-    sleep_timeout_s:      300,
-    battery_critical_pct: 10,
-    battery_present:      'auto',
+    sleep_timeout_s:       300,
+    battery_critical_pct:  10,
+    battery_present:       'auto',
+    debounce_press_scans:  3,
+    debounce_release_scans: 5,
   },
 
   orientation: 0,
@@ -280,12 +297,13 @@ export const MOCK_CONFIG: FullConfig = {
   },
 
   led_extension: {
-    enabled:    false,
-    count:      10,
-    mode:       0,
-    r:          255,
-    g:          100,
-    b:          0,
-    brightness: 200,
+    enabled:      true,
+    count:        12,
+    mode:         3,        // STATIC
+    r:            60,
+    g:            60,
+    b:            80,
+    brightness:   128,
+    max_power_mw: 500,
   },
 } as unknown as FullConfig;
