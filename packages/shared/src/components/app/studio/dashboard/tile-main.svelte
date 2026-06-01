@@ -69,27 +69,22 @@
     <MacroManager />
 
     <Drawer.Root direction="right">
-      <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), '')}>
+      <Drawer.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'me-auto')}>
         <Settings2 /> Paramètres
       </Drawer.Trigger>
       <Drawer.Content>
         <Drawer.Header>
           <Drawer.Title>Paramètres</Drawer.Title>
-          <!-- <Drawer.Description>This action cannot be undone.</Drawer.Description> -->
+          <Drawer.Description>Toutes les options sont sauvegardées automatiquement.</Drawer.Description>
         </Drawer.Header>
 
         <div class="w-full h-full max-w-5xl px-4 mx-auto overflow-y-auto">
           <SettingsTab />
         </div>
-
-        <!-- <Drawer.Footer>
-          <Button>Submit</Button>
-          <Drawer.Close>Cancel</Drawer.Close>
-        </Drawer.Footer> -->
       </Drawer.Content>
     </Drawer.Root>
 
-    <ButtonGroup.Root class="ms-auto">
+    <ButtonGroup.Root class="">
       <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>

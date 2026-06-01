@@ -2,7 +2,7 @@
   import { connect, serial } from '$shared/store/serial.svelte.js';
   import { loadConfig } from '$shared/store/config.svelte.js';
   import { Button } from '$shared/components/ui/button/index.js';
-  import { PlugZap, FlaskConical, FolderCodeIcon } from '@lucide/svelte';
+  import { PlugZap, FlaskConical, FolderCodeIcon, Command } from '@lucide/svelte';
   import { devMode } from '$shared/store/devMode.svelte.js';
 
   import * as Empty from '$shared/components/ui/empty/index.js';
@@ -25,7 +25,7 @@
 >
   <Empty.Header>
     <Empty.Media variant="icon">
-      <FolderCodeIcon />
+      <Command />
     </Empty.Media>
     <Empty.Title>Connecter votre SpinPad</Empty.Title>
     <Empty.Description>Prérequis : Chrome ou Edge, clavier USB. WebSerial non supporté sur Firefox.</Empty.Description>

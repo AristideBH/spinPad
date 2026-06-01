@@ -5,7 +5,17 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import { cn } from '$shared/utils.js';
-  import { Zap, Plus, Trash2, X, Clock, ArrowDownToLine, ArrowUpFromLine, GripVertical } from '@lucide/svelte';
+  import {
+    Zap,
+    Plus,
+    Trash2,
+    X,
+    Clock,
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    GripVertical,
+    ChevronDown,
+  } from '@lucide/svelte';
   import Sortable from './sortable/Sortable.svelte';
   import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
   import {
@@ -20,6 +30,8 @@
   import { KEYCODES, getKeycodeLabel, type Keycode } from '$shared/constants/keycodes.js';
   import { configState, setMacroName, setMacroSteps, clearMacro } from '$shared/store/config.svelte.js';
   import { macroManager } from '$shared/store/macroManager.svelte.js';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
 
   // ── État local ────────────────────────────────────────────────
   let selected = $state(0);
@@ -253,9 +265,9 @@
           {/if}
         </div>
 
-        <!-- Ajout d'étapes -->
-        <div class="flex flex-wrap gap-1.5">
+        <ButtonGroup.Root>
           <Button
+            variant="outline"
             size="sm"
             class="gap-1.5"
             onclick={() => openPicker('tap')}
@@ -263,40 +275,35 @@
           >
             <Plus class="size-3.5" /> Touche
           </Button>
-          <Button size="sm" variant="outline" onclick={() => (showAdvanced = !showAdvanced)}>Avancé</Button>
-        </div>
-
-        {#if showAdvanced}
-          <div class="flex flex-wrap gap-1.5">
-            <Button
-              size="sm"
-              variant="outline"
-              class="gap-1.5"
-              onclick={() => openPicker('hold')}
-              disabled={draftSteps.length >= MACRO_MAX_STEPS}
-            >
-              <ArrowDownToLine class="size-3.5" /> Maintien
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              class="gap-1.5"
-              onclick={() => openPicker('release')}
-              disabled={draftSteps.length >= MACRO_MAX_STEPS}
-            >
-              <ArrowUpFromLine class="size-3.5" /> Relâche
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              class="gap-1.5"
-              onclick={() => addStep({ type: MACRO_STEP_TYPE.DELAY_MS, delay: 50 })}
-              disabled={draftSteps.length >= MACRO_MAX_STEPS}
-            >
-              <Clock class="size-3.5" /> Délai
-            </Button>
-          </div>
-        {/if}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              {#snippet child({ props })}
+                <Button {...props} variant="outline" size="icon-sm">
+                  <ChevronDown />
+                </Button>
+              {/snippet}
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="end" class="[--radius:1rem]">
+              <DropdownMenu.Group>
+                <DropdownMenu.Item onclick={() => openPicker('hold')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
+                  <ArrowDownToLine class="size-3.5" /> Maintien
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onclick={() => openPicker('release')}
+                  disabled={draftSteps.length >= MACRO_MAX_STEPS}
+                >
+                  <ArrowUpFromLine class="size-3.5" /> Relâche
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onclick={() => addStep({ type: MACRO_STEP_TYPE.DELAY_MS, delay: 50 })}
+                  disabled={draftSteps.length >= MACRO_MAX_STEPS}
+                >
+                  <Clock class="size-3.5" /> Délai
+                </DropdownMenu.Item>
+              </DropdownMenu.Group>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </ButtonGroup.Root>
 
         <!-- Édition fine des délais -->
         {#each draftSteps as step, si (si)}
