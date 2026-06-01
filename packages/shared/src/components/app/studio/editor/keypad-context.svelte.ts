@@ -1,7 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { LayerConfig, ProfileConfig } from '$shared/constants/config-schema.js';
 import { configState, setEncoderAction, setKeyAction } from '$shared/store/config.svelte.js';
-import { keyMonitor, onKeyEvent, serial } from '$shared/store/serial.svelte.js';
 import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
 import { getKeycodeLabel } from '$shared/constants/keycodes.js';
 
@@ -39,12 +38,6 @@ export class KeypadContext {
   searchQuery = $state('');
   pickerOpen = $state(false);
   pickerStage = $state<PickerStage>('menu');
-
-  // ── Training ──────────────────────────────────────────────────
-  trainingActive = $state(false);
-  keyPressCounts = $state<number[]>(Array(10).fill(0));
-  keyFlash = $state<number[]>(Array(10).fill(0));
-  #trainingCleanup: (() => void) | null = null;
 
   // ── Derived ───────────────────────────────────────────────────
   readonly profile = $derived(
@@ -128,30 +121,6 @@ export class KeypadContext {
     this.selectKeycode({ value: action(ACTION_TYPES.ACTION_TYPE_MACRO, idx), label: '', category: 'macro' });
   }
 
-  // ── Training methods ──────────────────────────────────────────
-  async toggleTraining(): Promise<void> {
-    if (!serial.connected) return;
-    this.trainingActive = !this.trainingActive;
-    await keyMonitor(this.trainingActive);
-    if (this.trainingActive) {
-      this.#trainingCleanup = onKeyEvent((evt: { idx: number; state: string }) => {
-        if (evt.idx >= 0 && evt.idx < 10 && evt.state === 'down') {
-          this.keyPressCounts[evt.idx]++;
-          this.keyFlash[evt.idx] = Date.now();
-        }
-      });
-    } else {
-      this.#trainingCleanup?.();
-      this.#trainingCleanup = null;
-    }
-  }
-
-  stopTraining(): void {
-    this.trainingActive = false;
-    this.#trainingCleanup?.();
-    this.#trainingCleanup = null;
-  }
-
   resetLayer(layerIdx: number = configState.activeLayerIndex): void {
     const pi = configState.activeProfileIndex;
     const li = layerIdx;
@@ -166,15 +135,6 @@ export class KeypadContext {
     // setEncoderAction(pi, li, 'press', 0);
   }
 
-  resetTrainingCounts(): void {
-    this.keyPressCounts = Array(10).fill(0);
-    this.keyFlash = Array(10).fill(0);
-  }
-
-  keyFlashOpacity(idx: number): number {
-    const age = Date.now() - this.keyFlash[idx];
-    return age > 600 ? 0 : Math.max(0, 1 - age / 600);
-  }
 }
 
 export function createKeypadContext(): KeypadContext {

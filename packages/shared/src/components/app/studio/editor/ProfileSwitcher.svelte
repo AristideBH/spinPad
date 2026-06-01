@@ -6,6 +6,17 @@
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import type { ProfileConfig } from '$shared/constants/config-schema.js';
+
+  function profileFill(prof: ProfileConfig): { mapped: number; total: number } {
+    let mapped = 0;
+    let total = 0;
+    for (const layer of prof.layers ?? []) {
+      const keys = layer.keys ?? [];
+      total += keys.length;
+      for (const k of keys) if (k) mapped++;
+    }
+    return { mapped, total };
+  }
   import * as Tabs from '$shared/components/ui/tabs/index.js';
   import * as Card from '$shared/components/ui/card/index.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
@@ -164,8 +175,9 @@
             </Item.Media>
             <Item.Content>
               <Item.Title>{prof.name}</Item.Title>
-              <Item.Description class="text-xs">
-                {prof.layers?.length ?? 0} layer(s) · {prof.combos?.length ?? 0} combo(s)
+              <Item.Description class="text-xs line-clamp-2">
+                {@const fill = profileFill(prof)}
+                {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} touches
               </Item.Description>
             </Item.Content>
           </Item.Root>

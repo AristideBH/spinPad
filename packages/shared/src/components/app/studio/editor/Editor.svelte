@@ -2,13 +2,12 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as Card from '$shared/components/ui/card/index.js';
   import { configState, exportProfiles, importProfiles } from '$shared/store/config.svelte.js';
-  import { serial } from '$shared/store/serial.svelte.js';
-  import { Activity, Download, Plus, Share, Upload } from '@lucide/svelte';
+  import { trainingMode } from '$shared/store/trainingMode.svelte.js';
+  import { Download, Plus, Share, Upload } from '@lucide/svelte';
   import { createKeypadContext } from '../editor/keypad-context.svelte.js';
   import KeyGrid from '../editor/KeyGrid.svelte';
   import KeycodePicker from '../editor/KeycodePicker.svelte';
   import ProfileSwitcher from '../editor/ProfileSwitcher.svelte';
-  import TrainingPanel from '../editor/TrainingPanel.svelte';
   import Encoder from '../editor/Encoder.svelte';
   import LayerSwitcher from '../editor/LayerSwitcher.svelte';
   import * as Dialog from '$shared/components/ui/dialog/index.js';
@@ -18,10 +17,15 @@
 
   const ctx = createKeypadContext();
 
-  // Stop training when device disconnects
+  // Bridge training : SWn pressé sur device → ouvre le picker correspondant.
   $effect(() => {
-    if (!serial.connected && ctx.trainingActive) ctx.stopTraining();
+    const target = trainingMode.requestedTarget;
+    if (!target) return;
+    trainingMode.requestedTarget = null;
+    if (target.kind === 'key') ctx.openKeyPicker(target.idx);
+    else ctx.openEncoderPicker(`encoder_${target.field}`);
   });
+
 
   let fileInput = $state<HTMLInputElement | null>(null);
   let selectedExport = $state<Set<number>>(new Set());
@@ -70,16 +74,6 @@
 <Card.Root size="sm">
   <Card.Header class="flex items-start gap-1.5">
     <ProfileSwitcher />
-    <!-- {#if serial.connected}
-          <Button
-            variant={ctx.trainingActive ? 'default' : 'outline'}
-            onclick={() => ctx.toggleTraining()}
-            size="sm"
-            title="Mode entraînement : voir les touches pressées en temps réel"
-          >
-            <Activity class="size-3.5" />
-          </Button>
-        {/if} -->
   </Card.Header>
 
   <!-- Editor -->
@@ -88,7 +82,6 @@
       {#if ctx.layer}
         <div class="grow min-w-[180px] max-w-[200px]">
           <LayerSwitcher />
-          <TrainingPanel />
         </div>
 
         <div class="flex flex-wrap gap-12 p-6 border grow rounded-2xl justify-evenly">

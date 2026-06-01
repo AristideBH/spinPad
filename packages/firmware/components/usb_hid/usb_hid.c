@@ -227,6 +227,12 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         const char *ok = "{\"status\":\"ok\"}\n";
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
+    } else if (strstr(str, "\"training_mode\"")) {
+        bool enable = strstr(str, "\"enable\":true") != NULL;
+        keymap_set_training_mode(enable);
+        const char *ok = "{\"status\":\"ok\"}\n";
+        tud_cdc_n_write(0, ok, strlen(ok));
+        tud_cdc_n_write_flush(0);
     } else if (strstr(str, "\"set_time\"")) {
         // {"cmd":"set_time","ts":1234567890}
         cJSON *root = cJSON_Parse(str);

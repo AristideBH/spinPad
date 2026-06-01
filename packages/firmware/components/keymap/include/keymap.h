@@ -153,5 +153,10 @@ uint8_t keymap_get_active_layer(void);
 void keymap_set_monitor(bool enable);
 bool keymap_get_monitor(void);
 
+// Activer/désactiver le mode training : aucune action HID exécutée tant
+// qu'il est ON. Le monitor reste indépendant (events toujours streamés).
+void keymap_set_training_mode(bool enable);
+bool keymap_get_training_mode(void);
+
 // Lancer la macro macro_idx du profil actif dans une tâche FreeRTOS éphémère.
 void keymap_play_macro(uint8_t macro_idx);

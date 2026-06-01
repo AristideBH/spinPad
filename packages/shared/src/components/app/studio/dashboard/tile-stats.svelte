@@ -35,7 +35,7 @@
   });
 </script>
 
-<Card.Root class="@container/card @lg/main:col-span-2">
+<Card.Root class="@container/card @lg/main:col-span-3 @5xl/main:col-span-5">
   <Card.Header>
     <Card.Description>Statistiques</Card.Description>
   </Card.Header>

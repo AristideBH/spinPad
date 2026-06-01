@@ -6,6 +6,10 @@
   import { KeyboardLayout } from '$shared/lib/hooks/keyboard-layout.svelte.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
+  import { testMode } from '$shared/store/testMode.svelte.js';
+  import { trainingMode } from '$shared/store/trainingMode.svelte.js';
+
+  const liveMode = $derived(testMode.active ? testMode : trainingMode.active ? trainingMode : null);
 
   const ctx = getKeypadContext();
   const layout = new KeyboardLayout();
@@ -97,6 +101,22 @@
         translate: -50% -50%;
       "
       >
+        <!-- Pass 1 : pulses (peintes avant tous les keycaps ; ne chevauchent jamais les voisines). -->
+        {#if liveMode}
+          {#each KEY_LAYOUT as key (key.idx)}
+            {#key liveMode.pressNonce[key.idx]}
+              {#if liveMode.pressNonce[key.idx] > 0}
+                <span
+                  class="keycap-pulse"
+                  style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
+                  aria-hidden="true"
+                ></span>
+              {/if}
+            {/key}
+          {/each}
+        {/if}
+
+        <!-- Pass 2 : keycaps. -->
         {#each KEY_LAYOUT as key}
           <button
             style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
@@ -104,17 +124,11 @@
               'keycap',
               ctx.editingKey === key.idx && ctx.editingField === 'key' ? 'keycap--active' : '',
               key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
+              liveMode && liveMode.pressed[key.idx] ? 'keycap--press-sim' : '',
             )}
             onclick={() => ctx.openKeyPicker(key.idx)}
           >
-            {#if ctx.trainingActive}
-              <div class="keycap-flash" style="opacity: {ctx.keyFlashOpacity(key.idx)}"></div>
-            {/if}
-
             <div class="keycap-overlay" style="transform: rotate({-ctx.orientDeg}deg)">
-              {#if ctx.trainingActive && ctx.keyPressCounts[key.idx] > 0}
-                <span class="keycap-count">{ctx.keyPressCounts[key.idx]}</span>
-              {/if}
               {#if otherLayers(key.idx).length > 0}
                 <span class="keycap-dots">
                   {#each otherLayers(key.idx) as li (li)}
@@ -257,13 +271,36 @@
     color: color-mix(in oklch, var(--muted-foreground) 50%, transparent);
   }
 
-  .keycap-flash {
-    position: absolute;
-    inset: 0;
+  /* Mimique l'état :active sans interaction souris (mode test). */
+  .keycap--press-sim {
+    transform: translate(var(--depth-x), var(--depth-y));
+    box-shadow:
+      0 0 0 rgba(0, 0, 0, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  /* Halo qui pulse sous la touche. Placé dans la grid comme item dédié et rendu
+     AVANT les .keycap → les keycaps voisines le couvrent toujours (paint order). */
+  .keycap-pulse {
     border-radius: var(--keycap-radius);
-    background: var(--chart-5);
     pointer-events: none;
-    transition: opacity 300ms;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklch, var(--chart-5) 70%, transparent) 0%,
+      color-mix(in oklch, var(--chart-5) 30%, transparent) 55%,
+      transparent 100%
+    );
+    opacity: 0;
+    animation: keycap-pulse 480ms ease-out forwards;
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+
+  @keyframes keycap-pulse {
+    0%   { opacity: 0;    transform: scale(0.8); }
+    20%  { opacity: 0.95; transform: scale(1.15); }
+    100% { opacity: 0;    transform: scale(1.55); }
   }
 
   .keycap-count {

@@ -92,6 +92,11 @@ static bool    g_monitor_enabled  = false;
 static int64_t g_monitor_start_ms = 0;
 #define MONITOR_AUTO_OFF_MS (5 * 60 * 1000)  // 5 minutes
 
+// ── Mode training (suppress action execution) ────────────────
+// Activé par {"cmd":"training_mode","enable":true} : le studio reçoit
+// toujours les events via le monitor, mais aucune action HID ne part.
+static bool    g_training_mode = false;
+
 // ─────────────────────────────────────────────────────────────
 //  FONCTIONS PRIVÉES — MATRICE GPIO
 // ─────────────────────────────────────────────────────────────
@@ -224,6 +229,11 @@ static int combo_find_match(void)
 // Dispatcher l'action vers le bon handler (USB ou BLE)
 static void send_action(uint16_t action, bool pressed)
 {
+    // Mode training : on streame les events au studio (via _monitor_emit en
+    // amont) mais on n'exécute pas l'action HID. Permet de re-configurer le
+    // device en appuyant sur les touches sans déclencher leur action courante.
+    if (g_training_mode) return;
+
     uint8_t  type  = (action >> 12) & 0xF;   // 4 bits hauts = type
     uint16_t value = action & 0x0FFF;          // 12 bits bas  = valeur
 
@@ -477,9 +487,14 @@ void keymap_scan_matrix(void)
     uint8_t press_scans   = cfg->power.debounce_press_scans   ? cfg->power.debounce_press_scans   : 3;
     uint8_t release_scans = cfg->power.debounce_release_scans ? cfg->power.debounce_release_scans : 5;
 
-    // Auto-disable monitor après 5 minutes
+    // Auto-disable monitor après 5 minutes (et training avec lui, sinon les
+    // touches resteraient inertes une fois le studio fermé).
     if (g_monitor_enabled && (now - g_monitor_start_ms) > MONITOR_AUTO_OFF_MS) {
         g_monitor_enabled = false;
+        if (g_training_mode) {
+            g_training_mode = false;
+            ESP_LOGI(TAG, "Training mode désactivé (timeout moniteur)");
+        }
         ESP_LOGI(TAG, "Mode moniteur désactivé (timeout)");
     }
 
@@ -535,6 +550,14 @@ void keymap_set_monitor(bool enable)
 }
 
 bool keymap_get_monitor(void) { return g_monitor_enabled; }
+
+void keymap_set_training_mode(bool enable)
+{
+    g_training_mode = enable;
+    ESP_LOGI(TAG, "Training mode %s", enable ? "ON" : "OFF");
+}
+
+bool keymap_get_training_mode(void) { return g_training_mode; }
 
 // ─────────────────────────────────────────────────────────────
 //  MACRO PLAYBACK
