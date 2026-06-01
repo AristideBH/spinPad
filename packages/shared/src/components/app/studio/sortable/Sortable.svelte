@@ -89,9 +89,33 @@
     const move = deriveSingleMove(dataOrder, visualOrder());
     if (move) onReorder(move.from, move.to);
   }
+
+  // Verrouille le déplacement sur l'axe de la liste : mosaic suit le pointeur
+  // sur X et Y (drag libre 2-D), ce qui fait dériver l'aperçu hors de la liste.
+  // On remet à 0 la composante hors-axe du transform de l'item actif.
+  let wrapEl = $state<HTMLDivElement | null>(null);
+  $effect(() => {
+    if (!wrapEl) return;
+    const el = wrapEl;
+    const lockX = !horizontal; // liste verticale → on bloque X (et inversement)
+    const obs = new MutationObserver((muts) => {
+      for (const m of muts) {
+        const t = m.target as HTMLElement;
+        if (!t.classList || !t.classList.contains('svlt-grid-active')) continue;
+        const match = /translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)/.exec(t.style.transform);
+        if (!match) continue;
+        const x = parseFloat(match[1]);
+        const y = parseFloat(match[2]);
+        if (lockX && x !== 0) t.style.transform = `translate(0px, ${y}px)`;
+        else if (!lockX && y !== 0) t.style.transform = `translate(${x}px, 0px)`;
+      }
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['style'], subtree: true });
+    return () => obs.disconnect();
+  });
 </script>
 
-<div class="sortable-wrap" style={containerWidth ? `width:${containerWidth}px` : undefined}>
+<div bind:this={wrapEl} class="sortable-wrap" style={containerWidth ? `width:${containerWidth}px` : undefined}>
   <Grid bind:items={gridItems} {cols} {rowHeight} {gap} unstyled compact onpointerup={onPointerUp}>
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
       {@const payload = dataItem.data as { item: T; index: number }}
