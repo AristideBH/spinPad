@@ -8,7 +8,7 @@
       title: '10 touches + encodeur',
       text: 'Layout 3×4 avec SW1 et SW10 en format 2u. Encodeur rotatif quadrature avec clic.',
       span: 'md:col-span-2',
-      img: '/static/img/spinpad.png',
+      img: '/img/spinpad.png',
     },
     {
       icon: Bluetooth,
@@ -75,7 +75,7 @@
 
   <!-- TODO: remplacer par un vrai rendu du SpinPad -->
   <img
-    src="/static/img/spinpad.png"
+    src="/img/spinpad.png"
     alt="Le macropad SpinPad"
     class="object-cover w-full border shadow-sm aspect-5/4 rounded-2xl border-border"
   />

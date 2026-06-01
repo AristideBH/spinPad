@@ -3,6 +3,9 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { configState, deleteLayer, editLayer } from '$shared/store/config.svelte.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
+  import Sortable from '../sortable/Sortable.svelte';
+  import type { LayerConfig } from '$shared/constants/config-schema.js';
+  import { GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import * as Dialog from '$shared/components/ui/dialog/index.js';
@@ -48,11 +51,27 @@
     <Label class="ml-2">Layers</Label>
 
     <RadioGroup.Root bind:value={layerValue} onValueChange={onLayerChange} class="flex flex-col gap-1 ">
-      {#each ctx.profile.layers ?? [] as l, i (i)}
+      <Sortable
+        items={(ctx.profile.layers ?? []) as LayerConfig[]}
+        orientation="vertical"
+        rowHeight={36}
+        gap={[0, 4]}
+        getKey={(l, i) => `l-${i}-${l.name ?? ''}`}
+        onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
+      >
+        {#snippet children({ item: l, index: i, handlePointerDown })}
         <ButtonGroup.Root class="w-full">
+          <button
+            type="button"
+            class="flex items-center justify-center px-1 text-muted-foreground hover:text-foreground cursor-grab touch-none border border-r-0 rounded-l-md bg-background"
+            title="Réordonner"
+            onpointerdown={handlePointerDown}
+          >
+            <GripVertical class="size-3.5" />
+          </button>
           <Label
             class={cn(
-              'grow flex justify-start! gap-2! px-2! ps-0! items-center overflow-hidden',
+              'grow flex justify-start! gap-2! px-2! ps-0! items-center overflow-hidden rounded-none',
               buttonVariants({ variant: 'outline', size: 'sm' }),
             )}
             for="l-{i}"
@@ -98,7 +117,8 @@
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         </ButtonGroup.Root>
-      {/each}
+        {/snippet}
+      </Sortable>
     </RadioGroup.Root>
   </div>
 

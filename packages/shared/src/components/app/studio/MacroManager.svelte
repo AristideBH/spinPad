@@ -5,7 +5,8 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import { cn } from '$shared/utils.js';
-  import { Zap, Plus, Trash2, X, Clock, ArrowDownToLine, ArrowUpFromLine } from '@lucide/svelte';
+  import { Zap, Plus, Trash2, X, Clock, ArrowDownToLine, ArrowUpFromLine, GripVertical } from '@lucide/svelte';
+  import Sortable from './sortable/Sortable.svelte';
   import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
   import {
     MACRO_COUNT,
@@ -67,6 +68,16 @@
   }
   function removeRange(from: number, count: number) {
     draftSteps = draftSteps.filter((_, i) => i < from || i >= from + count);
+  }
+
+  // Réordonne les étapes au niveau des blocs affichés (un "Appui" = 2 steps
+  // down+up). On découpe draftSteps en blocs selon displayItems, on déplace
+  // le bloc dFrom→dTo, puis on aplatit.
+  function reorderSteps(dFrom: number, dTo: number) {
+    const blocks = displayItems.map((di) => draftSteps.slice(di.from, di.from + di.count));
+    const [moved] = blocks.splice(dFrom, 1);
+    blocks.splice(dTo, 0, moved);
+    draftSteps = blocks.flat();
   }
 
   // ── Affichage condensé (Tap = down+up consécutifs même touche) ─
@@ -199,28 +210,47 @@
           {#if displayItems.length === 0}
             <p class="py-3 text-xs text-center text-muted-foreground">Aucune étape — ajoute une touche ci-dessous.</p>
           {/if}
-          {#each displayItems as item (item.from)}
-            <div class="flex items-center gap-2 px-2 py-1.5 text-xs border rounded-md border-border">
-              <span class="font-medium capitalize text-muted-foreground w-14">
-                {item.kind === 'tap'
-                  ? 'Appui'
-                  : item.kind === 'hold'
-                    ? 'Maintien'
-                    : item.kind === 'release'
-                      ? 'Relâche'
-                      : 'Délai'}
-              </span>
-              <span class="flex-1 font-semibold">{item.label}</span>
-              <button
-                type="button"
-                class="text-muted-foreground hover:text-destructive"
-                title="Supprimer"
-                onclick={() => removeRange(item.from, item.count)}
-              >
-                <X class="size-3.5" />
-              </button>
-            </div>
-          {/each}
+          {#if displayItems.length > 0}
+            <Sortable
+              items={displayItems}
+              orientation="vertical"
+              rowHeight={34}
+              gap={[0, 4]}
+              getKey={(_, i) => `step-${i}`}
+              onReorder={reorderSteps}
+            >
+              {#snippet children({ item, handlePointerDown })}
+                <div class="flex items-center h-full gap-2 px-2 text-xs border rounded-md border-border bg-background">
+                  <button
+                    type="button"
+                    class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"
+                    title="Réordonner"
+                    onpointerdown={handlePointerDown}
+                  >
+                    <GripVertical class="size-3.5" />
+                  </button>
+                  <span class="font-medium capitalize text-muted-foreground w-14">
+                    {item.kind === 'tap'
+                      ? 'Appui'
+                      : item.kind === 'hold'
+                        ? 'Maintien'
+                        : item.kind === 'release'
+                          ? 'Relâche'
+                          : 'Délai'}
+                  </span>
+                  <span class="flex-1 font-semibold">{item.label}</span>
+                  <button
+                    type="button"
+                    class="text-muted-foreground hover:text-destructive"
+                    title="Supprimer"
+                    onclick={() => removeRange(item.from, item.count)}
+                  >
+                    <X class="size-3.5" />
+                  </button>
+                </div>
+              {/snippet}
+            </Sortable>
+          {/if}
         </div>
 
         <!-- Ajout d'étapes -->

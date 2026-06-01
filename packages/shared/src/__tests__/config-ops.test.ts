@@ -2,8 +2,13 @@ import { describe, it, expect } from "vitest";
 import { defaultConfig, CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS } from "$shared/constants/config-schema.js";
 import * as ops from "$shared/constants/config-ops.js";
 import { BUILTIN_PROFILE_PRESETS } from "$shared/constants/profile-presets.js";
+import { action, ACTION_TYPES } from "$shared/constants/action-types.js";
 
 const sel = (profile = 0, layer = 0) => ({ profile, layer });
+const MO = (n: number) => action(ACTION_TYPES.ACTION_TYPE_LAYER_MO, n);
+const TG = (n: number) => action(ACTION_TYPES.ACTION_TYPE_LAYER_TG, n);
+const TO = (n: number) => action(ACTION_TYPES.ACTION_TYPE_LAYER_TO, n);
+const KC = (n: number) => action(ACTION_TYPES.ACTION_TYPE_KC, n);
 
 describe("config-ops — profils", () => {
   it("ajoute un profil et le sélectionne", () => {
@@ -121,5 +126,46 @@ describe("config-ops — layers", () => {
     const moved = ops.editLayer(named.config, sel(0, 1), 0, 1, { moveTo: 0 });
     expect(moved.config.profiles[0].layers[0].name).toBe("Fn");
     expect(moved.selection.layer).toBe(0);
+  });
+});
+
+describe("config-ops — remap des références de layer au déplacement", () => {
+  // Profil à 3 layers avec des refs MO/TG/TO + une touche normale (témoin).
+  function cfg3() {
+    const cfg = defaultConfig();
+    let acc = ops.addLayer(cfg, sel(0, 0), 0);
+    acc = ops.addLayer(acc.config, acc.selection, 0); // 3 layers
+    const p = acc.config.profiles[0];
+    p.layers[0].keys[0] = MO(2);   // pointe layer 2
+    p.layers[0].keys[1] = TO(1);   // pointe layer 1
+    p.layers[0].keys[2] = KC(0x04); // témoin, ne doit pas bouger
+    p.layers[0].encoder_cw = TG(2);
+    p.layers[0].encoder = { cw: TG(2), ccw: 0, press: MO(1) };
+    return acc.config;
+  }
+
+  it("réécrit MO/TG/TO vers le nouvel index après move", () => {
+    const c = cfg3();
+    // déplace layer 2 → 0 : ancien 2 devient 0, anciens 0,1 décalent à 1,2
+    const r = ops.editLayer(c, sel(0, 0), 0, 2, { moveTo: 0 });
+    const moved = r.config.profiles[0].layers[1]; // l'ex-layer 0 est maintenant en 1
+    expect(moved.keys[0]).toBe(MO(0)); // pointait layer 2 → maintenant 0
+    expect(moved.keys[1]).toBe(TO(2)); // pointait layer 1 → décalé à 2
+    expect(moved.encoder_cw).toBe(TG(0));
+    expect(moved.encoder?.press).toBe(MO(2)); // pointait layer 1 → 2
+  });
+
+  it("laisse les actions non-layer intactes", () => {
+    const c = cfg3();
+    const r = ops.editLayer(c, sel(0, 0), 0, 2, { moveTo: 0 });
+    const moved = r.config.profiles[0].layers[1];
+    expect(moved.keys[2]).toBe(KC(0x04));
+  });
+
+  it("ne mute pas la config source", () => {
+    const c = cfg3();
+    const before = JSON.stringify(c);
+    ops.editLayer(c, sel(0, 0), 0, 2, { moveTo: 0 });
+    expect(JSON.stringify(c)).toBe(before);
   });
 });
