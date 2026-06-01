@@ -90,11 +90,11 @@
           <Item.Root
             variant="outline"
             class={cn(
-              'h-full w-full py-3 group transition-colors duration-200',
+              'h-full w-full py-3 group transition-colors duration-200 items-center',
               isActive ? 'bg-primary text-primary-foreground' : 'bg-card ',
             )}
           >
-            <Item.Media>
+            <Item.Media class="self-center! mb-1.5 me-2 gap-1">
               <button
                 type="button"
                 class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
@@ -102,7 +102,7 @@
                 onpointerdown={handlePointerDown}
                 onclick={(e) => e.preventDefault()}
               >
-                <GripVertical class="size-4" />
+                <GripVertical class="size-3.5" />
               </button>
               <div
                 class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0"
@@ -124,36 +124,29 @@
         </Label>
       {/snippet}
     </Sortable>
+
+    <!-- <p>{profileCount()}/{8}</p> -->
   </RadioGroup.Root>
-  <!-- <Button
-    variant="outline"
-    class="sticky ml-auto h-auto! right-0 self-stretch bg-muted!  z-10
-      [&>div]:bg-green! [&>div]:hover:bg-green-600!
-    "
-    size="icon"
-    title="Ajouter un profil"
-  >
-    <Plus />
-  </Button> -->
 </ScrollArea>
 
-<style>
-  :global(.scroller) {
-    display: flex;
-    gap: 15px;
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
+<Button
+  variant="outline"
+  class="sticky ml-auto h-auto! right-0 self-stretch bg-muted!  z-10
+        [&>div]:bg-green! [&>div]:hover:bg-green-600!
+      "
+  size="icon"
+  title="Ajouter un profil"
+>
+  <Plus />
+</Button>
 
-  :global(.item) {
-    flex: 0 0 100px;
-    height: 100px;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+<style>
+  :global(.svlt-grid-item) {
+    &:not(.svlt-grid-active) {
+      height: 100% !important;
+    }
+    & > label {
+      height: inherit;
+    }
   }
 </style>
