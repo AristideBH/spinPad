@@ -23,6 +23,15 @@ import {
   type FullConfig,
   type ProfileConfig,
 } from './config-schema.js';
+import { action, getActionType, getActionValue, ACTION_TYPES } from './action-types.js';
+
+// Types d'action dont la valeur est un index de layer (à remapper si on
+// réordonne les layers d'un profil).
+const LAYER_REF_TYPES: ReadonlySet<number> = new Set([
+  ACTION_TYPES.ACTION_TYPE_LAYER_MO,
+  ACTION_TYPES.ACTION_TYPE_LAYER_TG,
+  ACTION_TYPES.ACTION_TYPE_LAYER_TO,
+]);
 
 export interface Selection {
   profile: number;
@@ -90,6 +99,33 @@ function indexAfterMove(tracked: number, from: number, to: number): number {
 function moveInArray<T>(arr: T[], from: number, to: number): void {
   const [item] = arr.splice(from, 1);
   arr.splice(to, 0, item);
+}
+
+/** Remappe une action si elle référence un layer déplacé from→to. */
+function remapLayerRef(act: number, from: number, to: number): number {
+  if (!LAYER_REF_TYPES.has(getActionType(act))) return act;
+  const target = getActionValue(act);
+  const next = indexAfterMove(target, from, to);
+  return next === target ? act : action(getActionType(act), next);
+}
+
+/**
+ * Réécrit toutes les actions MO/TG/TO du profil pour suivre un déplacement
+ * de layer from→to (touches + encodeur, plat et imbriqué). Mute le profil.
+ */
+function remapProfileLayerRefs(profile: ProfileConfig, from: number, to: number): void {
+  for (const layer of profile.layers) {
+    layer.keys = layer.keys.map((k) => remapLayerRef(k, from, to));
+    layer.encoder_cw = remapLayerRef(layer.encoder_cw, from, to);
+    layer.encoder_ccw = remapLayerRef(layer.encoder_ccw, from, to);
+    if (layer.encoder) {
+      layer.encoder.cw = remapLayerRef(layer.encoder.cw, from, to);
+      layer.encoder.ccw = remapLayerRef(layer.encoder.ccw, from, to);
+      if (layer.encoder.press !== undefined) {
+        layer.encoder.press = remapLayerRef(layer.encoder.press, from, to);
+      }
+    }
+  }
 }
 
 // ── Profils ─────────────────────────────────────────────────────
@@ -232,6 +268,8 @@ export function editLayer(
   if (patch.moveTo !== undefined && patch.moveTo !== lIdx) {
     const to = clamp(patch.moveTo, 0, profile.layers.length - 1);
     moveInArray(profile.layers, lIdx, to);
+    // Suivre les références de layer (MO/TG/TO) après le déplacement.
+    remapProfileLayerRefs(profile, lIdx, to);
     if (selection.profile === pIdx) {
       sel = { ...selection, layer: indexAfterMove(selection.layer, lIdx, to) };
     }
