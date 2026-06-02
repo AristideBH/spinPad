@@ -41,12 +41,15 @@
 {/snippet}
 
 {#snippet menu()}
-  <Item.Group class="gap-2">
+  <Item.Group class="grid gap-2 sm:grid-cols-2">
     <Item.Root variant="outline">
       {#snippet child({ props })}
         <button
           {...props}
-          class={[props.class as string, 'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'].join(' ')}
+          class={[
+            props.class as string,
+            'cursor-pointer flex-col items-start text-left disabled:opacity-50 disabled:cursor-not-allowed',
+          ].join(' ')}
           disabled={!finePointer.current}
           onclick={() => ctx.setStage('record')}
         >
@@ -67,7 +70,7 @@
       {#snippet child({ props })}
         <button
           {...props}
-          class={[props.class as string, 'cursor-pointer'].join(' ')}
+          class={[props.class as string, 'cursor-pointer flex-col items-start text-left'].join(' ')}
           onclick={() => ctx.setStage('list')}
         >
           <Item.Media variant="icon"><List class="size-5" /></Item.Media>
@@ -110,7 +113,7 @@
   </Drawer.Root>
 {:else}
   <Dialog.Root bind:open={ctx.pickerOpen}>
-    <Dialog.Content class="sm:max-w-md max-h-[80vh] flex flex-col p-0 gap-0">
+    <Dialog.Content class="sm:max-w-lg max-h-[85dvh] flex flex-col p-0 gap-0">
       <Dialog.Title class="sr-only">{ctx.editTargetLabel}</Dialog.Title>
       {@render body()}
     </Dialog.Content>
