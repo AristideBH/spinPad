@@ -19,66 +19,51 @@ export function safeCapitalize(str: string) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
-export function scrollShadow(node: HTMLElement) {
-  // console.log('Attaching scroll shadow to', node);
-  // 1. Configuration des styles structurels du conteneur
-  node.style.position = 'relative';
-  node.style.overflowX = 'auto';
+/**
+ * Ombres de bord (gauche/droite) pour une zone à défilement horizontal.
+ *
+ * Les ombres sont ancrées au `container` (élément NON défilant, position
+ * relative) et restent fixes à ses bords — seule leur opacité varie. La
+ * position de défilement est lue sur `scroller` (le vrai conteneur scrollable,
+ * qui peut différer du container, ex. viewport bits-ui imbriqué). Aucun
+ * `transform` lié au scroll → pas de saccade.
+ */
+export function scrollShadow(scroller: HTMLElement, container: HTMLElement = scroller) {
+  container.style.position ||= 'relative';
 
-  // 2. Création dynamique des ombres
   const shadowLeft = document.createElement('div');
   const shadowRight = document.createElement('div');
+  container.style.overflow = 'clip'; // masque les ombres quand elles dépassent du container (ex. au redimensionnement)
 
-  const baseShadowStyle = `
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 12px;
-    z-index: 10;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-  `;
+  const baseShadowStyle =
+    'position:absolute;top:0;bottom:0;width:12px;z-index:10;pointer-events:none;transition:opacity 0.15s ease;';
 
-  shadowLeft.style.cssText = `${baseShadowStyle} left: 0; background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent); opacity: 0;`;
-  shadowRight.style.cssText = `${baseShadowStyle} right: 0; background: linear-gradient(270deg, rgba(0, 0, 0, 0.5), transparent); opacity: 0;`;
+  shadowLeft.style.cssText = `${baseShadowStyle}left:0;background:linear-gradient(90deg, rgba(0,0,0,0.5), transparent);opacity:0;`;
+  shadowRight.style.cssText = `${baseShadowStyle}right:0;background:linear-gradient(270deg, rgba(0,0,0,0.5), transparent);opacity:0;`;
 
-  node.appendChild(shadowLeft);
-  node.appendChild(shadowRight);
+  container.appendChild(shadowLeft);
+  container.appendChild(shadowRight);
 
-  // 3. Gestionnaire de scroll
   function handleScroll() {
-    const maxScroll = node.scrollWidth - node.clientWidth;
-
-    if (maxScroll <= 0) {
+    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+    if (maxScroll <= 1) {
       shadowLeft.style.opacity = '0';
       shadowRight.style.opacity = '0';
       return;
     }
-
-    // console.log('Scroll position:', node.scrollLeft, 'Max scroll:', maxScroll);
-
-    const currentScroll = node.scrollLeft / maxScroll;
-
-    // Fixer la position des ombres par rapport au scroll horizontal
-    shadowLeft.style.transform = `translateX(${node.scrollLeft}px)`;
-    shadowRight.style.transform = `translateX(${node.scrollLeft}px)`;
-
-    shadowLeft.style.opacity = `${currentScroll}`;
-    shadowRight.style.opacity = `${1 - currentScroll}`;
+    const left = scroller.scrollLeft;
+    // Pleine opacité dès qu'on est à >8px d'un bord, fondu doux au ras du bord.
+    shadowLeft.style.opacity = `${Math.min(1, left / 8)}`;
+    shadowRight.style.opacity = `${Math.min(1, (maxScroll - left) / 8)}`;
   }
 
-  // 4. Écouteurs d'événements
-  node.addEventListener('scroll', handleScroll);
-
+  scroller.addEventListener('scroll', handleScroll, { passive: true });
   const resizeObserver = new ResizeObserver(handleScroll);
-  resizeObserver.observe(node);
+  resizeObserver.observe(scroller);
+  requestAnimationFrame(handleScroll);
 
-  // Lancement initial
-  setTimeout(handleScroll, 0);
-
-  // 5. La fonction Teardown (appelée par Svelte lors du démontage)
   return () => {
-    node.removeEventListener('scroll', handleScroll);
+    scroller.removeEventListener('scroll', handleScroll);
     resizeObserver.disconnect();
     shadowLeft.remove();
     shadowRight.remove();

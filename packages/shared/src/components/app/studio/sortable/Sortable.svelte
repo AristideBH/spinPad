@@ -119,7 +119,7 @@
   const flyDirection = $derived(horizontal ? { x: flyDistance, y: 0 } : { x: 0, y: flyDistance });
 </script>
 
-<div bind:this={wrapEl} class="sortable-wrap" style={containerWidth ? `width:${containerWidth}px` : undefined}>
+<div bind:this={wrapEl} class="sortable-wrap" style={[containerWidth ? `width:${containerWidth}px` : '', horizontal ? 'touch-action:pan-x' : ''].filter(Boolean).join(';') || undefined}>
   <Grid bind:items={gridItems} {cols} {rowHeight} {gap} unstyled compact onpointerup={onPointerUp}>
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
       {@const payload = dataItem.data as { item: T; index: number }}
@@ -139,5 +139,11 @@
   }
   .sortable-wrap :global(.svlt-grid-container) {
     width: 100%;
+  }
+
+  /* Allow horizontal scroll on touch when used inside a horizontal ScrollArea.
+     touch-none on the drag handle overrides this for intentional drag. */
+  .sortable-wrap[style*='touch-action:pan-x'] :global(.svlt-grid-item) {
+    touch-action: pan-x;
   }
 </style>

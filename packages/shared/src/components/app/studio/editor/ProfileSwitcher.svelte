@@ -1,11 +1,17 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
-  import { Select, SelectContent, SelectItem, SelectTrigger } from '$shared/components/ui/select/index.js';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import { configState, editProfile, exportProfiles, importProfiles } from '$shared/store/config.svelte.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
-  import type { ProfileConfig } from '$shared/constants/config-schema.js';
+  import { CONFIG_MAX_PROFILES, type ProfileConfig } from '$shared/constants/config-schema.js';
+  import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
+  import * as Item from '$shared/components/ui/item/index.js';
+  import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
+  import { cn, scrollShadow } from '$shared/utils.js';
+  import { Download, GripVertical, Plus, Share, Trash, Upload } from '@lucide/svelte';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import * as Dialog from '$shared/components/ui/dialog/index.js';
+  import { toast } from 'svelte-sonner';
 
   function profileFill(prof: ProfileConfig): { mapped: number; total: number } {
     let mapped = 0;
@@ -17,43 +23,62 @@
     }
     return { mapped, total };
   }
-  import * as Tabs from '$shared/components/ui/tabs/index.js';
-  import * as Card from '$shared/components/ui/card/index.js';
-  import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
-  import * as Item from '$shared/components/ui/item/index.js';
-  import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
-  import { cn, scrollShadow } from '$shared/utils.js';
-  import {
-    Archive,
-    ChevronDown,
-    Download,
-    Edit,
-    GripVertical,
-    MailCheck,
-    MoreHorizontal,
-    MoreVertical,
-    Plus,
-    Settings2,
-    Share,
-    TextCursor,
-    Trash,
-    Upload,
-  } from '@lucide/svelte';
-  import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
-  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import * as Dialog from '$shared/components/ui/dialog/index.js';
-  import { toast } from 'svelte-sonner';
 
   let profileValue = $state(String(configState.activeProfileIndex));
   let layerValue = $state(String(configState.activeLayerIndex));
-  let profileCount = $derived(() => configState.data?.profile_count ?? 0);
   let viewport = $state<HTMLElement | null>(null);
+  let rootEl = $state<HTMLElement | null>(null);
 
   // Sync STORE → LOCAL (lecture seule) : reflète les changements programmatiques
   // de profil — reset au premier profil lors d'un rechargement de config, undo/redo, etc.
   // N'écrit jamais dans le store, donc pas de boucle ni de reset de layer parasite.
   $effect(() => {
     profileValue = String(configState.activeProfileIndex);
+  });
+
+  // Radix/bits-ui ScrollArea hides native scrollbars and the touch-action chain
+  // through mosaic's grid items doesn't reliably engage native finger-scroll.
+  // Drive horizontal scroll explicitly from touch drags on the viewport. A drag
+  // that starts on the reorder grip (data-grip) is left to mosaic.
+  $effect(() => {
+    const vp = viewport;
+    if (!vp) return;
+    vp.style.touchAction = 'pan-x';
+
+    let startX = 0;
+    let startScroll = 0;
+    let dragging = false;
+
+    function onStart(e: TouchEvent) {
+      if ((e.target as HTMLElement)?.closest('[data-grip]')) return;
+      dragging = true;
+      startX = e.touches[0].clientX;
+      startScroll = vp!.scrollLeft;
+    }
+    function onMove(e: TouchEvent) {
+      if (!dragging) return;
+      vp!.scrollLeft = startScroll - (e.touches[0].clientX - startX);
+    }
+    function onEnd() {
+      dragging = false;
+    }
+
+    vp.addEventListener('touchstart', onStart, { passive: true });
+    vp.addEventListener('touchmove', onMove, { passive: true });
+    vp.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      vp.removeEventListener('touchstart', onStart);
+      vp.removeEventListener('touchmove', onMove);
+      vp.removeEventListener('touchend', onEnd);
+    };
+  });
+
+  // Ombres de bord : ancrées au Root (non défilant, donc fixes aux bords), mais
+  // la position de défilement est lue sur le viewport bits-ui (le vrai scroller).
+  // On n'attache PAS au RadioGroup : son overflow casserait le sticky du panneau.
+  $effect(() => {
+    if (!viewport || !rootEl) return;
+    return scrollShadow(viewport, rootEl);
   });
 
   // Centre le profil actif dans la zone scrollable (snap doux). scrollIntoView
@@ -123,16 +148,11 @@
 
 <ScrollArea
   orientation="horizontal"
+  bind:ref={rootEl}
   bind:viewportRef={viewport}
-  class="profiles flex flex-row relative w-full gap-2 rounded-xl bg-background/50 items-start border shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)] **:data-[slot=scroll-area-viewport]:snap-x **:data-[slot=scroll-area-viewport]:scroll-px-2"
-  {@attach scrollShadow}
+  class="profiles flex flex-row relative w-full gap-2 rounded-xl bg-background/50 overflow-clip items-start border shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)] "
 >
-  <RadioGroup.Root
-    bind:value={profileValue}
-    onValueChange={onProfileChange}
-    class="flex w-full p-2 "
-    {@attach scrollShadow}
-  >
+  <RadioGroup.Root bind:value={profileValue} onValueChange={onProfileChange} class="flex items-stretch w-full p-2 ">
     <Sortable
       items={(configState.data?.profiles ?? []) as ProfileConfig[]}
       orientation="horizontal"
@@ -149,13 +169,16 @@
           <Item.Root
             variant="outline"
             class={cn(
-              'h-full w-full py-3 group transition-colors duration-200 items-center',
-              isActive ? 'bg-primary text-primary-foreground' : 'bg-card ',
+              'h-full w-full py-3 group transition-all duration-200 items-center border-muted ',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card hover:border-muted-foreground/15 hover:bg-muted/50',
             )}
           >
             <Item.Media class="self-center! mb-1.5 me-2 gap-1">
               <button
                 type="button"
+                data-grip
                 class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
                 title="Réordonner"
                 onpointerdown={handlePointerDown}
@@ -164,10 +187,8 @@
                 <GripVertical class="size-3.5" />
               </button>
               <div
-                class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0"
-                class:bg-card={isActive}
+                class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0 bg-muted"
                 class:text-foreground={isActive}
-                class:bg-muted={!isActive}
                 class:text-muted-foreground={!isActive}
               >
                 {i + 1}
@@ -185,14 +206,21 @@
       {/snippet}
     </Sortable>
 
-    <div class="flex flex-col items-center gap-2 ms-auto">
+    <div
+      class="sticky z-20 flex flex-col items-center border rounded-lg shadow-xl ms-auto shrink-0 right-2 bg-card border-muted shadow-background/50"
+    >
       <ButtonGroup.Root orientation="vertical">
-        <Button variant="secondary" size="icon">
+        <Button
+          variant="secondary"
+          size="icon"
+          disabled={profileList.length >= CONFIG_MAX_PROFILES}
+          title="Ajouter un profil"
+        >
           <Plus />
         </Button>
         <Dialog.Root bind:open={dialogOpen}>
           <Dialog.Trigger
-            class={cn('pt-3 pb-3.5', buttonVariants({ variant: 'secondary', size: 'xs' }))}
+            class={cn('', buttonVariants({ variant: 'secondary', size: 'icon' }))}
             title="Importer / Exporter profils"
           >
             <Share />
@@ -269,7 +297,9 @@
           </Dialog.Content>
         </Dialog.Root>
       </ButtonGroup.Root>
-      <p class="text-xs leading-none text-muted">{profileCount()}/{8}</p>
+      <p class="text-[0.5rem]! py-1 leading-none text-muted-foreground/50">
+        {profileList.length}/{CONFIG_MAX_PROFILES}
+      </p>
     </div>
   </RadioGroup.Root>
 </ScrollArea>
@@ -282,5 +312,9 @@
     & > label {
       height: inherit;
     }
+  }
+
+  :global(.profiles .svlt-grid-container) {
+    height: 100% !important;
   }
 </style>
