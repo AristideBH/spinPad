@@ -8,7 +8,6 @@
     Bluetooth,
     RefreshCw,
     LogOut,
-    Trash2,
     Settings2,
     Lightbulb,
     Activity,
@@ -25,6 +24,7 @@
   import { devMode } from '$shared/store/devMode.svelte.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
+  import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import StatusCard from '../../StatusCard.svelte';
 
   type LiveMode = 'off' | 'test' | 'training';
@@ -63,6 +63,7 @@
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
 
   let settingsOpen = $state(false);
+  let statsOpen = $state(false);
 
   // Stop live modes when device disconnects (unless devMode is on).
   $effect(() => {
@@ -143,6 +144,21 @@
         </DropdownMenu.Root>
       </ButtonGroup.Root>
     {/if}
+
+    <Button variant="outline" onclick={() => (statsOpen = true)}>
+      <Activity /> Stats
+    </Button>
+    <ResponsiveSheet
+      bind:open={statsOpen}
+      title="Statistiques"
+      description="Données d'utilisation depuis le dernier reset."
+      srOnlyTitle={false}
+      desktopClass="w-full sm:max-w-lg"
+    >
+      <div class="px-4 pb-4">
+        <StatsTile />
+      </div>
+    </ResponsiveSheet>
 
     <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
       <Settings2 /> Paramètres
