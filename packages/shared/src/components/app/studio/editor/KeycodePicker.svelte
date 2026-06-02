@@ -17,9 +17,7 @@
   const isMobile = new IsMobile();
   const finePointer = new HasFinePointer();
 
-  const subtitle = $derived(
-    [ctx.profile?.name, ctx.layer?.name].filter(Boolean).join(' · '),
-  );
+  const subtitle = $derived([ctx.profile?.name, ctx.layer?.name].filter(Boolean).join(' · '));
 </script>
 
 {#snippet header()}
@@ -67,7 +65,11 @@
 
     <Item.Root variant="outline">
       {#snippet child({ props })}
-        <button {...props} class={[props.class as string, 'cursor-pointer'].join(' ')} onclick={() => ctx.setStage('list')}>
+        <button
+          {...props}
+          class={[props.class as string, 'cursor-pointer'].join(' ')}
+          onclick={() => ctx.setStage('list')}
+        >
           <Item.Media variant="icon"><List class="size-5" /></Item.Media>
           <Item.Content>
             <Item.Title>Parcourir la liste</Item.Title>
@@ -84,10 +86,7 @@
     {@render header()}
     <div class="relative flex flex-col flex-1 min-h-0">
       {#key ctx.pickerStage}
-        <div
-          class="flex flex-col flex-1 min-h-0"
-          in:fly={{ x: ctx.pickerStage === 'menu' ? -16 : 16, duration: 150 }}
-        >
+        <div class="flex flex-col flex-1 min-h-0" in:fly={{ x: ctx.pickerStage === 'menu' ? -16 : 16, duration: 150 }}>
           {#if ctx.pickerStage === 'menu'}
             {@render menu()}
           {:else if ctx.pickerStage === 'record'}
@@ -106,6 +105,7 @@
     <Drawer.Content class="max-h-[85vh]">
       <Drawer.Title class="sr-only">{ctx.editTargetLabel}</Drawer.Title>
       {@render body()}
+      <Drawer.Footer></Drawer.Footer>
     </Drawer.Content>
   </Drawer.Root>
 {:else}

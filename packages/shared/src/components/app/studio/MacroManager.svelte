@@ -211,196 +211,196 @@
   description="16 macros partagées par tous les profils. Assigne-les à une touche via Macro dans le sélecteur de touche."
   srOnlyTitle={false}
 >
-    <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 pb-4 mx-auto overflow-y-auto">
-      <!-- Sélecteur de slot -->
-      <div class="grid grid-cols-4 gap-1.5">
-        {#each Array.from({ length: MACRO_COUNT }, (_, i) => i) as i (i)}
-          <button
-            type="button"
-            class={cn(
-              'flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-xs transition-colors',
-              selected === i ? 'border-rose-500 bg-rose-500/10' : 'border-border hover:border-rose-500/50',
-            )}
-            onclick={() => load(i)}
-          >
-            <span class="max-w-full font-semibold truncate">
-              {isMacroUsed(macros[i]) ? macros[i].name?.trim() || `Macro ${i}` : `M${i}`}
-            </span>
-            <span class="text-[10px] text-muted-foreground">
-              {isMacroUsed(macros[i]) ? `${macros[i].steps.length} ét.` : 'vide'}
-            </span>
-          </button>
-        {/each}
-      </div>
-
-      <!-- Éditeur du slot sélectionné -->
-      <div class="flex flex-col gap-3 p-3 border rounded-xl border-border">
-        <div class="flex flex-col gap-1.5">
-          <Label for="macro-name" class="text-xs">Nom</Label>
-          <Input
-            id="macro-name"
-            bind:value={draftName}
-            maxlength={MACRO_NAME_MAX_LEN - 1}
-            placeholder={`Macro ${selected}`}
-          />
-        </div>
-
-        <!-- Séquence -->
-        <div class="flex flex-col gap-1">
-          <Label class="text-xs">Séquence ({draftSteps.length}/{MACRO_MAX_STEPS})</Label>
-          {#if displayItems.length === 0}
-            <p class="py-3 text-xs text-center text-muted-foreground">Aucune étape — ajoute une touche ci-dessous.</p>
-          {/if}
-          {#if displayItems.length > 0}
-            <Sortable
-              items={displayItems}
-              orientation="vertical"
-              rowHeight={34}
-              gap={[0, 4]}
-              getKey={(_, i) => `step-${i}`}
-              onReorder={reorderSteps}
-            >
-              {#snippet children({ item, handlePointerDown })}
-                <div class="flex items-center h-full gap-2 px-2 text-xs border rounded-md border-border bg-background">
-                  <button
-                    type="button"
-                    class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"
-                    title="Réordonner"
-                    onpointerdown={handlePointerDown}
-                  >
-                    <GripVertical class="size-3.5" />
-                  </button>
-                  <span class="font-medium capitalize text-muted-foreground w-14">
-                    {item.kind === 'tap'
-                      ? 'Appui'
-                      : item.kind === 'hold'
-                        ? 'Maintien'
-                        : item.kind === 'release'
-                          ? 'Relâche'
-                          : 'Délai'}
-                  </span>
-                  <span class="flex-1 font-semibold">{item.label}</span>
-                  <button
-                    type="button"
-                    class="text-muted-foreground hover:text-destructive"
-                    title="Supprimer"
-                    onclick={() => removeRange(item.from, item.count)}
-                  >
-                    <X class="size-3.5" />
-                  </button>
-                </div>
-              {/snippet}
-            </Sortable>
-          {/if}
-        </div>
-
-        <ButtonGroup.Root>
-          <Button
-            variant="outline"
-            size="sm"
-            class="gap-1.5"
-            onclick={() => openPicker('tap')}
-            disabled={draftSteps.length + 2 > MACRO_MAX_STEPS}
-          >
-            <Plus class="size-3.5" /> Touche
-          </Button>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
-              {#snippet child({ props })}
-                <Button {...props} variant="outline" size="icon-sm">
-                  <ChevronDown />
-                </Button>
-              {/snippet}
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end" class="[--radius:1rem]">
-              <DropdownMenu.Group>
-                <DropdownMenu.Item onclick={() => openPicker('hold')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
-                  <ArrowDownToLine class="size-3.5" /> Maintien
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onclick={() => openPicker('release')}
-                  disabled={draftSteps.length >= MACRO_MAX_STEPS}
-                >
-                  <ArrowUpFromLine class="size-3.5" /> Relâche
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onclick={() => addStep({ type: MACRO_STEP_TYPE.DELAY_MS, delay: 50 })}
-                  disabled={draftSteps.length >= MACRO_MAX_STEPS}
-                >
-                  <Clock class="size-3.5" /> Délai
-                </DropdownMenu.Item>
-              </DropdownMenu.Group>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        </ButtonGroup.Root>
-
-        <!-- Édition fine des délais -->
-        {#each draftSteps as step, si (si)}
-          {#if step.type === MACRO_STEP_TYPE.DELAY_MS}
-            <div class="flex items-center gap-2 text-xs">
-              <Clock class="size-3.5 text-muted-foreground" />
-              <span class="text-muted-foreground">Délai #{si + 1}</span>
-              <Input
-                type="number"
-                min={1}
-                max={1000}
-                class="w-20 text-right h-7"
-                value={step.delay ?? 50}
-                onchange={(e: Event) => {
-                  const v = Math.min(1000, Math.max(1, +(e.target as HTMLInputElement).value));
-                  draftSteps = draftSteps.map((s, i) => (i === si ? { ...s, delay: v } : s));
-                }}
-              />
-              <span class="text-muted-foreground">ms</span>
-            </div>
-          {/if}
-        {/each}
-
-        <!-- Actions -->
-        <div class="flex justify-between gap-2 pt-2 border-t border-border">
-          <Button size="sm" variant="ghost" class="gap-1.5 text-destructive" onclick={clearSlot}>
-            <Trash2 class="size-3.5" /> Effacer
-          </Button>
-          <div class="flex gap-2">
-            <Button size="sm" variant="outline" onclick={() => load(selected)} disabled={!dirty}>Annuler</Button>
-            <Button size="sm" onclick={save} disabled={!dirty}>Enregistrer</Button>
-          </div>
-        </div>
-      </div>
+  <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 pb-4 mx-auto overflow-y-auto">
+    <!-- Sélecteur de slot -->
+    <div class="grid grid-cols-4 gap-1.5">
+      {#each Array.from({ length: MACRO_COUNT }, (_, i) => i) as i (i)}
+        <button
+          type="button"
+          class={cn(
+            'flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-xs transition-colors',
+            selected === i ? 'border-rose-500 bg-rose-500/10' : 'border-border hover:border-rose-500/50',
+          )}
+          onclick={() => load(i)}
+        >
+          <span class="max-w-full font-semibold truncate">
+            {isMacroUsed(macros[i]) ? macros[i].name?.trim() || `Macro ${i}` : `M${i}`}
+          </span>
+          <span class="text-[10px] text-muted-foreground">
+            {isMacroUsed(macros[i]) ? `${macros[i].steps.length} ét.` : 'vide'}
+          </span>
+        </button>
+      {/each}
     </div>
 
-<!-- Picker de touche pour les étapes (menu → record / list, nested drawer on mobile) -->
-<ResponsiveSheet
-  bind:open={pickerOpen}
-  title={pickerTitle}
-  srOnlyTitle={true}
-  nested={true}
-  desktopClass="sm:max-w-md flex flex-col"
->
-  {#snippet header()}
-    <div class="flex items-center gap-2 px-4 pt-4 pr-12 shrink-0">
-      {#if pickerStage !== 'menu'}
-        <Button variant="ghost" size="icon-sm" onclick={() => (pickerStage = 'menu')} title="Retour">
-          <ArrowLeft class="size-4" />
+    <!-- Éditeur du slot sélectionné -->
+    <div class="flex flex-col gap-3 p-3 border rounded-xl border-border">
+      <div class="flex flex-col gap-1.5">
+        <Label for="macro-name" class="text-xs">Nom</Label>
+        <Input
+          id="macro-name"
+          bind:value={draftName}
+          maxlength={MACRO_NAME_MAX_LEN - 1}
+          placeholder={`Macro ${selected}`}
+        />
+      </div>
+
+      <!-- Séquence -->
+      <div class="flex flex-col gap-1">
+        <Label class="text-xs">Séquence ({draftSteps.length}/{MACRO_MAX_STEPS})</Label>
+        {#if displayItems.length === 0}
+          <p class="py-3 text-xs text-center text-muted-foreground">Aucune étape — ajoute une touche ci-dessous.</p>
+        {/if}
+        {#if displayItems.length > 0}
+          <Sortable
+            items={displayItems}
+            orientation="vertical"
+            rowHeight={34}
+            gap={[0, 4]}
+            getKey={(_, i) => `step-${i}`}
+            onReorder={reorderSteps}
+          >
+            {#snippet children({ item, handlePointerDown })}
+              <div class="flex items-center h-full gap-2 px-2 text-xs border rounded-md border-border bg-background">
+                <button
+                  type="button"
+                  class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"
+                  title="Réordonner"
+                  onpointerdown={handlePointerDown}
+                >
+                  <GripVertical class="size-3.5" />
+                </button>
+                <span class="font-medium capitalize text-muted-foreground w-14">
+                  {item.kind === 'tap'
+                    ? 'Appui'
+                    : item.kind === 'hold'
+                      ? 'Maintien'
+                      : item.kind === 'release'
+                        ? 'Relâche'
+                        : 'Délai'}
+                </span>
+                <span class="flex-1 font-semibold">{item.label}</span>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:text-destructive"
+                  title="Supprimer"
+                  onclick={() => removeRange(item.from, item.count)}
+                >
+                  <X class="size-3.5" />
+                </button>
+              </div>
+            {/snippet}
+          </Sortable>
+        {/if}
+      </div>
+
+      <ButtonGroup.Root>
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1.5"
+          onclick={() => openPicker('tap')}
+          disabled={draftSteps.length + 2 > MACRO_MAX_STEPS}
+        >
+          <Plus class="size-3.5" /> Touche
         </Button>
-      {/if}
-      <p class="text-sm font-semibold text-left">{pickerTitle}</p>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            {#snippet child({ props })}
+              <Button {...props} variant="outline" size="icon-sm">
+                <ChevronDown />
+              </Button>
+            {/snippet}
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end" class="[--radius:1rem]">
+            <DropdownMenu.Group>
+              <DropdownMenu.Item onclick={() => openPicker('hold')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
+                <ArrowDownToLine class="size-3.5" /> Maintien
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onclick={() => openPicker('release')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
+                <ArrowUpFromLine class="size-3.5" /> Relâche
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onclick={() => addStep({ type: MACRO_STEP_TYPE.DELAY_MS, delay: 50 })}
+                disabled={draftSteps.length >= MACRO_MAX_STEPS}
+              >
+                <Clock class="size-3.5" /> Délai
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </ButtonGroup.Root>
+
+      <!-- Édition fine des délais -->
+      {#each draftSteps as step, si (si)}
+        {#if step.type === MACRO_STEP_TYPE.DELAY_MS}
+          <div class="flex items-center gap-2 text-xs">
+            <Clock class="size-3.5 text-muted-foreground" />
+            <span class="text-muted-foreground">Délai #{si + 1}</span>
+            <Input
+              type="number"
+              min={1}
+              max={1000}
+              class="w-20 text-right h-7"
+              value={step.delay ?? 50}
+              onchange={(e: Event) => {
+                const v = Math.min(1000, Math.max(1, +(e.target as HTMLInputElement).value));
+                draftSteps = draftSteps.map((s, i) => (i === si ? { ...s, delay: v } : s));
+              }}
+            />
+            <span class="text-muted-foreground">ms</span>
+          </div>
+        {/if}
+      {/each}
+
+      <!-- Actions -->
+      <div class="flex justify-between gap-2 pt-2 border-t border-border">
+        <Button size="sm" variant="ghost" class="gap-1.5 text-destructive" onclick={clearSlot}>
+          <Trash2 class="size-3.5" /> Effacer
+        </Button>
+        <div class="flex gap-2">
+          <Button size="sm" variant="outline" onclick={() => load(selected)} disabled={!dirty}>Annuler</Button>
+          <Button size="sm" onclick={save} disabled={!dirty}>Enregistrer</Button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  {#snippet footer()}
+    <!-- Empty -->
   {/snippet}
+  <!-- Picker de touche pour les étapes (menu → record / list, nested drawer on mobile) -->
+  <ResponsiveSheet
+    bind:open={pickerOpen}
+    title={pickerTitle}
+    srOnlyTitle={true}
+    nested={true}
+    desktopClass="sm:max-w-md flex flex-col"
+  >
+    {#snippet header()}
+      <div class="flex items-center gap-2 px-4 pt-4 pr-12 shrink-0">
+        {#if pickerStage !== 'menu'}
+          <Button variant="ghost" size="icon-sm" onclick={() => (pickerStage = 'menu')} title="Retour">
+            <ArrowLeft class="size-4" />
+          </Button>
+        {/if}
+        <p class="text-sm font-semibold text-left">{pickerTitle}</p>
+      </div>
+    {/snippet}
 
     <div class="relative flex flex-col flex-1 min-h-0 p-4">
       {#key pickerStage}
-        <div
-          class="flex flex-col flex-1 min-h-0"
-          in:fly={{ x: pickerStage === 'menu' ? -16 : 16, duration: 150 }}
-        >
+        <div class="flex flex-col flex-1 min-h-0" in:fly={{ x: pickerStage === 'menu' ? -16 : 16, duration: 150 }}>
           {#if pickerStage === 'menu'}
             <Item.Group class="gap-2">
               <Item.Root variant="outline">
                 {#snippet child({ props })}
                   <button
                     {...props}
-                    class={[props.class as string, 'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'].join(' ')}
+                    class={[
+                      props.class as string,
+                      'cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                    ].join(' ')}
                     disabled={!finePointer.current}
                     onclick={() => (pickerStage = 'record')}
                   >
@@ -467,5 +467,8 @@
         </div>
       {/key}
     </div>
-</ResponsiveSheet>
+    {#snippet footer()}
+      <!-- Empty -->
+    {/snippet}
+  </ResponsiveSheet>
 </ResponsiveSheet>

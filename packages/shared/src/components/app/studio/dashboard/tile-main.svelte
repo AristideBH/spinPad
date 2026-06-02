@@ -77,6 +77,7 @@
     <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
       <Lightbulb /> LED
     </Button>
+
     <MacroManager />
 
     {#if serial.connected || devMode.active}
@@ -99,11 +100,15 @@
       <div class="px-4 pb-4">
         <StatsTile />
       </div>
+      {#snippet footer()}
+        <!-- Empty -->
+      {/snippet}
     </ResponsiveSheet>
 
     <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
       <Settings2 /> Paramètres
     </Button>
+
     <ResponsiveSheet
       bind:open={settingsOpen}
       title="Paramètres"
@@ -114,6 +119,9 @@
       <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
         <SettingsTab />
       </div>
+      {#snippet footer()}
+        <!-- Empty -->
+      {/snippet}
     </ResponsiveSheet>
 
     <ButtonGroup.Root>

@@ -158,7 +158,7 @@
       orientation="horizontal"
       rowHeight={76}
       gap={[8, 8]}
-      cellWidth={256}
+      colWidth={256}
       getKey={(p) => `p-${p.name}`}
       onReorder={(from, to) => editProfile(from, { moveTo: to })}
     >

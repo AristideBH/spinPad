@@ -17,16 +17,15 @@
   interface Props {
     items: T[];
     orientation?: 'horizontal' | 'vertical';
-    rowHeight: number;
-    gap?: [number, number];
-    forceMount?: boolean;
+    /** Hauteur de ligne en px, ou "auto" : hauteur pilotée par le contenu (liste 1-D verticale). */
+    rowHeight?: number | 'auto';
     /**
-     * Largeur fixe d'une cellule en px (mode horizontal uniquement).
-     * Permet de garder des cartes à taille constante et de déborder dans
-     * une zone scrollable, au lieu d'être compressées dans la largeur du
-     * conteneur. Ignoré en vertical (les items prennent toute la largeur).
+     * Largeur de colonne en px (shrink-to-fit, déborde dans une zone scrollable),
+     * ou "auto" : largeur pilotée par le contenu (liste 1-D horizontale, le conteneur
+     * se réduit au contenu → items condensés à gauche). Ignoré en vertical.
      */
-    cellWidth?: number;
+    colWidth?: number | 'auto';
+    gap?: [number, number];
     getKey: (item: T, index: number) => string;
     onReorder: (from: number, to: number) => void;
     children: Snippet<[{ item: T; index: number; handlePointerDown: (e: PointerEvent) => void }]>;
@@ -35,10 +34,9 @@
   let {
     items,
     orientation = 'vertical',
-    rowHeight,
+    rowHeight = 'auto',
+    colWidth,
     gap = [8, 8],
-    forceMount = false,
-    cellWidth,
     getKey,
     onReorder,
     children,
@@ -51,10 +49,12 @@
   const cols = $derived<ColsDefinition>([[0, colCount]]);
   const dataOrder = $derived(items.map((it, i) => getKey(it, i)));
 
-  // En horizontal avec cellWidth, on force la largeur du conteneur du Grid
-  // (N cellules + gaps) pour que mosaic calcule une largeur de cellule fixe
-  // et que le parent scrollable prenne le relais en cas de débordement.
-  const containerWidth = $derived(horizontal && cellWidth ? colCount * cellWidth + (colCount - 1) * gap[0] : undefined);
+  // Largeur fixe horizontale : on garde le chemin éprouvé (grille fluide +
+  // largeur de conteneur forcée), au lieu du chemin "colWidth fixe" du module.
+  // Seul le mode "auto" passe colWidth au Grid.
+  const fixedColWidth = $derived(horizontal && typeof colWidth === 'number' ? colWidth : undefined);
+  const forcedWidth = $derived(fixedColWidth ? colCount * fixedColWidth + (colCount - 1) * gap[0] : undefined);
+  const gridColWidth = $derived<number | 'auto' | undefined>(colWidth === 'auto' ? 'auto' : undefined);
 
   // Reconstruit les éléments de grille depuis les données canoniques.
   // Ne dépend pas de `gridItems` → les mutations internes de mosaic
@@ -119,11 +119,14 @@
   const flyDirection = $derived(horizontal ? { x: flyDistance, y: 0 } : { x: 0, y: flyDistance });
 </script>
 
-<div bind:this={wrapEl} class="sortable-wrap" style={[containerWidth ? `width:${containerWidth}px` : '', horizontal ? 'touch-action:pan-x' : ''].filter(Boolean).join(';') || undefined}>
-  <Grid bind:items={gridItems} {cols} {rowHeight} {gap} unstyled compact onpointerup={onPointerUp}>
+<div bind:this={wrapEl} class="sortable-wrap" style={[forcedWidth ? `width:${forcedWidth}px` : '', horizontal ? 'touch-action:pan-x' : ''].filter(Boolean).join(';') || undefined}>
+  <Grid bind:items={gridItems} {cols} {rowHeight} colWidth={gridColWidth} {gap} unstyled compact onpointerup={onPointerUp}>
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
       {@const payload = dataItem.data as { item: T; index: number }}
-      <div transition:fly={{ ...flyDirection, duration: 250, delay: 80 + payload.index * 40 }} class="w-full h-full">
+      <div
+        transition:fly={{ ...flyDirection, duration: 250, delay: 80 + payload.index * 40 }}
+        class={horizontal ? 'h-full' : 'w-full'}
+      >
         {@render renderItem({ item: payload.item, index: payload.index, handlePointerDown: movePointerDown })}
       </div>
     {/snippet}
