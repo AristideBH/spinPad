@@ -6,10 +6,11 @@
   import { KeyboardLayout } from '$shared/lib/hooks/keyboard-layout.svelte.js';
   import { cn } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
-  import { testMode } from '$shared/store/testMode.svelte.js';
-  import { trainingMode } from '$shared/store/trainingMode.svelte.js';
+  import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
+  import { serial } from '$shared/store/serial.svelte.js';
+  import { devMode } from '$shared/store/devMode.svelte.js';
 
-  const liveMode = $derived(testMode.active ? testMode : trainingMode.active ? trainingMode : null);
+  const visualsActive = $derived(serial.connected || devMode.active);
 
   const ctx = getKeypadContext();
   const layout = new KeyboardLayout();
@@ -102,10 +103,10 @@
       "
       >
         <!-- Pass 1 : pulses (peintes avant tous les keycaps ; ne chevauchent jamais les voisines). -->
-        {#if liveMode}
+        {#if visualsActive}
           {#each KEY_LAYOUT as key (key.idx)}
-            {#key liveMode.pressNonce[key.idx]}
-              {#if liveMode.pressNonce[key.idx] > 0}
+            {#key keyVisuals.pressNonce[key.idx]}
+              {#if keyVisuals.pressNonce[key.idx] > 0}
                 <span
                   class="keycap-pulse"
                   style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
@@ -124,7 +125,7 @@
               'keycap',
               ctx.editingKey === key.idx && ctx.editingField === 'key' ? 'keycap--active' : '',
               key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
-              liveMode && liveMode.pressed[key.idx] ? 'keycap--press-sim' : '',
+              visualsActive && keyVisuals.pressed[key.idx] ? 'keycap--press-sim' : '',
             )}
             onclick={() => ctx.openKeyPicker(key.idx)}
           >

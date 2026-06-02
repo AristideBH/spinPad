@@ -5,12 +5,12 @@
   import Knob from './Knob.svelte';
   import EncoderButtons from './EncoderButtons.svelte';
   import PresetSelect from './PresetSelect.svelte';
-  import { testMode } from '$shared/store/testMode.svelte.js';
+  import { trainingMode } from '$shared/store/trainingMode.svelte.js';
 
   const ctx = getKeypadContext();
 
   const knob = new EncoderKnob({
-    isTrainingActive: () => testMode.active,
+    isTrainingActive: () => trainingMode.active,
     onTrigger: (field) => ctx.openEncoderPicker(field),
   });
 

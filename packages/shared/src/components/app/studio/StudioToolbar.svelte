@@ -4,6 +4,7 @@
   import { serial } from '$shared/store/serial.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import { startPolling, stopPolling } from '$shared/store/deviceStatus.svelte.js';
+  import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { Spinner } from '$shared/components/ui/spinner';
@@ -20,6 +21,13 @@
     if (shouldPoll) {
       startPolling(5000);
       return () => stopPolling();
+    }
+  });
+
+  $effect(() => {
+    if (serial.connected || devMode.active) {
+      keyVisuals.start();
+      return () => keyVisuals.stop();
     }
   });
 

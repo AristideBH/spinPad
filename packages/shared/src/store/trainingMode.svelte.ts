@@ -5,17 +5,16 @@
 //  dans le studio. Le firmware supprime l'exécution de l'action
 //  pendant ce mode (cf. cmd "training_mode").
 //
-//  DevMode encodeur : ArrowLeft/ArrowRight/Space → ccw/cw/press.
-//  TODO firmware : streamer {event:"encoder",dir:"cw"|"ccw"|"press"} via
-//  _monitor_emit() + gate g_training_mode dans le dispatch encodeur
-//  (mêmes hooks que send_action()). Côté store : brancher onKeyEvent sur
-//  evt.event === 'encoder' → #fireEncoder(evt.dir).
+//  Visual feedback (pulses, press-sim) is handled by keyVisuals which
+//  is always-on when connected. trainingMode only manages:
+//    - trainingModeCmd (firmware gate)
+//    - requestedTarget (picker trigger)
+//    - devMode: intercepts keyboard to set requestedTarget for encoder
 // ═══════════════════════════════════════════════════════════════
 
-import { keyMonitor, trainingModeCmd, onKeyEvent, serial } from './serial.svelte.js';
+import { trainingModeCmd, onMessage, serial } from './serial.svelte.js';
 import { devMode } from './devMode.svelte.js';
 import { testMode } from './testMode.svelte.js';
-import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder.svelte.js';
 
 const DEV_KEY_MAP: Record<string, number> = {
   Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
@@ -30,31 +29,16 @@ export type TrainingTarget =
 
 class TrainingModeState {
   active = $state(false);
-  pressNonce = $state<number[]>(Array(10).fill(0));
-  pressed = $state<boolean[]>(Array(10).fill(false));
   /** Cible demandée — lu et nullé par Editor.svelte qui ouvre le picker. */
   requestedTarget = $state<TrainingTarget | null>(null);
 
   #cleanup: (() => void) | null = null;
-  #releaseTimers: Array<ReturnType<typeof setTimeout> | null> = Array(10).fill(null);
 
-  #fire(idx: number): void {
-    if (idx < 0 || idx >= 10) return;
-    this.pressNonce[idx]++;
-    this.pressed[idx] = true;
-    if (this.#releaseTimers[idx]) clearTimeout(this.#releaseTimers[idx]!);
-    this.#releaseTimers[idx] = setTimeout(() => {
-      this.pressed[idx] = false;
-      this.#releaseTimers[idx] = null;
-    }, 120);
+  #triggerKey(idx: number): void {
     this.requestedTarget = { kind: 'key', idx };
   }
 
-  #fireEncoder(field: 'cw' | 'ccw' | 'press'): void {
-    const knob = getActiveEncoderKnob();
-    if (field === 'cw') knob?.pulseCW();
-    else if (field === 'ccw') knob?.pulseCCW();
-    else knob?.pulsePress();
+  #triggerEncoder(field: 'cw' | 'ccw' | 'press'): void {
     this.requestedTarget = { kind: 'encoder', field };
   }
 
@@ -68,30 +52,22 @@ class TrainingModeState {
       const onKey = (e: KeyboardEvent) => {
         if (e.repeat) return;
         const idx = DEV_KEY_MAP[e.code];
-        if (idx !== undefined) {
-          this.#fire(idx);
-          return;
-        }
-        if (e.code === 'ArrowRight') {
-          e.preventDefault();
-          this.#fireEncoder('cw');
-        } else if (e.code === 'ArrowLeft') {
-          e.preventDefault();
-          this.#fireEncoder('ccw');
-        } else if (e.code === 'Space') {
-          e.preventDefault();
-          this.#fireEncoder('press');
-        }
+        if (idx !== undefined) { this.#triggerKey(idx); return; }
+        if (e.code === 'ArrowRight') { e.preventDefault(); this.#triggerEncoder('cw'); }
+        else if (e.code === 'ArrowLeft') { e.preventDefault(); this.#triggerEncoder('ccw'); }
+        else if (e.code === 'Space') { e.preventDefault(); this.#triggerEncoder('press'); }
       };
       window.addEventListener('keydown', onKey, true);
       this.#cleanup = () => window.removeEventListener('keydown', onKey, true);
       return;
     }
 
-    await keyMonitor(true);
     await trainingModeCmd(true);
-    this.#cleanup = onKeyEvent((evt: { idx: number; state: string }) => {
-      if (evt.state === 'down') this.#fire(evt.idx);
+    this.#cleanup = onMessage((msg) => {
+      const m = msg as Record<string, unknown>;
+      if (!m) return;
+      if (m['event'] === 'key' && m['state'] === 'down') this.#triggerKey(m['idx'] as number);
+      else if (m['event'] === 'encoder') this.#triggerEncoder(m['dir'] as 'cw' | 'ccw' | 'press');
     });
   }
 
@@ -102,12 +78,7 @@ class TrainingModeState {
     this.#cleanup = null;
     this.requestedTarget = null;
     if (devMode.active) return;
-    try {
-      await trainingModeCmd(false);
-      await keyMonitor(false);
-    } catch {
-      // device may already be disconnected
-    }
+    try { await trainingModeCmd(false); } catch { /* device may be disconnected */ }
   }
 
   async toggle(): Promise<void> {
