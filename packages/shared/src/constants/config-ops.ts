@@ -201,6 +201,26 @@ export function editProfile(
   return { config: cfg, selection: sel };
 }
 
+/**
+ * Réinitialise un profil : remet à 0 toutes les touches de tous ses layers.
+ * Conserve la structure (nombre de layers, noms), les encodeurs, l'icône et le
+ * nom du profil — même sémantique que le « reset » d'un layer, appliqué à tous.
+ */
+export function clearProfile(
+  config: FullConfig,
+  selection: Selection,
+  idx: number,
+): OpResult {
+  const cfg = clone(config);
+  const profile = cfg.profiles[idx];
+  if (!profile) return { config: cfg, selection };
+
+  for (const layer of profile.layers) {
+    layer.keys = layer.keys.map(() => 0);
+  }
+  return { config: cfg, selection };
+}
+
 // ── Layers ──────────────────────────────────────────────────────
 
 /** Ajoute un layer au profil pIdx (garde ≤ CONFIG_MAX_LAYERS) et le sélectionne. */

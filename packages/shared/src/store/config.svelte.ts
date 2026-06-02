@@ -456,6 +456,10 @@ export function editProfile(idx: number, patch: ops.ProfilePatch): void {
   _applyOp(ops.editProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx, patch));
 }
 
+export function clearProfile(idx: number): void {
+  _applyOp(ops.clearProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx));
+}
+
 export function addLayer(profileIdx: number): void {
   _applyOp(ops.addLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx));
 }
