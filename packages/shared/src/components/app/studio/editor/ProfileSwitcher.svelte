@@ -1,16 +1,42 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
-  import { configState, editProfile, exportProfiles, importProfiles } from '$shared/store/config.svelte.js';
+  import {
+    configState,
+    addProfile,
+    deleteProfile,
+    clearProfile,
+    editProfile,
+    setProfileIcon,
+    exportProfiles,
+    importProfiles,
+  } from '$shared/store/config.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
-  import { CONFIG_MAX_PROFILES, type ProfileConfig } from '$shared/constants/config-schema.js';
+  import { CONFIG_MAX_PROFILES, MIN_PROFILES, type ProfileConfig } from '$shared/constants/config-schema.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as Item from '$shared/components/ui/item/index.js';
+  import IconPreview from '../../profiles/IconPreview.svelte';
+  import IconEditor from '../../profiles/IconEditor.svelte';
+  import AddProfileSheet from './AddProfileSheet.svelte';
   import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
   import { cn, scrollShadow } from '$shared/utils.js';
-  import { Download, GripVertical, Plus, Share, Trash, Upload } from '@lucide/svelte';
+  import {
+    BrushCleaning,
+    CopyPlus,
+    Download,
+    GripVertical,
+    MoreVertical,
+    Palette,
+    Plus,
+    Share,
+    Trash2,
+    Upload,
+  } from '@lucide/svelte';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import * as Dialog from '$shared/components/ui/dialog/index.js';
+  import * as InputGroup from '$shared/components/ui/input-group/index.js';
+  import * as Kbd from '$shared/components/ui/kbd/index.js';
   import { toast } from 'svelte-sonner';
 
   function profileFill(prof: ProfileConfig): { mapped: number; total: number } {
@@ -144,6 +170,35 @@
     if (selectedExport.size === 0) return;
     exportProfiles([...selectedExport].sort((a, b) => a - b));
   }
+
+  // ── CRUD par profil (menu ⋮ épinglé sur la carte active) ──────────
+  let pendingDelete = $state<number | null>(null);
+  let pendingClear = $state<number | null>(null);
+  let pendingIcon = $state<number | null>(null);
+  let addOpen = $state(false);
+
+  function renameProfile(i: number, name: string) {
+    editProfile(i, { name });
+  }
+
+  function duplicateProfile(i: number) {
+    if (profileList.length >= CONFIG_MAX_PROFILES) return;
+    addProfile(profileList[i]); // op clone + nom unique + auto-sélection
+  }
+
+  function confirmDelete() {
+    if (pendingDelete !== null) {
+      deleteProfile(pendingDelete);
+      pendingDelete = null;
+    }
+  }
+
+  function confirmClear() {
+    if (pendingClear !== null) {
+      clearProfile(pendingClear);
+      pendingClear = null;
+    }
+  }
 </script>
 
 <ScrollArea
@@ -169,7 +224,7 @@
           <Item.Root
             variant="outline"
             class={cn(
-              'h-full w-full py-3 group transition-all duration-200 items-center border-muted ',
+              'relative h-full w-full py-3 group transition-all duration-200 items-center border-muted ',
               isActive
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-card hover:border-muted-foreground/15 hover:bg-muted/50',
@@ -186,13 +241,17 @@
               >
                 <GripVertical class="size-3.5" />
               </button>
-              <div
-                class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0 bg-muted"
-                class:text-foreground={isActive}
-                class:text-muted-foreground={!isActive}
-              >
-                {i + 1}
-              </div>
+              {#if prof.icon}
+                <IconPreview value={prof.icon} size={32} class="shrink-0 bg-background/40" />
+              {:else}
+                <div
+                  class="flex items-center justify-center text-sm font-bold rounded-full size-8 shrink-0 bg-muted"
+                  class:text-foreground={isActive}
+                  class:text-muted-foreground={!isActive}
+                >
+                  {i + 1}
+                </div>
+              {/if}
             </Item.Media>
             <Item.Content>
               <Item.Title>{prof.name}</Item.Title>
@@ -201,6 +260,63 @@
                 {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} touches
               </Item.Description>
             </Item.Content>
+
+            {#if isActive}
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger
+                  title="Options du profil"
+                  class={cn(
+                    buttonVariants({ variant: 'ghost', size: 'icon' }),
+                    'absolute top-1 right-1 z-10 size-7 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground data-[state=open]:bg-primary-foreground/20',
+                  )}
+                  onclick={(e) => e.preventDefault()}
+                >
+                  <MoreVertical />
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content align="end" class="w-52">
+                  <div class="px-1.5 py-1">
+                    <InputGroup.Root class="h-7">
+                      <InputGroup.Input
+                        placeholder="Nom du profil"
+                        value={prof.name ?? ''}
+                        onkeydown={(e: KeyboardEvent) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
+                        }}
+                        onchange={(e: Event) => renameProfile(i, (e.currentTarget as HTMLInputElement).value)}
+                      />
+                      <InputGroup.Addon align="inline-end">
+                        <Kbd.Root>⏎</Kbd.Root>
+                      </InputGroup.Addon>
+                    </InputGroup.Root>
+                  </div>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item onSelect={() => (pendingIcon = i)}>
+                    <Palette />
+                    Modifier l'icône
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    disabled={profileList.length >= CONFIG_MAX_PROFILES}
+                    onSelect={() => duplicateProfile(i)}
+                  >
+                    <CopyPlus />
+                    Dupliquer
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => (pendingClear = i)}>
+                    <BrushCleaning />
+                    Réinitialiser
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    variant="destructive"
+                    disabled={profileList.length <= MIN_PROFILES}
+                    onSelect={() => (pendingDelete = i)}
+                  >
+                    <Trash2 />
+                    Supprimer
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            {/if}
           </Item.Root>
         </Label>
       {/snippet}
@@ -215,6 +331,7 @@
           size="icon"
           disabled={profileList.length >= CONFIG_MAX_PROFILES}
           title="Ajouter un profil"
+          onclick={() => (addOpen = true)}
         >
           <Plus />
         </Button>
@@ -303,6 +420,60 @@
     </div>
   </RadioGroup.Root>
 </ScrollArea>
+
+<AddProfileSheet bind:open={addOpen} />
+
+<Dialog.Root open={pendingDelete !== null} onOpenChange={(o) => (o ? null : (pendingDelete = null))}>
+  <Dialog.Content class="sm:max-w-sm">
+    <Dialog.Header>
+      <Dialog.Title>Supprimer le profil</Dialog.Title>
+      <Dialog.Description>
+        {#if pendingDelete !== null}
+          Supprimer définitivement le profil « {profileList[pendingDelete]?.name ?? `Profil ${pendingDelete + 1}`} » et
+          tous ses layers ? Cette action peut être annulée avec Ctrl+Z.
+        {/if}
+      </Dialog.Description>
+    </Dialog.Header>
+    <Dialog.Footer>
+      <Button variant="secondary" onclick={() => (pendingDelete = null)}>Annuler</Button>
+      <Button variant="destructive" onclick={confirmDelete}>Supprimer</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
+
+<Dialog.Root open={pendingIcon !== null} onOpenChange={(o) => (o ? null : (pendingIcon = null))}>
+  <Dialog.Content class="sm:max-w-fit">
+    <Dialog.Header>
+      <Dialog.Title>
+        Icône — {pendingIcon !== null ? (profileList[pendingIcon]?.name ?? `Profil ${pendingIcon + 1}`) : ''}
+      </Dialog.Title>
+      <Dialog.Description class="sr-only">Dessine ou choisis une icône pour ce profil.</Dialog.Description>
+    </Dialog.Header>
+    {#if pendingIcon !== null}
+      {@const pi = pendingIcon}
+      <IconEditor value={profileList[pi]?.icon ?? ''} onchange={(b64) => setProfileIcon(pi, b64)} />
+    {/if}
+  </Dialog.Content>
+</Dialog.Root>
+
+<Dialog.Root open={pendingClear !== null} onOpenChange={(o) => (o ? null : (pendingClear = null))}>
+  <Dialog.Content class="sm:max-w-sm">
+    <Dialog.Header>
+      <Dialog.Title>Réinitialiser le profil</Dialog.Title>
+      <Dialog.Description>
+        {#if pendingClear !== null}
+          Remettre à zéro toutes les touches de tous les layers de « {profileList[pendingClear]?.name ??
+            `Profil ${pendingClear + 1}`} » ? Les layers, encodeurs, l'icône et le nom sont conservés. Annulable avec
+          Ctrl+Z.
+        {/if}
+      </Dialog.Description>
+    </Dialog.Header>
+    <Dialog.Footer>
+      <Button variant="secondary" onclick={() => (pendingClear = null)}>Annuler</Button>
+      <Button variant="destructive" onclick={confirmClear}>Réinitialiser</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
 
 <style>
   :global(.profiles .svlt-grid-item) {

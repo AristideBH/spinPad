@@ -92,6 +92,30 @@ describe("config-ops — profils", () => {
     expect(r.config.active_profile).toBe(3);
     expect(r.selection.profile).toBe(3);
   });
+
+  it("clearProfile : remet à zéro les touches de tous les layers, conserve le reste", () => {
+    const cfg = defaultConfig();
+    // 2 layers, quelques touches + encodeurs + nom/icône
+    cfg.profiles[0].name = "Mix";
+    cfg.profiles[0].icon = "ICON64";
+    cfg.profiles[0].layers = [
+      { name: "Base", keys: [KC(4), 0, KC(5)], encoder_cw: MO(1), encoder_ccw: TG(1) },
+      { name: "Fn", keys: [KC(6), KC(7), 0], encoder_cw: TO(0), encoder_ccw: 0 },
+    ];
+    const r = ops.clearProfile(cfg, sel(0, 0), 0);
+    const p = r.config.profiles[0];
+    // toutes les touches à 0
+    expect(p.layers.every((l) => l.keys.every((k) => k === 0))).toBe(true);
+    // structure / encodeurs / nom / icône conservés
+    expect(p.layers.map((l) => l.name)).toEqual(["Base", "Fn"]);
+    expect(p.layers[0].encoder_cw).toBe(MO(1));
+    expect(p.layers[0].encoder_ccw).toBe(TG(1));
+    expect(p.name).toBe("Mix");
+    expect(p.icon).toBe("ICON64");
+    // sélection inchangée + source non mutée
+    expect(r.selection).toEqual(sel(0, 0));
+    expect(cfg.profiles[0].layers[0].keys[0]).toBe(KC(4));
+  });
 });
 
 describe("config-ops — layers", () => {
