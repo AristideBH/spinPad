@@ -292,15 +292,26 @@
       transparent 100%
     );
     opacity: 0;
-    animation: keycap-pulse 480ms ease-out forwards;
+    /* opacity: 1 !important; */
+    animation: keycap-pulse 350ms ease-out forwards;
     transform-origin: center;
     will-change: transform, opacity;
+    margin-bottom: var(--keycap-depth);
   }
 
   @keyframes keycap-pulse {
-    0%   { opacity: 0;    transform: scale(0.8); }
-    20%  { opacity: 0.95; transform: scale(1.15); }
-    100% { opacity: 0;    transform: scale(1.55); }
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(var(--keycap-depth));
+    }
+    20% {
+      opacity: 0.95;
+      transform: scale(1.15) translateY(var(--keycap-depth));
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.55) translateY(var(--keycap-depth));
+    }
   }
 
   .keycap-count {
@@ -325,15 +336,20 @@
     top: 4px;
     right: 4px;
     display: flex;
-    flex-direction: column;
     gap: 2px;
+    flex-direction: column-reverse;
     align-items: center;
   }
 
   .keycap-dot {
-    width: 5px;
-    height: 5px;
+    --size: 4px;
+    width: var(--size);
+    height: var(--size);
+    aspect-ratio: 1;
     border-radius: 9999px;
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
+    &:first-child {
+      /* margin-top: calc(var(--size) / -4); */
+    }
   }
 </style>

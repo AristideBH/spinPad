@@ -5,13 +5,17 @@
 //  dans le studio. Le firmware supprime l'exécution de l'action
 //  pendant ce mode (cf. cmd "training_mode").
 //
-//  TODO: étendre au support encodeur dès que le firmware stream les
-//  événements rotation/click dans le monitor.
+//  DevMode encodeur : ArrowLeft/ArrowRight/Space → ccw/cw/press.
+//  TODO firmware : streamer {event:"encoder",dir:"cw"|"ccw"|"press"} via
+//  _monitor_emit() + gate g_training_mode dans le dispatch encodeur
+//  (mêmes hooks que send_action()). Côté store : brancher onKeyEvent sur
+//  evt.event === 'encoder' → #fireEncoder(evt.dir).
 // ═══════════════════════════════════════════════════════════════
 
 import { keyMonitor, trainingModeCmd, onKeyEvent, serial } from './serial.svelte.js';
 import { devMode } from './devMode.svelte.js';
 import { testMode } from './testMode.svelte.js';
+import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder.svelte.js';
 
 const DEV_KEY_MAP: Record<string, number> = {
   Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
@@ -46,6 +50,14 @@ class TrainingModeState {
     this.requestedTarget = { kind: 'key', idx };
   }
 
+  #fireEncoder(field: 'cw' | 'ccw' | 'press'): void {
+    const knob = getActiveEncoderKnob();
+    if (field === 'cw') knob?.pulseCW();
+    else if (field === 'ccw') knob?.pulseCCW();
+    else knob?.pulsePress();
+    this.requestedTarget = { kind: 'encoder', field };
+  }
+
   async start(): Promise<void> {
     if (this.active) return;
     if (!devMode.active && !serial.connected) return;
@@ -56,7 +68,20 @@ class TrainingModeState {
       const onKey = (e: KeyboardEvent) => {
         if (e.repeat) return;
         const idx = DEV_KEY_MAP[e.code];
-        if (idx !== undefined) this.#fire(idx);
+        if (idx !== undefined) {
+          this.#fire(idx);
+          return;
+        }
+        if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          this.#fireEncoder('cw');
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          this.#fireEncoder('ccw');
+        } else if (e.code === 'Space') {
+          e.preventDefault();
+          this.#fireEncoder('press');
+        }
       };
       window.addEventListener('keydown', onKey, true);
       this.#cleanup = () => window.removeEventListener('keydown', onKey, true);

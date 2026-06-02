@@ -39,7 +39,7 @@
     breakpoint = 768,
     dismissible = true,
     nested = false,
-    desktopClass,
+    desktopClass = 'min-h-[85dvh]',
     mobileClass = 'max-h-[85vh]',
     showCloseButton = true,
     header,
