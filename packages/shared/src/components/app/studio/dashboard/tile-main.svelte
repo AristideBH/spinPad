@@ -3,7 +3,18 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Trash2, Settings2, Lightbulb, Activity, Check, ChevronDown } from '@lucide/svelte';
+  import {
+    Usb,
+    Bluetooth,
+    RefreshCw,
+    LogOut,
+    Trash2,
+    Settings2,
+    Lightbulb,
+    Activity,
+    Check,
+    ChevronDown,
+  } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -17,9 +28,7 @@
   import StatusCard from '../../StatusCard.svelte';
 
   type LiveMode = 'off' | 'test' | 'training';
-  const liveModeLabel = $derived<LiveMode>(
-    testMode.active ? 'test' : trainingMode.active ? 'training' : 'off',
-  );
+  const liveModeLabel = $derived<LiveMode>(testMode.active ? 'test' : trainingMode.active ? 'training' : 'off');
 
   async function setLiveMode(mode: LiveMode) {
     if (mode === 'test') await testMode.start();
@@ -96,36 +105,43 @@
     <MacroManager />
 
     {#if serial.connected || devMode.active}
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          {#snippet child({ props })}
-            <Button
-              {...props}
-              variant={liveModeLabel === 'off' ? 'outline' : 'default'}
-              class="gap-1.5"
-              title="Mode live"
-            >
-              <Activity class="size-4" />
-              {liveModeLabel === 'off' ? 'Live' : liveModeLabel === 'test' ? 'Test' : 'Training'}
-              <ChevronDown class="size-3.5" />
-            </Button>
-          {/snippet}
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content align="start" class="min-w-44">
-          <DropdownMenu.Item onclick={() => setLiveMode('off')}>
-            {#if liveModeLabel === 'off'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
-            Off
-          </DropdownMenu.Item>
-          <DropdownMenu.Item onclick={() => setLiveMode('test')}>
-            {#if liveModeLabel === 'test'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
-            Test <span class="ms-auto text-[10px] text-muted-foreground">visualiser</span>
-          </DropdownMenu.Item>
-          <DropdownMenu.Item onclick={() => setLiveMode('training')}>
-            {#if liveModeLabel === 'training'}<Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
-            Training <span class="ms-auto text-[10px] text-muted-foreground">configurer</span>
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      <ButtonGroup.Root>
+        <Button variant={liveModeLabel === 'off' ? 'outline' : 'default'}>
+          {liveModeLabel === 'off' ? 'Live' : liveModeLabel === 'test' ? 'Testing' : 'Training'}
+        </Button>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            {#snippet child({ props })}
+              <Button {...props} variant={liveModeLabel === 'off' ? 'outline' : 'default'}>
+                <ChevronDown />
+              </Button>
+            {/snippet}
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end" class="min-w-44">
+            <DropdownMenu.Item onclick={() => setLiveMode('off')}>
+              {#if liveModeLabel === 'off'}
+                <Check class="size-3.5" />
+              {:else}
+                <span class="size-3.5"></span>
+              {/if}
+              Off
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onclick={() => setLiveMode('test')}>
+              {#if liveModeLabel === 'test'}
+                <Check class="size-3.5" />
+              {:else}
+                <span class="size-3.5"></span>
+              {/if}
+              Test <span class="ms-auto text-[10px] text-muted-foreground">visualiser</span>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onclick={() => setLiveMode('training')}>
+              {#if liveModeLabel === 'training'}
+                <Check class="size-3.5" />{:else}<span class="size-3.5"></span>{/if}
+              Train <span class="ms-auto text-[10px] text-muted-foreground">configurer</span>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </ButtonGroup.Root>
     {/if}
 
     <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
@@ -143,7 +159,7 @@
       </div>
     </ResponsiveSheet>
 
-    <ButtonGroup.Root class="">
+    <ButtonGroup.Root>
       <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>

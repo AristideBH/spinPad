@@ -55,7 +55,7 @@
       <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
         <FlaskConical class="size-4" />
       </Popover.Trigger>
-      <Popover.Content class="w-80">
+      <Popover.Content align="end" class="w-80">
         <DemoSettings />
       </Popover.Content>
     </Popover.Root>

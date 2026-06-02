@@ -9,6 +9,7 @@
 import { keyMonitor, onKeyEvent, serial } from './serial.svelte.js';
 import { devMode } from './devMode.svelte.js';
 import { trainingMode } from './trainingMode.svelte.js';
+import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder.svelte.js';
 
 /** En devMode, mappe les touches physiques 1..9,0 → SW1..SW10 (idx 0..9). */
 const DEV_KEY_MAP: Record<string, number> = {
@@ -51,7 +52,21 @@ class TestModeState {
       const onKey = (e: KeyboardEvent) => {
         if (e.repeat) return;
         const idx = DEV_KEY_MAP[e.code];
-        if (idx !== undefined) this.#fire(idx);
+        if (idx !== undefined) {
+          this.#fire(idx);
+          return;
+        }
+        const knob = getActiveEncoderKnob();
+        if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          knob?.pulseCW();
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          knob?.pulseCCW();
+        } else if (e.code === 'Space') {
+          e.preventDefault();
+          knob?.pulsePress();
+        }
       };
       window.addEventListener('keydown', onKey, true);
       this.#cleanup = () => window.removeEventListener('keydown', onKey, true);

@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { EncoderKnob } from './encoder.svelte.js';
 
-  let { knob }: { knob: EncoderKnob } = $props();
+  // `interactive` opt-in for keyboard nudging (Arrow/Space). Off by default so
+  // DevMode live-modes can claim those keys for device-event simulation.
+  let { knob, interactive = false }: { knob: EncoderKnob; interactive?: boolean } = $props();
 
   let knobEl = $state<HTMLElement | null>(null);
 
@@ -18,7 +20,7 @@
     onclick={knob.handleClick}
     onmousedown={knob.handleStart}
     ontouchstart={knob.handleStart}
-    onkeydown={knob.handleKeyDown}
+    onkeydown={interactive ? knob.handleKeyDown : undefined}
     onwheel={knob.handleScroll}
     role="slider"
     aria-valuenow={knob.rotation}
@@ -28,6 +30,11 @@
   >
     <div class="indicator"></div>
   </div>
+  {#key knob.pressPulseNonce}
+    {#if knob.pressPulseNonce > 0}
+      <div class="press-pulse"></div>
+    {/if}
+  {/key}
 </div>
 
 <style>
@@ -152,6 +159,27 @@
       transparent 60%,
       rgba(0, 0, 0, 0.3) 100%
     );
+  }
+
+  .press-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 6;
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--knob-color) 80%, white);
+    animation: press-pulse 450ms ease-out;
+  }
+
+  @keyframes press-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--knob-color) 80%, white);
+      opacity: 1;
+    }
+    100% {
+      box-shadow: 0 0 0 24px transparent;
+      opacity: 0;
+    }
   }
 
   .indicator {

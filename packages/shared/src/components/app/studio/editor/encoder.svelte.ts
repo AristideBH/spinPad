@@ -7,6 +7,16 @@ export interface EncoderKnobOptions {
   onTrigger: (field: EncoderField) => void;
 }
 
+// Singleton ref to the currently-mounted EncoderKnob so live-mode stores can
+// drive visual feedback when the device (or DevMode keys) fire encoder events.
+let activeKnob: EncoderKnob | null = null;
+export function setActiveEncoderKnob(k: EncoderKnob | null): void {
+  activeKnob = k;
+}
+export function getActiveEncoderKnob(): EncoderKnob | null {
+  return activeKnob;
+}
+
 // Encapsulates the rotary-knob physics: drag tracking, inertia slide, and the
 // spring that snaps back to home. State that the encoder buttons also read
 // (activeTriggeredButton) lives here so a single instance is shared between
@@ -21,6 +31,8 @@ export class EncoderKnob {
   isAnimatingEntrance = $state(true);
   isResetting = $state(false);
   activeTriggeredButton = $state<string | null>(null);
+  /** Incremented on each press-pulse so Knob.svelte can remount the flash via {#key}. */
+  pressPulseNonce = $state(0);
 
   #el: HTMLElement | null = null;
 
@@ -172,6 +184,29 @@ export class EncoderKnob {
     e.preventDefault();
     this.#spring.set(this.#spring.current - e.deltaY, { instant: false });
   };
+
+  // ── Pulse API (called by live-mode stores on device/DevMode encoder events) ──
+
+  #pulseRotation(field: EncoderField, deltaDeg: number): void {
+    this.#spring.set(this.#spring.current + deltaDeg, { instant: false });
+    this.activeTriggeredButton = field;
+    setTimeout(() => {
+      if (this.activeTriggeredButton === field) this.activeTriggeredButton = null;
+      this.#spring.target = 0;
+    }, 250);
+  }
+
+  pulseCW(): void {
+    this.#pulseRotation('encoder_cw', 25);
+  }
+
+  pulseCCW(): void {
+    this.#pulseRotation('encoder_ccw', -25);
+  }
+
+  pulsePress(): void {
+    this.pressPulseNonce++;
+  }
 
   handleEnd = (): void => {
     this.isDragging = false;
