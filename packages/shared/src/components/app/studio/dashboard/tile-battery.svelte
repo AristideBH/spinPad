@@ -43,7 +43,6 @@
     if (batteryPct >= 15) return BatteryLow;
     return BatteryWarning;
   });
-
 </script>
 
 <Card.Root class="@container/card flex flex-col  @lg/main:row-span-2 @4xl/main:row-span-1">
@@ -53,17 +52,18 @@
       <BatteryIcon class="size-4 text-muted-foreground" />
     </Card.Action>
 
-    <div class="flex flex-col gap-1 mt-auto">
+    <div class="flex flex-col mt-auto">
       {#if !batteryPresent}
         <p class="text-base font-medium text-muted-foreground">Pas de batterie</p>
         <p class="text-xs text-muted-foreground">
           {batterySource === 'forced_no' ? 'Désactivée par configuration' : 'Mode USB-only'}
         </p>
       {:else}
-        <div class="flex items-baseline gap-2 mb-2">
-          <span class="text-2xl font-bold tabular-nums"
-            >{batteryPct}<span class="text-sm text-muted-foreground">%</span></span
-          >
+        <div class="flex items-baseline gap-2 my-1">
+          <span class="text-2xl font-bold tabular-nums">
+            {batteryPct}
+            <span class="text-sm text-muted-foreground">%</span>
+          </span>
           <span class="text-xs text-muted-foreground tabular-nums">{(batteryMv / 1000).toFixed(2)}V</span>
         </div>
         <div class="w-full h-2 overflow-hidden rounded-full bg-muted">
