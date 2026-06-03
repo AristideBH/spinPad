@@ -10,6 +10,7 @@
     setProfileIcon,
     exportProfiles,
     importProfiles,
+    setActiveProfileLocal,
   } from '$shared/store/config.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import { CONFIG_MAX_PROFILES, MIN_PROFILES, type ProfileConfig } from '$shared/constants/config-schema.js';
@@ -18,6 +19,7 @@
   import IconPreview from '../../profiles/IconPreview.svelte';
   import IconEditor from '../../profiles/IconEditor.svelte';
   import AddProfileSheet from './AddProfileSheet.svelte';
+  import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
   import { cn, scrollShadow } from '$shared/utils.js';
   import {
@@ -122,15 +124,21 @@
 
   // Écriture LOCAL → STORE à la sélection (jamais via $effect : un effet
   // se déclencherait au montage et réinitialiserait le layer à 0 par erreur).
+  // Couplage edit ↔ active : sélectionner un profil le rend aussi actif sur
+  // le device (bascule légère + persistance), via setActiveProfileLocal.
   function onProfileChange(v: string) {
-    configState.activeProfileIndex = +v;
     layerValue = '0';
-    configState.activeLayerIndex = 0;
+    setActiveProfileLocal(+v);
   }
 
   let fileInput = $state<HTMLInputElement | null>(null);
   let selectedExport = $state<Set<number>>(new Set());
   let dialogOpen = $state(false);
+
+  // Profil actif rapporté par le device (null si pas de device live). Sert au
+  // badge « Live » : reflète ce que le device exécute vraiment, ce qui peut
+  // brièvement différer de la sélection studio le temps d'une réconciliation.
+  const deviceActiveProfile = $derived(deviceStatus.data?.active_profile ?? null);
 
   const profileList = $derived(configState.data?.profiles ?? []);
   const allSelected = $derived(profileList.length > 0 && selectedExport.size === profileList.length);
@@ -254,7 +262,18 @@
               {/if}
             </Item.Media>
             <Item.Content>
-              <Item.Title>{prof.name}</Item.Title>
+              <Item.Title class="flex items-center gap-1.5">
+                {prof.name}
+                {#if i === deviceActiveProfile}
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-emerald-600 dark:text-emerald-400"
+                    title="Profil actuellement actif sur le device"
+                  >
+                    <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                    Live
+                  </span>
+                {/if}
+              </Item.Title>
               <Item.Description class="text-xs line-clamp-2">
                 {@const fill = profileFill(prof)}
                 {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} touches

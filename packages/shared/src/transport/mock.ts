@@ -38,6 +38,13 @@ export async function factoryReset(): Promise<{ status: string; msg: string }> {
   return { status: 'ok', msg: 'factory_reset' };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function setActiveProfile(_idx: number): Promise<{ status: string }> {
+  // No-op : en dev mode, le profil actif du « device » suit configState.data
+  // (voir makeMockDeviceStatus), donc la mutation locale suffit.
+  return { status: 'ok' };
+}
+
 // ── Device status transport ───────────────────────────────────
 
 let _prevBattery: BatteryScenario | null = null;

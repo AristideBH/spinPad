@@ -38,6 +38,8 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
       dirty: true,
     },
     uptime_s: Math.floor((Date.now() - START_TS) / 1000),
+    // Le mock joue le rôle du device : son profil actif suit la config chargée.
+    active_profile: configState.data?.active_profile ?? 0,
     connection: {
       usb: connection === 'usb' || connection === 'both',
       ble: connection === 'ble' || connection === 'both',

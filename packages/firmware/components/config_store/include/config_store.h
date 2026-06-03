@@ -185,6 +185,12 @@ esp_err_t config_store_update_from_json(const char *json_str);
 // Sauvegarder la config actuelle en NVS
 esp_err_t config_store_save(void);
 
+// Définir le profil actif (couche données uniquement) : clamp à profile_count,
+// met à jour g_config.active_profile et persiste en NVS. Ne touche PAS au keymap
+// ni à l'écran — utiliser keymap_set_active_profile() pour la bascule complète.
+// Écrit l'index réellement appliqué (après clamp) dans *applied si non NULL.
+esp_err_t config_store_set_active_profile(uint8_t idx, uint8_t *applied);
+
 // Exporter la config actuelle en JSON (dans un buffer alloué par l'appelant)
 // buffer doit être assez grand (utilise CONFIG_JSON_MAX_SIZE)
 esp_err_t config_store_to_json(char *buffer, size_t buffer_size);

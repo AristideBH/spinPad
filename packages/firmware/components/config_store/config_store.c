@@ -605,6 +605,20 @@ esp_err_t config_store_update_from_json(const char *json_str)
     return config_store_save();
 }
 
+esp_err_t config_store_set_active_profile(uint8_t idx, uint8_t *applied)
+{
+    if (g_config.profile_count == 0) return ESP_ERR_INVALID_STATE;
+    if (idx >= g_config.profile_count) idx = g_config.profile_count - 1;
+
+    if (applied) *applied = idx;
+
+    // No-op si déjà actif : éviter une écriture NVS inutile.
+    if (g_config.active_profile == idx) return ESP_OK;
+
+    g_config.active_profile = idx;
+    return config_store_save();
+}
+
 esp_err_t config_store_save(void)
 {
     // Sérialiser en JSON

@@ -7,6 +7,7 @@
 #include "ble_hid.h"
 #include "usb_hid.h"
 #include "web_config.h"
+#include "config_store.h"
 #include "fw_version.h"
 
 #include "esp_timer.h"
@@ -31,6 +32,9 @@ cJSON *device_status_build(void)
     // ── uptime ──────────────────────────────────────────────
     int64_t uptime_us = esp_timer_get_time();
     cJSON_AddNumberToObject(root, "uptime_s", (double)(uptime_us / 1000000));
+
+    // ── profil actif (pour la synchro studio ↔ device) ─────
+    cJSON_AddNumberToObject(root, "active_profile", config_store_get()->active_profile);
 
     // ── connection ──────────────────────────────────────────
     cJSON *conn = cJSON_AddObjectToObject(root, "connection");
