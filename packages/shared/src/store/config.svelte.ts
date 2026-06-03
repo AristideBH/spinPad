@@ -335,8 +335,12 @@ export function setEncoderAction(
   actionValue: number,
 ): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
-  const enc = cfg.profiles[profileIdx].layers[layerIdx].encoder;
-  if (enc) enc[direction] = actionValue;
+  const layer = cfg.profiles[profileIdx].layers[layerIdx];
+  // L'objet `encoder` (nested) est le format canonique lu par le firmware et
+  // l'UI. Les layers créés via defaultLayer peuvent ne pas l'avoir → on le crée
+  // à la volée, sinon l'assignation serait silencieusement ignorée.
+  const enc = layer.encoder ?? (layer.encoder = { cw: 0, ccw: 0, press: 0 });
+  enc[direction] = actionValue;
   configState.data = cfg;
   configState.isDirty = true;
   _autoSave.schedule();

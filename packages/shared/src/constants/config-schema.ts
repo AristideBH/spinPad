@@ -191,6 +191,9 @@ export function defaultLayer(name = 'Base'): LayerConfig {
     keys:        Array(CONFIG_NUM_KEYS).fill(0) as number[],
     encoder_cw:  0,
     encoder_ccw: 0,
+    // Objet `encoder` = format canonique (lu par firmware + UI). Sans lui, l'UI
+    // ne peut pas assigner d'action à l'encodeur sur un layer fraîchement créé.
+    encoder:     { cw: 0, ccw: 0, press: 0 },
   };
 }
 
