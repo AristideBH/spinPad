@@ -131,7 +131,7 @@
   <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} autofocus class="shrink-0" />
 
   {#if !filteredKeycodes}
-    <div bind:this={tabWrapperEl} class="shrink-0">
+    <div bind:this={tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--popover)]">
       <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
         <UnderlineTabs.List bind:ref={tabListEl}>
           <UnderlineTabs.Trigger value="all">Tout</UnderlineTabs.Trigger>

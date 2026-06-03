@@ -35,11 +35,12 @@ export function scrollShadow(scroller: HTMLElement, container: HTMLElement = scr
   const shadowRight = document.createElement('div');
   container.style.overflow = 'clip'; // masque les ombres quand elles dépassent du container (ex. au redimensionnement)
 
+  const color = `var(--scroll-shadow-color, rgba(0,0,0,0.5))`;
   const baseShadowStyle =
     'position:absolute;top:0;bottom:0;width:12px;z-index:10;pointer-events:none;transition:opacity 0.15s ease;';
 
-  shadowLeft.style.cssText = `${baseShadowStyle}left:0;background:linear-gradient(90deg, rgba(0,0,0,0.5), transparent);opacity:0;`;
-  shadowRight.style.cssText = `${baseShadowStyle}right:0;background:linear-gradient(270deg, rgba(0,0,0,0.5), transparent);opacity:0;`;
+  shadowLeft.style.cssText = `${baseShadowStyle}left:0;background:linear-gradient(90deg, ${color}, transparent);opacity:0;`;
+  shadowRight.style.cssText = `${baseShadowStyle}right:0;background:linear-gradient(270deg, ${color}, transparent);opacity:0;`;
 
   container.appendChild(shadowLeft);
   container.appendChild(shadowRight);
