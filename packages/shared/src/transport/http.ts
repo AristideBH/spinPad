@@ -35,6 +35,16 @@ export async function factoryReset(): Promise<{ ok: boolean }> {
   return r.json() as Promise<{ ok: boolean }>;
 }
 
+export async function setActiveProfile(idx: number): Promise<{ ok: boolean }> {
+  const r = await fetch(`${BASE}/api/active_profile`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ idx }),
+  });
+  if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du changement de profil`);
+  return r.json() as Promise<{ ok: boolean }>;
+}
+
 export async function getDeviceStatus(): Promise<DeviceStatus> {
   const r = await fetch(`${BASE}/api/status`);
   if (!r.ok) throw new Error(`Erreur HTTP ${r.status} lors du chargement du statut`);

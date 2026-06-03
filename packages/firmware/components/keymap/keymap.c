@@ -328,6 +328,17 @@ static void send_action(uint16_t action, bool pressed)
                 display_apply_orientation(cfg->orientation);
                 config_store_save();
                 ESP_LOGI(TAG, "Orientation → %d°", cfg->orientation * 90);
+            } else if (value == SPECIAL_PROFILE_NEXT || value == SPECIAL_PROFILE_PREV) {
+                // Bascule cyclique du profil actif on-device. keymap_set_active_profile
+                // persiste + recharge + émet l'événement "profile" pour le studio.
+                uint8_t count = config_store_get()->profile_count;
+                if (count > 0) {
+                    int delta = (value == SPECIAL_PROFILE_NEXT) ? 1 : (count - 1);
+                    uint8_t target = (uint8_t)((g_active_profile + delta) % count);
+                    keymap_set_active_profile(target);
+                    ESP_LOGI(TAG, "Profil actif → %u (%s)", target,
+                             value == SPECIAL_PROFILE_NEXT ? "next" : "prev");
+                }
             }
             // BLE_PAIR est géré séparément (long press SW16+SW17)
         }
@@ -476,6 +487,20 @@ static void _monitor_emit(int key_idx, int state, int64_t now)
              "{\"event\":\"key\",\"idx\":%d,\"state\":\"%s\",\"layer\":%d,\"action\":%u,\"ts_ms\":%lld}\n",
              key_idx, state ? "down" : "up",
              (int)g_layer_stack[g_layer_stack_size - 1], (unsigned)act, (long long)now);
+    usb_hid_cdc_send(buf);
+}
+
+// Émettre un événement de changement de profil actif vers le studio (stream
+// moniteur). Permet au studio de refléter en direct la bascule de profil,
+// qu'elle vienne du studio lui-même ou d'une action on-device (slice 5).
+static void _monitor_emit_profile(uint8_t idx)
+{
+    if (!g_monitor_enabled) return;
+    int64_t now = esp_timer_get_time() / 1000;  // µs → ms
+    char buf[64];
+    snprintf(buf, sizeof(buf),
+             "{\"event\":\"profile\",\"active\":%u,\"ts_ms\":%lld}\n",
+             (unsigned)idx, (long long)now);
     usb_hid_cdc_send(buf);
 }
 
@@ -739,6 +764,11 @@ void keymap_reload_from_config(void)
     // Charger le keymap depuis config_store
     const kb_config_t *cfg = config_store_get();
 
+    // Synchroniser le profil actif depuis la config. Auparavant g_active_profile
+    // restait figé ici : un changement de active_profile en config (set_config,
+    // factory_reset, bascule profil) n'était pas répercuté sur le moteur keymap.
+    g_active_profile = (cfg->active_profile < cfg->profile_count) ? cfg->active_profile : 0;
+
     // Copier les keymaps de chaque profil/layer
     for (int p = 0; p < cfg->profile_count && p < CONFIG_MAX_PROFILES; p++) {
         g_layer_count[p] = cfg->profiles[p].layer_count;
@@ -759,4 +789,24 @@ void keymap_reload_from_config(void)
 
     ESP_LOGI(TAG, "Keymap rechargée : profil %d, %d layers, %d combos",
              g_active_profile, g_layer_count[g_active_profile], g_combo_count);
+}
+
+void keymap_set_active_profile(uint8_t idx)
+{
+    uint8_t prev = g_active_profile;
+    uint8_t applied = idx;
+
+    // Couche données : clamp + persistance NVS.
+    if (config_store_set_active_profile(idx, &applied) != ESP_OK) return;
+
+    // Couche runtime : recharge keymap/combos et synchronise g_active_profile
+    // (via le fix dans keymap_reload_from_config), puis remet la stack de
+    // layers sur la base.
+    keymap_reload_from_config();
+    g_layer_stack_size = 0;
+    layer_push(0);
+
+    // Notifier le studio uniquement sur un vrai changement (évite le bruit et
+    // les boucles d'écho avec le réconciliateur côté studio).
+    if (applied != prev) _monitor_emit_profile(applied);
 }

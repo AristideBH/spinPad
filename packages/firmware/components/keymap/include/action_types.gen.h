@@ -52,6 +52,8 @@
 #define SPECIAL_ENC_SENS_UP    0x07
 #define SPECIAL_ENC_SENS_DN    0x08
 #define SPECIAL_SLEEP          0x09
+#define SPECIAL_PROFILE_NEXT   0x0A
+#define SPECIAL_PROFILE_PREV   0x0B
 
 // Helper macro: encode (type, value) → uint16_t action
 #define ACTION(type, val)  (((uint16_t)(type) << 12) | ((uint16_t)(val) & 0x0FFF))

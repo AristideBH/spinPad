@@ -52,11 +52,12 @@ export interface DeviceStats {
 }
 
 export interface DeviceStatus {
-  fw:         FirmwareInfo;
-  uptime_s:   number;
-  connection: ConnectionStatus;
-  battery:    BatteryStatus;
-  stats?:     DeviceStats;   // optionnel — voir DeviceStats
+  fw:              FirmwareInfo;
+  uptime_s:        number;
+  active_profile?: number;       // index du profil actif sur le device (synchro studio ↔ device)
+  connection:      ConnectionStatus;
+  battery:         BatteryStatus;
+  stats?:          DeviceStats;   // optionnel — voir DeviceStats
 }
 
 // ── Override config (sérialisé dans power.battery_present) ─────

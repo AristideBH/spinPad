@@ -233,6 +233,20 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         const char *ok = "{\"status\":\"ok\"}\n";
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
+    } else if (strstr(str, "\"set_active_profile\"")) {
+        // {"cmd":"set_active_profile","idx":N} — bascule légère du profil actif
+        // sans renvoyer toute la config. keymap_set_active_profile clamp l'index.
+        cJSON *root = cJSON_Parse(str);
+        if (root) {
+            cJSON *idx = cJSON_GetObjectItem(root, "idx");
+            if (cJSON_IsNumber(idx)) {
+                keymap_set_active_profile((uint8_t)idx->valuedouble);
+            }
+            cJSON_Delete(root);
+        }
+        const char *ok = "{\"status\":\"ok\"}\n";
+        tud_cdc_n_write(0, ok, strlen(ok));
+        tud_cdc_n_write_flush(0);
     } else if (strstr(str, "\"set_time\"")) {
         // {"cmd":"set_time","ts":1234567890}
         cJSON *root = cJSON_Parse(str);

@@ -339,6 +339,23 @@ export function getDeviceStatus(): Promise<DeviceStatus> {
   );
 }
 
+/**
+ * Bascule légère du profil actif côté firmware : {"cmd":"set_active_profile",
+ * "idx":N}. Le device clamp l'index, persiste en NVS, recharge son keymap et
+ * émet un événement "profile" sur le stream moniteur. Évite de renvoyer toute
+ * la config juste pour changer de profil.
+ */
+export function setActiveProfile(idx: number): Promise<{ status: string }> {
+  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  return _enqueueRpc(() =>
+    _rpcCall<{ status: string }>(
+      { cmd: 'set_active_profile', idx },
+      (msg) => (msg as Record<string, unknown>)['status'] === 'ok',
+      3000,
+    ),
+  );
+}
+
 export function keyMonitor(enable: boolean): Promise<{ status: string }> {
   return _enqueueRpc(() =>
     _rpcCall<{ status: string }>(
@@ -370,6 +387,21 @@ export function onKeyEvent(handler: (msg: any) => void): () => void {
   return onMessage((msg) => {
     const m = msg as Record<string, unknown>;
     if (m && m['event'] === 'key') handler(m);
+  });
+}
+
+/**
+ * S'abonne aux événements de bascule de profil émis par le device sur le stream
+ * moniteur : {"event":"profile","active":N,"ts_ms":...}. Permet une synchro
+ * basse latence quand le profil change on-device (slice 5) ou via le studio,
+ * en complément du polling device_status (5 s).
+ */
+export function onProfileEvent(handler: (active: number) => void): () => void {
+  return onMessage((msg) => {
+    const m = msg as Record<string, unknown>;
+    if (m && m['event'] === 'profile' && typeof m['active'] === 'number') {
+      handler(m['active'] as number);
+    }
   });
 }
 

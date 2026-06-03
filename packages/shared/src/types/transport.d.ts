@@ -14,6 +14,8 @@ export interface Transport {
   getConfig(): Promise<FullConfig>;
   setConfig(data: FullConfig): Promise<unknown>;
   factoryReset(): Promise<unknown>;
+  /** Bascule légère du profil actif sans renvoyer toute la config. */
+  setActiveProfile(idx: number): Promise<unknown>;
 }
 
 /** Interface minimale pour le polling de statut. */
