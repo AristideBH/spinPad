@@ -134,7 +134,6 @@
     <div bind:this={tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--popover)]">
       <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
         <UnderlineTabs.List bind:ref={tabListEl}>
-          <UnderlineTabs.Trigger value="all">Tout</UnderlineTabs.Trigger>
           {#each entries as [cat] (cat)}
             <UnderlineTabs.Trigger value={cat}>{GROUP_LABELS[cat] ?? cat}</UnderlineTabs.Trigger>
           {/each}
