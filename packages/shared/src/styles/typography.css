@@ -1,0 +1,216 @@
+@layer base {
+  /*- Headings */
+  h1 {
+    @apply ~text-5xl/7xl;
+    --wght: 900;
+  }
+
+  h2 {
+    @apply tracking-normal ~text-3xl/5xl;
+  }
+
+  h3 {
+    @apply ~text-xl/3xl;
+  }
+
+  h4 {
+    @apply uppercase tracking-wide ~text-base/lg;
+    --wght: 600;
+  }
+
+  h5 {
+    @apply uppercase;
+    --wght: 600;
+  }
+  h6 {
+    @apply uppercase ~text-sm/base;
+    --wght: 600;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-variation-settings: 'wght' var(--wght, 500);
+    @apply text-balance font-heading;
+    &:has(+ p),
+    &:has(+ .block-wrapper),
+    &:has(+ figure) {
+      @apply mb-2;
+    }
+  }
+
+  /*- Paragraph */
+  ul,
+  ol,
+  blockquote,
+  menu,
+  figure {
+    + p {
+      @apply mt-4;
+    }
+  }
+
+  p {
+    @apply mb-0 text-pretty text-lg leading-6;
+    & + p {
+      @apply mt-[0.65em];
+    }
+    & + h1,
+    & + h2,
+    & + h3,
+    & + h4,
+    & + h5,
+    & + h6 {
+      @apply mt-6;
+    }
+    & + button,
+    & + [data-button-root],
+    & + .buttons-wrapper {
+      @apply mt-6;
+    }
+  }
+
+  acronym,
+  abbr {
+    @apply underline-offset-4;
+  }
+  q {
+    @apply italic;
+  }
+  samp {
+    @apply px-1.5;
+  }
+
+  textarea {
+    field-sizing: content;
+  }
+
+  /*- Links */
+  a {
+    @apply text-primary underline-offset-4 hover:underline;
+
+    &[rel='footnote'] {
+      @apply no-underline;
+    }
+  }
+
+  a:has(sup) + a:has(sup) {
+    @apply ms-0.5;
+  }
+
+  input {
+    &[type='checkbox'],
+    &[type='radio'],
+    &[type='range'] {
+      @apply accent-primary;
+    }
+  }
+  progress {
+    @apply accent-primary;
+  }
+
+  /*- Lists */
+  ul,
+  ol {
+    @apply my-1 ms-6 flex flex-col gap-2;
+  }
+
+  ul {
+    @apply list-disc;
+    & ul {
+      list-style-type: circle;
+    }
+  }
+
+  ol {
+    @apply ms-[3ch] list-decimal;
+    li::marker {
+      @apply font-mono font-semibold;
+    }
+  }
+
+  /*- Format elements */
+  blockquote {
+    @apply mt-6 text-balance border-s-2 border-primary ps-6 italic;
+  }
+
+  code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+
+  pre {
+    @apply overflow-scroll rounded border bg-muted px-[0.3rem] py-[0.2rem] text-sm font-semibold text-muted-foreground;
+  }
+
+  /*- Utilities */
+  .lead {
+    @apply max-w-[69ch] text-pretty leading-relaxed! text-secondary-foreground/70 ~text-lg/2xl;
+  }
+
+  .small {
+    @apply text-sm font-normal leading-none;
+  }
+
+  /*- Text selection */
+  ::moz-selection {
+    background: hsla(var(--primary) / 0.8);
+    color: hsl(var(--primary-foreground));
+  }
+
+  ::selection {
+    background: hsla(var(--primary) / 0.8);
+    color: hsl(var(--primary-foreground));
+  }
+
+  /*- Table */
+  table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    @apply mt-4 w-full bg-background text-sm;
+  }
+  table caption {
+    @apply mb-2 font-bold;
+  }
+  table td,
+  table th {
+    @apply h-12 border-b px-4 text-left align-middle font-medium last-of-type:border-b-0;
+  }
+  table tbody {
+    @apply [&_tr:last-child]:border-0;
+  }
+  table tbody td {
+    @apply p-4 align-middle;
+  }
+  table thead {
+    @apply [&_tr]:border-b;
+  }
+
+  table tfoot {
+  }
+  table tfoot td {
+  }
+
+  a[data-button-root] {
+    @apply no-underline;
+  }
+}
+
+/* @layer components {
+  a.animate {
+    border-bottom-width: 0;
+    background-image:
+      linear-gradient(transparent, transparent), linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    background-size: 0 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.2s ease-in-out;
+  }
+
+  a.animate:hover {
+    background-size: 100% 2px;
+    background-position: 0 100%;
+  }
+} */
