@@ -156,17 +156,17 @@
 
 <style>
   .keycap-grid {
-    --keycap-color: var(--card);
+    --keycap-color: red;
     --keycap-side-color: color-mix(in oklch, var(--keycap-color) 60%, var(--background));
     --keycap-color-active: var(--card);
     --keycap-depth: 4px;
     --keycap-radius: 10px;
     --keycap-label-size: 10px;
     --keycap-sw-size: 8px;
-    filter: drop-shadow(
+    /* filter: drop-shadow(
         0px calc(var(--keycap-depth) * 2) 5px color-mix(in oklch, var(--color-background) 5%, transparent)
       )
-      drop-shadow(0px 1px 0.75px var(--color-background));
+      drop-shadow(0px 1px 0.75px var(--color-background)); */
   }
 
   .keycap {
@@ -174,14 +174,14 @@
     width: 100%;
     height: 100%;
     border-radius: var(--keycap-radius);
-    background-color: var(--keycap-color);
+    background-color: red;
     /* Screen-fixed top/bottom highlight directions — counter the grid rotation. */
     --top-x: calc(-1px * sin(var(--orient-deg)));
     --top-y: calc(-1px * cos(var(--orient-deg)));
-    box-shadow:
+    /* box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
       inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.13),
-      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22);
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22); */
     cursor: pointer;
     overflow: hidden;
     transition:
@@ -189,7 +189,7 @@
       box-shadow 60ms ease-out;
   }
 
-  .keycap::after {
+  /* .keycap::after {
     content: '';
     position: absolute;
     --depress-offset: 10px;
@@ -199,14 +199,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* Gradient angle tracks screen-up regardless of grid rotation. */
-    background: linear-gradient(
-      calc(-1 * var(--orient-deg)),
-      rgba(255, 255, 255, 0.035) 0%,
-      rgba(0, 0, 0, 0.17) 100%
-    );
+    background: linear-gradient(calc(-1 * var(--orient-deg)), rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
     pointer-events: none;
-  }
+  } */
 
   .keycap:hover {
     box-shadow:
@@ -355,8 +350,5 @@
     aspect-ratio: 1;
     border-radius: 9999px;
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
-    &:first-child {
-      /* margin-top: calc(var(--size) / -4); */
-    }
   }
 </style>
