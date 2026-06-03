@@ -156,17 +156,17 @@
 
 <style>
   .keycap-grid {
-    --keycap-color: red;
+    --keycap-color: var(--card);
     --keycap-side-color: color-mix(in oklch, var(--keycap-color) 60%, var(--background));
     --keycap-color-active: var(--card);
     --keycap-depth: 4px;
     --keycap-radius: 10px;
     --keycap-label-size: 10px;
     --keycap-sw-size: 8px;
-    /* filter: drop-shadow(
+    filter: drop-shadow(
         0px calc(var(--keycap-depth) * 2) 5px color-mix(in oklch, var(--color-background) 5%, transparent)
       )
-      drop-shadow(0px 1px 0.75px var(--color-background)); */
+      drop-shadow(0px 1px 0.75px var(--color-background));
   }
 
   .keycap {
@@ -174,14 +174,14 @@
     width: 100%;
     height: 100%;
     border-radius: var(--keycap-radius);
-    background-color: red;
+    background-color: var(--keycap-color);
     /* Screen-fixed top/bottom highlight directions — counter the grid rotation. */
     --top-x: calc(-1px * sin(var(--orient-deg)));
     --top-y: calc(-1px * cos(var(--orient-deg)));
-    /* box-shadow:
+    box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.13),
-      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22); */
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(255, 255, 255, 0.13),
+      inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.22);
     cursor: pointer;
     overflow: hidden;
     transition:
@@ -189,7 +189,7 @@
       box-shadow 60ms ease-out;
   }
 
-  /* .keycap::after {
+  .keycap::after {
     content: '';
     position: absolute;
     --depress-offset: 10px;
@@ -201,13 +201,13 @@
     transform: translate(-50%, -50%);
     background: linear-gradient(calc(-1 * var(--orient-deg)), rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
     pointer-events: none;
-  } */
+  }
 
   .keycap:hover {
     box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.22),
-      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.18);
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(255, 255, 255, 0.22),
+      inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.18);
   }
 
   .keycap:focus-visible {
@@ -219,16 +219,16 @@
     transform: translate(var(--depth-x), var(--depth-y));
     box-shadow:
       0 0 0 rgba(0, 0, 0, 0),
-      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.07),
-      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.12);
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(255, 255, 255, 0.07),
+      inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.12);
   }
 
   .keycap--active {
     --keycap-color: color-mix(in oklch, var(--keycap-color-active) 25%, var(--card));
     box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.18),
-      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(255, 255, 255, 0.18),
+      inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.22),
       0 0 0 1.5px var(--keycap-color-active);
   }
 
