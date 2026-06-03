@@ -41,3 +41,7 @@ Five canonical triage roles, using the default label strings (`needs-triage`, `n
 ### Domain docs
 
 Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+## Reference docs
+
+- **shadcn-svelte**: `.claude/docs/shadcn-svelte-llms.txt`. UI components live in `packages/shared/src/components/ui`. Read the "SpinPad usage notes" section at the top first (project conventions + custom comps); it's a link index — grep for a primitive and WebFetch its `.md` URL only when you need the full API.
