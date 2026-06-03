@@ -1,10 +1,15 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
+import rehypeSlug from 'rehype-slug';
 
 export default {
   extensions: ['.svelte', '.md'],
-  preprocess: [vitePreprocess(), mdsvex({ extensions: ['.md'] })],
+  preprocess: [
+    vitePreprocess(),
+    // rehype-slug adds `id` to every heading so the docs TOC can anchor to them.
+    mdsvex({ extensions: ['.md'], rehypePlugins: [rehypeSlug] }),
+  ],
   // `await` dans les composants + <svelte:boundary pending> (expérimental,
   // requiert Svelte ≥5.36 ; le flag disparaît en Svelte 6).
   compilerOptions: {

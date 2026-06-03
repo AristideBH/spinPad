@@ -1,3 +1,9 @@
+---
+title: Démarrage
+description: Premiers pas, connexion USB et mode démo.
+order: 1
+---
+
 # Getting Started
 
 Bienvenue dans **SpinPad Editor**, l'outil de configuration pour ton clavier custom.

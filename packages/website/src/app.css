@@ -5,10 +5,25 @@
 
 @source "../../shared/src";
 
-/* ── Docs prose overrides ── */
-.prose code {
+/* ── Docs prose mode ──
+   Element styling itself comes from the shared @layer base typography; this
+   scoped class only adds doc-context tweaks: a readable measure, anchor jumps
+   that clear the sticky header, and code/pre surface overrides. */
+.prose-docs {
+  @apply max-w-none;
+}
+.prose-docs :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 6rem;
+}
+.prose-docs :is(h2, h3, h4) {
+  @apply mt-8;
+}
+.prose-docs code {
   @apply bg-muted px-1.5 py-0.5 rounded text-sm;
 }
-.prose pre {
-  @apply bg-card border border-border;
+.prose-docs pre {
+  @apply bg-card border border-border p-4;
+}
+.prose-docs pre code {
+  @apply bg-transparent p-0;
 }
