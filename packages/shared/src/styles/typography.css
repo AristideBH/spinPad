@@ -1,20 +1,20 @@
 @layer base {
   /*- Headings */
   h1 {
-    @apply ~text-5xl/7xl;
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
     --wght: 900;
   }
 
   h2 {
-    @apply tracking-normal ~text-3xl/5xl;
+    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0;
   }
 
   h3 {
-    @apply ~text-xl/3xl;
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
   }
 
   h4 {
-    @apply uppercase tracking-wide ~text-base/lg;
+    @apply scroll-m-20 text-xl font-semibold tracking-tight;
     --wght: 600;
   }
 
@@ -23,7 +23,7 @@
     --wght: 600;
   }
   h6 {
-    @apply uppercase ~text-sm/base;
+    /* @apply uppercase ~text-sm/base; */
     --wght: 600;
   }
   h1,
@@ -53,23 +53,7 @@
   }
 
   p {
-    @apply mb-0 text-pretty text-lg leading-6;
-    & + p {
-      @apply mt-[0.65em];
-    }
-    & + h1,
-    & + h2,
-    & + h3,
-    & + h4,
-    & + h5,
-    & + h6 {
-      @apply mt-6;
-    }
-    & + button,
-    & + [data-button-root],
-    & + .buttons-wrapper {
-      @apply mt-6;
-    }
+    @apply text-pretty text-lg leading-7 [&:not(:first-child)]:mt-6;
   }
 
   acronym,
@@ -88,14 +72,6 @@
   }
 
   /*- Links */
-  a {
-    @apply text-primary underline-offset-4 hover:underline;
-
-    &[rel='footnote'] {
-      @apply no-underline;
-    }
-  }
-
   a:has(sup) + a:has(sup) {
     @apply ms-0.5;
   }
@@ -112,9 +88,9 @@
   }
 
   /*- Lists */
-  ul,
+  /* ul,
   ol {
-    @apply my-1 ms-6 flex flex-col gap-2;
+    @apply my-1 ms-6;
   }
 
   ul {
@@ -129,24 +105,15 @@
     li::marker {
       @apply font-mono font-semibold;
     }
-  }
-
-  /*- Format elements */
-  blockquote {
-    @apply mt-6 text-balance border-s-2 border-primary ps-6 italic;
-  }
-
-  code {
-    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
-  }
-
-  pre {
-    @apply overflow-scroll rounded border bg-muted px-[0.3rem] py-[0.2rem] text-sm font-semibold text-muted-foreground;
-  }
+  } */
 
   /*- Utilities */
   .lead {
-    @apply max-w-[69ch] text-pretty leading-relaxed! text-secondary-foreground/70 ~text-lg/2xl;
+    @apply max-w-[69ch] text-pretty leading-relaxed! text-secondary-foreground/70;
+  }
+
+  .large {
+    @apply text-lg font-semibold;
   }
 
   .small {
@@ -163,38 +130,44 @@
     background: hsla(var(--primary) / 0.8);
     color: hsl(var(--primary-foreground));
   }
+}
 
-  /*- Table */
+@layer components {
+  /* Targets the parent wrapper container */
+  div:has(> table) {
+    @apply my-6 w-full overflow-y-auto;
+  }
+
+  /* Semantic table styles */
   table {
-    width: 100%;
-    text-align: left;
-    border-collapse: collapse;
-    @apply mt-4 w-full bg-background text-sm;
-  }
-  table caption {
-    @apply mb-2 font-bold;
-  }
-  table td,
-  table th {
-    @apply h-12 border-b px-4 text-left align-middle font-medium last-of-type:border-b-0;
-  }
-  table tbody {
-    @apply [&_tr:last-child]:border-0;
-  }
-  table tbody td {
-    @apply p-4 align-middle;
-  }
-  table thead {
-    @apply [&_tr]:border-b;
+    @apply w-full;
+
+    tr {
+      @apply m-0 border-t p-0 even:bg-card;
+    }
+
+    th {
+      @apply border px-4 py-2 text-start font-bold;
+      @apply [&[align=center]]:text-center [&[align=right]]:text-end;
+    }
+
+    td {
+      @apply border px-4 py-2 text-start;
+      @apply [&[align=center]]:text-center [&[align=right]]:text-end;
+    }
   }
 
-  table tfoot {
-  }
-  table tfoot td {
+  /*- Blocks */
+  code {
+    @apply bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
   }
 
-  a[data-button-root] {
-    @apply no-underline;
+  blockquote {
+    @apply mt-6 text-balance border-s-2 border-muted ps-6 italic;
+  }
+
+  pre {
+    @apply overflow-scroll rounded border bg-muted px-[0.3rem] py-[0.2rem] text-sm font-semibold text-muted-foreground;
   }
 }
 

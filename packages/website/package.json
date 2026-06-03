@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "csstype": "^3.2.3",
     "mdsvex": "^0.12.7",
+    "rehype-slug": "^6.0.0",
     "shadcn-svelte": "^1.2.7",
     "svelte": "^5.55.10",
     "svelte-check": "^4.4.8",

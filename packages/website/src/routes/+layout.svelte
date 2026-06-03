@@ -4,6 +4,7 @@
   import { page } from '$app/stores';
 
   import * as Breadcrumb from '$shared/components/ui/breadcrumb/index.js';
+  import DotIcon from '@lucide/svelte/icons/dot';
   import { Separator } from '$shared/components/ui/separator/index.js';
   import * as Sidebar from '$shared/components/ui/sidebar/index.js';
   import AppSidebar from '../lib/components/ui/app-sidebar.svelte';
@@ -37,15 +38,24 @@
           <Separator orientation="vertical" class="me-2 data-[orientation=vertical]:h-4" />
           <Breadcrumb.Root>
             <Breadcrumb.List>
-              {#each breadcrumbs as crumb, i (crumb.url)}
+              {#each breadcrumbs as crumb, i (i)}
                 {#if i > 0}
-                  <Breadcrumb.Separator class="hidden md:block" />
+                  {#if !breadcrumbs[i - 1].url && !breadcrumbs[i - 1].current}
+                    <!-- séparateur entre un groupe (dossier) et son enfant -->
+                    <Breadcrumb.Separator class="hidden md:block">
+                      <DotIcon />
+                    </Breadcrumb.Separator>
+                  {:else}
+                    <Breadcrumb.Separator class="hidden md:block" />
+                  {/if}
                 {/if}
                 <Breadcrumb.Item class={i < breadcrumbs.length - 1 ? 'hidden md:block' : ''}>
                   {#if crumb.current}
                     <Breadcrumb.Page>{crumb.title}</Breadcrumb.Page>
-                  {:else}
+                  {:else if crumb.url}
                     <Breadcrumb.Link href={crumb.url}>{crumb.title}</Breadcrumb.Link>
+                  {:else}
+                    <span class="text-muted-foreground font-normal">{crumb.title}</span>
                   {/if}
                 </Breadcrumb.Item>
               {/each}

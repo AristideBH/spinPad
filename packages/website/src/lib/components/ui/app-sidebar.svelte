@@ -11,12 +11,12 @@
   import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
   import type { ComponentProps } from 'svelte';
   import { navTree } from '$lib/nav.js';
+  import { getDocsTree, type DocTreeNode } from '$lib/docs';
   import { WrenchIcon, ShoppingCart } from '@lucide/svelte';
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
-  const docsItem = navTree.find((n) => n.url === '/docs/')!;
-  const docsChildren = docsItem.children ?? [];
+  const docsTree = getDocsTree();
   const toolsItem =
     navTree.find((n) => n.url === '/studio/') || navTree.find((n) => n.url === '/flash/')!;
   const toolsChildren = toolsItem.children ?? [];
@@ -30,6 +30,30 @@
   let isStudio = $derived(page.url.pathname.startsWith('/studio'));
   let isFlash = $derived(page.url.pathname.startsWith('/flash'));
 </script>
+
+<!-- Recursive docs nav: folders render as group markers, docs as links, any depth. -->
+{#snippet docNodes(items: DocTreeNode[], depth: number)}
+  {#each items as node (node.type === 'folder' ? node.path : node.entry.slug)}
+    {#if node.type === 'folder'}
+      <li
+        class="mt-2 mb-0.5 px-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted-foreground"
+        style="padding-left: {0.5 + depth * 0.5}rem"
+      >
+        {node.label}
+      </li>
+      {@render docNodes(node.children, depth + 1)}
+    {:else}
+      <Sidebar.MenuSubItem>
+        <Sidebar.MenuSubButton
+          href={node.entry.url}
+          isActive={page.url.pathname === node.entry.url}
+        >
+          {node.entry.title}
+        </Sidebar.MenuSubButton>
+      </Sidebar.MenuSubItem>
+    {/if}
+  {/each}
+{/snippet}
 
 <Sidebar.Root bind:ref variant="inset" collapsible="icon" {...restProps}>
   <!-- ── Header / Logo ─────────────────────────────── -->
@@ -144,16 +168,7 @@
               </Collapsible.Trigger>
               <Collapsible.Content>
                 <Sidebar.MenuSub>
-                  {#each docsChildren as item (item.title)}
-                    <Sidebar.MenuSubItem>
-                      <Sidebar.MenuSubButton
-                        href={item.url}
-                        isActive={page.url.pathname === item.url}
-                      >
-                        {item.title}
-                      </Sidebar.MenuSubButton>
-                    </Sidebar.MenuSubItem>
-                  {/each}
+                  {@render docNodes(docsTree, 0)}
                 </Sidebar.MenuSub>
               </Collapsible.Content>
             </Sidebar.MenuItem>

@@ -1,3 +1,5 @@
+import { getDocsManifest, getDocTitle } from '$lib/docs';
+
 export type NavItem = {
 	title: string;
 	url: string;
@@ -6,9 +8,19 @@ export type NavItem = {
 
 export type BreadcrumbItem = {
 	title: string;
-	url: string;
+	/** Omitted for folder/group segments with no backing page (rendered as muted text). */
+	url?: string;
 	current: boolean;
 };
+
+/** "getting-started" → "Getting Started" (breadcrumb fallback for unmapped segments). */
+function humanize(segment: string): string {
+	return segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Documentation children are generated from the docs manifest — the markdown
+// files are the single source of truth, so this never drifts out of sync.
+const docsChildren: NavItem[] = getDocsManifest().map((d) => ({ title: d.title, url: d.url }));
 
 export const navTree: NavItem[] = [
 	{ title: 'Accueil', url: '/' },
@@ -24,16 +36,7 @@ export const navTree: NavItem[] = [
 	{
 		title: 'Documentation',
 		url: '/docs/',
-		children: [
-			{ title: 'Démarrage', url: '/docs/getting-started/' },
-			{ title: 'Keymap', url: '/docs/keymap/' },
-			{ title: 'Encodeur', url: '/docs/encoder/' },
-			{ title: 'LEDs', url: '/docs/leds/' },
-			{ title: 'Studio Mode', url: '/docs/studio-mode/' },
-			{ title: 'Orientation', url: '/docs/orientation/' },
-			{ title: 'Bluetooth', url: '/docs/ble/' },
-			{ title: 'Compiler', url: '/docs/firmware-build/' }
-		]
+		children: docsChildren
 	}, {
 		title: 'Store',
 		url: '/store/'
@@ -43,6 +46,31 @@ export const navTree: NavItem[] = [
 /** Derives breadcrumb trail from pathname. `pageTitle` overrides the last segment label. */
 export function getBreadcrumbs(pathname: string, pageTitle?: string): BreadcrumbItem[] {
 	if (pathname === '/') return [];
+
+	// Docs get a dedicated, fully-nested trail so deep slugs like
+	// /docs/keymap/layers/ read "Documentation › Keymap › Layers et Keymap",
+	// with each segment titled from the manifest when a doc exists for it.
+	if (pathname.startsWith('/docs/') && pathname !== '/docs/') {
+		const segments = pathname
+			.replace(/^\/docs\//, '')
+			.replace(/\/$/, '')
+			.split('/')
+			.filter(Boolean);
+
+		const crumbs: BreadcrumbItem[] = [{ title: 'Documentation', url: '/docs/', current: false }];
+		segments.forEach((seg, i) => {
+			const cumulativeSlug = segments.slice(0, i + 1).join('/');
+			const isLast = i === segments.length - 1;
+			const docTitle = getDocTitle(cumulativeSlug);
+			crumbs.push({
+				title: (isLast && pageTitle) || docTitle || humanize(seg),
+				// Folder/group segments have no backing page → no link (rendered muted).
+				url: isLast || docTitle !== undefined ? `/docs/${cumulativeSlug}/` : undefined,
+				current: isLast
+			});
+		});
+		return crumbs;
+	}
 
 	for (const item of navTree) {
 		if (item.url === pathname) {

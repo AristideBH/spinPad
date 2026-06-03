@@ -1,43 +1,70 @@
 <script lang="ts">
-  import Search from './Search.svelte';
-  import SetHeaderRight from '$lib/SetHeaderRight.svelte';
+  import { getDocsTree, type DocTreeNode } from '$lib/docs';
+  import * as Item from '$shared/components/ui/item/index.js';
+  import FileTextIcon from '@lucide/svelte/icons/file-text';
+  import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+
+  const tree = getDocsTree();
 </script>
-
-{#snippet toolbar()}
-  <Search />
-{/snippet}
-
-<SetHeaderRight content={toolbar} />
 
 <svelte:head>
     <title>Documentation : SpinPad</title>
 </svelte:head>
 
-<div class="max-w-4xl px-4 py-12 mx-auto">
+<!-- Récursif : les dossiers deviennent des titres de section, les docs des lignes Item. -->
+{#snippet section(items: DocTreeNode[], depth: number)}
+  {@const docs = items.filter((n) => n.type === 'doc')}
+  {@const folders = items.filter((n) => n.type === 'folder')}
+
+  {#if docs.length > 0}
+    <Item.Group>
+      {#each docs as node (node.type === 'doc' ? node.entry.slug : '')}
+        {#if node.type === 'doc'}
+          <Item.Root variant="outline">
+            {#snippet child({ props })}
+              <a href={node.entry.url} {...props}>
+                <Item.Media variant="icon">
+                  <FileTextIcon class="size-5 text-muted-foreground" />
+                </Item.Media>
+                <Item.Content>
+                  <Item.Title>{node.entry.title}</Item.Title>
+                  {#if node.entry.description}
+                    <Item.Description>{node.entry.description}</Item.Description>
+                  {/if}
+                </Item.Content>
+                <Item.Actions>
+                  <ChevronRightIcon
+                    class="size-4 text-muted-foreground transition-transform group-hover/item:translate-x-0.5"
+                  />
+                </Item.Actions>
+              </a>
+            {/snippet}
+          </Item.Root>
+        {/if}
+      {/each}
+    </Item.Group>
+  {/if}
+
+  {#each folders as node (node.type === 'folder' ? node.path : '')}
+    {#if node.type === 'folder'}
+      <h2
+        class="mt-10 mb-4 text-xs font-semibold tracking-widest uppercase text-muted-foreground"
+        style="padding-left: {depth * 0.75}rem"
+      >
+        {node.label}
+      </h2>
+      {@render section(node.children, depth + 1)}
+    {/if}
+  {/each}
+{/snippet}
+
+<div class="max-w-3xl px-4 py-12 mx-auto">
     <h1 class="mb-2 text-3xl font-bold">Documentation</h1>
     <p class="mb-10 text-muted-foreground">Tout ce qu'il faut savoir pour configurer et personnaliser votre SpinPad.</p>
 
-    <div class="grid gap-4 sm:grid-cols-2">
-        {#each [
-            { href: '/docs/getting-started/', title: 'Démarrage',          icon: '🚀', desc: 'Premier flash, connexion USB, premier keymap.' },
-            { href: '/docs/keymap/',          title: 'Keymap',             icon: '⌨️', desc: 'Profils, layers, actions, combos.' },
-            { href: '/docs/encoder/',         title: 'Encodeur',           icon: '🎛️', desc: 'Sensibilité, presets, actions par layer.' },
-            { href: '/docs/leds/',            title: 'LEDs',               icon: '💡', desc: 'Effets, extension de chaîne, Hyperion.' },
-            { href: '/docs/studio-mode/',     title: 'Studio Mode',        icon: '📡', desc: 'Config WiFi embarquée, hotspot, auto-save.' },
-            { href: '/docs/orientation/',     title: 'Orientation',        icon: '↕️', desc: 'Rotation du macropad, touches Rotate CW/CCW.' },
-            { href: '/docs/ble/',             title: 'Bluetooth',          icon: '📶', desc: 'Jumelage, multi-appareils, profils BLE.' },
-            { href: '/docs/firmware-build/',  title: 'Compiler le firmware', icon: '🔧', desc: 'ESP-IDF, ESP32-S3, partition table, SPIFFS.' },
-        ] as doc}
-            <a
-                href={doc.href}
-                class="flex gap-4 p-4 transition-colors border border-card bg-card rounded-xl hover:border-spinpad/50 group"
-            >
-                <span class="text-2xl mt-0.5">{doc.icon}</span>
-                <div>
-                    <p class="font-semibold transition-colors text-foreground group-hover:text-spinpad-light">{doc.title}</p>
-                    <p class="text-sm text-muted-foreground mt-0.5">{doc.desc}</p>
-                </div>
-            </a>
-        {/each}
-    </div>
+    {#if tree.length > 0}
+        {@render section(tree, 0)}
+    {:else}
+        <p class="text-muted-foreground">Aucune page de documentation pour le moment.</p>
+    {/if}
 </div>
