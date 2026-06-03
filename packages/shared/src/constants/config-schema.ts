@@ -16,7 +16,7 @@ import { backfillLayerColors } from './layer-colors.js';
 // (config_limits.gen.h) par scripts/codegen.mjs → ne pas dupliquer côté firmware.
 export const CONFIG_NUM_KEYS       = 10;   // SW1–SW10
 export const CONFIG_MAX_PROFILES   = 4;
-export const CONFIG_MAX_LAYERS     = 8;    // par profil (cap réel firmware)
+export const CONFIG_MAX_LAYERS     = 6;    // par profil (cap réel firmware)
 export const CONFIG_NAME_MAX_LEN   = 32;   // octets, '\0' inclus → 31 chars utiles
 export const CONFIG_FORMAT_VERSION = 2;
 
