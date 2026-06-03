@@ -59,6 +59,8 @@ const {
   SPECIAL_ENC_SENS_UP,
   SPECIAL_ENC_SENS_DN,
   SPECIAL_SLEEP,
+  SPECIAL_PROFILE_NEXT,
+  SPECIAL_PROFILE_PREV,
 } = SPECIAL_CODES;
 
 // ── Types ───────────────────────────────────────────────────────
@@ -314,6 +316,8 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Sens +', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_UP), category: 'firmware' },
     { label: 'Sens -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_DN), category: 'firmware' },
     { label: 'Veille', value: action(ACTION_TYPE_SPECIAL, SPECIAL_SLEEP), category: 'firmware' },
+    { label: 'Profil ▸', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_NEXT), category: 'firmware' },
+    { label: 'Profil ◂', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_PREV), category: 'firmware' },
   ],
 
 };

@@ -21,6 +21,16 @@ describe('action encoding round-trip', () => {
     expect(getActionValue(a)).toBe(SPECIAL_CODES.SPECIAL_BLE_SWITCH);
   });
 
+  it('encodes and decodes profile-switch special subcodes', () => {
+    for (const code of [SPECIAL_CODES.SPECIAL_PROFILE_NEXT, SPECIAL_CODES.SPECIAL_PROFILE_PREV]) {
+      const a = action(ACTION_TYPES.ACTION_TYPE_SPECIAL, code);
+      expect(getActionType(a)).toBe(ACTION_TYPES.ACTION_TYPE_SPECIAL);
+      expect(getActionValue(a)).toBe(code);
+    }
+    // Sous-codes distincts, dans la plage 12 bits.
+    expect(SPECIAL_CODES.SPECIAL_PROFILE_NEXT).not.toBe(SPECIAL_CODES.SPECIAL_PROFILE_PREV);
+  });
+
   it('encodes and decodes ACTION_TYPE_MEDIA', () => {
     const a = action(ACTION_TYPES.ACTION_TYPE_MEDIA, MEDIA_CODES.MEDIA_VOL_UP);
     expect(getActionType(a)).toBe(ACTION_TYPES.ACTION_TYPE_MEDIA);

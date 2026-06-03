@@ -338,6 +338,65 @@ export function setEncoderAction(
   _autoSave.schedule();
 }
 
+// ─────────────────────────────────────────────────────────────
+//  PROFIL ACTIF (couplé device ↔ studio)
+// ─────────────────────────────────────────────────────────────
+
+// Dernier index poussé au device — garde anti-écho pour le réconciliateur
+// (évite de renvoyer au device une valeur qu'il vient de nous signaler).
+let _lastSentActiveProfile = -1;
+
+/**
+ * Définit le profil actif côté studio ET device (couplage edit ↔ active).
+ *
+ * - Mutation EN PLACE de `data.active_profile` : pas d'entrée d'undo ni de
+ *   full-save (un switch de profil n'est pas une édition annulable), mais la
+ *   config reste cohérente pour le prochain `setConfig` (évite le clobber du
+ *   profil actif persisté sur le device).
+ * - `push: true` (défaut) → pousse la bascule légère au device.
+ *   `push: false` → utilisé par le réconciliateur quand le device est déjà la
+ *   source de vérité (on ne lui renvoie pas la valeur).
+ */
+export function setActiveProfileLocal(idx: number, opts: { push?: boolean } = {}): void {
+  const data = configState.data;
+  if (!data) return;
+  const max = Math.max(0, data.profiles.length - 1);
+  const clamped = Math.min(Math.max(idx, 0), max);
+
+  data.active_profile = clamped; // mutation en place → pas d'history/full-save
+  configState.activeProfileIndex = clamped;
+  configState.activeLayerIndex = 0;
+
+  if (opts.push ?? true) {
+    _lastSentActiveProfile = clamped;
+    void activeTransport()
+      .setActiveProfile(clamped)
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        // « Non connecté » est normal en mode preview (serial sans device).
+        if (msg !== 'Non connecté') console.error('[config] setActiveProfile échec :', msg);
+      });
+  }
+}
+
+/**
+ * Réconcilie le profil actif rapporté par le device avec l'état studio.
+ * Appelé depuis le polling device_status et l'événement « profile » du
+ * moniteur. Le device est la source de vérité du « profil live » : si l'index
+ * diverge, on aligne le studio SANS renvoyer au device (pas d'écho/boucle).
+ */
+export function reconcileActiveProfile(deviceIdx: number): void {
+  const data = configState.data;
+  if (!data || typeof deviceIdx !== 'number' || deviceIdx < 0) return;
+  if (deviceIdx === data.active_profile) return; // déjà synchro → no-op
+  if (deviceIdx === _lastSentActiveProfile) {
+    // C'est l'écho de notre propre push : on est déjà aligné localement.
+    _lastSentActiveProfile = -1;
+    return;
+  }
+  setActiveProfileLocal(deviceIdx, { push: false });
+}
+
 // Combo mutations dormant — firmware still supports chord combos but the
 // frontend editor has been deferred (see issue #16). Kept here as commented
 // reference for future UI work; round-trip through JSON parse/serialize is
@@ -432,6 +491,11 @@ export function clearMacro(idx: number): void {
 // ─────────────────────────────────────────────────────────────
 
 function _applyOp(result: ops.OpResult): void {
+  // Couplage edit ↔ active : le profil sélectionné après une op CRUD (add /
+  // duplicate auto-select, delete remap) est aussi le profil actif du device.
+  // L'op a déjà recalé active_profile pour l'intégrité ; on l'aligne sur la
+  // sélection finale. Le full-save qui suit le propage au device.
+  result.config.active_profile = result.selection.profile;
   configState.data = result.config;
   configState.activeProfileIndex = result.selection.profile;
   configState.activeLayerIndex = result.selection.layer;

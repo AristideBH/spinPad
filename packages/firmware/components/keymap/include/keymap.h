@@ -148,6 +148,12 @@ void keymap_reload_from_config(void);
 // Obtenir le layer actif actuellement (pour affichage sur l'écran)
 uint8_t keymap_get_active_layer(void);
 
+// Basculer le profil actif (couche données + runtime) : persiste en NVS,
+// recharge le keymap/combos, remet la stack de layers sur la base, et émet un
+// événement "profile" sur le stream moniteur si l'index a réellement changé.
+// idx est clampé à profile_count.
+void keymap_set_active_profile(uint8_t idx);
+
 // Activer/désactiver le streaming d'événements clavier (mode entraînement)
 // Quand activé, chaque changement d'état est émis via usb_hid_cdc_send().
 void keymap_set_monitor(bool enable);

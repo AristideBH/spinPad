@@ -68,6 +68,8 @@ export const SPECIAL_CODES = {
   SPECIAL_ENC_SENS_UP:   0x07,   // Sensibilité encodeur +
   SPECIAL_ENC_SENS_DN:   0x08,   // Sensibilité encodeur -
   SPECIAL_SLEEP:         0x09,   // Mettre le device en veille
+  SPECIAL_PROFILE_NEXT:  0x0A,   // Profil actif suivant (cyclique)
+  SPECIAL_PROFILE_PREV:  0x0B,   // Profil actif précédent (cyclique)
 } as const satisfies Record<string, number>;
 
 export type SpecialCode = keyof typeof SPECIAL_CODES;

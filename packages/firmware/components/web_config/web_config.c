@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 static const char *TAG = "WEB_CONFIG";
@@ -281,6 +282,44 @@ static esp_err_t handle_post_config(httpd_req_t *req)
     return ESP_OK;
 }
 
+// POST /api/active_profile — bascule légère du profil actif.
+// Corps : {"idx":N}. Évite de renvoyer toute la config juste pour changer
+// de profil. keymap_set_active_profile clamp l'index et persiste en NVS.
+static esp_err_t handle_post_active_profile(httpd_req_t *req)
+{
+    reset_idle_timer();
+    set_cors_headers(req);
+
+    char buf[64];
+    int content_len = req->content_len;
+    if (content_len <= 0 || content_len >= (int)sizeof(buf)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid content length");
+        return ESP_FAIL;
+    }
+    int received = httpd_req_recv(req, buf, content_len);
+    if (received <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Failed to receive body");
+        return ESP_FAIL;
+    }
+    buf[received] = '\0';
+
+    const char *p = strstr(buf, "\"idx\"");
+    if (p) p = strchr(p, ':');
+    if (!p) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Missing idx");
+        return ESP_FAIL;
+    }
+    int idx = atoi(p + 1);
+    if (idx < 0) idx = 0;
+
+    extern void keymap_set_active_profile(uint8_t idx);
+    keymap_set_active_profile((uint8_t)idx);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, "{\"ok\":true}");
+    return ESP_OK;
+}
+
 // GET /api/status — télémétrie live (batterie, connexion, fw)
 static esp_err_t handle_get_status(httpd_req_t *req)
 {
@@ -380,6 +419,12 @@ static esp_err_t start_http_server(void)
         .handler = handle_factory_reset, .user_ctx = NULL
     };
     httpd_register_uri_handler(g_server, &post_reset_uri);
+
+    httpd_uri_t post_active_profile_uri = {
+        .uri = "/api/active_profile", .method = HTTP_POST,
+        .handler = handle_post_active_profile, .user_ctx = NULL
+    };
+    httpd_register_uri_handler(g_server, &post_active_profile_uri);
 
     httpd_uri_t get_status_uri = {
         .uri = "/api/status", .method = HTTP_GET,
