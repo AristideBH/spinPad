@@ -1,44 +1,29 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { getDocsManifest } from '$lib/docs/index.js';
+  import * as Toc from '$shared/components/ui/toc/index.js';
 
   let { children } = $props();
 
-  const docs = getDocsManifest();
-
-  const groups = docs.reduce<Record<string, typeof docs>>((acc, doc) => {
-    const key = doc.group ?? '__root__';
-    (acc[key] ??= []).push(doc);
-    return acc;
-  }, {});
+  // Live table of contents built from the rendered article headings.
+  const toc = new Toc.UseToc();
 </script>
 
 <div class="flex max-w-5xl gap-10 px-4 py-10 mx-auto">
-  <nav class="hidden md:block w-52 shrink-0">
-    <p class="mb-4 text-xs font-semibold tracking-widest uppercase text-muted-foreground">Docs</p>
-    {#each Object.entries(groups) as [group, items]}
-      {#if group !== '__root__'}
-        <p class="mt-5 mb-2 text-xs font-semibold tracking-widest uppercase text-muted-foreground">{group}</p>
-      {/if}
-      <ul class="space-y-1">
-        {#each items as doc}
-          <li>
-            <a
-              href="/docs/{doc.slug}/"
-              class="block text-sm px-2 py-1 rounded transition-colors
-                     {$page.url.pathname.includes(doc.slug)
-                       ? 'bg-primary/10 text-primary font-medium'
-                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'}"
-            >
-              {doc.title}
-            </a>
-          </li>
-        {/each}
-      </ul>
-    {/each}
-  </nav>
-
-  <article class="flex-1 min-w-0 prose prose-invert max-w-none">
-    {@render children()}
+  <!-- ── Content ── -->
+  <article class="prose-docs flex-1 min-w-0">
+    <div bind:this={toc.ref} style="display: contents;">
+      {@render children()}
+    </div>
   </article>
+
+  <!-- ── On-this-page TOC ── -->
+  <aside class="hidden lg:block w-52 shrink-0">
+    {#if toc.current.length > 0}
+      <div class="sticky top-24">
+        <p class="mb-3 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+          Sur cette page
+        </p>
+        <Toc.Root toc={toc.current} />
+      </div>
+    {/if}
+  </aside>
 </div>

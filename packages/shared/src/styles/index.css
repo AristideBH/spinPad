@@ -13,6 +13,7 @@
  */
 
 @import './fonts.css';
+@import './typography.css';
 
 @source inline("bg-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-950/80 hover:bg-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-900/80 border-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-700/50 hover:border-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-500/50");
 
