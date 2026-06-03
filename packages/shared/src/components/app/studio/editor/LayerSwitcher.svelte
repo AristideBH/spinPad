@@ -37,11 +37,11 @@
     radioRoot: horizontal ? 'flex flex-row items-center gap-1 grow min-w-0' : 'flex flex-col gap-1',
     group: horizontal ? 'min-w-0 border rounded-lg' : 'w-full border rounded-lg',
     grip: horizontal
-      ? 'flex items-center justify-center px-1 pe-0 border-0! cursor-grab touch-none'
+      ? 'flex items-center justify-center px-1 pe-0 border-0! cursor-grab touch-none '
       : 'flex items-center justify-center ps-1 pe-0 border-0! cursor-grab touch-none',
     label: horizontal
-      ? 'grow min-w-0 justify-center! gap-1! px-2! border-0! rounded-none! truncate'
-      : 'grow flex justify-start! gap-2! px-2! border-0! rounded-none!',
+      ? 'grow min-w-0 justify-center! gap-1! px-2! border-0!  truncate'
+      : 'grow flex justify-start! gap-2! px-2! border-0! ',
     dropdownTrigger: 'px-1 border-0 data-[state=open]:bg-foreground/80!',
   });
 
@@ -85,7 +85,7 @@
 
   const activeLayerVariant = (i: number) => {
     if (i === configState.activeLayerIndex) return 'default';
-    return 'outline';
+    return 'secondary';
   };
 </script>
 
@@ -103,33 +103,46 @@
         onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
       >
         {#snippet children({ item: l, index: i, handlePointerDown })}
-          <ButtonGroup.Root class={s.group}>
+          {@const isActive = i === configState.activeLayerIndex}
+          <ButtonGroup.Root class={cn(s.group, 'border')}>
             <Button
-              class={s.grip}
+              class={cn(s.grip, ' border-b!', layerColor(i))}
               title="Réordonner"
               size="sm"
               variant={activeLayerVariant(i)}
               onpointerdown={handlePointerDown}
             >
               <GripVertical class="size-3.5" />
-              <span class={cn('w-0.5 h-full rounded-none shrink-0', layerColor(i))}></span>
             </Button>
-            <Label class={cn(s.label, buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }))} for="l-{i}">
-              <RadioGroup.Item class="hidden" value={String(i)} title={l.name} id="l-{i}" />
 
+            <Label
+              class={cn(
+                s.label,
+                'z-20 border-b!',
+                buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
+                layerColor(i),
+              )}
+              for="l-{i}"
+            >
+              <RadioGroup.Item class="hidden" value={String(i)} title={l.name} id="l-{i}" />
               {l.name}
             </Label>
 
-            {#if i === configState.activeLayerIndex}
+            {#if isActive}
               <DropdownMenu.Root>
                 <!-- & has data-state="open" -->
                 <DropdownMenu.Trigger
-                  class={cn(buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }), s.dropdownTrigger)}
+                  class={cn(
+                    buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
+                    s.dropdownTrigger,
+                    'border-b!',
+                    layerColor(i),
+                  )}
                   title="Éditer le layer"
                 >
                   <MoreVertical />
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content align="end" class="w-48">
+                <DropdownMenu.Content align="end" class="w-45">
                   <div class="px-1.5 py-1">
                     <InputGroup.Root class="h-7">
                       <InputGroup.Input
@@ -147,7 +160,10 @@
                     </InputGroup.Root>
                   </div>
                   <DropdownMenu.Separator />
-                  <DropdownMenu.Item disabled={layerCount >= CONFIG_MAX_LAYERS} onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}>
+                  <DropdownMenu.Item
+                    disabled={layerCount >= CONFIG_MAX_LAYERS}
+                    onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}
+                  >
                     <CopyPlus />
                     Dupliquer
                   </DropdownMenu.Item>
@@ -162,6 +178,14 @@
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
             {/if}
+
+            <!-- <div
+              class={cn(
+                'w-full h-full fixed bottom-0 right-0 -z-20 rounded-lg border-b-destructive border',
+                isActive ? '' : '',
+                layerColor(i),
+              )}
+            ></div> -->
           </ButtonGroup.Root>
         {/snippet}
       </Sortable>

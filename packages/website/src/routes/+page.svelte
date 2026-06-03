@@ -1,45 +1,79 @@
 <script lang="ts">
   import { Button } from '$shared/components/ui/button/index.js';
-  import { Keyboard, Bluetooth, Palette, Lightbulb, Layers, Wrench } from '@lucide/svelte';
+  import * as Kbd from '$shared/components/ui/kbd/index.js';
+  import Keypad from '$lib/components/Keypad.svelte';
+  import {
+    Keyboard,
+    Bluetooth,
+    Palette,
+    Lightbulb,
+    Layers,
+    Wrench,
+    ArrowRight,
+  } from '@lucide/svelte';
 
+  // Faits matériels affichés en bandeau — tous tirés des specs réelles ci-dessous,
+  // aucun chiffre inventé.
+  const stats = [
+    { value: '10', label: 'touches + encodeur' },
+    { value: '4×4', label: 'profils × layers' },
+    { value: 'BLE 5', label: '+ USB-C natif' },
+    { value: 'WS2812', label: '10 LEDs / touche' },
+  ];
+
+  // Bento 2 colonnes : ligne pleine (image) / split / ligne pleine (accent) / split.
+  // 6 features → 6 cellules, remplissage exact, aucune cellule vide.
   const features = [
     {
       icon: Keyboard,
       title: '10 touches + encodeur',
       text: 'Layout 3×4 avec SW1 et SW10 en format 2u. Encodeur rotatif quadrature avec clic.',
-      span: 'md:col-span-2',
       img: '/img/spinpad.png',
     },
     {
       icon: Bluetooth,
       title: 'USB & Bluetooth',
       text: "HID natif sur USB-C et BLE 5. Passez d'un appareil à l'autre sans rebrancher.",
-      span: '',
     },
     {
       icon: Palette,
       title: 'Studio Mode embarqué',
-      text: 'Maintenez SW8+SW9 → hotspot WiFi + interface de config servie depuis le macropad lui-même.',
-      span: '',
+      text: 'Maintenez SW8+SW9 → hotspot WiFi + interface de config servie depuis le macropad.',
     },
     {
       icon: Lightbulb,
       title: 'LEDs WS2812',
-      text: '10 LEDs par touche + chaîne extensible. Effets Solid, Breathe, Reactive, Mirror, Hyperion.',
-      span: 'md:col-span-2',
+      text: 'Effets Solid, Breathe, Reactive, Mirror, Hyperion. Chaîne extensible.',
       accent: true,
     },
     {
       icon: Layers,
       title: '4 profils × 4 layers',
-      text: "Jusqu'à 16 configurations. Combos, momentary/toggle layers, actions encoder par layer.",
-      span: 'md:col-span-2',
+      text: "Jusqu'à 16 configurations. Combos, momentary/toggle layers, encoder par layer.",
     },
     {
       icon: Wrench,
       title: 'Open source',
       text: 'Firmware ESP-IDF + Studio SvelteKit. Modifiez, compilez, flashez. MIT License.',
-      span: '',
+    },
+  ];
+
+  const steps = [
+    {
+      title: 'Flasher le firmware',
+      text: "Dans le navigateur (Chrome/Edge + WebSerial) ou via esptool.py.",
+    },
+    {
+      title: 'Brancher le SpinPad',
+      text: 'En USB-C : reconnu immédiatement comme clavier HID, sans pilote.',
+    },
+    {
+      title: 'Configurer avec Studio',
+      text: "Par USB (WebSerial) ou en Studio Mode WiFi, depuis n'importe quel appareil.",
+    },
+    {
+      title: 'Utiliser',
+      text: 'Configs persistées en NVS. Débranchez, rebranchez, tout est là.',
     },
   ];
 </script>
@@ -52,98 +86,182 @@
   />
 </svelte:head>
 
-<!-- Hero -->
-<section class="grid items-center max-w-5xl gap-10 px-4 pt-16 pb-20 mx-auto lg:grid-cols-2">
-  <div>
-    <div
-      class="inline-block px-3 py-1 mb-4 text-xs font-medium tracking-widest uppercase border rounded-full bg-spinpad/20 border-spinpad/40 text-spinpad"
-    >
-      Open Source
-    </div>
-    <h1 class="mb-4 text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-      Le macropad qui s'adapte à vous
-    </h1>
-    <p class="mb-8 text-lg leading-relaxed text-muted-foreground">
-      10 touches programmables + encodeur rotatif sur ESP32-S3. USB & Bluetooth. Configurez depuis
-      le navigateur, sans pilote.
-    </p>
-    <div class="flex flex-wrap gap-3">
-      <Button href="/studio/">Ouvrir Studio</Button>
-      <Button variant="outline" href="/docs/">Lire la doc</Button>
-    </div>
-  </div>
-
-  <!-- TODO: remplacer par un vrai rendu du SpinPad -->
-  <img
-    src="/img/spinpad.png"
-    alt="Le macropad SpinPad"
-    class="object-cover w-full border shadow-sm aspect-5/4 rounded-2xl border-border"
-  />
-</section>
-
-<!-- Features (bento) -->
-<section class="grid max-w-5xl grid-cols-1 gap-4 px-4 py-16 mx-auto md:grid-cols-3">
-  {#each features as f (f.title)}
-    {@const Icon = f.icon}
-    <div
-      class="flex flex-col overflow-hidden border rounded-xl {f.span} {f.accent
-        ? 'border-spinpad/30 bg-spinpad/10'
-        : 'border-border bg-card'}"
-    >
-      {#if f.img}
-        <img
-          src={f.img}
-          alt=""
-          loading="lazy"
-          class="object-cover w-full h-32 border-b border-border"
-        />
-      {/if}
-      <div class="flex flex-col p-5">
-        <Icon class="mb-3 size-6 text-spinpad" />
-        <h3 class="mb-1 font-semibold text-foreground">{f.title}</h3>
-        <p class="text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+<!-- ░░ Hero : split asymétrique ░░ -->
+<section class="relative w-full px-4 pt-12 pb-16 overflow-hidden md:pt-20 md:pb-24">
+  <div aria-hidden="true" class="absolute inset-0 -z-10 tech-grid"></div>
+  <div class="reveal-hero grid items-center max-w-6xl gap-12 mx-auto lg:grid-cols-[1.05fr_1fr]">
+    <div>
+      <span
+        class="inline-flex items-center px-3 py-1 mb-6 text-xs font-medium tracking-widest uppercase rounded-full bg-spinpad/15 text-spinpad ring-1 ring-spinpad/30"
+      >
+        Open Source
+      </span>
+      <h1
+        class="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl lg:text-7xl"
+      >
+        Le macropad qui s'adapte à vous
+      </h1>
+      <p class="mt-6 text-lg leading-relaxed text-muted-foreground max-w-[48ch]">
+        10 touches programmables + encodeur rotatif sur ESP32-S3. USB & Bluetooth. Configurez
+        depuis le navigateur, sans pilote.
+      </p>
+      <div class="flex flex-wrap gap-3 mt-9">
+        <Button
+          href="/studio/"
+          class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
+        >
+          Ouvrir Studio
+          <ArrowRight class="size-4" />
+        </Button>
+        <Button
+          variant="outline"
+          href="/docs/"
+          class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
+        >
+          Lire la doc
+        </Button>
       </div>
     </div>
-  {/each}
-</section>
 
-<!-- Studio Mode callout -->
-<section class="px-4 py-16 bg-spinpad/10 border-y border-spinpad/20">
-  <div class="max-w-3xl mx-auto text-center">
-    <h2 class="mb-3 text-2xl font-bold">Configuration sans fil</h2>
-    <p class="mb-6 leading-relaxed text-muted-foreground">
-      Maintenez <strong class="text-foreground">SW8 + SW9</strong> pendant 3 secondes. Le SpinPad
-      crée un hotspot WiFi
-      <code class="px-1 rounded bg-muted">SpinPad-Config</code>. Connectez-vous et ouvrez
-      <code class="px-1 rounded bg-muted">192.168.4.1</code>. Studio se charge depuis le macropad,
-      sans installation.
-    </p>
-    <img
-      src="/studio-preview.png"
-      alt="Aperçu de Studio Mode"
-      class="w-full max-w-lg mx-auto border rounded-lg border-border"
-    />
+    <div class="relative flex justify-center lg:justify-end">
+      <!-- Lueur cyan de marque (pas de dégradé IA générique) -->
+      <div
+        aria-hidden="true"
+        class="absolute -inset-10 -z-10 blur-3xl bg-[radial-gradient(circle_at_55%_45%,color-mix(in_oklch,var(--color-spinpad)_32%,transparent),transparent_68%)]"
+      ></div>
+      <!-- Le vrai keypad SpinPad, rendu en CSS (cohérent avec le Studio) -->
+      <Keypad />
+    </div>
   </div>
 </section>
 
-<!-- Quick start -->
-<section class="max-w-3xl px-4 py-16 mx-auto">
-  <h2 class="mb-8 text-2xl font-bold text-center">Démarrage rapide</h2>
-  <ol class="space-y-4">
-    {#each [{ n: '1', title: 'Flasher le firmware', text: "Utilisez l'outil de flash dans le navigateur (Chrome/Edge + WebSerial) ou esptool.py." }, { n: '2', title: 'Brancher le SpinPad', text: 'Connectez-le en USB-C. Il apparaît immédiatement comme clavier HID, aucun pilote nécessaire.' }, { n: '3', title: 'Configurer avec Studio', text: "Depuis le navigateur via USB (WebSerial), ou en Studio Mode WiFi depuis n'importe quel appareil." }, { n: '4', title: 'Utiliser', text: 'Les configs sont persistées en NVS. Débranchez, rebranchez, tout est là.' }] as step}
-      <li class="flex gap-4">
-        <span
-          class="flex items-center justify-center w-8 h-8 text-sm font-bold border rounded-full shrink-0 bg-spinpad/20 border-spinpad/40 text-spinpad"
-          >{step.n}</span
+<!-- ░░ Bandeau specs ░░ -->
+<section class="w-full px-4">
+  <div
+    class="reveal grid max-w-6xl grid-cols-2 mx-auto overflow-hidden border divide-x divide-y rounded-2xl border-border/60 divide-border/60 md:grid-cols-4 md:divide-y-0 bg-card/40"
+  >
+    {#each stats as s (s.label)}
+      <div class="flex flex-col gap-1 p-6">
+        <span class="font-display text-3xl font-semibold tracking-tight text-spinpad md:text-4xl"
+          >{s.value}</span
         >
-        <div>
-          <p class="font-semibold text-foreground">{step.title}</p>
-          <p class="text-sm text-muted-foreground mt-0.5">{step.text}</p>
-        </div>
-      </li>
+        <span class="text-sm leading-snug text-muted-foreground">{s.label}</span>
+      </div>
     {/each}
-  </ol>
-  <div class="mt-8 text-center">
-    <Button href="/flash/">Flasher le firmware</Button>
+  </div>
+</section>
+
+<!-- ░░ Features (bento à rythme) ░░ -->
+<section class="w-full px-4 py-20 md:py-28">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="font-display mb-10 text-3xl font-semibold tracking-tight md:text-4xl">
+      Pensé pour être bidouillé
+    </h2>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {#each features as f (f.title)}
+        {@const Icon = f.icon}
+        {#if f.img}
+          <!-- Ligne pleine : visuel produit réel + texte (composition horizontale) -->
+          <div
+            class="reveal group relative grid overflow-hidden border md:col-span-2 sm:grid-cols-2 rounded-2xl border-border/60 bg-card"
+          >
+            <div class="relative overflow-hidden min-h-52">
+              <div
+                aria-hidden="true"
+                class="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,color-mix(in_oklch,var(--color-spinpad)_30%,transparent),transparent_62%)]"
+              ></div>
+              <img
+                src={f.img}
+                alt=""
+                loading="lazy"
+                class="relative object-contain w-full h-full p-8 transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            </div>
+            <div class="flex flex-col justify-center p-8">
+              <Icon class="mb-3 size-6 text-spinpad" />
+              <h3 class="font-display mb-2 text-xl font-medium tracking-tight text-foreground">
+                {f.title}
+              </h3>
+              <p class="leading-relaxed text-muted-foreground">{f.text}</p>
+            </div>
+          </div>
+        {:else}
+          <div
+            class="reveal relative flex flex-col p-6 overflow-hidden border rounded-2xl {f.accent
+              ? 'md:col-span-2 border-spinpad/30 bg-[linear-gradient(120deg,color-mix(in_oklch,var(--color-spinpad)_18%,var(--color-card)),var(--color-card))]'
+              : 'border-border/60 bg-card'}"
+          >
+            <Icon class="mb-3 size-5 text-spinpad" />
+            <h3 class="font-display mb-1 text-lg font-medium tracking-tight text-foreground">
+              {f.title}
+            </h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+          </div>
+        {/if}
+      {/each}
+    </div>
+  </div>
+</section>
+
+<!-- ░░ Studio Mode (moment centré, vraies touches) ░░ -->
+<section class="w-full px-4 py-20 md:py-28">
+  <div
+    class="reveal relative max-w-4xl px-6 py-16 mx-auto overflow-hidden text-center border md:px-12 rounded-3xl border-spinpad/25 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklch,var(--color-spinpad)_12%,var(--color-card)),var(--color-card))]"
+  >
+    <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">
+      Configuration sans fil
+    </h2>
+    <p class="mx-auto mt-4 leading-relaxed text-muted-foreground max-w-[52ch]">
+      Maintenez la combinaison ci-dessous pendant 3 secondes. Le SpinPad crée un hotspot WiFi et
+      sert Studio depuis le macropad lui-même, sans installation.
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-8 text-base">
+      <Kbd.Root class="px-3 py-1.5 text-sm">SW8</Kbd.Root>
+      <span class="text-muted-foreground">+</span>
+      <Kbd.Root class="px-3 py-1.5 text-sm">SW9</Kbd.Root>
+      <ArrowRight class="size-4 text-muted-foreground" />
+      <code class="px-2 py-1 text-sm rounded-md bg-background/70 text-spinpad">SpinPad-Config</code>
+      <ArrowRight class="size-4 text-muted-foreground" />
+      <code class="px-2 py-1 text-sm rounded-md bg-background/70 text-foreground">192.168.4.1</code>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ Démarrage rapide (flux séquentiel) ░░ -->
+<section class="w-full px-4 py-20 md:py-28">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="font-display mb-12 text-3xl font-semibold tracking-tight md:text-4xl">
+      Démarrage rapide
+    </h2>
+    <ol class="grid gap-8 md:grid-cols-4 md:gap-6">
+      {#each steps as step, i (step.title)}
+        <li class="reveal relative flex flex-col">
+          <div class="flex items-center gap-3 mb-4">
+            <span
+              class="font-display flex items-center justify-center text-sm font-semibold rounded-full size-9 shrink-0 bg-spinpad/15 text-spinpad ring-1 ring-spinpad/30"
+            >
+              {i + 1}
+            </span>
+            {#if i < steps.length - 1}
+              <span class="flex-1 hidden h-px md:block bg-border/70"></span>
+            {/if}
+          </div>
+          <p class="font-display text-lg font-medium tracking-tight text-foreground">{step.title}</p>
+          <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
+        </li>
+      {/each}
+    </ol>
+
+    <div class="mt-14">
+      <Button
+        href="/flash/"
+        size="lg"
+        class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
+      >
+        Flasher le firmware
+        <ArrowRight class="size-4" />
+      </Button>
+    </div>
   </div>
 </section>

@@ -268,7 +268,7 @@
             <Item.Content>
               <Item.Title class="flex items-center gap-1.5">
                 {prof.name}
-                {#if i === deviceActiveProfile}
+                <!-- {#if i === deviceActiveProfile}
                   <span
                     class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-emerald-600 dark:text-emerald-400"
                     title="Profil actuellement actif sur le device"
@@ -276,7 +276,7 @@
                     <span class="size-1.5 rounded-full bg-emerald-500"></span>
                     Live
                   </span>
-                {/if}
+                {/if} -->
               </Item.Title>
               <Item.Description class="text-xs line-clamp-2">
                 {@const fill = profileFill(prof)}
@@ -296,7 +296,7 @@
                 >
                   <MoreVertical />
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content align="end" class="w-52">
+                <DropdownMenu.Content align="end" sideOffset={54} class="w-64 translate-x-1">
                   <div class="px-1.5 py-1">
                     <InputGroup.Root class="h-7">
                       <InputGroup.Input

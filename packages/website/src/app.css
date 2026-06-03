@@ -2,8 +2,55 @@
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@spinpad/shared/styles';
+@import '@fontsource-variable/space-grotesk';
 
 @source "../../shared/src";
+
+/* Website-only display face for landing headings. Body stays Inter (shared
+   token, also used by the studio app — left untouched). */
+@theme inline {
+  --font-display: 'Space Grotesk Variable', var(--font-sans, sans-serif);
+}
+
+/* ── Scroll-reveal (MOTION_INTENSITY 6) ──
+   CSS scroll-driven animations: zero JS, batched by the compositor. Gated
+   behind @supports so unsupporting browsers (Safari/FF) keep content visible,
+   and behind prefers-reduced-motion so it collapses to static. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+    .reveal-hero {
+      animation: reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+}
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Backdrop grille technique (blueprint) ──
+   Lignes fines à la teinte de bordure, fondues vers les bords par un masque
+   radial pour ne pas alourdir. Cadre la « surface de config » du hero. */
+.tech-grid {
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 0%, transparent 75%);
+  opacity: 0.5;
+}
 
 /* ── Docs prose mode ──
    Element styling itself comes from the shared @layer base typography; this

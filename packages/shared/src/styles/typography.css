@@ -53,7 +53,7 @@
   }
 
   p {
-    @apply text-pretty text-lg leading-7;
+    @apply text-pretty text-lg;
   }
 
   acronym,

@@ -3,14 +3,14 @@
 // One entry per layer up to CONFIG_MAX_LAYERS (8).
 
 export const LAYER_COLORS = [
-  'bg-sky-500',
-  'bg-emerald-500',
-  'bg-amber-500',
-  'bg-rose-500',
-  'bg-violet-500',
-  'bg-cyan-500',
-  'bg-lime-500',
-  'bg-orange-500',
+  'border-b-sky-500!',
+  'border-b-emerald-500!',
+  'border-b-amber-500!',
+  'border-b-rose-500!',
+  'border-b-violet-500!',
+  'border-b-cyan-500!',
+  'border-b-lime-500!',
+  'border-b-orange-500!',
 ] as const;
 
 export function layerColor(i: number): string {
