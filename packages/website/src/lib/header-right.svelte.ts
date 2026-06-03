@@ -1,24 +1,21 @@
-import { getContext, setContext } from 'svelte';
-import type { Component } from 'svelte';
+import { getContext, setContext, type Snippet } from 'svelte';
 
 const KEY = Symbol('header-right');
 
-type Slot = { component: Component; props: Record<string, unknown> } | null;
-
 type HeaderRightContext = {
-	readonly current: Slot;
-	set(component: Component | null, props?: Record<string, unknown>): void;
+	readonly current: Snippet | null;
+	set(snippet: Snippet | null): void;
 };
 
 export function createHeaderRight(): HeaderRightContext {
-	let slot: Slot = $state(null);
+	let slot: Snippet | null = $state(null);
 
 	const ctx: HeaderRightContext = {
 		get current() {
 			return slot;
 		},
-		set(component, props = {}) {
-			slot = component ? { component, props } : null;
+		set(snippet) {
+			slot = snippet;
 		}
 	};
 

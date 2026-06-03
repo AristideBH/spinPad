@@ -1,7 +1,6 @@
 <script lang="ts">
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
-  import { Badge } from '$shared/components/ui/badge/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import { cn } from '$shared/utils.js';
@@ -15,9 +14,9 @@
     ArrowUpFromLine,
     GripVertical,
     ChevronDown,
-    Check,
   } from '@lucide/svelte';
   import Sortable from './sortable/Sortable.svelte';
+  import SaveBadge from './SaveBadge.svelte';
   import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
   import {
     MACRO_COUNT,
@@ -213,11 +212,6 @@
   description="16 macros partagées par tous les profils. Assigne-les à une touche via Macro dans le sélecteur de touche."
   srOnlyTitle={false}
 >
-  {#snippet badge()}
-    <Badge variant="secondary" class="gap-1 font-normal">
-      <Check class="size-3" /> Sauvegardé
-    </Badge>
-  {/snippet}
   <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 pb-4 mx-auto overflow-y-auto">
     <!-- Sélecteur de slot -->
     <div class="grid grid-cols-4 gap-1.5">
@@ -374,7 +368,7 @@
   </div>
 
   {#snippet footer()}
-    <!-- Empty -->
+    <SaveBadge />
   {/snippet}
   <!-- Picker de touche pour les étapes (menu → record / list, nested drawer on mobile) -->
   <ResponsiveSheet

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { useHeaderRight } from '$lib/header-right.svelte.js';
   import Search from './Search.svelte';
-  
-  const headerRight = useHeaderRight();
-  $effect(() => {
-    headerRight.set(Search);
-    return () => headerRight.set(null); // nettoyage auto à la navigation
-  });
+  import SetHeaderRight from '$lib/SetHeaderRight.svelte';
 </script>
+
+{#snippet toolbar()}
+  <Search />
+{/snippet}
+
+<SetHeaderRight content={toolbar} />
 
 <svelte:head>
     <title>Documentation : SpinPad</title>

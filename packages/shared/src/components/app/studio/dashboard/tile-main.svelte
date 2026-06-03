@@ -3,7 +3,7 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine, Check } from '@lucide/svelte';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -14,6 +14,7 @@
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import StatusCard from '../../StatusCard.svelte';
+  import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
 
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
@@ -82,14 +83,13 @@
 
     {#if serial.connected || devMode.active}
       <Button variant={trainingMode.active ? 'default' : 'outline'} onclick={toggleLiveMode}>
-        <Activity /> Training {trainingMode.active ? 'ON' : 'OFF'}
+        <Activity /> Training
       </Button>
     {/if}
 
     <Button variant="outline" onclick={() => (statsOpen = true)}>
       <ChartLine /> Stats
     </Button>
-
     <ResponsiveSheet
       bind:open={statsOpen}
       title="Statistiques"
@@ -101,14 +101,13 @@
         <StatsTile />
       </div>
       {#snippet footer()}
-        <!-- Empty -->
+        <SaveBadge />
       {/snippet}
     </ResponsiveSheet>
 
     <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
       <Settings2 /> Paramètres
     </Button>
-
     <ResponsiveSheet
       bind:open={settingsOpen}
       title="Paramètres"
@@ -116,16 +115,11 @@
       srOnlyTitle={false}
       desktopClass="w-full sm:max-w-2xl"
     >
-      {#snippet badge()}
-        <Badge variant="secondary" class="gap-1 font-normal">
-          <Check class="size-3" /> Sauvegardé
-        </Badge>
-      {/snippet}
       <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
         <SettingsTab />
       </div>
       {#snippet footer()}
-        <!-- Empty -->
+        <SaveBadge />
       {/snippet}
     </ResponsiveSheet>
 

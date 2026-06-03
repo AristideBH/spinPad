@@ -56,9 +56,8 @@
 
       <!-- Right: dynamic slot for per-page toolbar content -->
       {#if headerRight.current}
-        {@const HeaderRightComponent = headerRight.current.component}
         <div class="relative flex items-center w-full gap-2 ms-auto container/main">
-          <HeaderRightComponent {...headerRight.current.props} />
+          {@render headerRight.current()}
         </div>
       {/if}
     </header>
