@@ -10,20 +10,25 @@
   const ctx = getKeypadContext();
 
   const CATEGORY_COLORS: Record<string, string> = {
-    letter: 'bg-blue-950/80 hover:bg-blue-900/80',
-    number: 'bg-lime-950/80 hover:bg-lime-900/80',
-    function: 'bg-cyan-950/80 hover:bg-cyan-900/80',
-    symbol: 'bg-teal-950/80 hover:bg-teal-900/80',
-    nav: 'bg-sky-950/80 hover:bg-sky-900/80',
-    keypad: 'bg-emerald-950/80 hover:bg-emerald-900/80',
-    special: 'bg-slate-800/80 hover:bg-slate-700/80',
-    modifier: 'bg-violet-950/80 hover:bg-violet-900/80',
-    layer: 'bg-green-950/80 hover:bg-green-900/80',
-    media: 'bg-orange-950/80 hover:bg-orange-900/80',
-    app: 'bg-amber-950/80 hover:bg-amber-900/80',
-    firmware: 'bg-purple-950/80 hover:bg-purple-900/80',
-    macro: 'bg-rose-950/80 hover:bg-rose-900/80',
+    letter: 'blue',
+    number: 'lime',
+    function: 'cyan',
+    symbol: 'teal',
+    nav: 'sky',
+    keypad: 'emerald',
+    special: 'slate',
+    modifier: 'violet',
+    layer: 'green',
+    media: 'orange',
+    app: 'amber',
+    firmware: 'purple',
+    macro: 'rose',
   };
+
+  function categoryClass(category: string): string {
+    const color = CATEGORY_COLORS[category];
+    return color ? `bg-${color}-950/80 hover:bg-${color}-900/80` : 'bg-card';
+  }
 
   const GROUP_LABELS: Record<string, string> = {
     letters: 'Lettres',
@@ -43,6 +48,7 @@
 
   let tabValue = $state('all');
   let listEl = $state<HTMLDivElement | null>(null);
+  let tabListEl = $state<HTMLElement | null>(null);
   let sectionEls = $state<Record<string, HTMLElement | null>>({});
   let isSyncingFromTab = false;
 
@@ -99,11 +105,18 @@
 
     return () => observer.disconnect();
   });
+
+  // Scroll active trigger into view in the tab list when tabValue changes
+  $effect(() => {
+    tabValue;
+    const active = tabListEl?.querySelector<HTMLElement>('[data-state="active"]');
+    active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
 </script>
 
 {#snippet keyButton(kc: Keycode)}
   <Button
-    class={cn('text-foreground text-xs cursor-pointer', CATEGORY_COLORS[kc.category] ?? 'bg-card')}
+    class={cn('text-foreground text-xs cursor-pointer', categoryClass(kc.category))}
     onclick={() => ctx.selectKeycode(kc)}>{kc.label}</Button
   >
 {/snippet}
@@ -117,7 +130,7 @@
       style="mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%)"
     >
       <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
-        <UnderlineTabs.List>
+        <UnderlineTabs.List bind:ref={tabListEl}>
           <UnderlineTabs.Trigger value="all">Tout</UnderlineTabs.Trigger>
           {#each entries as [cat] (cat)}
             <UnderlineTabs.Trigger value={cat}>{GROUP_LABELS[cat] ?? cat}</UnderlineTabs.Trigger>
@@ -151,6 +164,7 @@
           </div>
         </div>
       {/each}
+      <div aria-hidden="true" class="h-[50dvh] shrink-0"></div>
     {/if}
   </div>
 </div>

@@ -14,6 +14,8 @@
 
 @import './fonts.css';
 
+@source inline("bg-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-950/80 hover:bg-{blue,lime,cyan,teal,sky,emerald,slate,violet,green,orange,amber,purple,rose}-900/80");
+
 @custom-variant dark (&:is(.dark *));
 
 /* ── Design tokens (oklch) ──────────────────────────────────────────────── */
