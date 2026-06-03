@@ -99,14 +99,15 @@
         rowHeight={horizontal ? 36 : 'auto'}
         colWidth={horizontal ? 'auto' : undefined}
         gap={sortableGap}
-        getKey={(l, i) => `l-${i}-${l.name ?? ''}`}
+        getKey={(l, i) => `l-${l.color ?? i}`}
         onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
       >
         {#snippet children({ item: l, index: i, handlePointerDown })}
           {@const isActive = i === configState.activeLayerIndex}
+          {@const lc = layerColor(l.color ?? i)}
           <ButtonGroup.Root class={cn(s.group, 'border')}>
             <Button
-              class={cn(s.grip, ' border-b!', layerColor(i))}
+              class={cn(s.grip, ' border-b!', lc)}
               title="Réordonner"
               size="sm"
               variant={activeLayerVariant(i)}
@@ -120,7 +121,7 @@
                 s.label,
                 'z-20 border-b!',
                 buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
-                layerColor(i),
+                lc,
               )}
               for="l-{i}"
             >
@@ -136,7 +137,7 @@
                     buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
                     s.dropdownTrigger,
                     'border-b!',
-                    layerColor(i),
+                    lc,
                   )}
                   title="Éditer le layer"
                 >

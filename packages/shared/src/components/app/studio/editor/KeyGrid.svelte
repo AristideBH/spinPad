@@ -133,7 +133,8 @@
               {#if otherLayers(key.idx).length > 0}
                 <span class="keycap-dots">
                   {#each otherLayers(key.idx) as li (li)}
-                    <span class={cn('keycap-dot', layerColor(li))}></span>
+                    <span class={cn('keycap-dot border-b-4', layerColor(ctx.profile?.layers?.[li]?.color ?? li))}
+                    ></span>
                   {/each}
                 </span>
               {/if}

@@ -8,6 +8,8 @@
 //  Correspond à kb_config_t dans config_store.h (firmware).
 // ═══════════════════════════════════════════════════════════════
 
+import { backfillLayerColors } from './layer-colors.js';
+
 // ── Constantes structurelles ────────────────────────────────────
 
 // Source de vérité unique : ces constantes sont aussi émises en C
@@ -118,6 +120,10 @@ export interface LayerConfig {
   encoder_ccw: number;
   name?:       string;
   encoder?:    { cw: number; ccw: number; press?: number };
+  // Slot couleur (0..CONFIG_MAX_LAYERS-1) — app-only, ignoré par le firmware.
+  // Suit le layer lors d'un réordonnancement pour stabiliser sa couleur. Voir
+  // layer-colors.ts. Réassigné par position à l'entrée si absent (round-trip device).
+  color?:      number;
 }
 
 export interface ProfileConfig {
@@ -288,6 +294,7 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
     },
   };
 
+  backfillLayerColors(config.profiles);
   return { ok: true, config };
 }
 
@@ -334,5 +341,6 @@ function mergeLayer(raw: unknown, def: LayerConfig = defaultLayer()): LayerConfi
       : def.keys,
     encoder_cw:  typeof r.encoder_cw  === 'number' ? r.encoder_cw  : def.encoder_cw,
     encoder_ccw: typeof r.encoder_ccw === 'number' ? r.encoder_ccw : def.encoder_ccw,
+    ...(typeof r.color === 'number' ? { color: r.color } : {}),
   };
 }

@@ -23,6 +23,7 @@ import {
   type FullConfig,
   type ProfileConfig,
 } from './config-schema.js';
+import { allocColorSlot } from './layer-colors.js';
 import { action, getActionType, getActionValue, ACTION_TYPES } from './action-types.js';
 
 // Types d'action dont la valeur est un index de layer (à remapper si on
@@ -236,6 +237,7 @@ export function addLayer(
   }
   const names = profile.layers.map((l) => l.name ?? '');
   const layer = defaultLayer(uniqueName(`Layer ${profile.layers.length + 1}`, names));
+  layer.color = allocColorSlot(profile.layers);
   profile.layers.push(layer);
 
   const newLayer = profile.layers.length - 1;
@@ -258,6 +260,7 @@ export function duplicateLayer(
   const src = clone(profile.layers[lIdx]);
   const names = profile.layers.map((l) => l.name ?? '');
   src.name = uniqueName(src.name ?? `Layer ${profile.layers.length + 1}`, names);
+  src.color = allocColorSlot(profile.layers); // nouveau slot : layer distinct du source
   profile.layers.splice(lIdx + 1, 0, src);
 
   return { config: cfg, selection: { profile: pIdx, layer: lIdx + 1 } };

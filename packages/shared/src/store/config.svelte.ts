@@ -43,6 +43,7 @@ import {
   type MacroStep,
 } from '$shared/constants/config-schema.js';
 import { serial } from './serial.svelte.js';
+import { backfillLayerColors } from '$shared/constants/layer-colors.js';
 import type { Selection } from '$shared/constants/config-ops.js';
 
 // ─────────────────────────────────────────────────────────────
@@ -140,12 +141,14 @@ export async function loadConfig(): Promise<void> {
     // par défaut au lieu d'échouer sur "Non connecté".
     if (_transportMode() === 'serial' && !serial.connected) {
       const cfg = defaultConfig();
+      backfillLayerColors(cfg.profiles);
       configState.data = cfg;
       configState.activeProfileIndex = cfg.active_profile ?? 0;
       configState.isDirty = false;
       return;
     }
     const cfg = await activeTransport().getConfig();
+    backfillLayerColors(cfg.profiles);
     configState.data = cfg;
     configState.activeProfileIndex = cfg.active_profile ?? 0;
     configState.isDirty = false;
@@ -233,6 +236,7 @@ export async function importConfig(file: File): Promise<void> {
   } catch (err) {
     throw new Error(`Fichier invalide : ${err instanceof Error ? err.message : String(err)}`);
   }
+  backfillLayerColors(parsed.profiles);
   configState.data = parsed;
   configState.activeProfileIndex = parsed.active_profile ?? 0;
   configState.isDirty = true;
