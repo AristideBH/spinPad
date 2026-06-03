@@ -156,17 +156,17 @@
 
 <style>
   .keycap-grid {
-    --keycap-color: var(--card);
+    --keycap-color: red;
     --keycap-side-color: color-mix(in oklch, var(--keycap-color) 60%, var(--background));
     --keycap-color-active: var(--card);
     --keycap-depth: 4px;
     --keycap-radius: 10px;
     --keycap-label-size: 10px;
     --keycap-sw-size: 8px;
-    filter: drop-shadow(
+    /* filter: drop-shadow(
         0px calc(var(--keycap-depth) * 2) 5px color-mix(in oklch, var(--color-background) 5%, transparent)
       )
-      drop-shadow(0px 1px 0.75px var(--color-background));
+      drop-shadow(0px 1px 0.75px var(--color-background)); */
   }
 
   .keycap {
@@ -174,11 +174,14 @@
     width: 100%;
     height: 100%;
     border-radius: var(--keycap-radius);
-    background-color: var(--keycap-color);
-    box-shadow:
+    background-color: red;
+    /* Screen-fixed top/bottom highlight directions — counter the grid rotation. */
+    --top-x: calc(-1px * sin(var(--orient-deg)));
+    --top-y: calc(-1px * cos(var(--orient-deg)));
+    /* box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset 0 1px 0 rgba(255, 255, 255, 0.13),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.13),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22); */
     cursor: pointer;
     overflow: hidden;
     transition:
@@ -186,26 +189,25 @@
       box-shadow 60ms ease-out;
   }
 
-  .keycap::after {
+  /* .keycap::after {
     content: '';
     position: absolute;
     --depress-offset: 10px;
     width: calc(100% - var(--depress-offset));
     height: calc(100% - var(--depress-offset));
-    aspect-ratio: 1;
     border-radius: 500px;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--orient-deg, 0deg)));
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
+    transform: translate(-50%, -50%);
+    background: linear-gradient(calc(-1 * var(--orient-deg)), rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
     pointer-events: none;
-  }
+  } */
 
   .keycap:hover {
     box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.22),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.18);
   }
 
   .keycap:focus-visible {
@@ -217,16 +219,16 @@
     transform: translate(var(--depth-x), var(--depth-y));
     box-shadow:
       0 0 0 rgba(0, 0, 0, 0),
-      inset 0 1px 0 rgba(255, 255, 255, 0.07),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.07),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.12);
   }
 
   .keycap--active {
     --keycap-color: color-mix(in oklch, var(--keycap-color-active) 25%, var(--card));
     box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.18),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.22),
       0 0 0 1.5px var(--keycap-color-active);
   }
 
@@ -277,8 +279,8 @@
     transform: translate(var(--depth-x), var(--depth-y));
     box-shadow:
       0 0 0 rgba(0, 0, 0, 0),
-      inset 0 1px 0 rgba(255, 255, 255, 0.07),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+      inset var(--top-x) var(--top-y) 0 rgba(255, 255, 255, 0.07),
+      inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.12);
   }
 
   /* Halo qui pulse sous la touche. Placé dans la grid comme item dédié et rendu
@@ -297,21 +299,20 @@
     animation: keycap-pulse 350ms ease-out forwards;
     transform-origin: center;
     will-change: transform, opacity;
-    margin-bottom: var(--keycap-depth);
   }
 
   @keyframes keycap-pulse {
     0% {
       opacity: 0;
-      transform: scale(0.8) translateY(var(--keycap-depth));
+      transform: scale(0.8) translate(var(--depth-x), var(--depth-y));
     }
     20% {
       opacity: 0.95;
-      transform: scale(1.15) translateY(var(--keycap-depth));
+      transform: scale(1.15) translate(var(--depth-x), var(--depth-y));
     }
     100% {
       opacity: 0;
-      transform: scale(1.55) translateY(var(--keycap-depth));
+      transform: scale(1.55) translate(var(--depth-x), var(--depth-y));
     }
   }
 
@@ -349,8 +350,5 @@
     aspect-ratio: 1;
     border-radius: 9999px;
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
-    &:first-child {
-      /* margin-top: calc(var(--size) / -4); */
-    }
   }
 </style>
