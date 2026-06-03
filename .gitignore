@@ -48,3 +48,4 @@ config-app/.env
 .env
 .env.*
 packages/firmware/.hintrc
+.claude/worktrees/**
