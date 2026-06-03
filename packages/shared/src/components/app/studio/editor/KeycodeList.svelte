@@ -3,7 +3,7 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { keycodeGroups, keycodesFlat, type Keycode } from '$shared/constants/keycodes.js';
   import { configState } from '$shared/store/config.svelte.js';
-  import { cn } from '$shared/utils.js';
+  import { cn, scrollShadow } from '$shared/utils.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
 
@@ -49,6 +49,7 @@
   let tabValue = $state('all');
   let listEl = $state<HTMLDivElement | null>(null);
   let tabListEl = $state<HTMLElement | null>(null);
+  let tabWrapperEl = $state<HTMLElement | null>(null);
   let sectionEls = $state<Record<string, HTMLElement | null>>({});
   let isSyncingFromTab = false;
 
@@ -112,6 +113,11 @@
     const active = tabListEl?.querySelector<HTMLElement>('[data-state="active"]');
     active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   });
+
+  $effect(() => {
+    if (!tabListEl || !tabWrapperEl) return;
+    return scrollShadow(tabListEl, tabWrapperEl);
+  });
 </script>
 
 {#snippet keyButton(kc: Keycode)}
@@ -125,10 +131,7 @@
   <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} autofocus class="shrink-0" />
 
   {#if !filteredKeycodes}
-    <div
-      class="shrink-0"
-      style="mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%)"
-    >
+    <div bind:this={tabWrapperEl} class="shrink-0">
       <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
         <UnderlineTabs.List bind:ref={tabListEl}>
           <UnderlineTabs.Trigger value="all">Tout</UnderlineTabs.Trigger>
