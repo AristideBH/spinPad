@@ -3,7 +3,7 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine } from '@lucide/svelte';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine, Check } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -116,6 +116,11 @@
       srOnlyTitle={false}
       desktopClass="w-full sm:max-w-2xl"
     >
+      {#snippet badge()}
+        <Badge variant="secondary" class="gap-1 font-normal">
+          <Check class="size-3" /> Sauvegardé
+        </Badge>
+      {/snippet}
       <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
         <SettingsTab />
       </div>

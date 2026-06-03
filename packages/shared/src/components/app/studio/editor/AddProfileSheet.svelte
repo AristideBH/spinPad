@@ -11,8 +11,8 @@
   //  profil (layer 0) via _applyOp, puis ferme la sheet.
   // ───────────────────────────────────────────────────────────────
   import ResponsiveSheet from '$shared/components/ui/responsive-sheet/responsive-sheet.svelte';
-  import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
-  import { cn } from '$shared/utils.js';
+  import { Button } from '$shared/components/ui/button/index.js';
+  import * as Item from '$shared/components/ui/item/index.js';
   import IconPreview from '../../profiles/IconPreview.svelte';
   import ProfileForm from './ProfileForm.svelte';
   import { addProfile } from '$shared/store/config.svelte.js';
@@ -58,7 +58,12 @@
   );
 </script>
 
-<ResponsiveSheet bind:open title="Ajouter un profil" side="right" desktopClass="w-full sm:max-w-md flex flex-col">
+<ResponsiveSheet
+  bind:open
+  title="Ajouter un profil"
+  desktop="dialog"
+  desktopClass="sm:max-w-lg max-h-[85dvh] flex flex-col p-0 gap-0"
+>
   {#snippet header()}
     <div class="flex items-center gap-2 px-4 py-3 border-b">
       {#if view !== 'chooser'}
@@ -74,26 +79,39 @@
     {#key view}
       <div class="flex flex-col flex-1 min-h-0" in:fly={{ x: view === 'chooser' ? -16 : 16, duration: 150 }}>
         {#if view === 'chooser'}
-          <div class="grid gap-3 p-4 sm:grid-cols-2">
-            <button
-              type="button"
-              onclick={() => (view = 'library')}
-              class="flex flex-col items-start gap-2 p-4 text-left transition-colors border rounded-xl hover:border-primary/50 hover:bg-muted/40"
-            >
-              <Library class="size-5 text-primary" />
-              <span class="font-medium">Depuis la librairie</span>
-              <span class="text-xs text-muted-foreground">Partir d'un preset, tel quel ou personnalisé.</span>
-            </button>
-            <button
-              type="button"
-              onclick={openCreate}
-              class="flex flex-col items-start gap-2 p-4 text-left transition-colors border rounded-xl hover:border-primary/50 hover:bg-muted/40"
-            >
-              <PencilRuler class="size-5 text-primary" />
-              <span class="font-medium">Créer de zéro</span>
-              <span class="text-xs text-muted-foreground">Nom, icône et layers à partir d'un profil vierge.</span>
-            </button>
-          </div>
+          <Item.Group class="grid gap-2 p-4 sm:grid-cols-2">
+            <Item.Root variant="outline">
+              {#snippet child({ props })}
+                <button
+                  {...props}
+                  class={[props.class as string, 'cursor-pointer flex-col items-start text-left'].join(' ')}
+                  onclick={() => (view = 'library')}
+                >
+                  <Item.Media variant="icon"><Library class="size-5" /></Item.Media>
+                  <Item.Content>
+                    <Item.Title>Depuis la librairie</Item.Title>
+                    <Item.Description>Partir d'un preset, tel quel ou personnalisé.</Item.Description>
+                  </Item.Content>
+                </button>
+              {/snippet}
+            </Item.Root>
+
+            <Item.Root variant="outline">
+              {#snippet child({ props })}
+                <button
+                  {...props}
+                  class={[props.class as string, 'cursor-pointer flex-col items-start text-left'].join(' ')}
+                  onclick={openCreate}
+                >
+                  <Item.Media variant="icon"><PencilRuler class="size-5" /></Item.Media>
+                  <Item.Content>
+                    <Item.Title>Créer de zéro</Item.Title>
+                    <Item.Description>Nom, icône et layers à partir d'un profil vierge.</Item.Description>
+                  </Item.Content>
+                </button>
+              {/snippet}
+            </Item.Root>
+          </Item.Group>
         {:else if view === 'library'}
           <div class="flex flex-col gap-2 p-4 overflow-y-auto">
             {#each presets as preset (preset.id)}

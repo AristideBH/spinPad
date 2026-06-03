@@ -23,10 +23,8 @@
 {#if ctx.layer}
   <div class="flex flex-col self-stretch gap-3 keycap-grid">
     <Label>Encodeur</Label>
-    <div class="flex flex-col items-center gap-4 w-fit">
-      <EncoderButtons {knob} />
-      <Knob {knob} />
-    </div>
     <PresetSelect />
+    <EncoderButtons {knob} />
+    <Knob {knob} />
   </div>
 {/if}
