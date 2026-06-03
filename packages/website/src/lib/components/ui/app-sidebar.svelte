@@ -3,8 +3,6 @@
   import * as Sidebar from '$shared/components/ui/sidebar/index.js';
   import { page } from '$app/state';
   import HomeIcon from '@lucide/svelte/icons/house';
-  import Palette from '@lucide/svelte/icons/Palette';
-  import ZapIcon from '@lucide/svelte/icons/zap';
   import BookOpenIcon from '@lucide/svelte/icons/book-open';
   import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
   import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
