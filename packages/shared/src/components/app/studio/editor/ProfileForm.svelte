@@ -21,6 +21,7 @@
     type ProfileConfig,
   } from '$shared/constants/config-schema.js';
   import { ChevronDown, ChevronUp, Plus, Trash2 } from '@lucide/svelte';
+  import { untrack } from 'svelte';
 
   interface Props {
     initial?: ProfileConfig;
@@ -32,7 +33,7 @@
 
   // Copie locale isolée (snapshot → structuredClone : ni proxy, ni ref partagée).
   let draft = $state<ProfileConfig>(
-    structuredClone($state.snapshot(initial ?? defaultProfile()) as ProfileConfig),
+    structuredClone($state.snapshot(untrack(() => initial) ?? defaultProfile()) as ProfileConfig),
   );
 
   const canAddLayer = $derived(draft.layers.length < CONFIG_MAX_LAYERS);

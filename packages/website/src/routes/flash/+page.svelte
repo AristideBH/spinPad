@@ -99,7 +99,6 @@
       const loader = new ESPLoader({
         transport,
         baudrate: 921600,
-        romBaudrate: 115200,
         terminal: {
           clean() {},
           writeLine: (msg: string) => addLog(msg),
@@ -119,19 +118,28 @@
       addLog('Flash en cours…');
       phase = 'flashing';
 
-      let written = 0;
       const total = images.reduce((s, img) => s + img.data.byteLength, 0);
-
+      const written = images.map(() => 0);
       for (const img of images) {
         addLog(`→ 0x${img.offset.toString(16).toUpperCase()} (${(img.data.byteLength / 1024).toFixed(0)} KB)`);
-        await loader.flashData(img.data, img.offset, (pct: number) => {
-          progress = Math.round(((written + (pct / 100) * img.data.byteLength) / total) * 100);
-        });
-        written += img.data.byteLength;
       }
 
+      await loader.writeFlash({
+        fileArray: images.map((img) => ({ data: img.data, address: img.offset })),
+        flashMode: 'keep',
+        flashFreq: 'keep',
+        flashSize: 'keep',
+        eraseAll: false,
+        compress: true,
+        reportProgress: (fileIndex: number, bytesWritten: number) => {
+          written[fileIndex] = bytesWritten;
+          const sum = written.reduce((s, n) => s + n, 0);
+          progress = Math.round((sum / total) * 100);
+        },
+      });
+
       addLog('Redémarrage…');
-      await loader.hardReset();
+      await loader.after('hard_reset');
       await port.close();
 
       phase = 'done';

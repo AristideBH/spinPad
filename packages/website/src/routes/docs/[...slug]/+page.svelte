@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { components } from '$lib/docs/index.js';
 
-  $: slug = $page.params.slug.replace(/\/$/, '');
-  $: component = (components[`/content/docs/${slug}.md`] as any)?.default ?? null;
+  let slug = $derived((page.params.slug ?? '').replace(/\/$/, ''));
+  let component = $derived((components[`/content/docs/${slug}.md`] as any)?.default ?? null);
 </script>
 
 {#if component}
-  <svelte:component this={component} />
+  {@const SvelteComponent = component}
+  <SvelteComponent />
 {:else}
   <p class="text-muted-foreground">Page introuvable : <code>{slug}</code></p>
 {/if}

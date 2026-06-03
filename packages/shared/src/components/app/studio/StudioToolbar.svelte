@@ -15,7 +15,6 @@
   // Démarrer le polling du statut device quand connecté ou en mode démo.
   // Le store route automatiquement vers le bon transport (serial / http / mock).
   $effect(() => {
-    //@ts-expect-error - Vite injecte la variable d'env à la compilation, elle n'existe pas à l'exécution
     const shouldPoll = serial.connected || devMode.active || import.meta.env.VITE_TRANSPORT === 'http';
     if (shouldPoll) {
       startPolling(5000);
