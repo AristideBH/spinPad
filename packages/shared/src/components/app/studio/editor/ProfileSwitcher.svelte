@@ -11,6 +11,7 @@
     exportProfiles,
     importProfiles,
     setActiveProfileLocal,
+    undo,
   } from '$shared/store/config.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import { CONFIG_MAX_PROFILES, MIN_PROFILES, type ProfileConfig } from '$shared/constants/config-schema.js';
@@ -180,8 +181,6 @@
   }
 
   // ── CRUD par profil (menu ⋮ épinglé sur la carte active) ──────────
-  let pendingDelete = $state<number | null>(null);
-  let pendingClear = $state<number | null>(null);
   let pendingIcon = $state<number | null>(null);
   let addOpen = $state(false);
 
@@ -194,18 +193,23 @@
     addProfile(profileList[i]); // op clone + nom unique + auto-sélection
   }
 
-  function confirmDelete() {
-    if (pendingDelete !== null) {
-      deleteProfile(pendingDelete);
-      pendingDelete = null;
-    }
+  // Suppression / réinitialisation immédiates : pas de dialogue de confirmation.
+  // L'op est poussée dans l'historique (Ctrl+Z), et le toast offre un « Annuler »
+  // direct qui rejoue exactement le même undo. Le nom est capturé avant l'op.
+  function onDelete(i: number) {
+    const name = profileList[i]?.name ?? `Profil ${i + 1}`;
+    deleteProfile(i);
+    toast(`Profil « ${name} » supprimé`, {
+      action: { label: 'Annuler', onClick: () => undo() },
+    });
   }
 
-  function confirmClear() {
-    if (pendingClear !== null) {
-      clearProfile(pendingClear);
-      pendingClear = null;
-    }
+  function onClear(i: number) {
+    const name = profileList[i]?.name ?? `Profil ${i + 1}`;
+    clearProfile(i);
+    toast(`Profil « ${name} » réinitialisé`, {
+      action: { label: 'Annuler', onClick: () => undo() },
+    });
   }
 </script>
 
@@ -321,14 +325,14 @@
                     <CopyPlus />
                     Dupliquer
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item onSelect={() => (pendingClear = i)}>
+                  <DropdownMenu.Item onSelect={() => onClear(i)}>
                     <BrushCleaning />
                     Réinitialiser
                   </DropdownMenu.Item>
                   <DropdownMenu.Item
                     variant="destructive"
                     disabled={profileList.length <= MIN_PROFILES}
-                    onSelect={() => (pendingDelete = i)}
+                    onSelect={() => onDelete(i)}
                   >
                     <Trash2 />
                     Supprimer
@@ -442,24 +446,6 @@
 
 <AddProfileSheet bind:open={addOpen} />
 
-<Dialog.Root open={pendingDelete !== null} onOpenChange={(o) => (o ? null : (pendingDelete = null))}>
-  <Dialog.Content class="sm:max-w-sm">
-    <Dialog.Header>
-      <Dialog.Title>Supprimer le profil</Dialog.Title>
-      <Dialog.Description>
-        {#if pendingDelete !== null}
-          Supprimer définitivement le profil « {profileList[pendingDelete]?.name ?? `Profil ${pendingDelete + 1}`} » et
-          tous ses layers ? Cette action peut être annulée avec Ctrl+Z.
-        {/if}
-      </Dialog.Description>
-    </Dialog.Header>
-    <Dialog.Footer>
-      <Button variant="secondary" onclick={() => (pendingDelete = null)}>Annuler</Button>
-      <Button variant="destructive" onclick={confirmDelete}>Supprimer</Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
-
 <Dialog.Root open={pendingIcon !== null} onOpenChange={(o) => (o ? null : (pendingIcon = null))}>
   <Dialog.Content class="sm:max-w-fit">
     <Dialog.Header>
@@ -472,25 +458,6 @@
       {@const pi = pendingIcon}
       <IconEditor value={profileList[pi]?.icon ?? ''} onchange={(b64) => setProfileIcon(pi, b64)} />
     {/if}
-  </Dialog.Content>
-</Dialog.Root>
-
-<Dialog.Root open={pendingClear !== null} onOpenChange={(o) => (o ? null : (pendingClear = null))}>
-  <Dialog.Content class="sm:max-w-sm">
-    <Dialog.Header>
-      <Dialog.Title>Réinitialiser le profil</Dialog.Title>
-      <Dialog.Description>
-        {#if pendingClear !== null}
-          Remettre à zéro toutes les touches de tous les layers de « {profileList[pendingClear]?.name ??
-            `Profil ${pendingClear + 1}`} » ? Les layers, encodeurs, l'icône et le nom sont conservés. Annulable avec
-          Ctrl+Z.
-        {/if}
-      </Dialog.Description>
-    </Dialog.Header>
-    <Dialog.Footer>
-      <Button variant="secondary" onclick={() => (pendingClear = null)}>Annuler</Button>
-      <Button variant="destructive" onclick={confirmClear}>Réinitialiser</Button>
-    </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
 

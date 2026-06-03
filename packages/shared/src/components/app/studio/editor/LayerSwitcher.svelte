@@ -1,14 +1,14 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
-  import { configState, deleteLayer, editLayer } from '$shared/store/config.svelte.js';
+  import { configState, deleteLayer, editLayer, undo } from '$shared/store/config.svelte.js';
+  import { toast } from 'svelte-sonner';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import type { LayerConfig } from '$shared/constants/config-schema.js';
   import { GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
-  import * as Dialog from '$shared/components/ui/dialog/index.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { cn } from '$shared/utils.js';
@@ -48,7 +48,6 @@
   const sortableGap = $derived<[number, number]>(horizontal ? [6, 0] : [0, 4]);
 
   let layerValue = $state(String(configState.activeLayerIndex));
-  let pendingDelete = $state<number | null>(null);
 
   const layerCount = $derived(ctx.profile?.layers?.length ?? 0);
 
@@ -66,11 +65,22 @@
     editLayer(configState.activeProfileIndex, i, { name });
   }
 
-  function confirmDelete() {
-    if (pendingDelete !== null) {
-      deleteLayer(configState.activeProfileIndex, pendingDelete);
-      pendingDelete = null;
-    }
+  // Suppression / réinitialisation immédiates : pas de dialogue. L'op entre dans
+  // l'historique (Ctrl+Z) et le toast offre un « Annuler » direct via undo().
+  function onDelete(i: number) {
+    const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
+    deleteLayer(configState.activeProfileIndex, i);
+    toast(`Layer « ${name} » supprimé`, {
+      action: { label: 'Annuler', onClick: () => undo() },
+    });
+  }
+
+  function onReset(i: number) {
+    const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
+    ctx.resetLayer(i);
+    toast(`Layer « ${name} » réinitialisé`, {
+      action: { label: 'Annuler', onClick: () => undo() },
+    });
   }
 
   const activeLayerVariant = (i: number) => {
@@ -137,15 +147,11 @@
                     </InputGroup.Root>
                   </div>
                   <DropdownMenu.Separator />
-                  <DropdownMenu.Item onSelect={() => ctx.resetLayer(i)}>
+                  <DropdownMenu.Item onSelect={() => onReset(i)}>
                     <BrushCleaning />
                     Réinitialiser
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item
-                    variant="destructive"
-                    disabled={layerCount <= 1}
-                    onSelect={() => (pendingDelete = i)}
-                  >
+                  <DropdownMenu.Item variant="destructive" disabled={layerCount <= 1} onSelect={() => onDelete(i)}>
                     <Trash2 />
                     Supprimer
                   </DropdownMenu.Item>
@@ -157,22 +163,4 @@
       </Sortable>
     </RadioGroup.Root>
   </div>
-
-  <Dialog.Root open={pendingDelete !== null} onOpenChange={(o) => (o ? null : (pendingDelete = null))}>
-    <Dialog.Content class="sm:max-w-sm">
-      <Dialog.Header>
-        <Dialog.Title>Supprimer le layer</Dialog.Title>
-        <Dialog.Description>
-          {#if pendingDelete !== null}
-            Supprimer définitivement le layer « {ctx.profile.layers?.[pendingDelete]?.name ?? `L${pendingDelete}`} » ? Cette
-            action peut être annulée avec Ctrl+Z.
-          {/if}
-        </Dialog.Description>
-      </Dialog.Header>
-      <Dialog.Footer>
-        <Button variant="secondary" onclick={() => (pendingDelete = null)}>Annuler</Button>
-        <Button variant="destructive" onclick={confirmDelete}>Supprimer</Button>
-      </Dialog.Footer>
-    </Dialog.Content>
-  </Dialog.Root>
 {/if}
