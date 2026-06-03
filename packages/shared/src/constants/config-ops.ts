@@ -242,6 +242,27 @@ export function addLayer(
   return { config: cfg, selection: { profile: pIdx, layer: newLayer } };
 }
 
+/** Duplique le layer lIdx du profil pIdx (clone + nom unique), l'insère juste
+ *  après et le sélectionne. No-op si déjà au max. */
+export function duplicateLayer(
+  config: FullConfig,
+  selection: Selection,
+  pIdx: number,
+  lIdx: number,
+): OpResult {
+  const cfg = clone(config);
+  const profile = cfg.profiles[pIdx];
+  if (!profile || profile.layers.length >= CONFIG_MAX_LAYERS || lIdx < 0 || lIdx >= profile.layers.length) {
+    return { config: cfg, selection };
+  }
+  const src = clone(profile.layers[lIdx]);
+  const names = profile.layers.map((l) => l.name ?? '');
+  src.name = uniqueName(src.name ?? `Layer ${profile.layers.length + 1}`, names);
+  profile.layers.splice(lIdx + 1, 0, src);
+
+  return { config: cfg, selection: { profile: pIdx, layer: lIdx + 1 } };
+}
+
 /** Supprime un layer (garde au moins MIN_LAYERS). */
 export function deleteLayer(
   config: FullConfig,

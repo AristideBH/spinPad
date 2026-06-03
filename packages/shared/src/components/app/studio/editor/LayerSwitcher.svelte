@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
-  import { configState, deleteLayer, editLayer, undo } from '$shared/store/config.svelte.js';
+  import { addLayer, configState, deleteLayer, duplicateLayer, editLayer, undo } from '$shared/store/config.svelte.js';
   import { toast } from 'svelte-sonner';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
-  import type { LayerConfig } from '$shared/constants/config-schema.js';
+  import { CONFIG_MAX_LAYERS, type LayerConfig } from '$shared/constants/config-schema.js';
   import { GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
@@ -13,7 +13,7 @@
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { cn } from '$shared/utils.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
-  import { BrushCleaning, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
+  import { BrushCleaning, CopyPlus, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
 
@@ -147,6 +147,10 @@
                     </InputGroup.Root>
                   </div>
                   <DropdownMenu.Separator />
+                  <DropdownMenu.Item disabled={layerCount >= CONFIG_MAX_LAYERS} onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}>
+                    <CopyPlus />
+                    Dupliquer
+                  </DropdownMenu.Item>
                   <DropdownMenu.Item onSelect={() => onReset(i)}>
                     <BrushCleaning />
                     Réinitialiser
@@ -161,6 +165,17 @@
           </ButtonGroup.Root>
         {/snippet}
       </Sortable>
+      <Button
+        variant="outline"
+        size="sm"
+        class={cn('shrink-0', horizontal ? '' : 'w-full justify-start! gap-2!')}
+        disabled={layerCount >= CONFIG_MAX_LAYERS}
+        title="Ajouter un layer vierge"
+        onclick={() => addLayer(configState.activeProfileIndex)}
+      >
+        <Plus class="size-3.5" />
+        {#if !horizontal}Ajouter un layer{/if}
+      </Button>
     </RadioGroup.Root>
   </div>
 {/if}

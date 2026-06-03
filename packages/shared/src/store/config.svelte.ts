@@ -528,6 +528,10 @@ export function addLayer(profileIdx: number): void {
   _applyOp(ops.addLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx));
 }
 
+export function duplicateLayer(profileIdx: number, layerIdx: number): void {
+  _applyOp(ops.duplicateLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, layerIdx));
+}
+
 export function deleteLayer(profileIdx: number, layerIdx: number): void {
   _applyOp(ops.deleteLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, layerIdx));
 }
