@@ -18,43 +18,67 @@
   const ctx = createKeypadContext();
 
   // Détection de retour à la ligne : on bascule le LayerSwitcher en onglets
-  // horizontaux quand la colonne layer + le bloc clavier ne tiennent plus côte
-  // à côte. La décision se base sur la largeur du conteneur vs une exigence
-  // FIXE (colonne layer + gap + largeur min du clavier), JAMAIS sur la
-  // géométrie post-bascule (offsetTop) : sinon `wrapped` se verrouille — passer
-  // en w-full pousse toujours le clavier dessous, et on ne « dé-wrap » jamais.
-  const LAYER_COL = 180; // max-w de la colonne layer en mode vertical
-  const GAP = 16; // gap-4 entre colonne et clavier
+  // horizontaux quand la colonne layer + le clavier ne tiennent plus côte à côte.
+  //
+  // On NE PRÉDIT PAS le wrap via les tailles intrinsèques (min/max-content) :
+  // min-content sous-estime (clavier replié), max-content surestime (l'Encodeur
+  // s'étire à des largeurs jamais rendues) et les deux divergent entre Chrome et
+  // Firefox. À la place : PROBE synchrone. On impose la géométrie « côte à côte »
+  // (colonne à sa largeur verticale, clavier au naturel) puis on demande au
+  // navigateur si le clavier reste sur la même rangée -> on lit le wrap RÉEL du
+  // moteur de rendu, identique dans tous les navigateurs.
+  const LAYER_COL = 180; // largeur fixe de la colonne layer (vertical)
+  // Hystérésis, exprimée comme un élargissement de la colonne sondée quand on
+  // est déjà wrappé : pour dé-wrapper, le côte-à-côte doit tenir AVEC cette
+  // marge. Absorbe le va-et-vient de scrollbar (~17px Chrome/Windows : wrap ->
+  // plus haut -> scrollbar -> largeur chute). Firefox (overlay) n'a pas ce souci.
+  const HYST = 32;
 
   let contentEl = $state<HTMLElement | null>(null);
+  let layerEl = $state<HTMLElement | null>(null);
   let keypadEl = $state<HTMLElement | null>(null);
   let wrapped = $state(false);
 
-  // Largeur min-content du bloc clavier (taille quasi constante) : mesurée via
-  // une passe `width:min-content` ponctuelle, indépendante de l'état de wrap.
-  let keypadMin = $state(0);
+  // Observe le conteneur, coalesce les rafales de resize sur un rAF. La fermeture
+  // `measure` n'est pas réactive : lire `wrapped` dedans ne re-déclenche pas l'effet.
   $effect(() => {
-    if (!keypadEl) return;
-    const el = keypadEl;
-    const prev = el.style.width;
-    el.style.width = 'min-content';
-    keypadMin = el.getBoundingClientRect().width;
-    el.style.width = prev;
-  });
+    const content = contentEl;
+    const layer = layerEl;
+    const keypad = keypadEl;
+    if (!content || !layer || !keypad) return;
 
-  $effect(() => {
-    if (!contentEl) return;
-    const min = keypadMin; // dépendance réactive : recalcule quand mesuré
+    let raf = 0;
     const measure = () => {
-      const cs = getComputedStyle(contentEl!);
-      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-      const inner = contentEl!.clientWidth - padX;
-      if (min > 0) wrapped = inner < LAYER_COL + GAP + min;
+      raf = 0;
+      // Largeur de colonne sondée : +HYST quand déjà wrappé (marge anti-rebond).
+      const probeW = `${wrapped ? LAYER_COL + HYST : LAYER_COL}px`;
+      // Force la colonne à sa forme verticale (les classes Tailwind w-full /
+      // max-w sont écrasées par le style inline le temps de la mesure), puis
+      // lis si le clavier a basculé sous la colonne. Écriture/lecture/restau
+      // synchrones -> aucune frame peinte entre -> pas de flash.
+      const lw = layer.style.width;
+      const lmw = layer.style.maxWidth;
+      const lf = layer.style.flex;
+      layer.style.width = probeW;
+      layer.style.maxWidth = probeW;
+      layer.style.flex = '0 0 auto';
+      const stacked = keypad.getBoundingClientRect().top - layer.getBoundingClientRect().top > 1;
+      layer.style.width = lw;
+      layer.style.maxWidth = lmw;
+      layer.style.flex = lf;
+      if (stacked !== wrapped) wrapped = stacked; // n'écrit qu'au changement réel
     };
-    const obs = new ResizeObserver(measure);
-    obs.observe(contentEl);
-    measure();
-    return () => obs.disconnect();
+    const schedule = () => {
+      raf ||= requestAnimationFrame(measure);
+    };
+
+    const obs = new ResizeObserver(schedule);
+    obs.observe(content);
+    schedule();
+    return () => {
+      obs.disconnect();
+      cancelAnimationFrame(raf);
+    };
   });
 
   // Bridge training : SWn pressé sur device → ouvre le picker correspondant.
@@ -119,7 +143,7 @@
   <div transition:fly={{ y: 20, duration: 350, delay: 200 }} class="relative">
     <Card.Content bind:ref={contentEl} class="flex flex-wrap items-start justify-start gap-x-4 gap-y-1">
       {#if ctx.layer}
-        <div class={wrapped ? 'w-full' : 'grow min-w-[180px] max-w-[178px]'}>
+        <div bind:this={layerEl} class={wrapped ? 'w-full' : 'grow min-w-[180px] max-w-[180px]'}>
           <LayerSwitcher orientation={wrapped ? 'horizontal' : 'vertical'} />
         </div>
 

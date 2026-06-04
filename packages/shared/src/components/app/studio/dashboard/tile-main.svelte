@@ -15,6 +15,8 @@
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import StatusCard from '../../StatusCard.svelte';
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
+  import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
+  import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
 
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
@@ -49,8 +51,22 @@
   });
 </script>
 
-<Card.Root class="@container/card col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2">
-  <Card.Header class="h-full">
+<Card.Root class="@container/card  relative col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2 py-0 gap-0">
+  <Card.Header class="relative h-full py-4 overflow-hidden isolate">
+    <LedMatrix
+      mode="flow"
+      muted={serial.connected || devMode.active ? false : true}
+      brightness={0.85}
+      cell={6}
+      dotRatio={0.7}
+      speed={0.5}
+      pulses={() => [...keyVisuals.pressNonce, keyVisuals.encoderPress]}
+      rotation={() => keyVisuals.encoderTurn}
+      pop={0.3}
+      eqGain={0.125}
+      class="absolute inset-0 pointer-events-none -z-10"
+    />
+    <!-- Vitrine LED en fond d'en-tête : éteinte si rien n'est connecté. -->
     <Card.Description>
       <!-- ══ Connexion ═════════════════════════════════ -->
       <div class="flex flex-wrap gap-2">
@@ -65,7 +81,9 @@
       </div>
     </Card.Description>
 
-    <Card.Title class="text-2xl font-semibold @[250px]/card:text-3xl self-end mb-1 mt-6">
+    <Card.Title
+      class="text-2xl font-semibold text-shadow-lg text-shadow-muted @[250px]/card:text-3xl self-end mb-1 mt-12"
+    >
       {bleName}
     </Card.Title>
 
