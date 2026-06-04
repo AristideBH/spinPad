@@ -256,13 +256,13 @@
           <Sortable
             items={displayItems}
             orientation="vertical"
-            rowHeight={34}
+            rowHeight="auto"
             gap={[0, 4]}
             getKey={(_, i) => `step-${i}`}
             onReorder={reorderSteps}
           >
             {#snippet children({ item, handlePointerDown })}
-              <div class="flex items-center h-full gap-2 px-2 text-xs border rounded-md border-border bg-background">
+              <div class="flex items-center h-8 gap-2 px-2 text-xs border rounded-md border-border bg-background">
                 <button
                   type="button"
                   class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"

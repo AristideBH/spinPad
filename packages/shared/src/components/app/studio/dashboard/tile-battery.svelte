@@ -52,7 +52,7 @@
       <BatteryIcon class="size-4 text-muted-foreground" />
     </Card.Action>
 
-    <div class="flex flex-col mt-auto">
+    <div class="flex flex-col col-span-2 mt-auto">
       {#if !batteryPresent}
         <p class="text-base font-medium text-muted-foreground">Pas de batterie</p>
         <p class="text-xs text-muted-foreground">

@@ -128,7 +128,7 @@
 {/snippet}
 
 <div class="flex flex-col min-h-0 gap-2">
-  <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} autofocus class="shrink-0" />
+  <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} class="shrink-0" />
 
   {#if !filteredKeycodes}
     <div bind:this={tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--popover)]">

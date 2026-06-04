@@ -9,19 +9,13 @@
     deleteLayer,
     editLayer,
     setProfileIcon,
-  } from "$shared/store/config.svelte.js";
-  import { serial, connect, disconnect } from "$shared/store/serial.svelte.js";
-  import {
-    listProfilePresets,
-    type ProfilePreset,
-  } from "$shared/constants/profile-presets.js";
-  import {
-    CONFIG_MAX_PROFILES,
-    CONFIG_MAX_LAYERS,
-  } from "$shared/constants/config-schema.js";
-  import IconPreview from "./IconPreview.svelte";
-  import IconEditor from "./IconEditor.svelte";
-  import { Input } from "$shared/components/ui/input/index.js";
+  } from '$shared/store/config.svelte.js';
+  import { serial, connect, disconnect } from '$shared/store/serial.svelte.js';
+  import { listProfilePresets, type ProfilePreset } from '$shared/constants/profile-presets.js';
+  import { CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS } from '$shared/constants/config-schema.js';
+  import IconPreview from './IconPreview.svelte';
+  import IconEditor from './IconEditor.svelte';
+  import { Input } from '$shared/components/ui/input/index.js';
 
   // ── Presets disponibles (builtin + futures sources) ──
   let presets = $state<ProfilePreset[]>([]);
@@ -50,9 +44,7 @@
 <div class="flex flex-col max-w-3xl gap-6 p-6 mx-auto">
   <header class="flex flex-wrap items-center gap-3">
     <h1 class="text-lg font-semibold">Démo — Profils &amp; Layers</h1>
-    <span
-      class="px-2 py-0.5 rounded text-xs border border-border text-muted-foreground"
-    >
+    <span class="px-2 py-0.5 rounded text-xs border border-border text-muted-foreground">
       transport: {configState.transportMode}
     </span>
     <div class="flex items-center gap-2 ml-auto">
@@ -71,7 +63,7 @@
         onclick={() => loadConfig()}
         disabled={configState.isLoading}
       >
-        {configState.isLoading ? "Chargement…" : "Charger la config"}
+        {configState.isLoading ? 'Chargement…' : 'Charger la config'}
       </button>
     </div>
   </header>
@@ -90,7 +82,7 @@
     </p>
   {:else}
     <!-- ── Profils ────────────────────────────────────── -->
-    <section class="flex flex-col gap-2">
+    <!-- <section class="flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <h2 class="text-sm font-medium">Profils ({profiles.length}/{CONFIG_MAX_PROFILES})</h2>
         <div class="relative">
@@ -165,11 +157,11 @@
           </div>
         </div>
       {/each}
-    </section>
+    </section> -->
 
     <!-- ── Layers du profil sélectionné ──────────────── -->
     {#if activeProfile}
-      <section class="flex flex-col gap-2">
+      <!-- <section class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-medium">
             Layers de « {activeProfile.name} » ({activeProfile.layers.length}/{CONFIG_MAX_LAYERS})
@@ -188,9 +180,8 @@
             <span class="font-mono text-xs text-muted-foreground">L{li}</span>
             <Input
               class="w-auto"
-              value={layer.name ?? ""}
-              onchange={(e: Event) =>
-                editLayer(activeIdx, li, { name: (e.target as HTMLInputElement).value })}
+              value={layer.name ?? ''}
+              onchange={(e: Event) => editLayer(activeIdx, li, { name: (e.target as HTMLInputElement).value })}
             />
             <div class="flex gap-1 ml-auto">
               <button
@@ -211,27 +202,23 @@
             </div>
           </div>
         {/each}
-      </section>
+      </section> -->
 
       <!-- ── Éditeur d'icône ───────────────────────────── -->
       <section class="flex flex-col gap-2">
         <h2 class="text-sm font-medium">Icône de « {activeProfile.name} »</h2>
-        <IconEditor
-          value={activeProfile.icon ?? ""}
-          onchange={(b64) => setProfileIcon(activeIdx, b64)}
-        />
+        <IconEditor value={activeProfile.icon ?? ''} onchange={(b64) => setProfileIcon(activeIdx, b64)} />
       </section>
     {/if}
 
     <!-- ── JSON brut (preuve du data-flow) ─────────────── -->
-    <section class="flex flex-col gap-2">
+    <!-- <section class="flex flex-col gap-2">
       <h2 class="text-sm font-medium">configState.data (JSON)</h2>
-      <pre
-        class="p-3 overflow-auto text-xs border rounded max-h-80 border-border bg-muted/30">{JSON.stringify(
+      <pre class="p-3 overflow-auto text-xs border rounded max-h-80 border-border bg-muted/30">{JSON.stringify(
           data,
           null,
           2,
         )}</pre>
-    </section>
+    </section> -->
   {/if}
 </div>

@@ -5,7 +5,7 @@
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import { CONFIG_MAX_LAYERS, type LayerConfig } from '$shared/constants/config-schema.js';
-  import { GripVertical } from '@lucide/svelte';
+  import { BadgeCheckIcon, ChevronRightIcon, EllipsisVertical, GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
@@ -13,9 +13,11 @@
   import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
   import { cn, scrollShadow } from '$shared/utils.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
-  import { BrushCleaning, CopyPlus, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
+  import { BrushCleaning, CopyPlus, Plus, Trash2 } from '@lucide/svelte';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
+  import { fade } from 'svelte/transition';
+  import * as Item from '$shared/components/ui/item/index.js';
 
   interface Props {
     orientation?: 'horizontal' | 'vertical';
@@ -31,20 +33,6 @@
   // pour un colWidth NUMÉRIQUE ; en 'auto' la piste reste à 100% et les onglets
   // débordent sans pouvoir défiler. Voir le pattern de ProfileSwitcher.
   const H_COL_W = 120;
-
-  // ─── Surface d'édition des styles ──────────────────────────────────────
-  // Classes Tailwind par élément interne, variantes vertical/horizontal côte à
-  // côte. Les wrappers de layout (ScrollArea, sticky…) vivent dans le markup.
-  const s = $derived({
-    group: horizontal ? 'w-full min-w-0 border rounded-lg' : 'w-full border rounded-lg',
-    grip: horizontal
-      ? 'flex items-center justify-center px-1 pe-0 border-0! cursor-grab touch-none '
-      : 'flex items-center justify-center ps-1 pe-0 border-0! cursor-grab touch-none',
-    label: horizontal
-      ? 'grow min-w-0 justify-center! gap-1! px-2! border-0!  truncate'
-      : 'grow flex justify-start! gap-2! px-2! border-0! ',
-    dropdownTrigger: 'px-1 border-0 data-[state=open]:bg-foreground/80!',
-  });
 
   const sortableGap = $derived<[number, number]>(horizontal ? [6, 0] : [0, 4]);
 
@@ -165,77 +153,88 @@
     {#snippet children({ item: l, index: i, handlePointerDown })}
       {@const isActive = i === configState.activeLayerIndex}
       {@const lc = layerColor(l.color ?? i)}
-      <ButtonGroup.Root class={cn(s.group, 'border ')}>
-        <Button
-          class={cn(s.grip, ' border-b!', lc)}
-          title="Réordonner"
-          size="sm"
-          variant={activeLayerVariant(i)}
-          data-grip
-          onpointerdown={handlePointerDown}
+      <Label for="l-{i}">
+        <RadioGroup.Item hidden disabled={isActive} value={String(i)} title={l.name} id="l-{i}" />
+        <Item.Root
+          variant={isActive ? 'active' : 'card'}
+          size="xs"
+          class={cn(
+            'relative group cursor-pointer px-1.5 py-1 border',
+            lc,
+            !isActive ? 'hover:border-muted-foreground/15 hover:bg-muted/90' : '',
+          )}
         >
-          <GripVertical class="size-3.5" />
-        </Button>
-
-        <Label
-          class={cn(s.label, 'z-20 border-b!', buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }), lc)}
-          for="l-{i}"
-        >
-          <RadioGroup.Item class="hidden" value={String(i)} title={l.name} id="l-{i}" />
-          {l.name}
-        </Label>
-
-        {#if isActive}
-          <DropdownMenu.Root>
-            <!-- & has data-state="open" -->
-            <DropdownMenu.Trigger
-              class={cn(
-                buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
-                s.dropdownTrigger,
-                'border-b!',
-                lc,
-              )}
-              title="Éditer le layer"
+          <Item.Media>
+            <button
+              type="button"
+              data-grip
+              class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
+              title="Réordonner"
+              onpointerdown={handlePointerDown}
+              onclick={(e) => e.preventDefault()}
             >
-              <MoreVertical />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end" class="w-45">
-              <div class="px-1.5 py-1">
-                <InputGroup.Root class="h-7">
-                  <InputGroup.Input
-                    placeholder="Nom du layer"
-                    value={l.name ?? ''}
-                    onkeydown={(e: KeyboardEvent) => {
-                      e.stopPropagation();
-                      if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
-                    }}
-                    onchange={(e: Event) => rename(i, (e.currentTarget as HTMLInputElement).value)}
-                  />
-                  <InputGroup.Addon align="inline-end">
-                    <Kbd.Root>⏎</Kbd.Root>
-                  </InputGroup.Addon>
-                </InputGroup.Root>
-              </div>
-              <DropdownMenu.Separator />
-              <DropdownMenu.Item
-                disabled={layerCount >= CONFIG_MAX_LAYERS}
-                onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}
-              >
-                <CopyPlus />
-                Dupliquer
-              </DropdownMenu.Item>
-              <DropdownMenu.Item onSelect={() => onReset(i)}>
-                <BrushCleaning />
-                Réinitialiser
-              </DropdownMenu.Item>
-              <DropdownMenu.Item variant="destructive" disabled={layerCount <= 1} onSelect={() => onDelete(i)}>
-                <Trash2 />
-                Supprimer
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        {/if}
-      </ButtonGroup.Root>
+              <GripVertical class="size-3.5" />
+            </button>
+          </Item.Media>
+
+          <Item.Content>
+            <Item.Title class="text-sm line-clamp-1">{l.name}</Item.Title>
+          </Item.Content>
+
+          {#if isActive}
+            <Item.Actions>
+              <DropdownMenu.Root>
+                <div in:fade={{ duration: 150, delay: 200 }} out:fade={{ duration: 150 }}>
+                  <DropdownMenu.Trigger
+                    class={cn(
+                      buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+                      'absolute top-0 bottom-0 right-0 w-6 h-full z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground  data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
+                    )}
+                    title="Éditer le layer"
+                  >
+                    <EllipsisVertical />
+                  </DropdownMenu.Trigger>
+                </div>
+
+                <DropdownMenu.Content align="end" class="w-45">
+                  <div class="px-1.5 py-1">
+                    <InputGroup.Root class="h-7">
+                      <InputGroup.Input
+                        placeholder="Nom du layer"
+                        value={l.name ?? ''}
+                        onkeydown={(e: KeyboardEvent) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
+                        }}
+                        onchange={(e: Event) => rename(i, (e.currentTarget as HTMLInputElement).value)}
+                      />
+                      <InputGroup.Addon align="inline-end">
+                        <Kbd.Root>⏎</Kbd.Root>
+                      </InputGroup.Addon>
+                    </InputGroup.Root>
+                  </div>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item
+                    disabled={layerCount >= CONFIG_MAX_LAYERS}
+                    onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}
+                  >
+                    <CopyPlus />
+                    Dupliquer
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item onSelect={() => onReset(i)}>
+                    <BrushCleaning />
+                    Réinitialiser
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item variant="destructive" disabled={layerCount <= 1} onSelect={() => onDelete(i)}>
+                    <Trash2 />
+                    Supprimer
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            </Item.Actions>
+          {/if}
+        </Item.Root>
+      </Label>
     {/snippet}
   </Sortable>
 {/snippet}

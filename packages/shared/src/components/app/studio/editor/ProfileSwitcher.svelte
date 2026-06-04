@@ -28,9 +28,9 @@
     CopyPlus,
     Download,
     GripVertical,
-    MoreVertical,
     Palette,
     Plus,
+    Settings2,
     Share,
     Trash2,
     Upload,
@@ -41,6 +41,7 @@
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import { toast } from 'svelte-sonner';
+  import { fade, scale, slide } from 'svelte/transition';
 
   function profileFill(prof: ProfileConfig): { mapped: number; total: number } {
     let mapped = 0;
@@ -243,6 +244,7 @@
             )}
           >
             <Item.Media class="self-center! mb-1.5 me-2 gap-1">
+              <!-- -- GRIP -- -->
               <button
                 type="button"
                 data-grip
@@ -265,8 +267,9 @@
                 </div>
               {/if}
             </Item.Media>
+
             <Item.Content>
-              <Item.Title class="flex items-center gap-1.5">
+              <Item.Title class="flex items-center gap-1.5 line-clamp-1">
                 {prof.name}
                 <!-- {#if i === deviceActiveProfile}
                   <span
@@ -284,18 +287,21 @@
               </Item.Description>
             </Item.Content>
 
+            <!-- -- MENU -- -->
             {#if isActive}
               <DropdownMenu.Root>
-                <DropdownMenu.Trigger
-                  title="Options du profil"
-                  class={cn(
-                    buttonVariants({ variant: 'ghost', size: 'icon' }),
-                    'absolute top-1 right-1 z-10 size-7 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground data-[state=open]:bg-primary-foreground/20',
-                  )}
-                  onclick={(e) => e.preventDefault()}
-                >
-                  <MoreVertical />
-                </DropdownMenu.Trigger>
+                <div in:fade={{ duration: 150, delay: 200 }} out:fade={{ duration: 150 }}>
+                  <DropdownMenu.Trigger
+                    title="Options du profil"
+                    class={cn(
+                      buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+                      'absolute top-0.5 right-0.5 size-6 z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground  data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
+                    )}
+                    onclick={(e) => e.preventDefault()}
+                  >
+                    <Settings2 />
+                  </DropdownMenu.Trigger>
+                </div>
                 <DropdownMenu.Content align="end" sideOffset={54} class="w-64 translate-x-1">
                   <div class="px-1.5 py-1">
                     <InputGroup.Root class="h-7">

@@ -3,7 +3,7 @@
   import * as Card from '$shared/components/ui/card/index.js';
   import { configState, exportProfiles, importProfiles } from '$shared/store/config.svelte.js';
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
-  import { Download, Plus, Share, Upload } from '@lucide/svelte';
+  import { Activity, Download, Plus, Share, Upload } from '@lucide/svelte';
   import { createKeypadContext } from '../editor/keypad-context.svelte.js';
   import KeyGrid from '../editor/KeyGrid.svelte';
   import KeycodePicker from '../editor/KeycodePicker.svelte';
@@ -134,22 +134,29 @@
   }
 </script>
 
-<Card.Root size="sm" class="gap-y-6!">
-  <Card.Header class="flex items-start gap-1.5">
-    <ProfileSwitcher />
-  </Card.Header>
+<Card.Root size="sm" class="gap-y-5!">
+  <div transition:fly={{ y: 50, duration: 350, delay: 220 }} class="relative">
+    <Card.Header class="flex items-start gap-1.5">
+      <ProfileSwitcher />
+    </Card.Header>
+  </div>
 
   <!-- Editor -->
-  <div transition:fly={{ y: 20, duration: 350, delay: 200 }} class="relative">
+  <div transition:fly={{ y: 20, duration: 600, delay: 350 }} class="relative">
     <Card.Content bind:ref={contentEl} class="flex flex-wrap items-start justify-start gap-x-4 gap-y-1">
       {#if ctx.layer}
         <div bind:this={layerEl} class={wrapped ? 'w-full' : 'grow min-w-[180px] max-w-[180px]'}>
           <LayerSwitcher orientation={wrapped ? 'horizontal' : 'vertical'} />
         </div>
 
-        <div bind:this={keypadEl} class="flex flex-wrap gap-12 p-6 border grow rounded-2xl justify-evenly">
-          <KeyGrid />
-          <Encoder />
+        <div bind:this={keypadEl} class="flex flex-wrap justify-between gap-12 p-6 border grow rounded-2xl">
+          <div class="flex flex-wrap gap-6 justify-evenly grow rounded-2xl">
+            <KeyGrid />
+            <Encoder />
+          </div>
+          <div class="flex flex-col justify-start gap-2 h-fill w-fit">
+            <Button variant="outline" size="icon"><Activity /></Button>
+          </div>
         </div>
       {/if}
     </Card.Content>

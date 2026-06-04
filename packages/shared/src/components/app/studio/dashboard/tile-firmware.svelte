@@ -38,7 +38,7 @@
   <Card.Header class="h-full">
     <Card.Description>Firmware</Card.Description>
     <!-- Actions -->
-    <div class="flex items-center gap-1.5 mb-1 mt-auto">
+    <div class="flex items-center gap-1.5 mb-1 mt-auto col-span-2">
       <Cpu class="size-3.5 text-muted-foreground" />
       <span class="text-base font-semibold tabular-nums">v{fwVersion}</span>
       <span

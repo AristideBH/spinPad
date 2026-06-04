@@ -3,7 +3,17 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine } from '@lucide/svelte';
+  import {
+    Usb,
+    Bluetooth,
+    RefreshCw,
+    LogOut,
+    Settings2,
+    Lightbulb,
+    Activity,
+    ChartLine,
+    Settings,
+  } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -62,8 +72,8 @@
       speed={0.5}
       pulses={() => [...keyVisuals.pressNonce, keyVisuals.encoderPress]}
       rotation={() => keyVisuals.encoderTurn}
-      pop={0.3}
-      eqGain={0.125}
+      pop={0.5}
+      eqGain={0.25}
       class="absolute inset-0 pointer-events-none -z-10"
     />
     <!-- Vitrine LED en fond d'en-tête : éteinte si rien n'est connecté. -->
@@ -81,9 +91,7 @@
       </div>
     </Card.Description>
 
-    <Card.Title
-      class="text-2xl font-semibold text-shadow-lg text-shadow-muted @[250px]/card:text-3xl self-end mb-1 mt-12"
-    >
+    <Card.Title class="text-3xl font-semibold text-shadow-lg  @[250px]/card:text-4xl self-end mt-20">
       {bleName}
     </Card.Title>
 
@@ -99,11 +107,11 @@
 
     <MacroManager />
 
-    {#if serial.connected || devMode.active}
+    <!-- {#if serial.connected || devMode.active}
       <Button variant={trainingMode.active ? 'default' : 'outline'} onclick={toggleLiveMode}>
         <Activity /> Training
       </Button>
-    {/if}
+    {/if} -->
 
     <Button variant="outline" onclick={() => (statsOpen = true)}>
       <ChartLine /> Stats
@@ -123,8 +131,8 @@
       {/snippet}
     </ResponsiveSheet>
 
-    <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
-      <Settings2 /> Paramètres
+    <Button variant="outline" class="ms-auto" onclick={() => (settingsOpen = true)}>
+      <Settings /> Paramètres
     </Button>
     <ResponsiveSheet
       bind:open={settingsOpen}
@@ -142,14 +150,14 @@
     </ResponsiveSheet>
 
     <ButtonGroup.Root>
-      <Button variant="outline" size="icon" onclick={handleReload}>
+      <!-- <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
-      </Button>
-      {#if serial.connected}
+      </Button> -->
+      <!-- {#if serial.connected}
         <Button variant="outline" onclick={disconnect} class="ms-auto gap-1.5">
-          <LogOut class="size-4" /> Déconnecter
+          <LogOut class="size-4" />
         </Button>
-      {/if}
+      {/if} -->
     </ButtonGroup.Root>
   </Card.Footer>
 </Card.Root>

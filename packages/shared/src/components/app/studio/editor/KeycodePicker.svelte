@@ -21,7 +21,7 @@
 </script>
 
 {#snippet header()}
-  <div class="flex items-center gap-2 pr-8 shrink-0">
+  <div class="flex items-center gap-2 px-4 py-3 border-b">
     {#if ctx.pickerStage !== 'menu'}
       <Button variant="ghost" size="icon-sm" onclick={() => ctx.setStage('menu')} title="Retour">
         <ArrowLeft class="size-4" />
@@ -42,7 +42,7 @@
 
 {#snippet menu()}
   <Item.Group class="grid gap-2 sm:grid-cols-2">
-    <Item.Root variant="outline">
+    <Item.Root variant="outline" class="hover:bg-muted/50">
       {#snippet child({ props })}
         <button
           {...props}
@@ -66,7 +66,7 @@
       {/snippet}
     </Item.Root>
 
-    <Item.Root variant="outline">
+    <Item.Root variant="outline" class="hover:bg-muted/50">
       {#snippet child({ props })}
         <button
           {...props}
@@ -85,9 +85,9 @@
 {/snippet}
 
 {#snippet body()}
-  <div class="flex flex-col min-h-0 gap-3 p-4">
+  <div class="flex flex-col min-h-0 gap-0 p-0">
     {@render header()}
-    <div class="relative flex flex-col flex-1 min-h-0">
+    <div class="relative flex flex-col flex-1 min-h-0 p-4">
       {#key ctx.pickerStage}
         <div class="flex flex-col flex-1 min-h-0" in:fly={{ x: ctx.pickerStage === 'menu' ? -16 : 16, duration: 150 }}>
           {#if ctx.pickerStage === 'menu'}

@@ -12,7 +12,7 @@
   });
 </script>
 
-<div class="knob-container w-fit" style="--rotation-deg: {knob.rotation}deg;" class:dragging={knob.isDragging}>
+<div class="mt-2 knob-container w-fit" style="--rotation-deg: {knob.rotation}deg;" class:dragging={knob.isDragging}>
   <div
     bind:this={knobEl}
     class="knob"

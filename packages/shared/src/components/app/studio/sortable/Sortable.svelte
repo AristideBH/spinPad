@@ -119,13 +119,28 @@
   const flyDirection = $derived(horizontal ? { x: flyDistance, y: 0 } : { x: 0, y: flyDistance });
 </script>
 
-<div bind:this={wrapEl} class="sortable-wrap" style={[forcedWidth ? `width:${forcedWidth}px` : '', horizontal ? 'touch-action:pan-x' : ''].filter(Boolean).join(';') || undefined}>
-  <Grid bind:items={gridItems} {cols} {rowHeight} colWidth={gridColWidth} {gap} unstyled compact onpointerup={onPointerUp}>
+<div
+  bind:this={wrapEl}
+  class="sortable-wrap"
+  style={[forcedWidth ? `width:${forcedWidth}px` : '', horizontal ? 'touch-action:pan-x' : '']
+    .filter(Boolean)
+    .join(';') || undefined}
+>
+  <Grid
+    bind:items={gridItems}
+    {cols}
+    {rowHeight}
+    colWidth={gridColWidth}
+    {gap}
+    unstyled
+    compact
+    onpointerup={onPointerUp}
+  >
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
       {@const payload = dataItem.data as { item: T; index: number }}
       <div
         transition:fly={{ ...flyDirection, duration: 250, delay: 80 + payload.index * 40 }}
-        class={horizontal ? 'h-full' : 'w-full'}
+        class={horizontal ? 'h-full' : 'w-full h-full'}
       >
         {@render renderItem({ item: payload.item, index: payload.index, handlePointerDown: movePointerDown })}
       </div>
