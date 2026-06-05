@@ -10,6 +10,7 @@
         muted: 'bg-muted/50 border-transparent',
         active: 'bg-primary text-primary-foreground',
         card: 'bg-muted text-muted-primary',
+        dark: 'bg-background/30 ',
       },
       size: {
         default: 'gap-2.5 px-3 py-2.5',

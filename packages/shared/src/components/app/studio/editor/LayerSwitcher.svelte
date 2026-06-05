@@ -270,7 +270,7 @@
         >
           {@render tabs()}
           <!-- Bouton « + » épinglé à droite : reste visible quand la piste défile. -->
-          <div class="sticky right-0 z-20 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
+          <div class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
             {@render addBtn()}
           </div>
         </RadioGroup.Root>

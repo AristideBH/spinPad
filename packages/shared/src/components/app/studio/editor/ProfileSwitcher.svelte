@@ -352,7 +352,7 @@
     </Sortable>
 
     <div
-      class="sticky z-20 flex flex-col items-center border rounded-lg ms-auto shrink-0 right-2 bg-card border-muted shadow-[0_0_18px_9px_var(--tw-shadow-color)] shadow-background/70"
+      class="sticky z-10 flex flex-col items-center border rounded-lg ms-auto shrink-0 right-2 bg-card border-muted shadow-[0_0_18px_9px_var(--tw-shadow-color)] shadow-background/70"
     >
       <ButtonGroup.Root orientation="vertical">
         <Button

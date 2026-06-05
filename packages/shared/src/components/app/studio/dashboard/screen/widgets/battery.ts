@@ -9,6 +9,6 @@ export const battery: WidgetDef = {
   singleton: true,
   preview: () => {
     const b = deviceStatus.data?.battery;
-    return b?.present ? `${b.percent}%` : '—%';
+    return b?.present ? `${b.percent}%` : '—';
   },
 };

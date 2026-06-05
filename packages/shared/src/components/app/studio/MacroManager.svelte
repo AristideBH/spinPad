@@ -367,7 +367,7 @@
     </div>
   </div>
 
-  {#snippet footer()}
+  {#snippet badge()}
     <SaveBadge />
   {/snippet}
   <!-- Picker de touche pour les étapes (menu → record / list, nested drawer on mobile) -->
@@ -376,10 +376,10 @@
     title={pickerTitle}
     srOnlyTitle={true}
     nested={true}
-    desktopClass="sm:max-w-md flex flex-col"
+    desktopClass="max-w-md flex flex-col"
   >
     {#snippet header()}
-      <div class="flex items-center gap-2 px-4 pt-4 pr-12 shrink-0">
+      <div class="flex items-center max-w-md gap-2 pt-4 pr-12 shrink-0">
         {#if pickerStage !== 'menu'}
           <Button variant="ghost" size="icon-sm" onclick={() => (pickerStage = 'menu')} title="Retour">
             <ArrowLeft class="size-4" />
@@ -468,8 +468,5 @@
         </div>
       {/key}
     </div>
-    {#snippet footer()}
-      <!-- Empty -->
-    {/snippet}
   </ResponsiveSheet>
 </ResponsiveSheet>

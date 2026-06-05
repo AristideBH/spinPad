@@ -8,11 +8,13 @@
     Bluetooth,
     RefreshCw,
     LogOut,
-    Settings2,
     Lightbulb,
     Activity,
-    ChartLine,
     Settings,
+    PanelRightClose,
+    PanelRightOpen,
+    PanelBottomClose,
+    PanelBottomOpen,
   } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
@@ -22,11 +24,20 @@
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
-  import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import StatusCard from '../../StatusCard.svelte';
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
   import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
   import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
+  import { IsMobile } from '$shared/lib/hooks/is-mobile.svelte';
+  let {
+    showAnnex = false,
+    onToggle,
+  }: {
+    showAnnex?: boolean;
+    onToggle?: () => void;
+  } = $props();
+
+  let isMobile = $derived(new IsMobile(976));
 
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
@@ -51,7 +62,6 @@
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
 
   let settingsOpen = $state(false);
-  let statsOpen = $state(false);
 
   // Stop training mode when device disconnects (unless devMode is on).
   $effect(() => {
@@ -61,8 +71,10 @@
   });
 </script>
 
-<Card.Root class="@container/card  relative col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2 py-0 gap-0">
-  <Card.Header class="relative h-full py-4 overflow-hidden isolate">
+<Card.Root class="@container/card relative h-full py-0 gap-0 z-10">
+  <Card.Header
+    class="relative h-full py-4 overflow-hidden isolate shadow-[inset_0_0px_50px_rgba(0,0,0,1)] shadow-black/50"
+  >
     <LedMatrix
       mode="flow"
       muted={serial.connected || devMode.active ? false : true}
@@ -112,24 +124,6 @@
       </Button>
 
       <MacroManager />
-
-      <Button variant="outline" onclick={() => (statsOpen = true)}>
-        <ChartLine /> Stats
-      </Button>
-      <ResponsiveSheet
-        bind:open={statsOpen}
-        title="Statistiques"
-        description="Données d'utilisation depuis le dernier reset."
-        srOnlyTitle={false}
-        desktopClass="w-full sm:max-w-lg"
-      >
-        <div class="px-4 pb-4">
-          <StatsTile />
-        </div>
-        {#snippet footer()}
-          <SaveBadge />
-        {/snippet}
-      </ResponsiveSheet>
     </ButtonGroup.Root>
 
     <Button variant="outline" size="icon" class="ms-auto" onclick={() => (settingsOpen = true)}>
@@ -140,25 +134,33 @@
       title="Paramètres"
       description="Toutes les options sont sauvegardées automatiquement."
       srOnlyTitle={false}
-      desktopClass="w-full sm:max-w-2xl"
+      desktopClass="w-full max-w-md"
     >
-      <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
-        <SettingsTab />
-      </div>
-      {#snippet footer()}
+      {#snippet badge()}
         <SaveBadge />
       {/snippet}
+      <div class="flex flex-col w-full h-full max-w-5xl px-4 mx-auto overflow-hidden">
+        <SettingsTab />
+      </div>
     </ResponsiveSheet>
 
+    <Button variant="outline" size="icon" onclick={onToggle}>
+      {#if isMobile.current}
+        {#if showAnnex}<PanelBottomOpen />{:else}<PanelBottomClose />{/if}
+      {:else}
+        {#if showAnnex}<PanelRightOpen />{:else}<PanelRightClose />{/if}
+      {/if}
+    </Button>
+
     <ButtonGroup.Root>
-      <!-- <Button variant="outline" size="icon" onclick={handleReload}>
+      <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
-      </Button> -->
-      <!-- {#if serial.connected}
-        <Button variant="outline" onclick={disconnect} class="ms-auto gap-1.5">
+      </Button>
+      {#if serial.connected}
+        <Button variant="outline" size="icon" onclick={disconnect} class="ms-auto gap-1.5">
           <LogOut class="size-4" />
         </Button>
-      {/if} -->
+      {/if}
     </ButtonGroup.Root>
   </Card.Footer>
 </Card.Root>

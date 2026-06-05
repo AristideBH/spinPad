@@ -21,6 +21,7 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
   const connection = opts.connection ?? 'usb';
   const pct = opts.batteryPercent ?? (battery === 'low' ? 12 : 85);
 
+  const usbConnected = connection === 'usb' || connection === 'both';
   const batteryStatus: DeviceStatus['battery'] =
     battery === 'absent'
       ? { present: false }
@@ -29,6 +30,7 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
           percent: pct,
           voltage_mv: Math.round(3300 + (pct / 100) * 900),
           source: 'auto',
+          charging: usbConnected,
         };
 
   return {
@@ -93,6 +95,12 @@ let _readCount = 0;
 export function tickMockDischarge(): number {
   _readCount++;
   if (_readCount % 50 === 0 && _pct > 0) _pct--;
+  return _pct;
+}
+
+export function tickMockCharge(): number {
+  _readCount++;
+  if (_readCount % 50 === 0 && _pct < 100) _pct++;
   return _pct;
 }
 

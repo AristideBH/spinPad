@@ -34,7 +34,7 @@
   }
 </script>
 
-<Card.Root class="@container/card  @lg/main:row-span-2 @4xl/main:row-span-1">
+<Card.Root class="@container/card h-full">
   <Card.Header class="h-full">
     <Card.Description>Firmware</Card.Description>
   </Card.Header>

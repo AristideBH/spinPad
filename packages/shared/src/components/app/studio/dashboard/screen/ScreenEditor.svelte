@@ -138,7 +138,7 @@
   // colonnes mosaic, hauteur via rowHeight dérivée de la hauteur mesurée du
   // conteneur. mosaic creuse les gaps À L'INTÉRIEUR des items (pas d'espace
   // externe), donc la hauteur totale = ROWS × rowHeight → rowHeight = h / ROWS.
-  const GAP = 5;
+  const GAP = 4;
   let gridH = $state(0);
   const rowHeight = $derived(gridH > 0 ? gridH / ROWS : 40);
 
@@ -157,7 +157,7 @@
     </p>
   {:else}
     <!-- ── Grille d'édition (remplit le conteneur sur les deux axes) ─ -->
-    <div class="flex-1 w-full px-0.5 pt-1 rounded-t-xl border-t bg-background/50">
+    <div class="flex-1 w-full px-1 pt-1 pb-0.5 border-t rounded-t-xl bg-background/50">
       <div class="w-full h-full screen-grid" bind:clientHeight={gridH} bind:this={gridRef}>
         <Grid
           bind:items={gridItems}
@@ -185,7 +185,7 @@
               {@const options = def.options ?? []}
               {@const hasOpts = sizes.length > 1 || options.length > 0}
               <Item.Root
-                variant="muted"
+                variant="dark"
                 size="xs"
                 class="relative gap-1 w-full rounded-xl h-full px-2 py-1! overflow-hidden border-border/60 flex-nowrap"
               >
@@ -196,7 +196,10 @@
                       data-grip
                       class="flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground cursor-grab touch-none"
                       title="Déplacer"
-                      onpointerdown={(e) => { draggingIdx = idx; movePointerDown(e); }}
+                      onpointerdown={(e) => {
+                        draggingIdx = idx;
+                        movePointerDown(e);
+                      }}
                     >
                       <GripVertical class="size-3" />
                     </button>
@@ -211,10 +214,7 @@
                 <!-- options + suppression (menu, design aligné sur LayerSwitcher) -->
                 {#if editable}
                   <Item.Actions>
-                    <DropdownMenu.Root
-                      open={openIdx === idx}
-                      onOpenChange={(v) => (openIdx = v ? idx : null)}
-                    >
+                    <DropdownMenu.Root open={openIdx === idx} onOpenChange={(v) => (openIdx = v ? idx : null)}>
                       <DropdownMenu.Trigger
                         title="Options du widget"
                         class={cn(
@@ -232,14 +232,22 @@
                               range={def.size}
                               current={{ w: w.w, h: w.h }}
                               fits={(cw, ch) => canResize(idx, cw, ch)}
-                              onpick={(cw, ch) => { setSize(idx, cw, ch); openIdx = null; }}
+                              onpick={(cw, ch) => {
+                                setSize(idx, cw, ch);
+                                openIdx = null;
+                              }}
                             />
                           </div>
                         {/if}
 
                         {#if options.length > 0}
                           {#if sizes.length > 1}<DropdownMenu.Separator />{/if}
-                          <OptionControls widget={w} {options} onPatch={(p) => patchWidget(idx, p)} onClose={() => (openIdx = null)} />
+                          <OptionControls
+                            widget={w}
+                            {options}
+                            onPatch={(p) => patchWidget(idx, p)}
+                            onClose={() => (openIdx = null)}
+                          />
                         {/if}
 
                         {#if hasOpts}<DropdownMenu.Separator />{/if}

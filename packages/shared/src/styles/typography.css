@@ -1,20 +1,20 @@
 @layer base {
   /*- Headings */
   h1 {
-    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    @apply text-4xl font-extrabold tracking-tight scroll-m-20 lg:text-5xl;
     --wght: 900;
   }
 
   h2 {
-    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0;
+    @apply pb-2 text-3xl font-semibold tracking-tight transition-colors border-b scroll-m-20 first:mt-0;
   }
 
   h3 {
-    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+    @apply text-2xl font-semibold tracking-tight scroll-m-20;
   }
 
   h4 {
-    @apply scroll-m-20 text-xl font-semibold tracking-tight;
+    @apply text-xl font-semibold tracking-tight scroll-m-20;
     --wght: 600;
   }
 
@@ -53,7 +53,7 @@
   }
 
   p {
-    @apply text-pretty;
+    @apply text-balance;
   }
 
   acronym,
@@ -135,7 +135,7 @@
 @layer components {
   /* Targets the parent wrapper container */
   div:has(> table) {
-    @apply my-6 w-full overflow-y-auto;
+    @apply w-full my-6 overflow-y-auto;
   }
 
   /* Semantic table styles */
@@ -143,16 +143,16 @@
     @apply w-full;
 
     tr {
-      @apply m-0 border-t p-0 even:bg-card;
+      @apply p-0 m-0 border-t even:bg-card;
     }
 
     th {
-      @apply border px-4 py-2 text-start font-bold;
+      @apply px-4 py-2 font-bold border text-start;
       @apply [&[align=center]]:text-center [&[align=right]]:text-end;
     }
 
     td {
-      @apply border px-4 py-2 text-start;
+      @apply px-4 py-2 border text-start;
       @apply [&[align=center]]:text-center [&[align=right]]:text-end;
     }
   }
@@ -163,7 +163,7 @@
   }
 
   blockquote {
-    @apply mt-6 text-balance border-s-2 border-muted ps-6 italic;
+    @apply mt-6 italic text-balance border-s-2 border-muted ps-6;
   }
 
   pre {

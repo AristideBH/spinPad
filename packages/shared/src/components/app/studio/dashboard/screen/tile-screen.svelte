@@ -8,7 +8,7 @@
   let editable = $state(false);
 </script>
 
-<Card.Root class="@container/card row-span-2 min-h-[180px] h-full gap-2 pb-0">
+<Card.Root class="@container/card min-h-[180px] h-full gap-2 pb-0">
   <Card.Header class="h-fit">
     {#if editable}
       <ScreenAddMenu />

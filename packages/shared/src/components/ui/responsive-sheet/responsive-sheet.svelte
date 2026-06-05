@@ -5,6 +5,7 @@
   import * as Dialog from '$shared/components/ui/dialog/index.js';
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
   import type { Side } from '$shared/components/ui/sheet/sheet-content.svelte';
+  import { cn } from '$shared';
 
   type Props = {
     open?: boolean;
@@ -60,7 +61,7 @@
 
 {#snippet drawerBody()}
   <Drawer.Content class={mobileClass}>
-    <Drawer.Header class={srOnlyTitle ? 'sr-only' : undefined}>
+    <Drawer.Header class={cn('w-full max-w-md mx-auto ', srOnlyTitle ? 'sr-only' : undefined)}>
       <div class="flex items-center gap-2">
         <Drawer.Title>{title}</Drawer.Title>
         {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
@@ -86,7 +87,7 @@
 {:else if desktop === 'dialog'}
   <Dialog.Root bind:open>
     <Dialog.Content {showCloseButton} class={desktopClass}>
-      <Dialog.Header class={srOnlyTitle ? 'sr-only' : undefined}>
+      <Dialog.Header class={cn('', srOnlyTitle ? 'sr-only' : undefined)}>
         <div class="flex items-center gap-2 pe-8">
           <Dialog.Title>{title}</Dialog.Title>
           {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
@@ -101,8 +102,8 @@
 {:else}
   <Sheet.Root bind:open>
     <Sheet.Content {side} {showCloseButton} class={desktopClass}>
-      <Sheet.Header class={srOnlyTitle ? 'sr-only' : undefined}>
-        <div class="flex items-center gap-2 pe-8">
+      <Sheet.Header class={cn('', srOnlyTitle ? 'sr-only' : undefined)}>
+        <div class="flex items-center max-w-md gap-2 pe-8">
           <Sheet.Title>{title}</Sheet.Title>
           {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
         </div>

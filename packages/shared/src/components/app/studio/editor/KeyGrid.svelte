@@ -34,8 +34,8 @@
     return host.toUpperCase() !== us.toUpperCase();
   }
 
-  const CELL = 72;
-  const GAP = 12;
+  const CELL = 84;
+  const GAP = 16;
   const isTransposed = $derived(ctx.orientDeg === 90 || ctx.orientDeg === 270);
   const gridW = $derived(isTransposed ? 4 * CELL + 3 * GAP : 3 * CELL + 2 * GAP);
   const gridH = $derived(isTransposed ? 3 * CELL + 2 * GAP : 4 * CELL + 3 * GAP);
@@ -201,7 +201,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background: linear-gradient(calc(-1 * var(--orient-deg)), rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
+    box-shadow: inset calc(1 * var(--top-x)) calc(1 * var(--top-y)) 0 rgba(255, 255, 255, 0.03);
     pointer-events: none;
+    filter: blur(0.65px);
+    /* filter: blur(0px); */
   }
 
   .keycap:hover {

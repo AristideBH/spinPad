@@ -135,7 +135,7 @@
     unstyled
     compact
     onpointerup={onPointerUp}
-    fastStart
+    fastStart={true}
     scroller={wrapEl as HTMLElement}
   >
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
