@@ -46,12 +46,12 @@
 </script>
 
 {#if devMode.active}
-  <Card.Header class="mt-2">
-    <Card.Title>Démo</Card.Title>
-  </Card.Header>
+  <Card.Root>
+    <Card.Header class="mt-2 border-b b">
+      <Card.Title>Démo</Card.Title>
+    </Card.Header>
 
-  <Card.Content class="p-4">
-    <div class="flex flex-col gap-3">
+    <Card.Content class="flex flex-col gap-3 p-2">
       <div class="flex flex-wrap items-center gap-2">
         <span class="w-20 text-xs text-muted-foreground">Batterie</span>
         <ButtonGroup.Root>
@@ -83,7 +83,10 @@
           </Button>
         </ButtonGroup.Root>
       </div>
+    </Card.Content>
+
+    <Card.Footer>
       <Button variant="outline" size="sm" onclick={handleDevMode}>Quitter le mode démo</Button>
-    </div>
-  </Card.Content>
+    </Card.Footer>
+  </Card.Root>
 {/if}

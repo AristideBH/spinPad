@@ -107,25 +107,31 @@ typedef struct {
 } kb_ble_config_t;
 
 // ── Widgets OLED ─────────────────────────────────────────────
-typedef enum {
-    WIDGET_NONE        = 0,
-    WIDGET_BLE_STATUS  = 1,
-    WIDGET_LAYER       = 2,
-    WIDGET_PROFILE     = 3,
-    WIDGET_BATTERY     = 4,
-    WIDGET_CUSTOM_TEXT = 5,
-    WIDGET_CLOCK       = 6,
-} kb_widget_type_t;
+// kb_widget_type_t est généré depuis WIDGET_TYPE (config-schema.ts) :
+#include "widget_types.gen.h"
 
 #define WIDGET_MAX_CUSTOM_LEN  13   // 12 chars max + '\0'
 #define DISPLAY_MAX_WIDGETS     8
 
+// Grille logique 4×4 (modèle span-based v1). Doit rester synchronisé avec
+// WIDGET_GRID_* / WIDGET_CAPABILITIES dans config-schema.ts (source de vérité).
+#define WIDGET_GRID_COLS    4
+#define WIDGET_GRID_ROWS    4
+#define WIDGET_MIN_BAND_PX  10   // bande extérieure fixe (col/row 0 et 3)
+
+// Flags dans kb_widget_t.opts[0]
+#define WIDGET_OPT_CLOCK_24H        (1u << 0)   // horloge 24h (sinon 12h)
+#define WIDGET_OPT_CLOCK_SHOW_DATE  (1u << 1)   // horloge 2×2 : afficher la date
+
 typedef struct {
     kb_widget_type_t type;
-    bool             enabled;
-    uint8_t          row;                          // 0–4 (chaque rangée = 8px)
-    uint8_t          col;                          // 0–11 (chaque colonne = 6px)
+    uint8_t          x;      // 0..WIDGET_GRID_COLS-1
+    uint8_t          y;      // 0..WIDGET_GRID_ROWS-1
+    uint8_t          w;      // span en cellules
+    uint8_t          h;
+    uint8_t          opts[2];                      // flags par type (cf. WIDGET_OPT_*)
     char             custom_text[WIDGET_MAX_CUSTOM_LEN];
+    uint8_t          icon[PROFILE_ICON_BYTES];     // bitmap 24×24 1bpp (type ICON uniquement)
 } kb_widget_t;
 
 // ── Config écran ──────────────────────────────────────────────

@@ -201,11 +201,12 @@ static void apply_defaults(void)
     // ── Écran ──────────────────────────────────────────────
     g_config.display.brightness  = 180;
     g_config.display.timeout_s   = 30;
-    g_config.display.widget_count = 4;
-    g_config.display.widgets[0] = (kb_widget_t){ WIDGET_BLE_STATUS, true,  0, 0, "" };
-    g_config.display.widgets[1] = (kb_widget_t){ WIDGET_LAYER,      true,  1, 0, "" };
-    g_config.display.widgets[2] = (kb_widget_t){ WIDGET_PROFILE,    true,  2, 0, "" };
-    g_config.display.widgets[3] = (kb_widget_t){ WIDGET_BATTERY,    true,  3, 0, "" };
+    // Layout v1 par défaut (grille 4×4) — cf. defaultWidgets() côté TS.
+    // Champs : { type, x, y, w, h, opts={0,0}, custom_text="" }
+    g_config.display.widget_count = 3;
+    g_config.display.widgets[0] = (kb_widget_t){ WIDGET_BATTERY, 0, 0, 2, 1, {0,0}, "" }; // batterie haut-gauche
+    g_config.display.widgets[1] = (kb_widget_t){ WIDGET_CLOCK,   2, 0, 2, 1, {0,0}, "" }; // heure haut-droite 2×1
+    g_config.display.widgets[2] = (kb_widget_t){ WIDGET_PROFILE, 0, 1, 4, 3, {0,0}, "" }; // profil 4×3, 2ᵉ rangée
 
     // ── Encodeur ───────────────────────────────────────────
     g_config.encoder.sensitivity = 1;   // 1 événement par détent
@@ -293,18 +294,34 @@ static esp_err_t parse_json_to_config(const char *json_str)
             for (int wi = 0; wi < wcount; wi++) {
                 cJSON *w = cJSON_GetArrayItem(widgets, wi);
                 kb_widget_t *kw = &g_config.display.widgets[wi];
+                memset(kw, 0, sizeof(*kw));
                 cJSON *wtype = cJSON_GetObjectItem(w, "type");
                 if (cJSON_IsNumber(wtype)) kw->type = (kb_widget_type_t)(int)wtype->valuedouble;
-                cJSON *wen = cJSON_GetObjectItem(w, "enabled");
-                if (cJSON_IsBool(wen)) kw->enabled = cJSON_IsTrue(wen);
-                cJSON *wrow = cJSON_GetObjectItem(w, "row");
-                if (cJSON_IsNumber(wrow)) kw->row = (uint8_t)wrow->valuedouble;
-                cJSON *wcol = cJSON_GetObjectItem(w, "col");
-                if (cJSON_IsNumber(wcol)) kw->col = (uint8_t)wcol->valuedouble;
+                cJSON *wx = cJSON_GetObjectItem(w, "x");
+                if (cJSON_IsNumber(wx)) kw->x = (uint8_t)wx->valuedouble;
+                cJSON *wy = cJSON_GetObjectItem(w, "y");
+                if (cJSON_IsNumber(wy)) kw->y = (uint8_t)wy->valuedouble;
+                cJSON *ww = cJSON_GetObjectItem(w, "w");
+                kw->w = cJSON_IsNumber(ww) ? (uint8_t)ww->valuedouble : 1;
+                cJSON *wh = cJSON_GetObjectItem(w, "h");
+                kw->h = cJSON_IsNumber(wh) ? (uint8_t)wh->valuedouble : 1;
+                // Options par type (cf. WIDGET_OPT_*)
+                if (cJSON_IsTrue(cJSON_GetObjectItem(w, "clock_24h")))
+                    kw->opts[0] |= WIDGET_OPT_CLOCK_24H;
+                if (cJSON_IsTrue(cJSON_GetObjectItem(w, "clock_show_date")))
+                    kw->opts[0] |= WIDGET_OPT_CLOCK_SHOW_DATE;
                 cJSON *wtxt = cJSON_GetObjectItem(w, "custom_text");
                 if (cJSON_IsString(wtxt)) {
                     strncpy(kw->custom_text, wtxt->valuestring, WIDGET_MAX_CUSTOM_LEN - 1);
                     kw->custom_text[WIDGET_MAX_CUSTOM_LEN - 1] = '\0';
+                }
+                // Icône (base64 → 72 octets 1bpp ; type ICON uniquement)
+                cJSON *wicon = cJSON_GetObjectItem(w, "icon");
+                if (cJSON_IsString(wicon) && wicon->valuestring[0]) {
+                    size_t olen = 0;
+                    mbedtls_base64_decode(kw->icon, PROFILE_ICON_BYTES, &olen,
+                                          (const unsigned char *)wicon->valuestring,
+                                          strlen(wicon->valuestring));
                 }
             }
         }
@@ -683,12 +700,31 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
     for (int wi = 0; wi < g_config.display.widget_count; wi++) {
         kb_widget_t *kw = &g_config.display.widgets[wi];
         cJSON *w = cJSON_CreateObject();
-        cJSON_AddNumberToObject(w, "type",    (int)kw->type);
-        cJSON_AddBoolToObject  (w, "enabled", kw->enabled);
-        cJSON_AddNumberToObject(w, "row",     kw->row);
-        cJSON_AddNumberToObject(w, "col",     kw->col);
+        cJSON_AddNumberToObject(w, "type", (int)kw->type);
+        cJSON_AddNumberToObject(w, "x",    kw->x);
+        cJSON_AddNumberToObject(w, "y",    kw->y);
+        cJSON_AddNumberToObject(w, "w",    kw->w);
+        cJSON_AddNumberToObject(w, "h",    kw->h);
+        if (kw->type == WIDGET_CLOCK) {
+            cJSON_AddBoolToObject(w, "clock_24h",       kw->opts[0] & WIDGET_OPT_CLOCK_24H);
+            cJSON_AddBoolToObject(w, "clock_show_date", kw->opts[0] & WIDGET_OPT_CLOCK_SHOW_DATE);
+        }
         if (kw->type == WIDGET_CUSTOM_TEXT) {
             cJSON_AddStringToObject(w, "custom_text", kw->custom_text);
+        }
+        if (kw->type == WIDGET_ICON) {
+            bool icon_set = false;
+            for (int bi = 0; bi < PROFILE_ICON_BYTES; bi++) {
+                if (kw->icon[bi]) { icon_set = true; break; }
+            }
+            if (icon_set) {
+                unsigned char icon_b64[128];   // 72 o → 96 chars + marge
+                size_t b64_len = 0;
+                if (mbedtls_base64_encode(icon_b64, sizeof(icon_b64), &b64_len,
+                                          kw->icon, PROFILE_ICON_BYTES) == 0) {
+                    cJSON_AddStringToObject(w, "icon", (const char *)icon_b64);
+                }
+            }
         }
         cJSON_AddItemToArray(widgets_out, w);
     }

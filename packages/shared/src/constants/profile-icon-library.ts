@@ -13,9 +13,9 @@
 import { base64ToGrid, type BoolGrid } from './profile-icon.js';
 
 export interface IconLibraryEntry {
-  id:    string;
+  id: string;
   label: string;
-  data:  string;   // base64 — source de vérité
+  data: string; // base64 — source de vérité
   /** Décodé à la demande (lazy via getter) */
   readonly grid: BoolGrid;
 }
@@ -23,7 +23,9 @@ export interface IconLibraryEntry {
 function entry(id: string, label: string, data: string): IconLibraryEntry {
   let _grid: BoolGrid | undefined;
   return {
-    id, label, data,
+    id,
+    label,
+    data,
     get grid() {
       if (!_grid) _grid = base64ToGrid(data);
       return _grid;
@@ -35,13 +37,46 @@ function entry(id: string, label: string, data: string): IconLibraryEntry {
 // Source de vérité : base64. Éditable via le panneau Dev de l'IconEditor.
 
 export const PROFILE_ICON_LIBRARY: IconLibraryEntry[] = [
-  entry('home',       'Maison',     'AAAAAAAAAAAAAAgAAAQAAPofAAkQgAgQgAgQQAgQIMgfEMgfCMgfEMgfIAgQQAgQgAgQAAkQAPofAAQAAAgAAAAAAAAAAAAA'),
-  entry('controller', 'Manette', 'AAAAAAAAAAAAgP8DwAAGwAAMwAAMwGYGgGYDgAADgAADgAADgAADgAgDgAgDgDYDwAgGwAgMwAAMwAAGgP8DAAAAAAAAAAAA'),
-  entry('pc',         'Ordinateur', 'AAAAAAAAAAAA8P8AEIAAEIAAEIAAEIAIEIAIEIAIEIAPEIAPEIAPEIAPEIAIEIAIEIAIEIAAEIAAEIAA8P8AAAAAAAAAAAAA'),
-  entry('palette',    'Palette',    'AAAAAAAAAP4AgIMDwAAGYCAMMHAYkCAQ2AEwiAAgCAAgCAAgCAAgSAAg+AAwUAAQMMQfYM4PwMQHgMMHAP4HAMAHAAAAAAAA'),
-  entry('settings',   'Réglages',   'AAAAAAAAABAAABAAABAAIHwIQIMFgAEDwAAGQDgEIHwIIP4IPO44IP4IIHwIQDgEwAAGgAEDQIMFIHwIABAAABAAAAAAAAAA'),
-  entry('music',      'Musique',    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHAIAPAMAfAMAfAMAfAIAP8P8HEAAAEAAAEAAA8AEAAAAAAAAAAAAA'),
-  entry('terminal',   'Terminal',   'AAAAAAAAAAAA4P8PIAEIIAEIIIkIIFEIIFEIICEIIAEIIAEJIAEJIAEJIAEJIAEJIAEJIAEIIAEIIAEI4P8PAAAAAAAAAAAA'),
+  entry(
+    'home',
+    'Maison',
+    'AAAAAAAAAAAAAPgfAAQQAAIQAAEQgAAQQAAQIAAQEAAQCAAQCAAQEAAfIIAAQIAAgAAfAAEQAAIQAAQQAPgfAAAAAAAAAAAA',
+  ),
+  entry(
+    'controller',
+    'Manette',
+    'AAAAAAAAAAAAgP8HwAAMQAAIQAAMwGYGgGYCgAACgAACgAACgAACgAgCgAgCgDYCwAgGQAgMQAAIwAAMgP8HAAAAAAAAAAAA',
+  ),
+  entry(
+    'pc',
+    'Ordinateur',
+    'AAAAAAAAAAAA8P8AEIAAEIAAEIAAEIAIEIAIEIAIEIAPEIAPEIAPEIAPEIAIEIAIEIAIEIAAEIAAEIAA8P8AAAAAAAAAAAAA',
+  ),
+  entry(
+    'palette',
+    'Palette',
+    'AAAAAAAAAP4AgIMDwAAGYCAMMHAYECEQmAMwCAEgCAAgCAAgiAAgyAEgmAAwEAgYMBwOYAgBwAABgAMBAP4AAAAAAAAAAAAA',
+  ),
+  entry(
+    'settings',
+    'Réglages',
+    'AAAAAAAAADwAACQAYGIGsIENEAAIIAAEIDwEMGYYDMMgDIEgDIEgDMMgMGYYIDwEIAAEEAAIsIENYGIGACQAADwAAAAAAAAA',
+  ),
+  entry(
+    'music',
+    'Musique',
+    'AAAAAAAAAAAAAAAAAAAOAAAfAAAfAAAfAAAP4P8HYAAAYAAAcAAAMAAAMMADOOAHGOAHGOAHHOAD/P8BAAAAAAAAAAAAAAAA',
+  ),
+  entry(
+    'terminal',
+    'Terminal',
+    'AAAAAAAAAAAA4P8PIAEIIAEIIIkIINkIIHEIICEIIAEIIAEJIAEJIAEJIAEJIAEJIAEJIAEIIAEIIAEI4P8PAAAAAAAAAAAA',
+  ),
+  entry(
+    'lightbulb',
+    'Ampoule',
+    'AAAAAAAAAAAAAAAAAAAAgA8A4HAAIIAAEAABGAAeCAAyCAAyCAAyyAAymAEeEAEBIIAA4HAAgA8AAAAAAAAAAAAAAAAAAAAA',
+  ),
 ];
 
 export function iconLibraryEntry(id: string): IconLibraryEntry | undefined {

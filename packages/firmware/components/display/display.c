@@ -32,6 +32,7 @@
 #include "freertos/task.h"
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 static const char *TAG = "DISPLAY";
 
@@ -69,6 +70,7 @@ static void fb_draw_pixel(int x, int y, bool on)
     else    g_framebuffer[page][x] &= ~(1 << bit);
 }
 
+__attribute__((unused))
 static void fb_draw_hline(int x, int y, int w, bool on)
 {
     for (int i = 0; i < w; i++) fb_draw_pixel(x + i, y, on);
@@ -158,78 +160,112 @@ static void fb_draw_icon(int x, int y, const uint8_t icon[8])
 }
 
 // ─────────────────────────────────────────────────────────────
-//  WIDGET RENDERER
+//  GRILLE MOSAÏQUE 4×4
 //
-//  Chaque widget est positionné par (row, col).
-//  row 0-4 → y = row * 8  (chaque rangée = 8px)
-//  col 0-11 → x = col * 6 (police 5×7 + 1px espace = 6px/char)
+//  Layout logique 4×4 dessiné en espace orientation-0 (framebuffer
+//  72×40). L'anneau extérieur (col/row 0 et 3) = bande fixe de
+//  WIDGET_MIN_BAND_PX ; les 2 pistes centrales se partagent le reste
+//  (1fr). L'orientation physique est appliquée par fb_flush (rotation
+//  logicielle 90/270, mirror hardware 180/270) — le rendu reste 72×40.
+//
+//  Chaque widget occupe une boîte (x, y, w, h) en cellules. Chaque
+//  paire (type, taille) = une variante de dessin distincte.
 // ─────────────────────────────────────────────────────────────
+
+// Bord gauche (px) de la colonne de grille c ∈ [0..WIDGET_GRID_COLS].
+static int cell_col_edge(int c)
+{
+    const int band = WIDGET_MIN_BAND_PX;
+    const int mid  = (FB_WIDTH - 2 * band) / (WIDGET_GRID_COLS - 2);
+    if (c <= 0)                    return 0;
+    if (c >= WIDGET_GRID_COLS)     return FB_WIDTH;
+    if (c == WIDGET_GRID_COLS - 1) return FB_WIDTH - band;   // dernière piste = bande
+    return band + (c - 1) * mid;
+}
+
+// Bord haut (px) de la rangée de grille r ∈ [0..WIDGET_GRID_ROWS].
+static int cell_row_edge(int r)
+{
+    const int band = WIDGET_MIN_BAND_PX;
+    const int mid  = (FB_HEIGHT - 2 * band) / (WIDGET_GRID_ROWS - 2);
+    if (r <= 0)                    return 0;
+    if (r >= WIDGET_GRID_ROWS)     return FB_HEIGHT;
+    if (r == WIDGET_GRID_ROWS - 1) return FB_HEIGHT - band;
+    return band + (r - 1) * mid;
+}
+
+// Dessine une chaîne centrée (H+V) dans la boîte (bx,by,bw,bh), clippée.
+static void fb_draw_string_in(int bx, int by, int bw, int bh, const char *str, bool invert)
+{
+    int len = (int)strlen(str);
+    int tw  = len > 0 ? len * 6 - 1 : 0;   // dernière lettre sans l'espace
+    int x   = bx + (bw - tw) / 2;
+    int y   = by + (bh - 7) / 2;
+    if (x < bx) x = bx;
+    if (y < by) y = by;
+    while (*str && x + 5 <= bx + bw) {
+        x += fb_draw_char(x, y, *str++, invert);
+    }
+}
 
 static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
 {
-    if (!w->enabled || w->type == WIDGET_NONE) return;
+    if (w->type == WIDGET_NONE) return;
 
-    int y = w->row * 8;
-    int x = w->col * 6;
+    const int  px   = cell_col_edge(w->x);
+    const int  py   = cell_row_edge(w->y);
+    const int  pw   = cell_col_edge(w->x + w->w) - px;
+    const int  ph   = cell_row_edge(w->y + w->h) - py;
+    const bool wide = w->w >= 2;
+    const bool tall = w->h >= 2;
 
     switch (w->type) {
 
     case WIDGET_BLE_STATUS:
-        if (ble_hid_is_connected()) {
-            if (x == 0) {
-                fb_draw_icon(0, y, ICON_BLE);
-                fb_draw_string(10, y + 1, cfg->ble.slot_names[ble_hid_get_active_slot()], false);
-            } else {
-                fb_draw_string(x, y + 1,
-                    cfg->ble.slot_names[ble_hid_get_active_slot()], false);
-            }
-        } else {
-            fb_draw_string(x, y + 1, "BLE--", false);
-        }
+        // 1×1 : icône BLE (état = connecté/non géré ailleurs par l'app).
+        if (ble_hid_is_connected())
+            fb_draw_icon(px + (pw - 8) / 2, py + (ph - 8) / 2, ICON_BLE);
         break;
 
+    case WIDGET_BATTERY: {
+        if (!battery_is_present()) break;
+        uint8_t pct = battery_get_percent();
+        if (wide) {
+            // 2×1 : icône + pourcentage
+            fb_draw_icon(px + 1, py + (ph - 8) / 2, ICON_BATTERY);
+            char b[6];
+            snprintf(b, sizeof(b), "%u%%", pct);
+            fb_draw_string_in(px + 11, py, pw - 11, ph, b, false);
+        } else {
+            // 1×1 : icône seule
+            fb_draw_icon(px + (pw - 8) / 2, py + (ph - 8) / 2, ICON_BATTERY);
+        }
+        break;
+    }
+
     case WIDGET_LAYER: {
-        char buf[14];
         uint8_t layer = keymap_get_active_layer();
-        const char *lname = cfg->profiles[cfg->active_profile].layers[layer].name;
-        snprintf(buf, sizeof(buf), "L:%s", lname);
-        fb_draw_string(x, y + 1, buf, false);
+        char b[16];
+        if (wide) {
+            // 2×1 : "L:<nom>"
+            const char *ln = cfg->profiles[cfg->active_profile].layers[layer].name;
+            snprintf(b, sizeof(b), "L:%s", ln);
+        } else {
+            // 1×1 : numéro du layer
+            snprintf(b, sizeof(b), "%u", (unsigned)(layer + 1));
+        }
+        fb_draw_string_in(px, py, pw, ph, b, false);
         break;
     }
 
     case WIDGET_PROFILE: {
-        char buf[13];
-        snprintf(buf, sizeof(buf), "%s", cfg->profiles[cfg->active_profile].name);
-        fb_draw_string(x, y + 1, buf, false);
+        // 2×1 / 2×2 : nom du profil centré (variante 2×2 = plus d'espace vertical)
+        fb_draw_string_in(px, py, pw, ph, cfg->profiles[cfg->active_profile].name, false);
         break;
     }
 
-    case WIDGET_BATTERY:
-        if (battery_is_present()) {
-            if (x == 0) {
-                fb_draw_icon(0, y, ICON_BATTERY);
-                uint8_t pct = battery_get_percent();
-                int bar_w = (pct * 40) / 100;
-                for (int bx = 10; bx < 10 + bar_w; bx++) {
-                    fb_draw_pixel(bx, y + 3, true);
-                    fb_draw_pixel(bx, y + 4, true);
-                    fb_draw_pixel(bx, y + 5, true);
-                }
-                fb_draw_hline(10, y + 2, 40, true);
-                fb_draw_hline(10, y + 6, 40, true);
-                char pct_str[6];
-                snprintf(pct_str, sizeof(pct_str), "%d%%", pct);
-                fb_draw_string(52, y + 1, pct_str, false);
-            } else {
-                char pct_str[6];
-                snprintf(pct_str, sizeof(pct_str), "%d%%", battery_get_percent());
-                fb_draw_string(x, y + 1, pct_str, false);
-            }
-        }
-        break;
-
     case WIDGET_CUSTOM_TEXT:
-        fb_draw_string(x, y + 1, w->custom_text, false);
+        fb_draw_string_in(px, py, pw, ph, w->custom_text, false);
         break;
 
     case WIDGET_CLOCK: {
@@ -238,11 +274,41 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
         uint64_t elapsed  = now_ms > cfg->display.clock_base_uptime_ms
                             ? (now_ms - cfg->display.clock_base_uptime_ms) / 1000 : 0;
         uint32_t unix_now = cfg->display.clock_base_unix_ts + (uint32_t)elapsed;
+        bool     h24      = w->opts[0] & WIDGET_OPT_CLOCK_24H;
         uint8_t  hour     = (unix_now % 86400) / 3600;
         uint8_t  min      = (unix_now % 3600)  / 60;
-        char buf[6];
-        snprintf(buf, sizeof(buf), "%02u:%02u", hour, min);
-        fb_draw_string(x, y + 1, buf, false);
+        uint8_t  disp_h   = h24 ? hour : (hour % 12 == 0 ? 12 : hour % 12);
+        char     tbuf[6];
+        snprintf(tbuf, sizeof(tbuf), "%02u:%02u", disp_h, min);
+
+        if (tall && (w->opts[0] & WIDGET_OPT_CLOCK_SHOW_DATE)) {
+            // 2×2 + date : heure en haut, JJ/MM en bas
+            fb_draw_string_in(px, py, pw, ph / 2, tbuf, false);
+            time_t    t = (time_t)unix_now;
+            struct tm tmv;
+            gmtime_r(&t, &tmv);
+            char dbuf[6];
+            snprintf(dbuf, sizeof(dbuf), "%02d/%02d", tmv.tm_mday, tmv.tm_mon + 1);
+            fb_draw_string_in(px, py + ph / 2, pw, ph - ph / 2, dbuf, false);
+        } else {
+            fb_draw_string_in(px, py, pw, ph, tbuf, false);
+        }
+        break;
+    }
+
+    case WIDGET_ICON: {
+        // Bitmap 24×24 1bpp mis à l'échelle (nearest-neighbor) dans la boîte (px,py,pw,ph).
+        // Layout colonne-majeur : byteIndex = x * 3 + (y >> 3), bit = y & 7.
+        if (pw <= 0 || ph <= 0) break;
+        for (int dy = 0; dy < ph; dy++) {
+            int sy = (dy * PROFILE_ICON_H) / ph;
+            for (int dx = 0; dx < pw; dx++) {
+                int sx = (dx * PROFILE_ICON_W) / pw;
+                int bidx = sx * (PROFILE_ICON_H / 8) + (sy >> 3);
+                bool pixel = (w->icon[bidx] >> (sy & 7)) & 1;
+                fb_draw_pixel(px + dx, py + dy, pixel);
+            }
+        }
         break;
     }
 

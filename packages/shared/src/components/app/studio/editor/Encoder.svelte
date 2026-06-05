@@ -21,7 +21,7 @@
 </script>
 
 {#if ctx.layer}
-  <div class="flex flex-col self-stretch gap-3 keycap-grid">
+  <div class="flex flex-col self-stretch gap-2 keycap-grid">
     <Label>Encodeur</Label>
     <PresetSelect />
     <EncoderButtons {knob} />

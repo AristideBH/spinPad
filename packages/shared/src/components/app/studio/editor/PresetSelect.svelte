@@ -16,7 +16,7 @@
 </script>
 
 <Select.Root type="single" name="presets" value={selected} onValueChange={onPresetChange}>
-  <Select.Trigger class="w-[180px]">
+  <Select.Trigger class="w-[180px] mt-0.5">
     {#if selectedPreset}
       {@const Icon = selectedPreset.icon}
       <Icon class="size-4 text-muted-foreground" />

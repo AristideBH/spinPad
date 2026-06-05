@@ -21,6 +21,10 @@ const DEV_KEY_MAP: Record<string, number> = {
 class KeyVisualsState {
   pressNonce = $state<number[]>(Array(10).fill(0));
   pressed = $state<boolean[]>(Array(10).fill(false));
+  // Encodeur : position cumulée signée (CW +1 / CCW -1) et compteur d'appuis.
+  // Réactifs -> consommables par les visualisations (ex. LedMatrix).
+  encoderTurn = $state(0);
+  encoderPress = $state(0);
 
   #cleanup: (() => void) | null = null;
   #releaseTimers: Array<ReturnType<typeof setTimeout> | null> = Array(10).fill(null);
@@ -48,9 +52,9 @@ class KeyVisualsState {
           return;
         }
         const knob = getActiveEncoderKnob();
-        if (e.code === 'ArrowRight') { e.preventDefault(); knob?.pulseCW(); }
-        else if (e.code === 'ArrowLeft') { e.preventDefault(); knob?.pulseCCW(); }
-        else if (e.code === 'Space') { e.preventDefault(); knob?.pulsePress(); }
+        if (e.code === 'ArrowRight') { e.preventDefault(); knob?.pulseCW(); this.encoderTurn++; }
+        else if (e.code === 'ArrowLeft') { e.preventDefault(); knob?.pulseCCW(); this.encoderTurn--; }
+        else if (e.code === 'Space') { e.preventDefault(); knob?.pulsePress(); this.encoderPress++; }
       };
       window.addEventListener('keydown', onKey, true);
       this.#cleanup = () => window.removeEventListener('keydown', onKey, true);
@@ -65,9 +69,9 @@ class KeyVisualsState {
         this.fire(m['idx'] as number);
       } else if (m['event'] === 'encoder') {
         const knob = getActiveEncoderKnob();
-        if (m['dir'] === 'cw') knob?.pulseCW();
-        else if (m['dir'] === 'ccw') knob?.pulseCCW();
-        else if (m['dir'] === 'press') knob?.pulsePress();
+        if (m['dir'] === 'cw') { knob?.pulseCW(); this.encoderTurn++; }
+        else if (m['dir'] === 'ccw') { knob?.pulseCCW(); this.encoderTurn--; }
+        else if (m['dir'] === 'press') { knob?.pulsePress(); this.encoderPress++; }
       }
     });
   }

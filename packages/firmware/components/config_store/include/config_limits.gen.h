@@ -6,10 +6,10 @@
 #pragma once
 
 #define CONFIG_MAX_PROFILES   4
-#define CONFIG_MAX_LAYERS     8
+#define CONFIG_MAX_LAYERS     6
 #define CONFIG_NAME_MAX_LEN   32
 #define CONFIG_NUM_KEYS       10  // Doit correspondre à KB_NUM_KEYS dans kb_config.h
-#define CONFIG_FORMAT_VERSION 2
+#define CONFIG_FORMAT_VERSION 3
 
 // Macros globales (partagées par tous les profils)
 #define MACRO_COUNT           16

@@ -1,14 +1,12 @@
 <script lang="ts">
   import { APP_CONFIG } from '$shared/app.config.js';
-  import { ensureConfigLoaded, redo, undo } from '$shared/store/config.svelte.js';
+  import { redo, undo } from '$shared/store/config.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
   import { Toaster } from 'svelte-sonner';
-  import { Skeleton } from '$shared/components/ui/skeleton/index.js';
   import ConnectBanner from './ConnectBanner.svelte';
   import Dashboard from './dashboard/Dashboard.svelte';
   import Editor from './editor/Editor.svelte';
-  import { Button } from '$shared/components/ui/button';
 
   const isOnline = $derived(serial.connected || devMode.active);
 
@@ -36,7 +34,7 @@
 {/if}
 
 <article
-  class="flex flex-col items-stretch w-full max-w-5xl gap-6 px-6 py-6 mx-auto transition-all duration-500 ease-in-out"
+  class="@container/main flex flex-col items-stretch w-full max-w-5xl gap-6 px-4 py-4 mx-auto transition-all duration-500 ease-in-out"
   class:disabled={!isOnline}
 >
   <Dashboard />
@@ -53,7 +51,7 @@
     --tw-blur: blur(var(--blur-xs));
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,)
       var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
-    overflow: hidden;
+    overflow: visible;
     max-height: calc(100dvh - 16rem);
     margin-top: calc(var(--spacing) * 32);
   }

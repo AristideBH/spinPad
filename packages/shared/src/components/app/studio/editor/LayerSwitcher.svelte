@@ -1,21 +1,23 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
-  import { Input } from '$shared/components/ui/input/index.js';
   import { addLayer, configState, deleteLayer, duplicateLayer, editLayer, undo } from '$shared/store/config.svelte.js';
   import { toast } from 'svelte-sonner';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../sortable/Sortable.svelte';
   import { CONFIG_MAX_LAYERS, type LayerConfig } from '$shared/constants/config-schema.js';
-  import { GripVertical } from '@lucide/svelte';
+  import { BadgeCheckIcon, ChevronRightIcon, EllipsisVertical, GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { cn } from '$shared/utils.js';
+  import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
+  import { cn, scrollShadow } from '$shared/utils.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
-  import { BrushCleaning, CopyPlus, MoreVertical, Plus, Trash2 } from '@lucide/svelte';
+  import { BrushCleaning, CopyPlus, Plus, Trash2 } from '@lucide/svelte';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
+  import { fade } from 'svelte/transition';
+  import * as Item from '$shared/components/ui/item/index.js';
 
   interface Props {
     orientation?: 'horizontal' | 'vertical';
@@ -26,24 +28,11 @@
 
   const horizontal = $derived(orientation === 'horizontal');
 
-  // ─── Surface d'édition des styles ──────────────────────────────────────
-  // Toutes les classes Tailwind conditionnelles par élément vivent ici, avec
-  // les variantes vertical/horizontal côte à côte. Pour retoucher l'allure
-  // d'un mode, éditez la branche correspondante — pas besoin de fouiller le
-  // markup imbriqué (ButtonGroup / Label / Dropdown).
-  const s = $derived({
-    outer: horizontal ? 'flex flex-row items-center gap-2' : 'flex flex-col gap-3 keycap-grid',
-    heading: horizontal ? 'shrink-0 mx-2' : 'mx-2',
-    radioRoot: horizontal ? 'flex flex-row items-center gap-1 grow min-w-0' : 'flex flex-col gap-1',
-    group: horizontal ? 'min-w-0 border rounded-lg' : 'w-full border rounded-lg',
-    grip: horizontal
-      ? 'flex items-center justify-center px-1 pe-0 border-0! cursor-grab touch-none '
-      : 'flex items-center justify-center ps-1 pe-0 border-0! cursor-grab touch-none',
-    label: horizontal
-      ? 'grow min-w-0 justify-center! gap-1! px-2! border-0!  truncate'
-      : 'grow flex justify-start! gap-2! px-2! border-0! ',
-    dropdownTrigger: 'px-1 border-0 data-[state=open]:bg-foreground/80!',
-  });
+  // Largeur fixe d'un onglet en mode horizontal. Indispensable au scroll : le
+  // Sortable n'impose une largeur explicite (donc un overflow scrollable) que
+  // pour un colWidth NUMÉRIQUE ; en 'auto' la piste reste à 100% et les onglets
+  // débordent sans pouvoir défiler. Voir le pattern de ProfileSwitcher.
+  const H_COL_W = 120;
 
   const sortableGap = $derived<[number, number]>(horizontal ? [6, 0] : [0, 4]);
 
@@ -51,10 +40,70 @@
 
   const layerCount = $derived(ctx.profile?.layers?.length ?? 0);
 
+  // Refs de la zone scrollable horizontale (ombres de bord + drag tactile).
+  let viewport = $state<HTMLElement | null>(null);
+  let rootEl = $state<HTMLElement | null>(null);
+
   // Sync RadioGroup to store: profile switch resets activeLayerIndex to 0 (ProfileSwitcher),
   // so the selected layer must follow. Mount fire sets the same value -> harmless.
   $effect(() => {
     layerValue = String(configState.activeLayerIndex);
+  });
+
+  // Ombres de bord (ancrées au Root non défilant, position lue sur le viewport).
+  // Uniquement en horizontal — refs nulles autrement.
+  $effect(() => {
+    if (!horizontal || !viewport || !rootEl) return;
+    return scrollShadow(viewport, rootEl);
+  });
+
+  // bits-ui masque les scrollbars natives et la chaîne touch-action via mosaic
+  // n'engage pas le scroll-doigt natif : on pilote le défilement horizontal
+  // depuis les drags tactiles. Un drag démarré sur la poignée (data-grip) est
+  // laissé à mosaic pour le réordonnancement.
+  $effect(() => {
+    if (!horizontal) return;
+    const vp = viewport;
+    if (!vp) return;
+    vp.style.touchAction = 'pan-x';
+
+    let startX = 0;
+    let startScroll = 0;
+    let dragging = false;
+
+    function onStart(e: TouchEvent) {
+      if ((e.target as HTMLElement)?.closest('[data-grip]')) return;
+      dragging = true;
+      startX = e.touches[0].clientX;
+      startScroll = vp!.scrollLeft;
+    }
+    function onMove(e: TouchEvent) {
+      if (!dragging) return;
+      vp!.scrollLeft = startScroll - (e.touches[0].clientX - startX);
+    }
+    function onEnd() {
+      dragging = false;
+    }
+
+    vp.addEventListener('touchstart', onStart, { passive: true });
+    vp.addEventListener('touchmove', onMove, { passive: true });
+    vp.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      vp.removeEventListener('touchstart', onStart);
+      vp.removeEventListener('touchmove', onMove);
+      vp.removeEventListener('touchend', onEnd);
+    };
+  });
+
+  // Centre le layer actif dans la piste scrollable (no-op si tout tient sans scroll).
+  $effect(() => {
+    const idx = configState.activeLayerIndex;
+    if (!horizontal || !viewport) return;
+    requestAnimationFrame(() => {
+      if (!viewport || viewport.scrollWidth <= viewport.clientWidth) return;
+      const el = viewport.querySelector(`label[for="l-${idx}"]`);
+      el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    });
   });
 
   function onLayerChange(v: string) {
@@ -89,59 +138,64 @@
   };
 </script>
 
-{#if ctx.profile}
-  <div class={s.outer}>
-    <Label class={s.heading}>Layers</Label>
-    <RadioGroup.Root bind:value={layerValue} onValueChange={onLayerChange} class={s.radioRoot}>
-      <Sortable
-        items={(ctx.profile.layers ?? []) as LayerConfig[]}
-        {orientation}
-        rowHeight={horizontal ? 36 : 'auto'}
-        colWidth={horizontal ? 'auto' : undefined}
-        gap={sortableGap}
-        getKey={(l, i) => `l-${i}-${l.name ?? ''}`}
-        onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
-      >
-        {#snippet children({ item: l, index: i, handlePointerDown })}
-          {@const isActive = i === configState.activeLayerIndex}
-          <ButtonGroup.Root class={cn(s.group, 'border')}>
-            <Button
-              class={cn(s.grip, ' border-b!', layerColor(i))}
+<!-- Piste réordonnable d'onglets layer : identique dans les deux modes (le
+     Sortable s'adapte via `orientation`/`colWidth`). -->
+{#snippet tabs()}
+  <Sortable
+    items={(ctx.profile?.layers ?? []) as LayerConfig[]}
+    {orientation}
+    rowHeight={horizontal ? 36 : 'auto'}
+    colWidth={horizontal ? H_COL_W : undefined}
+    gap={sortableGap}
+    getKey={(l, i) => `l-${l.color ?? i}`}
+    onReorder={(from, to) => editLayer(configState.activeProfileIndex, from, { moveTo: to })}
+  >
+    {#snippet children({ item: l, index: i, handlePointerDown })}
+      {@const isActive = i === configState.activeLayerIndex}
+      {@const lc = layerColor(l.color ?? i)}
+      <Label for="l-{i}">
+        <RadioGroup.Item hidden disabled={isActive} value={String(i)} title={l.name} id="l-{i}" />
+        <Item.Root
+          variant={isActive ? 'active' : 'card'}
+          size="xs"
+          class={cn(
+            'relative group cursor-pointer px-1.5 py-1 border',
+            lc,
+            !isActive ? 'hover:border-muted-foreground/15 hover:bg-muted/90' : '',
+          )}
+        >
+          <Item.Media>
+            <button
+              type="button"
+              data-grip
+              class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
               title="Réordonner"
-              size="sm"
-              variant={activeLayerVariant(i)}
               onpointerdown={handlePointerDown}
+              onclick={(e) => e.preventDefault()}
             >
               <GripVertical class="size-3.5" />
-            </Button>
+            </button>
+          </Item.Media>
 
-            <Label
-              class={cn(
-                s.label,
-                'z-20 border-b!',
-                buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
-                layerColor(i),
-              )}
-              for="l-{i}"
-            >
-              <RadioGroup.Item class="hidden" value={String(i)} title={l.name} id="l-{i}" />
-              {l.name}
-            </Label>
+          <Item.Content>
+            <Item.Title class="text-sm line-clamp-1">{l.name}</Item.Title>
+          </Item.Content>
 
-            {#if isActive}
+          {#if isActive}
+            <Item.Actions>
               <DropdownMenu.Root>
-                <!-- & has data-state="open" -->
-                <DropdownMenu.Trigger
-                  class={cn(
-                    buttonVariants({ variant: activeLayerVariant(i), size: 'sm' }),
-                    s.dropdownTrigger,
-                    'border-b!',
-                    layerColor(i),
-                  )}
-                  title="Éditer le layer"
-                >
-                  <MoreVertical />
-                </DropdownMenu.Trigger>
+                <div in:fade={{ duration: 150, delay: 200 }} out:fade={{ duration: 150 }}>
+                  <DropdownMenu.Trigger
+                    class={cn(
+                      buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+                      'absolute top-0 bottom-0 right-0 w-6 h-full z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground  data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
+                    )}
+                    title="Éditer le layer"
+                  >
+                    <EllipsisVertical />
+                  </DropdownMenu.Trigger>
+                </div>
+
                 <DropdownMenu.Content align="end" class="w-45">
                   <div class="px-1.5 py-1">
                     <InputGroup.Root class="h-7">
@@ -177,29 +231,58 @@
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
-            {/if}
+            </Item.Actions>
+          {/if}
+        </Item.Root>
+      </Label>
+    {/snippet}
+  </Sortable>
+{/snippet}
 
-            <!-- <div
-              class={cn(
-                'w-full h-full fixed bottom-0 right-0 -z-20 rounded-lg border-b-destructive border',
-                isActive ? '' : '',
-                layerColor(i),
-              )}
-            ></div> -->
-          </ButtonGroup.Root>
-        {/snippet}
-      </Sortable>
-      <Button
-        variant="outline"
-        size="sm"
-        class={cn('shrink-0', horizontal ? '' : 'w-full justify-start! gap-2!')}
-        disabled={layerCount >= CONFIG_MAX_LAYERS}
-        title="Ajouter un layer vierge"
-        onclick={() => addLayer(configState.activeProfileIndex)}
+{#snippet addBtn()}
+  <Button
+    variant="outline"
+    size="sm"
+    class={cn('shrink-0', horizontal ? '' : 'w-full justify-start! gap-2!')}
+    disabled={layerCount >= CONFIG_MAX_LAYERS}
+    title="Ajouter un layer vierge"
+    onclick={() => addLayer(configState.activeProfileIndex)}
+  >
+    <Plus class="size-3.5" />
+    {#if !horizontal}Ajouter un layer{/if}
+  </Button>
+{/snippet}
+
+{#if ctx.profile}
+  {#if horizontal}
+    <div class="flex flex-row items-center gap-2">
+      <Label class="mx-2 shrink-0">Layers</Label>
+      <ScrollArea
+        orientation="horizontal"
+        bind:ref={rootEl}
+        bind:viewportRef={viewport}
+        class="grow min-w-0 [--scroll-shadow-color:var(--popover)]"
       >
-        <Plus class="size-3.5" />
-        {#if !horizontal}Ajouter un layer{/if}
-      </Button>
-    </RadioGroup.Root>
-  </div>
+        <RadioGroup.Root
+          bind:value={layerValue}
+          onValueChange={onLayerChange}
+          class="flex flex-row items-start w-full gap-2 "
+        >
+          {@render tabs()}
+          <!-- Bouton « + » épinglé à droite : reste visible quand la piste défile. -->
+          <div class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
+            {@render addBtn()}
+          </div>
+        </RadioGroup.Root>
+      </ScrollArea>
+    </div>
+  {:else}
+    <div class="flex flex-col gap-3 keycap-grid">
+      <Label class="mx-2">Layers</Label>
+      <RadioGroup.Root bind:value={layerValue} onValueChange={onLayerChange} class="flex flex-col gap-1">
+        {@render tabs()}
+        {@render addBtn()}
+      </RadioGroup.Root>
+    </div>
+  {/if}
 {/if}

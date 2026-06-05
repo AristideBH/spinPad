@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PROFILE_ICON_W, PROFILE_ICON_H } from "$shared/constants/config-schema.js";
+  import { PROFILE_ICON_W, PROFILE_ICON_H } from '$shared/constants/config-schema.js';
   import {
     emptyGrid,
     setPixel,
@@ -14,39 +14,54 @@
     drawEllipse,
     drawEllipseFill,
     type BoolGrid,
-  } from "$shared/constants/profile-icon.js";
-  import { PROFILE_ICON_LIBRARY } from "$shared/constants/profile-icon-library.js";
+  } from '$shared/constants/profile-icon.js';
+  import { PROFILE_ICON_LIBRARY } from '$shared/constants/profile-icon-library.js';
   import {
-    Pencil, Minus, Square, SquareDashed, Circle, Disc3,
-    Trash2, FlipHorizontal2, Save, RotateCcw, Upload, Download, Copy, Check,
-  } from "@lucide/svelte";
-  import { Input } from "$shared/components/ui/input/index.js";
-  import { Slider } from "$shared/components/ui/slider/index.js";
+    Pencil,
+    Minus,
+    Square,
+    SquareDashed,
+    Circle,
+    Disc3,
+    Trash2,
+    FlipHorizontal2,
+    Save,
+    RotateCcw,
+    Upload,
+    Download,
+    Copy,
+    Check,
+    Contrast,
+  } from '@lucide/svelte';
+  import { Input } from '$shared/components/ui/input/index.js';
+  import { Slider } from '$shared/components/ui/slider/index.js';
+  import { Button } from '$shared/components/ui/button/index.js';
+  import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
 
   interface Props {
-    value?: string;           // base64 courante (prop externe)
+    value?: string; // base64 courante (prop externe)
     onchange?: (b64: string) => void;
-    cell?: number;            // px par cellule dans l'éditeur
+    cell?: number; // px par cellule dans l'éditeur
   }
-  let { value = "", onchange, cell = 12 }: Props = $props();
+  let { value = '', onchange, cell = 12 }: Props = $props();
 
   // ── Outils ───────────────────────────────────────────────────
-  type Tool = "pen" | "line" | "rect" | "rectFill" | "ellipse" | "ellipseFill";
-  const TOOLS: { id: Tool; label: string; icon: any }[] = [
-    { id: "pen",         label: "Crayon",       icon: Pencil         },
-    { id: "line",        label: "Ligne",         icon: Minus          },
-    { id: "rect",        label: "Rectangle",     icon: SquareDashed   },
-    { id: "rectFill",    label: "Rect. plein",   icon: Square         },
-    { id: "ellipse",     label: "Ellipse",       icon: Circle         },
-    { id: "ellipseFill", label: "Ellipse pleine",icon: Disc3          },
+  type Tool = 'pen' | 'line' | 'rect' | 'rectFill' | 'ellipse' | 'ellipseFill';
+  const TOOLS: { id: Tool; label: string; icon: any; fill?: boolean }[] = [
+    { id: 'pen', label: 'Crayon', icon: Pencil },
+    { id: 'line', label: 'Ligne', icon: Minus },
+    { id: 'rectFill', label: 'Rect. plein', icon: Square, fill: true },
+    { id: 'rect', label: 'Rectangle', icon: Square },
+    { id: 'ellipseFill', label: 'Ellipse pleine', icon: Circle, fill: true },
+    { id: 'ellipse', label: 'Ellipse', icon: Circle },
   ];
 
   // ── État ─────────────────────────────────────────────────────
-  let grid    = $state<BoolGrid>(emptyGrid());
-  let saved   = $state<BoolGrid>(emptyGrid());   // snapshot au dernier Save
-  let synced  = $state<string | undefined>(undefined);
-  let dirty   = $state(false);                    // modifié depuis dernier Save
-  let tool    = $state<Tool>("pen");
+  let grid = $state<BoolGrid>(emptyGrid());
+  let saved = $state<BoolGrid>(emptyGrid()); // snapshot au dernier Save
+  let synced = $state<string | undefined>(undefined);
+  let dirty = $state(false); // modifié depuis dernier Save
+  let tool = $state<Tool>('pen');
   let fileInput = $state<HTMLInputElement | null>(null);
 
   // Import threshold
@@ -55,8 +70,8 @@
   // Copy feedback
   let copied = $state(false);
 
-  const W  = PROFILE_ICON_W;
-  const H  = PROFILE_ICON_H;
+  const W = PROFILE_ICON_W;
+  const H = PROFILE_ICON_H;
   const px = $derived(W * cell);
   const py = $derived(H * cell);
 
@@ -66,61 +81,73 @@
   // ── Sync prop externe → grille ───────────────────────────────
   $effect(() => {
     if (value !== synced) {
-      grid   = base64ToGrid(value);
-      saved  = grid.slice();
+      grid = base64ToGrid(value);
+      saved = grid.slice();
       synced = value;
-      dirty  = false;
+      dirty = false;
     }
   });
 
   // ── Rendu éditeur (attachment : re-run sur grid/cell/px/py) ──
   const renderEditor = (el: HTMLCanvasElement) => {
-    const ctx = el.getContext("2d");
+    const ctx = el.getContext('2d');
     if (!ctx) return;
 
     fillIconPixels(ctx, grid, cell, px, py);
 
     // Grille
-    ctx.strokeStyle = "rgba(255,255,255,0.07)";
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
     ctx.lineWidth = 1;
     for (let i = 0; i <= W; i++) {
-      ctx.beginPath(); ctx.moveTo(i * cell + 0.5, 0); ctx.lineTo(i * cell + 0.5, py); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(i * cell + 0.5, 0);
+      ctx.lineTo(i * cell + 0.5, py);
+      ctx.stroke();
     }
     for (let j = 0; j <= H; j++) {
-      ctx.beginPath(); ctx.moveTo(0, j * cell + 0.5); ctx.lineTo(px, j * cell + 0.5); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, j * cell + 0.5);
+      ctx.lineTo(px, j * cell + 0.5);
+      ctx.stroke();
     }
 
     // Crosshair centre
     const cx = (W / 2) * cell + 0.5;
     const cy = (H / 2) * cell + 0.5;
-    ctx.strokeStyle = "rgba(255,80,80,0.45)";
+    ctx.strokeStyle = 'rgba(255,80,80,0.45)';
     ctx.lineWidth = 1;
     ctx.setLineDash([2, 3]);
-    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, py); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(px, cy); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, 0);
+    ctx.lineTo(cx, py);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, cy);
+    ctx.lineTo(px, cy);
+    ctx.stroke();
     ctx.setLineDash([]);
   };
 
   // ── Rendu preview taille réelle (attachment : re-run sur grid) ──
   const renderPreview = (el: HTMLCanvasElement) => {
-    const ctx = el.getContext("2d");
+    const ctx = el.getContext('2d');
     if (!ctx) return;
     ctx.putImageData(gridToImageData(grid, 1), 0, 0);
   };
 
   // ── Interaction ───────────────────────────────────────────────
-  let drawing  = $state(false);
-  let paintOn  = $state(true);
-  let start    = $state<{ x: number; y: number } | null>(null);
+  let drawing = $state(false);
+  let paintOn = $state(true);
+  let start = $state<{ x: number; y: number } | null>(null);
   let baseGrid: BoolGrid = emptyGrid();
 
   function cellAt(e: PointerEvent): { x: number; y: number } | null {
     const el = e.currentTarget as HTMLCanvasElement;
-    const rect  = el.getBoundingClientRect();
-    const scaleX = el.width  / rect.width;
+    const rect = el.getBoundingClientRect();
+    const scaleX = el.width / rect.width;
     const scaleY = el.height / rect.height;
     const x = Math.floor(((e.clientX - rect.left) * scaleX) / cell);
-    const y = Math.floor(((e.clientY - rect.top)  * scaleY) / cell);
+    const y = Math.floor(((e.clientY - rect.top) * scaleY) / cell);
     if (x < 0 || x >= W || y < 0 || y >= H) return null;
     return { x, y };
   }
@@ -128,11 +155,21 @@
   function applyShape(from: { x: number; y: number }, to: { x: number; y: number }, on: boolean) {
     const g = baseGrid.slice();
     switch (tool) {
-      case "line":        drawLine(g,    from.x, from.y, to.x, to.y, on); break;
-      case "rect":        drawRect(g,    from.x, from.y, to.x, to.y, on); break;
-      case "rectFill":    drawRectFill(g,from.x, from.y, to.x, to.y, on); break;
-      case "ellipse":     drawEllipse(g,     from.x, from.y, to.x, to.y, on); break;
-      case "ellipseFill": drawEllipseFill(g, from.x, from.y, to.x, to.y, on); break;
+      case 'line':
+        drawLine(g, from.x, from.y, to.x, to.y, on);
+        break;
+      case 'rect':
+        drawRect(g, from.x, from.y, to.x, to.y, on);
+        break;
+      case 'rectFill':
+        drawRectFill(g, from.x, from.y, to.x, to.y, on);
+        break;
+      case 'ellipse':
+        drawEllipse(g, from.x, from.y, to.x, to.y, on);
+        break;
+      case 'ellipseFill':
+        drawEllipseFill(g, from.x, from.y, to.x, to.y, on);
+        break;
     }
     grid = g;
     dirty = true;
@@ -144,12 +181,12 @@
     e.preventDefault();
     drawing = true;
     paintOn = e.button !== 2;
-    start   = c;
+    start = c;
     baseGrid = grid.slice();
-    if (tool === "pen") {
+    if (tool === 'pen') {
       const next = grid.slice();
       setPixel(next, c.x, c.y, paintOn);
-      grid  = next;
+      grid = next;
       dirty = true;
     }
     (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
@@ -159,10 +196,10 @@
     if (!drawing || !start) return;
     const c = cellAt(e);
     if (!c) return;
-    if (tool === "pen") {
+    if (tool === 'pen') {
       const next = grid.slice();
       drawLine(next, start.x, start.y, c.x, c.y, paintOn);
-      grid  = next;
+      grid = next;
       dirty = true;
       start = c;
     } else {
@@ -173,37 +210,37 @@
   function onPointerUp() {
     if (!drawing) return;
     drawing = false;
-    start   = null;
+    start = null;
     // Pas d'emit ici — l'utilisateur doit cliquer Save
   }
 
   // ── Save / Reset ─────────────────────────────────────────────
   function save() {
     const b64 = currentBase64;
-    saved  = grid.slice();
+    saved = grid.slice();
     synced = b64;
-    dirty  = false;
+    dirty = false;
     onchange?.(b64);
   }
 
   function reset() {
-    grid  = saved.slice();
+    grid = saved.slice();
     dirty = false;
   }
 
   // ── Actions rapides ───────────────────────────────────────────
   function loadPreset(g: BoolGrid) {
-    grid  = g.slice();
+    grid = g.slice();
     dirty = true;
   }
 
   function clear() {
-    grid  = emptyGrid();
+    grid = emptyGrid();
     dirty = true;
   }
 
   function invert() {
-    grid  = grid.map((p) => !p);
+    grid = grid.map((p) => !p);
     dirty = true;
   }
 
@@ -217,21 +254,21 @@
   // ── Export PNG ────────────────────────────────────────────────
   function exportPng() {
     const scale = 8;
-    const off = document.createElement("canvas");
-    off.width  = W * scale;
+    const off = document.createElement('canvas');
+    off.width = W * scale;
     off.height = H * scale;
-    const ctx = off.getContext("2d");
+    const ctx = off.getContext('2d');
     if (!ctx) return;
     ctx.putImageData(gridToImageData(grid, scale), 0, 0);
     off.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
-      const a   = document.createElement("a");
-      a.href     = url;
-      a.download = "spinpad-icon.png";
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'spinpad-icon.png';
       a.click();
       URL.revokeObjectURL(url);
-    }, "image/png");
+    }, 'image/png');
   }
 
   // ── Import image ─────────────────────────────────────────────
@@ -240,91 +277,56 @@
     if (!file) return;
     const img = new Image();
     img.onload = () => {
-      const off = document.createElement("canvas");
-      off.width  = img.width;
+      const off = document.createElement('canvas');
+      off.width = img.width;
       off.height = img.height;
-      const ctx = off.getContext("2d");
+      const ctx = off.getContext('2d');
       if (!ctx) return;
       ctx.drawImage(img, 0, 0);
-      grid  = imageDataToGrid(ctx.getImageData(0, 0, img.width, img.height), threshold);
+      grid = imageDataToGrid(ctx.getImageData(0, 0, img.width, img.height), threshold);
       dirty = true;
       URL.revokeObjectURL(img.src);
     };
     img.src = URL.createObjectURL(file);
-    (e.target as HTMLInputElement).value = "";
+    (e.target as HTMLInputElement).value = '';
   }
 </script>
 
 <div class="flex flex-col gap-3">
-
   <!-- ── Barre d'outils ── -->
   <div class="flex flex-wrap items-center gap-1">
-    {#each TOOLS as t (t.id)}
-      <button
-        type="button"
-        title={t.label}
-        class="p-1.5 border rounded border-border {tool === t.id
-          ? 'bg-primary text-primary-foreground'
-          : 'hover:border-primary/60'}"
-        onclick={() => (tool = t.id)}
-      >
-        <t.icon size={14} />
-      </button>
-    {/each}
-
-    <span class="mx-1 text-border">|</span>
+    <ButtonGroup.Root>
+      {#each TOOLS as t (t.id)}
+        {@const isActive = tool === t.id}
+        <Button title={t.label} variant={isActive ? 'default' : 'secondary'} onclick={() => (tool = t.id)}>
+          <t.icon size={14} class={t?.fill ? 'fill-current' : ''} />
+        </Button>
+      {/each}
+    </ButtonGroup.Root>
 
     <!-- Inverser -->
-    <button
-      type="button"
-      title="Inverser"
-      class="p-1.5 border rounded border-border hover:border-primary/60"
-      onclick={invert}
-    >
-      <FlipHorizontal2 size={14} />
-    </button>
+    <ButtonGroup.Root>
+      <Button title="Inverser" variant="secondary" class="" onclick={invert}>
+        <Contrast size={14} />
+      </Button>
 
-    <!-- Effacer -->
-    <button
-      type="button"
-      title="Effacer"
-      class="p-1.5 border rounded border-border hover:border-destructive/60 hover:text-destructive"
-      onclick={clear}
-    >
-      <Trash2 size={14} />
-    </button>
+      <!-- Effacer -->
+      <Button title="Effacer" variant="secondary" class="" onclick={clear}>
+        <Trash2 size={14} />
+      </Button>
 
-    <span class="mx-1 text-border">|</span>
+      <!-- Reset -->
+      <Button title="Annuler les modifications" variant="secondary" disabled={!dirty} onclick={reset}>
+        <RotateCcw size={14} />
+      </Button>
+    </ButtonGroup.Root>
 
     <!-- Save -->
-    <button
-      type="button"
-      title="Enregistrer"
-      disabled={!dirty}
-      class="p-1.5 border rounded border-border {dirty
-        ? 'hover:border-primary/60'
-        : 'opacity-40 cursor-not-allowed'}"
-      onclick={save}
-    >
+    <Button title="Enregistrer" disabled={!dirty} onclick={save}>
       <Save size={14} />
-    </button>
+    </Button>
 
-    <!-- Reset -->
-    <button
-      type="button"
-      title="Annuler les modifications"
-      disabled={!dirty}
-      class="p-1.5 border rounded border-border {dirty
-        ? 'hover:border-destructive/60 hover:text-destructive'
-        : 'opacity-40 cursor-not-allowed'}"
-      onclick={reset}
-    >
-      <RotateCcw size={14} />
-    </button>
-
-    <span class="ml-2 text-[10px] text-muted-foreground">
-      clic gauche : peindre · clic droit : effacer
-    </span>
+    <span class="ml-2 text-[10px] text-muted-foreground"> clic gauche : peindre · clic droit : effacer </span>
   </div>
 
   <!-- ── Zone de dessin + preview ── -->
@@ -334,7 +336,7 @@
       {@attach renderEditor}
       width={px}
       height={py}
-      class="border rounded cursor-crosshair border-border touch-none select-none"
+      class="border rounded select-none cursor-crosshair border-border touch-none"
       style="image-rendering: pixelated;"
       onpointerdown={onPointerDown}
       onpointermove={onPointerMove}
@@ -350,7 +352,7 @@
         {@attach renderPreview}
         width={W}
         height={H}
-        class="border border-border rounded"
+        class="border rounded border-border"
         style="image-rendering: pixelated; width: {W}px; height: {H}px;"
       ></canvas>
     </div>
@@ -359,36 +361,23 @@
   <!-- ── Presets ── -->
   <div class="flex flex-wrap items-center gap-2">
     <span class="text-xs text-muted-foreground">Presets :</span>
-    {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
-      <button
-        type="button"
-        title={entry.label}
-        class="px-1.5 py-0.5 text-[10px] border rounded border-border hover:border-primary/60"
-        onclick={() => loadPreset(entry.grid)}
-      >
-        {entry.label}
-      </button>
-    {/each}
+    <ButtonGroup.Root>
+      {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
+        <Button size="xs" variant="outline" title={entry.label} onclick={() => loadPreset(entry.grid)}>
+          {entry.label}
+        </Button>
+      {/each}
+    </ButtonGroup.Root>
   </div>
 
   <!-- ── Export / Import ── -->
   <div class="flex flex-wrap items-center gap-2">
-    <button
-      type="button"
-      title="Exporter PNG"
-      class="flex items-center gap-1 px-2 py-1 text-xs border rounded border-border hover:border-primary/60"
-      onclick={exportPng}
-    >
+    <Button title="Exporter PNG" onclick={exportPng}>
       <Download size={12} /> PNG
-    </button>
-    <button
-      type="button"
-      title="Importer une image"
-      class="flex items-center gap-1 px-2 py-1 text-xs border rounded border-border hover:border-primary/60"
-      onclick={() => fileInput?.click()}
-    >
+    </Button>
+    <Button title="Importer une image" onclick={() => fileInput?.click()}>
       <Upload size={12} /> Image
-    </button>
+    </Button>
     <input bind:this={fileInput} type="file" accept="image/*" class="hidden" onchange={importFile} />
 
     <!-- Threshold import -->
@@ -399,43 +388,38 @@
     </div>
   </div>
 
-  <!-- ── Champ base64 ── -->
-  <div class="flex items-center gap-2">
-    <Input
-      type="text"
-      readonly
-      value={currentBase64}
-      class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
-      onclick={(e: Event) => (e.target as HTMLInputElement).select()}
-    />
-    <button
-      type="button"
-      title="Copier le base64"
-      class="shrink-0 p-1.5 border rounded border-border hover:border-primary/60"
-      onclick={copyBase64}
-    >
-      {#if copied}
-        <Check size={14} class="text-green-500" />
-      {:else}
-        <Copy size={14} />
-      {/if}
-    </button>
-  </div>
-
   <!-- ── Panneau Dev (collapsible) ── -->
   <details class="text-[10px] border border-dashed border-border rounded">
-    <summary class="cursor-pointer px-2 py-1 text-muted-foreground select-none hover:text-foreground">
+    <summary class="px-2 py-1 cursor-pointer select-none text-muted-foreground hover:text-foreground">
       Dev — mise à jour profile-icon-library.ts
     </summary>
-    <div class="p-2 flex flex-col gap-2">
+    <div class="flex flex-col gap-2 p-2">
+      <!-- ── Champ base64 ── -->
+      <div class="flex items-center gap-2">
+        <Input
+          type="text"
+          readonly
+          value={currentBase64}
+          class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
+          onclick={(e: Event) => (e.target as HTMLInputElement).select()}
+        />
+        <Button variant="outline" title="Copier le base64" onclick={copyBase64}>
+          {#if copied}
+            <Check size={14} class="text-green-500" />
+          {:else}
+            <Copy size={14} />
+          {/if}
+        </Button>
+      </div>
       <p class="text-muted-foreground">
         Copiez la ligne ci-dessous pour remplacer une entrée dans
         <code>profile-icon-library.ts</code>.
       </p>
-      <pre class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">entry('id', 'Label', '{currentBase64}'),</pre>
+      <pre
+        class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">entry('id', 'Label', '{currentBase64}'),</pre>
       <p class="text-muted-foreground">Base64 brut :</p>
-      <pre class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">{currentBase64}</pre>
+      <pre
+        class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">{currentBase64}</pre>
     </div>
   </details>
-
 </div>

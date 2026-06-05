@@ -18,6 +18,7 @@ export interface BatteryPresent {
   percent:    number;   // 0-100
   voltage_mv: number;   // mV (~3300-4200 LiPo)
   source:     BatterySource;
+  charging?:  boolean;
 }
 export type BatteryStatus = BatteryAbsent | BatteryPresent;
 

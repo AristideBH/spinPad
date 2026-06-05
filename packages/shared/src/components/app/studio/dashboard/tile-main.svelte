@@ -3,7 +3,19 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Settings2, Lightbulb, Activity, ChartLine } from '@lucide/svelte';
+  import {
+    Usb,
+    Bluetooth,
+    RefreshCw,
+    LogOut,
+    Lightbulb,
+    Activity,
+    Settings,
+    PanelRightClose,
+    PanelRightOpen,
+    PanelBottomClose,
+    PanelBottomOpen,
+  } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -12,9 +24,20 @@
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
-  import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import StatusCard from '../../StatusCard.svelte';
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
+  import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
+  import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
+  import { IsMobile } from '$shared/lib/hooks/is-mobile.svelte';
+  let {
+    showAnnex = false,
+    onToggle,
+  }: {
+    showAnnex?: boolean;
+    onToggle?: () => void;
+  } = $props();
+
+  let isMobile = $derived(new IsMobile(976));
 
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
@@ -39,7 +62,6 @@
   const bleName = $derived(configState.data?.ble?.device_name ?? 'SpinPad');
 
   let settingsOpen = $state(false);
-  let statsOpen = $state(false);
 
   // Stop training mode when device disconnects (unless devMode is on).
   $effect(() => {
@@ -49,8 +71,24 @@
   });
 </script>
 
-<Card.Root class="@container/card col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2">
-  <Card.Header class="h-full">
+<Card.Root class="@container/card relative h-full py-0 gap-0 z-10">
+  <Card.Header
+    class="relative h-full py-4 overflow-hidden isolate shadow-[inset_0_0px_50px_rgba(0,0,0,1)] shadow-black/50"
+  >
+    <LedMatrix
+      mode="flow"
+      muted={serial.connected || devMode.active ? false : true}
+      brightness={0.85}
+      cell={6}
+      dotRatio={0.7}
+      speed={0.5}
+      pulses={() => [...keyVisuals.pressNonce, keyVisuals.encoderPress]}
+      rotation={() => keyVisuals.encoderTurn}
+      pop={0.5}
+      eqGain={0.25}
+      class="absolute inset-0 pointer-events-none -z-10"
+    />
+    <!-- Vitrine LED en fond d'en-tête : éteinte si rien n'est connecté. -->
     <Card.Description>
       <!-- ══ Connexion ═════════════════════════════════ -->
       <div class="flex flex-wrap gap-2">
@@ -65,7 +103,7 @@
       </div>
     </Card.Description>
 
-    <Card.Title class="text-2xl font-semibold @[250px]/card:text-3xl self-end mb-1 mt-6">
+    <Card.Title class="text-3xl font-semibold text-shadow-lg  @[250px]/card:text-4xl self-end mt-20">
       {bleName}
     </Card.Title>
 
@@ -75,63 +113,54 @@
   </Card.Header>
 
   <Card.Footer class="flex flex-wrap gap-2">
-    <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
-      <Lightbulb /> LED
-    </Button>
-
-    <MacroManager />
-
     {#if serial.connected || devMode.active}
       <Button variant={trainingMode.active ? 'default' : 'outline'} onclick={toggleLiveMode}>
         <Activity /> Training
       </Button>
     {/if}
+    <ButtonGroup.Root>
+      <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
+        <Lightbulb /> LED
+      </Button>
 
-    <Button variant="outline" onclick={() => (statsOpen = true)}>
-      <ChartLine /> Stats
-    </Button>
-    <ResponsiveSheet
-      bind:open={statsOpen}
-      title="Statistiques"
-      description="Données d'utilisation depuis le dernier reset."
-      srOnlyTitle={false}
-      desktopClass="w-full sm:max-w-lg"
-    >
-      <div class="px-4 pb-4">
-        <StatsTile />
-      </div>
-      {#snippet footer()}
-        <SaveBadge />
-      {/snippet}
-    </ResponsiveSheet>
+      <MacroManager />
+    </ButtonGroup.Root>
 
-    <Button variant="outline" class="me-auto" onclick={() => (settingsOpen = true)}>
-      <Settings2 /> Paramètres
+    <Button variant="outline" size="icon" class="ms-auto" onclick={() => (settingsOpen = true)}>
+      <Settings />
     </Button>
     <ResponsiveSheet
       bind:open={settingsOpen}
       title="Paramètres"
       description="Toutes les options sont sauvegardées automatiquement."
       srOnlyTitle={false}
-      desktopClass="w-full sm:max-w-2xl"
+      desktopClass="w-full max-w-md!"
     >
-      <div class="w-full h-full max-w-5xl px-4 pb-4 mx-auto overflow-y-auto">
+      {#snippet badge()}
+        <SaveBadge class="ms-auto" />
+      {/snippet}
+      <div class="flex flex-col w-full h-full max-w-5xl px-4 pt-4 mx-auto overflow-hidden">
         <SettingsTab />
       </div>
-      {#snippet footer()}
-        <SaveBadge />
-      {/snippet}
     </ResponsiveSheet>
 
-    <ButtonGroup.Root>
+    <Button variant="outline" size="icon" onclick={onToggle}>
+      {#if isMobile.current}
+        {#if showAnnex}<PanelBottomOpen />{:else}<PanelBottomClose />{/if}
+      {:else}
+        {#if showAnnex}<PanelRightOpen />{:else}<PanelRightClose />{/if}
+      {/if}
+    </Button>
+
+    <!-- <ButtonGroup.Root>
       <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>
       {#if serial.connected}
-        <Button variant="outline" onclick={disconnect} class="ms-auto gap-1.5">
-          <LogOut class="size-4" /> Déconnecter
+        <Button variant="outline" size="icon" onclick={disconnect} class="ms-auto gap-1.5">
+          <LogOut class="size-4" />
         </Button>
       {/if}
-    </ButtonGroup.Root>
+    </ButtonGroup.Root> -->
   </Card.Footer>
 </Card.Root>

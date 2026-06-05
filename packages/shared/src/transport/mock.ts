@@ -14,6 +14,7 @@ import { MOCK_CONFIG } from '$shared/mock/keyboard-config.js';
 import {
   makeMockDeviceStatus,
   tickMockDischarge,
+  tickMockCharge,
   resetMockDischarge,
 } from '$shared/mock/device-status.js';
 import type { FullConfig }   from '$shared/constants/config-schema.js';
@@ -58,11 +59,12 @@ export async function getDeviceStatus(): Promise<DeviceStatus> {
     else if (devMode.battery === 'low') resetMockDischarge(12);
   }
 
+  const usbConnected = devMode.connection === 'usb' || devMode.connection === 'both';
   let pct: number;
   if (devMode.battery === 'low') {
     pct = 12;
   } else if (devMode.battery === 'present') {
-    pct = tickMockDischarge();
+    pct = usbConnected ? tickMockCharge() : tickMockDischarge();
   } else {
     pct = 0;
   }

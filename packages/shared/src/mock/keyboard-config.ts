@@ -291,12 +291,10 @@ export const MOCK_CONFIG: FullConfig = {
   display: {
     brightness: 180,
     timeout_s: 30,
-    widget_count: 4,
     widgets: [
-      { type: 1, enabled: true, row: 0, col: 0, custom_text: '' }, // BLE status
-      { type: 2, enabled: true, row: 1, col: 0, custom_text: '' }, // Layer
-      { type: 3, enabled: true, row: 2, col: 0, custom_text: '' }, // Profile
-      { type: 4, enabled: true, row: 3, col: 0, custom_text: '' }, // Battery
+      { type: 4, x: 0, y: 0, w: 2, h: 1 }, // Batterie (haut-gauche)
+      { type: 6, x: 2, y: 0, w: 2, h: 1 }, // Horloge (haut-droite, 2×1)
+      { type: 3, x: 0, y: 1, w: 4, h: 3 }, // Profil (4×3, à partir de la 2ᵉ rangée)
     ],
   },
 
