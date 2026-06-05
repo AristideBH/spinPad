@@ -17,8 +17,9 @@
     widget: WidgetConfig;
     options: WidgetOption[];
     onPatch: (patch: Partial<WidgetConfig>) => void;
+    onClose?: () => void;
   }
-  let { widget, options, onPatch }: Props = $props();
+  let { widget, options, onPatch, onClose }: Props = $props();
 
   function value(o: WidgetOption): unknown {
     return (widget as unknown as Record<string, unknown>)[o.key] ?? o.default;
@@ -33,7 +34,7 @@
       <Switch
         checked={Boolean(value(o))}
         disabled={off}
-        onCheckedChange={(v: boolean) => onPatch({ [o.key]: v } as Partial<WidgetConfig>)}
+        onCheckedChange={(v: boolean) => { onPatch({ [o.key]: v } as Partial<WidgetConfig>); onClose?.(); }}
       />
     </div>
   {:else if o.kind === 'text'}
@@ -48,6 +49,7 @@
           e.stopPropagation();
           if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur();
         }}
+        onblur={() => onClose?.()}
         oninput={(e: Event) => {
           const v = (e.target as HTMLInputElement).value;
           onPatch({ [o.key]: o.max ? v.slice(0, o.max) : v } as Partial<WidgetConfig>);

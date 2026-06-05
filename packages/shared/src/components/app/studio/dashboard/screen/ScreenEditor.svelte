@@ -31,6 +31,7 @@
   import { cn } from '$shared/utils.js';
   import { GripVertical, Trash2, EllipsisVertical } from '@lucide/svelte';
   import { fade } from 'svelte/transition';
+  import { toast } from 'svelte-sonner';
 
   interface Props {
     /** Mode édition : affiche la poignée de drag et le menu d'options. */
@@ -39,6 +40,7 @@
   let { editable = true }: Props = $props();
 
   let gridRef = $state();
+  let openIdx = $state<number | null>(null);
 
   const COLS = WIDGET_GRID_COLS;
   const ROWS = WIDGET_GRID_ROWS;
@@ -111,6 +113,8 @@
     });
   });
 
+  let draggingIdx = $state<number | null>(null);
+
   // À la fin d'un drag : persiste les positions si elles ont changé.
   function onPointerUp() {
     let changed = false;
@@ -122,7 +126,12 @@
       }
       return w;
     });
-    if (changed) writeWidgets(next);
+    if (changed) {
+      writeWidgets(next);
+    } else if (draggingIdx !== null) {
+      toast.error('Déplacement impossible');
+    }
+    draggingIdx = null;
   }
 
   // La grille remplit le conteneur sur les deux axes : largeur via les 4
@@ -187,7 +196,7 @@
                       data-grip
                       class="flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground cursor-grab touch-none"
                       title="Déplacer"
-                      onpointerdown={movePointerDown}
+                      onpointerdown={(e) => { draggingIdx = idx; movePointerDown(e); }}
                     >
                       <GripVertical class="size-3" />
                     </button>
@@ -202,7 +211,10 @@
                 <!-- options + suppression (menu, design aligné sur LayerSwitcher) -->
                 {#if editable}
                   <Item.Actions>
-                    <DropdownMenu.Root>
+                    <DropdownMenu.Root
+                      open={openIdx === idx}
+                      onOpenChange={(v) => (openIdx = v ? idx : null)}
+                    >
                       <DropdownMenu.Trigger
                         title="Options du widget"
                         class={cn(
@@ -220,14 +232,14 @@
                               range={def.size}
                               current={{ w: w.w, h: w.h }}
                               fits={(cw, ch) => canResize(idx, cw, ch)}
-                              onpick={(cw, ch) => setSize(idx, cw, ch)}
+                              onpick={(cw, ch) => { setSize(idx, cw, ch); openIdx = null; }}
                             />
                           </div>
                         {/if}
 
                         {#if options.length > 0}
                           {#if sizes.length > 1}<DropdownMenu.Separator />{/if}
-                          <OptionControls widget={w} {options} onPatch={(p) => patchWidget(idx, p)} />
+                          <OptionControls widget={w} {options} onPatch={(p) => patchWidget(idx, p)} onClose={() => (openIdx = null)} />
                         {/if}
 
                         {#if hasOpts}<DropdownMenu.Separator />{/if}

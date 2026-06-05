@@ -25,6 +25,7 @@
   import { buttonVariants } from '$shared/components/ui/button/index.js';
   import { cn } from '$shared/utils.js';
   import { Plus } from '@lucide/svelte';
+  import { toast } from 'svelte-sonner';
 
   const COLS = WIDGET_GRID_COLS;
   const ROWS = WIDGET_GRID_ROWS;
@@ -57,7 +58,10 @@
     if (disabled(type)) return;
     const size = widgetDefaultSize(type);
     const pos = findFreeSpace(size.w, size.h);
-    if (!pos) return; // grille pleine
+    if (!pos) {
+      toast("Plus d'espace sur l'écran. Faîtes de la place !");
+      return;
+    }
     updateConfig('display.widgets', [...widgets, createWidget(type, pos.x, pos.y, size.w, size.h)]);
   }
 </script>
@@ -66,10 +70,10 @@
   <DropdownMenu.Trigger
     disabled={full}
     title="Ajouter un widget"
-    class={cn(buttonVariants({ variant: 'outline', size: 'xs' }), 'gap-1.5')}
+    class={cn(buttonVariants({ variant: 'outline', size: 'xs' }), 'gap-1.5 w-fit')}
   >
-    <Plus class="size-3.5" />
     Ajouter
+    <Plus class="size-3" />
   </DropdownMenu.Trigger>
   <DropdownMenu.Content align="start" class="w-45">
     {#each PLACEABLE_WIDGET_TYPES as type (type)}
