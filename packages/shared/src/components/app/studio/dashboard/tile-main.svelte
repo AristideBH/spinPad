@@ -152,7 +152,7 @@
       {/if}
     </Button>
 
-    <ButtonGroup.Root>
+    <!-- <ButtonGroup.Root>
       <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>
@@ -161,6 +161,6 @@
           <LogOut class="size-4" />
         </Button>
       {/if}
-    </ButtonGroup.Root>
+    </ButtonGroup.Root> -->
   </Card.Footer>
 </Card.Root>
