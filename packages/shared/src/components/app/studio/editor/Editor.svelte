@@ -149,14 +149,9 @@
           <LayerSwitcher orientation={wrapped ? 'horizontal' : 'vertical'} />
         </div>
 
-        <div bind:this={keypadEl} class="flex flex-wrap justify-between gap-12 p-6 border grow rounded-2xl">
-          <div class="flex flex-wrap gap-6 justify-evenly grow rounded-2xl">
-            <KeyGrid />
-            <Encoder />
-          </div>
-          <div class="flex flex-col justify-start gap-2 h-fill w-fit">
-            <Button variant="outline" size="icon"><Activity /></Button>
-          </div>
+        <div bind:this={keypadEl} class="flex flex-wrap gap-12 p-6 border justify-evenly grow rounded-2xl">
+          <KeyGrid />
+          <Encoder />
         </div>
       {/if}
     </Card.Content>

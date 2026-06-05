@@ -53,13 +53,13 @@
       <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
         <FlaskConical class="size-4" />
       </Popover.Trigger>
-      <Popover.Content align="end" class="w-80">
+      <Popover.Content align="end" class="p-0 w-2xs rounded-xl">
         <DemoSettings />
       </Popover.Content>
     </Popover.Root>
   {/if}
 
-  <Button size="icon" variant="outline" title="Aide & documentation" href="./docs/studio-mode/">
+  <Button size="icon" variant="outline" title="Aide & documentation" href="/docs/studio/layers/">
     <Info class="size-4" />
   </Button>
 {/if}

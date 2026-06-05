@@ -135,6 +135,8 @@
     unstyled
     compact
     onpointerup={onPointerUp}
+    fastStart
+    scroller={wrapEl as HTMLElement}
   >
     {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}
       {@const payload = dataItem.data as { item: T; index: number }}
