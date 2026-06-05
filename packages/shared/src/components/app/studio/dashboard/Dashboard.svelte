@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { flushSync } from 'svelte';
-  import { cubicOut } from 'svelte/easing';
+  import { untrack } from 'svelte';
   import { cn } from '$shared/utils.js';
   import BatteryTile from './tile-battery.svelte';
   import FirmwareTile from './tile-firmware.svelte';
@@ -8,37 +7,38 @@
   import ScreenTile from './screen/tile-screen.svelte';
   import { IsMobile } from '$shared/store/is-mobile.svelte';
 
-  let isDesktop = $derived(new IsMobile(976));
+  const isMobile = new IsMobile(896);
+
   let sectionEl = $state<HTMLElement | null>(null);
-  let mainTileEl = $state<HTMLElement | null>(null);
-  let annexLaidOut = $derived(!isDesktop.current ? false : true);
-  let showAnnex = $derived(!isDesktop.current && annexLaidOut ? true : false);
+  let annexEl = $state<HTMLElement | null>(null);
+  let showAnnex = $state(!isMobile.current);
 
-  function annexTransition(node: Element, { delay = 0 }: { delay?: number } = {}) {
-    const desktop = !isDesktop.current;
-    return {
-      delay,
-      duration: 300,
-      easing: cubicOut,
-      css: (t: number) => {
-        const dx = desktop ? (1 - t) * 60 : 0;
-        const dy = desktop ? 0 : (1 - t) * 40;
-        return `transform: translate(${-dx}px, ${-dy}px); opacity: ${t};`;
-      },
-    };
-  }
+  // Sync zero-dimension to layout axis: fires on mount + breakpoint change.
+  // Uses untrack for showAnnex so toggle animations are never interrupted.
+  $effect(() => {
+    const mobile = isMobile.current; // tracked — re-runs on resize
+    if (!annexEl || untrack(() => showAnnex)) return;
+    annexEl.getAnimations().forEach((a) => a.cancel());
+    annexEl.style.width = '';
+    annexEl.style.height = '';
+    annexEl.style[mobile ? 'height' : 'width'] = '0px';
+    annexEl.style.overflow = 'hidden';
+  });
 
-  function animateHeight(el: HTMLElement, fromH: number, toH: number) {
-    // Cancel any in-progress animation before starting a new one
+  function animateDimension(el: HTMLElement, prop: 'width' | 'height', from: number, to: number) {
     el.getAnimations().forEach((a) => a.cancel());
-    el.style.height = '';
-    el.style.overflow = '';
 
-    if (Math.abs(toH - fromH) < 2) return;
+    if (Math.abs(to - from) < 2) {
+      el.style[prop] = to === 0 ? '0px' : '';
+      el.style.overflow = to === 0 ? 'hidden' : '';
+      return;
+    }
 
-    el.style.overflow = 'visible';
+    // Pin to `from` before first render so no 1-frame flash
+    el.style[prop] = `${from}px`;
+    el.style.overflow = 'hidden';
 
-    const anim = el.animate([{ height: `${fromH}px` }, { height: `${toH}px` }], {
+    const anim = el.animate([{ [prop]: `${from}px` }, { [prop]: `${to}px` }], {
       duration: 280,
       easing: 'cubic-bezier(0.4,0,0.2,1)',
       fill: 'forwards',
@@ -46,90 +46,75 @@
 
     anim.finished
       .then(() => {
-        anim.commitStyles(); // bake toH into inline style
-        anim.cancel(); // remove fill
-        el.style.height = ''; // release to natural height
-        el.style.overflow = '';
+        anim.commitStyles();
+        anim.cancel();
+        if (to === 0) {
+          el.style[prop] = '0px';
+        } else {
+          el.style[prop] = '';
+          el.style.overflow = '';
+        }
       })
       .catch(() => {
-        // cancelled mid-flight — just clear inline styles
-        el.style.height = '';
-        el.style.overflow = '';
+        el.style[prop] = to === 0 ? '0px' : '';
+        el.style.overflow = to === 0 ? 'hidden' : '';
       });
-  }
-
-  function measure() {
-    sectionEl!.style.height = '';
-    mainTileEl!.style.height = '';
-    return {
-      toMain: mainTileEl!.offsetHeight,
-      toSection: sectionEl!.offsetHeight,
-    };
   }
 
   function toggleAnnex() {
+    if (!sectionEl || !annexEl) return;
+    const prop = isMobile.current ? 'height' : 'width';
+
     if (showAnnex) {
-      const prevSection = sectionEl!.offsetHeight;
-      const prevMain = mainTileEl!.offsetHeight;
-      sectionEl!.style.height = `${prevSection}px`;
-      mainTileEl!.style.height = `${prevMain}px`;
+      // ── HIDE ───────────────────────────────────────────
+      const prevSection = sectionEl.offsetHeight;
+      const prevAnnex = prop === 'width' ? annexEl.offsetWidth : annexEl.offsetHeight;
+
+      // display:none removes annex from layout cleanly — safe for measuring any prop
+      annexEl.style.display = 'none';
+      const toSection = sectionEl.offsetHeight;
+      annexEl.style.display = '';
+      void annexEl.offsetHeight;
 
       showAnnex = false;
-
-      setTimeout(() => {
-        // flushSync guarantees annexLaidOut DOM update is committed before we measure
-        flushSync(() => {
-          annexLaidOut = false;
-        });
-        const { toMain, toSection } = measure();
-        animateHeight(sectionEl!, prevSection, toSection);
-        animateHeight(mainTileEl!, prevMain, toMain);
-      }, 470);
+      animateDimension(annexEl, prop, prevAnnex, 0);
+      animateDimension(sectionEl, 'height', prevSection, toSection);
     } else {
-      const prevSection = sectionEl!.offsetHeight;
-      const prevMain = mainTileEl!.offsetHeight;
-      sectionEl!.style.height = `${prevSection}px`;
-      mainTileEl!.style.height = `${prevMain}px`;
+      // ── SHOW ───────────────────────────────────────────
+      const prevSection = sectionEl.offsetHeight;
 
-      // flushSync batches both changes and commits to DOM synchronously
-      flushSync(() => {
-        annexLaidOut = true;
-        showAnnex = true;
-      });
-      const { toMain, toSection } = measure();
-      animateHeight(sectionEl!, prevSection, toSection);
-      animateHeight(mainTileEl!, prevMain, toMain);
+      // Release 0 constraint → measure natural size → re-pin at 0 for animation start
+      annexEl.style[prop] = '';
+      void annexEl.offsetHeight;
+      const toAnnex = prop === 'width' ? annexEl.offsetWidth : annexEl.offsetHeight;
+      const toSection = sectionEl.offsetHeight;
+      annexEl.style[prop] = '0px';
+      void annexEl.offsetHeight;
+
+      showAnnex = true;
+      animateDimension(annexEl, prop, 0, toAnnex);
+      animateDimension(sectionEl, 'height', prevSection, toSection);
     }
   }
 </script>
 
-<section bind:this={sectionEl} class="grid grid-cols-2 gap-4 @lg/main:grid-cols-3 @4xl/main:grid-cols-5">
-  <div
-    bind:this={mainTileEl}
-    class={cn(
-      'h-full',
-      annexLaidOut ? 'col-span-full @4xl/main:col-span-3 @4xl/main:row-span-2' : 'col-span-full max-h-[32rem]',
-    )}
-  >
+<section
+  bind:this={sectionEl}
+  class={cn(
+    'flex flex-col @4xl/main:flex-row gap-4 lg:max-h-[240px] transition-all',
+    !showAnnex ? 'max-h-[240px]' : 'max-h-none',
+  )}
+>
+  <div class={cn('min-w-0', showAnnex ? 'flex-1' : 'w-full')}>
     <MainTile {showAnnex} onToggle={toggleAnnex} />
   </div>
-  {#if showAnnex}
-    <div class="h-full row-span-2" in:annexTransition={{ delay: 0 }} out:annexTransition={{ delay: 150 }}>
-      <ScreenTile />
+
+  <!-- Always in DOM; width (desktop) or height (mobile) animated to 0 on hide -->
+  <div bind:this={annexEl} class="overflow-hidden flex-shrink-0 @4xl/main:w-2/5">
+    <div class="grid h-full min-w-0 grid-cols-2 gap-4">
+      <div class="h-full min-w-0 row-span-2"><ScreenTile /></div>
+      <div class="h-full min-w-0"><BatteryTile /></div>
+      <div class="h-full min-w-0"><FirmwareTile /></div>
     </div>
-    <div
-      class="@lg/main:row-span-2 @4xl/main:row-span-1 h-full"
-      in:annexTransition={{ delay: 75 }}
-      out:annexTransition={{ delay: 75 }}
-    >
-      <BatteryTile />
-    </div>
-    <div
-      class="@lg/main:row-span-2 @4xl/main:row-span-1 h-full"
-      in:annexTransition={{ delay: 150 }}
-      out:annexTransition={{ delay: 0 }}
-    >
-      <FirmwareTile />
-    </div>
-  {/if}
+  </div>
 </section>

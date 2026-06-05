@@ -46,8 +46,8 @@
     breakpoint = 768,
     dismissible = true,
     nested = false,
-    desktopClass = 'min-h-[85dvh]',
-    mobileClass = 'max-h-[85dvh]',
+    desktopClass = 'min-h-[95dvh] h-full',
+    mobileClass = 'max-h-[95dvh] h-full',
     showCloseButton = true,
     header,
     badge,
@@ -61,10 +61,10 @@
 
 {#snippet drawerBody()}
   <Drawer.Content class={mobileClass}>
-    <Drawer.Header class={cn('w-full max-w-md mx-auto ', srOnlyTitle ? 'sr-only' : undefined)}>
+    <Drawer.Header class={cn(srOnlyTitle ? 'sr-only' : undefined)}>
       <div class="flex items-center gap-2">
         <Drawer.Title>{title}</Drawer.Title>
-        {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
+        {#if badge && !srOnlyTitle}{@render badge()}{/if}
       </div>
       {#if description}<Drawer.Description>{description}</Drawer.Description>{/if}
     </Drawer.Header>
@@ -88,9 +88,9 @@
   <Dialog.Root bind:open>
     <Dialog.Content {showCloseButton} class={desktopClass}>
       <Dialog.Header class={cn('', srOnlyTitle ? 'sr-only' : undefined)}>
-        <div class="flex items-center gap-2 pe-8">
+        <div class="flex items-center gap-2 pe-4">
           <Dialog.Title>{title}</Dialog.Title>
-          {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
+          {#if badge && !srOnlyTitle}{@render badge()}{/if}
         </div>
         {#if description}<Dialog.Description>{description}</Dialog.Description>{/if}
       </Dialog.Header>
@@ -105,7 +105,7 @@
       <Sheet.Header class={cn('', srOnlyTitle ? 'sr-only' : undefined)}>
         <div class="flex items-center max-w-md gap-2 pe-8">
           <Sheet.Title>{title}</Sheet.Title>
-          {#if badge && !srOnlyTitle}<span class="ms-auto">{@render badge()}</span>{/if}
+          {#if badge && !srOnlyTitle}{@render badge()}{/if}
         </div>
         {#if description}<Sheet.Description>{description}</Sheet.Description>{/if}
       </Sheet.Header>

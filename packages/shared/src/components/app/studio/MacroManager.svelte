@@ -212,7 +212,7 @@
   description="16 macros partagées par tous les profils. Assigne-les à une touche via Macro dans le sélecteur de touche."
   srOnlyTitle={false}
 >
-  <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 pb-4 mx-auto overflow-y-auto">
+  <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 py-4 mx-auto overflow-y-auto">
     <!-- Sélecteur de slot -->
     <div class="grid grid-cols-4 gap-1.5">
       {#each Array.from({ length: MACRO_COUNT }, (_, i) => i) as i (i)}
@@ -389,7 +389,7 @@
       </div>
     {/snippet}
 
-    <div class="relative flex flex-col flex-1 min-h-0 p-4">
+    <div class="relative flex flex-col flex-1 min-h-0 p-4 mt-4">
       {#key pickerStage}
         <div class="flex flex-col flex-1 min-h-0" in:fly={{ x: pickerStage === 'menu' ? -16 : 16, duration: 150 }}>
           {#if pickerStage === 'menu'}

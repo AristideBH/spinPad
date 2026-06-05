@@ -134,12 +134,12 @@
       title="Paramètres"
       description="Toutes les options sont sauvegardées automatiquement."
       srOnlyTitle={false}
-      desktopClass="w-full max-w-md"
+      desktopClass="w-full max-w-md!"
     >
       {#snippet badge()}
-        <SaveBadge />
+        <SaveBadge class="ms-auto" />
       {/snippet}
-      <div class="flex flex-col w-full h-full max-w-5xl px-4 mx-auto overflow-hidden">
+      <div class="flex flex-col w-full h-full max-w-5xl px-4 pt-4 mx-auto overflow-hidden">
         <SettingsTab />
       </div>
     </ResponsiveSheet>

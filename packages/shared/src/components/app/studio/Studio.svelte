@@ -34,7 +34,7 @@
 {/if}
 
 <article
-  class="flex flex-col items-stretch w-full max-w-5xl gap-6 px-4 py-4 mx-auto transition-all duration-500 ease-in-out"
+  class="@container/main flex flex-col items-stretch w-full max-w-5xl gap-6 px-4 py-4 mx-auto transition-all duration-500 ease-in-out"
   class:disabled={!isOnline}
 >
   <Dashboard />
