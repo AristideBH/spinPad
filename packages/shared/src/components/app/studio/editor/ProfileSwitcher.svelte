@@ -42,6 +42,11 @@
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import { toast } from 'svelte-sonner';
   import { fade, scale, slide } from 'svelte/transition';
+  import { tick } from 'svelte';
+  import { simulateTyping } from '$shared/lib/simulate-typing';
+  import { getKeypadContext } from './keypad-context.svelte';
+
+  const ctx = getKeypadContext();
 
   function profileFill(prof: ProfileConfig): { mapped: number; total: number } {
     let mapped = 0;
@@ -111,17 +116,32 @@
     return scrollShadow(viewport, rootEl);
   });
 
-  // Centre le profil actif dans la zone scrollable (snap doux). scrollIntoView
-  // clampe aux extrémités, donc premier/dernier ne sur-défilent pas, et on ne
-  // fait rien si le contenu tient sans scroll.
+  // Scroll the active profile tab into view, respecting the sticky add-button on the right.
+  // tick() flushes Svelte's DOM, rAF waits for browser layout so scrollWidth is accurate.
   $effect(() => {
     const idx = configState.activeProfileIndex;
+    const _count = profileList.length; // re-fire on add/remove
     if (!viewport) return;
-    requestAnimationFrame(() => {
-      if (!viewport || viewport.scrollWidth <= viewport.clientWidth) return;
-      const card = viewport.querySelector(`label[for="p-${idx}"]`);
-      card?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-    });
+    const vp = viewport;
+    void tick().then(() =>
+      requestAnimationFrame(() => {
+        if (vp.scrollWidth <= vp.clientWidth) return;
+        const el = vp.querySelector(`label[for="p-${idx}"]`) as HTMLElement | null;
+        if (!el) return;
+        const addBtn = vp.querySelector('[data-add-btn]') as HTMLElement | null;
+        const stickyW = addBtn ? addBtn.offsetWidth : 0;
+        const vpRect = vp.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const elL = elRect.left - vpRect.left;
+        const elR = elRect.right - vpRect.left;
+        const available = vp.clientWidth - stickyW;
+        if (elL < 0) {
+          vp.scrollBy({ left: elL - 8, behavior: 'smooth' });
+        } else if (elR > available) {
+          vp.scrollBy({ left: elR - available + 8, behavior: 'smooth' });
+        }
+      }),
+    );
   });
 
   // Écriture LOCAL → STORE à la sélection (jamais via $effect : un effet
@@ -131,6 +151,7 @@
   function onProfileChange(v: string) {
     layerValue = '0';
     setActiveProfileLocal(+v);
+    simulateTyping(ctx, { duration: 1000, easing: 'ease-out' });
   }
 
   let fileInput = $state<HTMLInputElement | null>(null);
@@ -352,6 +373,7 @@
     </Sortable>
 
     <div
+      data-add-btn
       class="sticky z-10 flex flex-col items-center border rounded-lg ms-auto shrink-0 right-2 bg-card border-muted shadow-[0_0_18px_9px_var(--tw-shadow-color)] shadow-background/70"
     >
       <ButtonGroup.Root orientation="vertical">

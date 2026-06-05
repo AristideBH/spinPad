@@ -38,6 +38,7 @@ export class KeypadContext {
   searchQuery = $state('');
   pickerOpen = $state(false);
   pickerStage = $state<PickerStage>('menu');
+  simulationActive = $state(false);
 
   // ── Derived ───────────────────────────────────────────────────
   readonly profile = $derived(
@@ -59,6 +60,7 @@ export class KeypadContext {
 
   // ── Picker methods ────────────────────────────────────────────
   openKeyPicker(keyIndex: number): void {
+    if (this.simulationActive) return;
     this.editingKey = keyIndex;
     this.editingField = 'key';
     this.searchQuery = '';

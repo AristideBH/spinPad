@@ -17,7 +17,9 @@
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
   import { fade } from 'svelte/transition';
+  import { tick } from 'svelte';
   import * as Item from '$shared/components/ui/item/index.js';
+  import { simulateTyping } from '$shared/lib/simulate-typing.js';
 
   interface Props {
     orientation?: 'horizontal' | 'vertical';
@@ -95,19 +97,37 @@
     };
   });
 
-  // Centre le layer actif dans la piste scrollable (no-op si tout tient sans scroll).
+  // Scroll the active layer tab into view, respecting the sticky add-button on the right.
+  // tick() flushes Svelte's DOM, rAF waits for browser layout so scrollWidth is accurate.
   $effect(() => {
     const idx = configState.activeLayerIndex;
+    const _count = layerCount; // re-fire on add/remove
     if (!horizontal || !viewport) return;
-    requestAnimationFrame(() => {
-      if (!viewport || viewport.scrollWidth <= viewport.clientWidth) return;
-      const el = viewport.querySelector(`label[for="l-${idx}"]`);
-      el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-    });
+    const vp = viewport;
+    void tick().then(() =>
+      requestAnimationFrame(() => {
+        if (vp.scrollWidth <= vp.clientWidth) return;
+        const el = vp.querySelector(`label[for="l-${idx}"]`) as HTMLElement | null;
+        if (!el) return;
+        const addBtn = vp.querySelector('[data-add-btn]') as HTMLElement | null;
+        const stickyW = addBtn ? addBtn.offsetWidth : 0;
+        const vpRect = vp.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const elL = elRect.left - vpRect.left;
+        const elR = elRect.right - vpRect.left;
+        const available = vp.clientWidth - stickyW;
+        if (elL < 0) {
+          vp.scrollBy({ left: elL - 8, behavior: 'smooth' });
+        } else if (elR > available) {
+          vp.scrollBy({ left: elR - available + 8, behavior: 'smooth' });
+        }
+      }),
+    );
   });
 
   function onLayerChange(v: string) {
     configState.activeLayerIndex = +v;
+    simulateTyping(ctx, { duration: 1000, easing: 'ease-out' });
   }
 
   function rename(i: number, name: string) {
@@ -270,7 +290,7 @@
         >
           {@render tabs()}
           <!-- Bouton « + » épinglé à droite : reste visible quand la piste défile. -->
-          <div class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
+          <div data-add-btn class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
             {@render addBtn()}
           </div>
         </RadioGroup.Root>
