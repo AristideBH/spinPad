@@ -37,9 +37,11 @@
 <Card.Root class="@container/card  @lg/main:row-span-2 @4xl/main:row-span-1">
   <Card.Header class="h-full">
     <Card.Description>Firmware</Card.Description>
+  </Card.Header>
+  <Card.Content>
     <!-- Actions -->
-    <div class="flex items-center gap-1.5 mb-1 mt-auto col-span-2">
-      <Cpu class="size-3.5 text-muted-foreground" />
+    <div class="flex items-baseline col-span-2 gap-1.5 mt-auto mb-1">
+      <Cpu class="size-3 text-muted-foreground" />
       <span class="text-base font-semibold tabular-nums">v{fwVersion}</span>
       <span
         class="font-mono text-xs text-muted-foreground"
@@ -48,9 +50,9 @@
         {fwBuild}{fwDirty ? '+' : ''}
       </span>
     </div>
-    <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+    <div class="flex items-baseline gap-1.5 text-xs text-muted-foreground">
       <Clock class="size-3" />
       <span class="tabular-nums">Uptime {uptimeStr}</span>
-    </div></Card.Header
-  >
+    </div>
+  </Card.Content>
 </Card.Root>

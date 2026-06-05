@@ -23,6 +23,7 @@ import {
   MACRO_COUNT,
   MACRO_MAX_STEPS,
   MACRO_NAME_MAX_LEN,
+  WIDGET_TYPE,
 } from '../src/constants/config-schema.ts';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -38,6 +39,11 @@ const OUT = resolve(
 const OUT_LIMITS = resolve(
   __dirname,
   '../../firmware/components/config_store/include/config_limits.gen.h'
+);
+
+const OUT_WIDGETS = resolve(
+  __dirname,
+  '../../firmware/components/config_store/include/widget_types.gen.h'
 );
 
 function toHex(n) {
@@ -108,3 +114,24 @@ const limitsLines = [
 
 writeFileSync(OUT_LIMITS, limitsLines.join('\n') + '\n', 'utf8');
 console.log(`✅  Generated: ${OUT_LIMITS}`);
+
+// ── widget_types.gen.h ──────────────────────────────────────────
+// Enum des types de widgets OLED, miroir de WIDGET_TYPE (config-schema.ts).
+// Nom C = WIDGET_<CLE>. Inclus par config_store.h.
+const widgetMaxLen = Math.max(...Object.keys(WIDGET_TYPE).map((k) => k.length));
+const widgetLines = [
+  '// AUTO-GENERATED — do not edit manually',
+  '// Source: packages/shared/src/constants/config-schema.ts (WIDGET_TYPE)',
+  '// Run:   pnpm codegen',
+  '#pragma once',
+  '',
+  'typedef enum {',
+  ...Object.entries(WIDGET_TYPE).map(
+    ([k, v]) => `    WIDGET_${k.padEnd(widgetMaxLen)} = ${v},`
+  ),
+  '} kb_widget_type_t;',
+  '',
+];
+
+writeFileSync(OUT_WIDGETS, widgetLines.join('\n') + '\n', 'utf8');
+console.log(`✅  Generated: ${OUT_WIDGETS}`);

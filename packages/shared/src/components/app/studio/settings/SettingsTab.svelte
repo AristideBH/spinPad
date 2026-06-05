@@ -9,16 +9,13 @@
   import { Label } from '$shared/components/ui/label/index.js';
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
-  import * as Select from '$shared/components/ui/select/index.js';
   import { Kbd } from '$shared/components/ui/kbd/index.js';
   import { Field, FieldLabel } from '$shared/components/ui/field/index.js';
   import SettingsField from '$shared/components/app/SettingsField.svelte';
   import NotConnected from '$shared/components/app/NotConnected.svelte';
   import OptionGrid from '$shared/components/app/OptionGrid.svelte';
   import SliderField from '$shared/components/app/SliderField.svelte';
-  import AddButton from '$shared/components/app/AddButton.svelte';
-  import { WIDGET_TYPE, WIDGET_LABELS, DISPLAY_MAX_WIDGETS, defaultWidgets } from '$shared/constants/config-schema.js';
-  import type { WidgetConfig, WidgetType } from '$shared/constants/config-schema.js';
+  import ScreenEditor from '$shared/components/app/studio/dashboard/screen/ScreenEditor.svelte';
 
   // ── Orientation ───────────────────────────────────────────────
   const ORIENTATIONS = [
@@ -95,55 +92,7 @@
   }
 
   // ── Widget system ─────────────────────────────────────────────
-  const WIDGET_TYPE_OPTIONS = Object.entries(WIDGET_LABELS)
-    .filter(([k]) => Number(k) !== WIDGET_TYPE.NONE)
-    .map(([k, label]) => ({ value: Number(k) as WidgetType, label }));
-
-  // Reactive alias so widgets array is always fresh from the store
-  const widgets = $derived<WidgetConfig[]>((configState.data?.display?.widgets ?? defaultWidgets()) as WidgetConfig[]);
-
-  function updateWidget(idx: number, patch: Partial<WidgetConfig>) {
-    const updated = widgets.map((w, i) => (i === idx ? { ...w, ...patch } : w));
-    updateConfig('display.widgets', updated);
-  }
-
-  function addWidget() {
-    if (widgets.length >= DISPLAY_MAX_WIDGETS) return;
-    const updated = [
-      ...widgets,
-      {
-        type: WIDGET_TYPE.CUSTOM_TEXT as WidgetType,
-        enabled: true,
-        row: widgets.length,
-        col: 0,
-        custom_text: 'Hello',
-      },
-    ];
-    updateConfig('display.widgets', updated);
-  }
-
-  function removeWidget(idx: number) {
-    const updated = widgets.filter((_, i) => i !== idx);
-    updateConfig('display.widgets', updated);
-  }
-
-  // SVG preview helpers — 72×40 logical px, displayed at 3× scale
-  const SVG_SCALE = 3;
-  const SVG_W = 72 * SVG_SCALE;
-  const SVG_H = 40 * SVG_SCALE;
-
-  function widgetLabel(w: WidgetConfig): string {
-    if (w.type === WIDGET_TYPE.CUSTOM_TEXT) return w.custom_text?.slice(0, 12) || '…';
-    return WIDGET_LABELS[w.type] ?? '?';
-  }
-
-  // Approximate pixel width of label in the font (5px/char + 1px space = 6px)
-  function widgetPreviewWidth(w: WidgetConfig): number {
-    const chars = Math.min(widgetLabel(w).length, 12);
-    const iconPx = w.type === WIDGET_TYPE.BLE_STATUS || w.type === WIDGET_TYPE.BATTERY ? 10 : 0;
-    return (iconPx + chars * 6) * SVG_SCALE;
-  }
-
+  // L'édition des widgets OLED (grille mosaïque 4×4) vit dans ScreenEditor.
   function syncClock() {
     setTime(Math.floor(Date.now() / 1000));
   }
@@ -243,124 +192,21 @@
               {/snippet}
             </SettingsField>
 
-            <!-- Widget editor -->
+            <!-- Widget editor (grille mosaïque 4×4) -->
             <div class="mt-4">
               <div class="flex items-center justify-between mb-3">
                 <Label class="text-sm font-medium">Widgets OLED</Label>
-                <AddButton
-                  onclick={addWidget}
-                  disabled={widgets.length >= DISPLAY_MAX_WIDGETS}
-                  class="text-muted-foreground hover:text-foreground"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="text-xs h-7"
+                  onclick={syncClock}
+                  disabled={!serial.connected}
                 >
-                  + Ajouter
-                </AddButton>
+                  Sync heure
+                </Button>
               </div>
-
-              <!-- SVG preview: 72×40 scaled 3× -->
-              <div class="flex justify-center mb-3">
-                <div class="inline-block p-1 bg-black border rounded border-border">
-                  <svg
-                    width={SVG_W}
-                    height={SVG_H}
-                    viewBox="0 0 {SVG_W} {SVG_H}"
-                    class="block"
-                    style="image-rendering:pixelated"
-                  >
-                    {#each widgets as w, i}
-                      {#if w.enabled && w.type !== 0}
-                        {@const wx = w.col * 6 * SVG_SCALE}
-                        {@const wy = w.row * 8 * SVG_SCALE}
-                        {@const ww = widgetPreviewWidth(w)}
-                        {@const wh = 7 * SVG_SCALE}
-                        <rect x={wx} y={wy + SVG_SCALE} width={ww} height={wh} fill="rgba(255,255,255,0.15)" rx="1" />
-                        <text x={wx + 2} y={wy + wh - 1} fill="#fff" font-size="7" font-family="monospace"
-                          >{widgetLabel(w)}</text
-                        >
-                      {/if}
-                    {/each}
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Widget list -->
-              <div class="flex flex-col gap-2">
-                {#each widgets as w, i}
-                  <div class="flex flex-col gap-2 p-2 text-sm border rounded-lg border-border">
-                    <div class="flex items-center gap-2">
-                      <Switch checked={w.enabled} onCheckedChange={(v: boolean) => updateWidget(i, { enabled: v })} />
-                      <Select.Root
-                        type="single"
-                        value={String(w.type)}
-                        onValueChange={(v) => {
-                          if (v !== undefined) updateWidget(i, { type: +v as WidgetType });
-                        }}
-                      >
-                        <Select.Trigger class="flex-1 h-8 text-sm">
-                          {WIDGET_LABELS[w.type] ?? 'Type'}
-                        </Select.Trigger>
-                        <Select.Content>
-                          {#each WIDGET_TYPE_OPTIONS as opt}
-                            <Select.Item value={String(opt.value)}>{opt.label}</Select.Item>
-                          {/each}
-                        </Select.Content>
-                      </Select.Root>
-                      <span class="text-xs text-muted-foreground">R{w.row} C{w.col}</span>
-                      <button
-                        type="button"
-                        class="ml-auto text-xs transition-colors text-muted-foreground hover:text-destructive"
-                        onclick={() => removeWidget(i)}>✕</button
-                      >
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <Label class="w-8 text-xs text-muted-foreground">Ligne</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={4}
-                        class="text-xs text-right w-14 h-7"
-                        value={w.row}
-                        onchange={(e: Event) =>
-                          updateWidget(i, {
-                            row: Math.min(4, Math.max(0, +(e.target as HTMLInputElement).value)),
-                          })}
-                      />
-                      <Label class="w-8 text-xs text-muted-foreground">Col</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={11}
-                        class="text-xs text-right w-14 h-7"
-                        value={w.col}
-                        onchange={(e: Event) =>
-                          updateWidget(i, {
-                            col: Math.min(11, Math.max(0, +(e.target as HTMLInputElement).value)),
-                          })}
-                      />
-                      {#if w.type === WIDGET_TYPE.CUSTOM_TEXT}
-                        <Input
-                          type="text"
-                          maxlength={12}
-                          placeholder="Texte (12 max)"
-                          class="flex-1 text-xs h-7"
-                          value={w.custom_text ?? ''}
-                          oninput={(e: Event) =>
-                            updateWidget(i, {
-                              custom_text: (e.target as HTMLInputElement).value.slice(0, 12),
-                            })}
-                        />
-                      {/if}
-                      {#if w.type === WIDGET_TYPE.CLOCK}
-                        <button
-                          type="button"
-                          class="text-xs px-2 py-0.5 rounded border border-border hover:bg-accent transition-colors"
-                          onclick={syncClock}
-                          disabled={!serial.connected}>Sync heure</button
-                        >
-                      {/if}
-                    </div>
-                  </div>
-                {/each}
-              </div>
+              <ScreenEditor />
             </div>
           </CardContent>
         </Card>

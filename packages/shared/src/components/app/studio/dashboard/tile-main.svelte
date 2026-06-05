@@ -101,38 +101,39 @@
   </Card.Header>
 
   <Card.Footer class="flex flex-wrap gap-2">
-    <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
-      <Lightbulb /> LED
-    </Button>
-
-    <MacroManager />
-
-    <!-- {#if serial.connected || devMode.active}
+    {#if serial.connected || devMode.active}
       <Button variant={trainingMode.active ? 'default' : 'outline'} onclick={toggleLiveMode}>
         <Activity /> Training
       </Button>
-    {/if} -->
+    {/if}
+    <ButtonGroup.Root>
+      <Button variant="outline" class="gap-1.5" title="Contrôle LED (à venir)" disabled>
+        <Lightbulb /> LED
+      </Button>
 
-    <Button variant="outline" onclick={() => (statsOpen = true)}>
-      <ChartLine /> Stats
-    </Button>
-    <ResponsiveSheet
-      bind:open={statsOpen}
-      title="Statistiques"
-      description="Données d'utilisation depuis le dernier reset."
-      srOnlyTitle={false}
-      desktopClass="w-full sm:max-w-lg"
-    >
-      <div class="px-4 pb-4">
-        <StatsTile />
-      </div>
-      {#snippet footer()}
-        <SaveBadge />
-      {/snippet}
-    </ResponsiveSheet>
+      <MacroManager />
 
-    <Button variant="outline" class="ms-auto" onclick={() => (settingsOpen = true)}>
-      <Settings /> Paramètres
+      <Button variant="outline" onclick={() => (statsOpen = true)}>
+        <ChartLine /> Stats
+      </Button>
+      <ResponsiveSheet
+        bind:open={statsOpen}
+        title="Statistiques"
+        description="Données d'utilisation depuis le dernier reset."
+        srOnlyTitle={false}
+        desktopClass="w-full sm:max-w-lg"
+      >
+        <div class="px-4 pb-4">
+          <StatsTile />
+        </div>
+        {#snippet footer()}
+          <SaveBadge />
+        {/snippet}
+      </ResponsiveSheet>
+    </ButtonGroup.Root>
+
+    <Button variant="outline" size="icon" class="ms-auto" onclick={() => (settingsOpen = true)}>
+      <Settings />
     </Button>
     <ResponsiveSheet
       bind:open={settingsOpen}
