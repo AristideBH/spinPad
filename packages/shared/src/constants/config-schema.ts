@@ -246,11 +246,13 @@ export function defaultLayer(name = 'Base'): LayerConfig {
 }
 
 export function defaultProfile(): ProfileConfig {
-  return {
+  const profile: ProfileConfig = {
     name: 'Profile',
     icon: '', // pas d'icône par défaut (les presets en fournissent une)
     layers: [defaultLayer('Base')], // un seul layer au départ — ajout à la demande
   };
+  backfillLayerColors([profile]); // garantit color: 0 sur le layer de base
+  return profile;
 }
 
 export function defaultConfig(): FullConfig {
