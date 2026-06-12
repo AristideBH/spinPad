@@ -6,11 +6,11 @@
   import { Kbd } from '$shared/components/ui/kbd/index.js';
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
   import { HasFinePointer } from '$shared/lib/hooks/pointer.svelte.js';
-  import { configState } from '$shared/store/config.svelte.js';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import KeycodeList from './KeycodeList.svelte';
   import LiveRecordPanel from './LiveRecordPanel.svelte';
-  import { Activity, ArrowLeft, List } from '@lucide/svelte';
+  import KeyLedPicker from './KeyLedPicker.svelte';
+  import { Activity, ArrowLeft, Lightbulb, List } from '@lucide/svelte';
   import { fly } from 'svelte/transition';
 
   const ctx = getKeypadContext();
@@ -81,6 +81,44 @@
         </button>
       {/snippet}
     </Item.Root>
+
+    <!-- Option LED : seulement pour les touches (pas l'encodeur) -->
+    {#if ctx.editingField === 'key'}
+      {@const ki = ctx.editingKey}
+      {@const kled = ki !== null ? (ctx.layer?.key_leds?.[ki] ?? null) : null}
+      {@const hasLed = kled !== null && kled.effect !== 'off'}
+      <Item.Root variant="outline" class="hover:bg-muted/50 sm:col-span-2">
+        {#snippet child({ props })}
+          <button
+            {...props}
+            class={[props.class as string, 'cursor-pointer flex-col items-start text-left'].join(' ')}
+            onclick={() => ctx.setStage('led')}
+          >
+            <Item.Media variant="icon">
+              {#if hasLed}
+                <span
+                  class="rounded-full size-5 ring-1 ring-white/20"
+                  style="background:rgb({kled!.r},{kled!.g},{kled!.b});box-shadow:0 0 8px 2px rgb({kled!.r},{kled!
+                    .g},{kled!.b})"
+                ></span>
+              {:else}
+                <Lightbulb class="opacity-50 size-5" />
+              {/if}
+            </Item.Media>
+            <Item.Content>
+              <Item.Title>Couleur LED</Item.Title>
+              <Item.Description>
+                {#if hasLed}
+                  {kled!.effect} · #{[kled!.r, kled!.g, kled!.b].map((v) => v.toString(16).padStart(2, '0')).join('')}
+                {:else}
+                  Override la couleur de cette touche.
+                {/if}
+              </Item.Description>
+            </Item.Content>
+          </button>
+        {/snippet}
+      </Item.Root>
+    {/if}
   </Item.Group>
 {/snippet}
 
@@ -94,6 +132,8 @@
             {@render menu()}
           {:else if ctx.pickerStage === 'record'}
             <LiveRecordPanel />
+          {:else if ctx.pickerStage === 'led'}
+            <KeyLedPicker />
           {:else}
             <KeycodeList />
           {/if}

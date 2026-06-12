@@ -115,13 +115,13 @@ const CALC = MEDIA(MEDIA_APP_CALC);
 const SCRSHOT = MEDIA(MEDIA_APP_SCRSHOT);
 
 // ── Key index order ───────────────────────────────────────────
-// keys[0..9] = [SW1, SW8, SW2, SW7, SW9, SW3, SW6, SW10, SW4, SW5]
+// keys[0..9] = [SW1, SW7, SW2, SW6, SW8, SW3, SW5, SW9, SW4, SW10]
 //
 // Physical layout:
-//   [ SW8 ] [ SW1 ---- 2u ---- ]
-//   [ SW9 ] [ SW7 ]   [ SW2 ]
-//   [ SW10 -2u- ] [ SW6 ] [ SW3 ]
-//   [       ]     [ SW5 ] [ SW4 ]
+//   [ SW1 ---- 2u ---- ] [ SW7 ]
+//   [ SW2 ]   [ SW6 ]   [ SW8 ]
+//   [ SW3 -2u- ] [ SW5 ] [ SW9 ]
+//   [         ] [ SW4 ] [ SW10 ]
 
 export const MOCK_CONFIG: FullConfig = {
   version: 2,
@@ -136,6 +136,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Productivity',
       layer_count: 3,
+      led: { r: 0, g: 120, b: 255, effect: 'breathe' }, // bleu
       layers: [
         {
           name: 'Base',
@@ -143,6 +144,8 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
+          // SW1 (MO layer) = blanc → indicateur de layer shift
+          key_leds: [{ r: 255, g: 255, b: 255, effect: 'static' }, null, null, null, null, null, null, null, null, null],
         },
         {
           name: 'Fn',
@@ -157,6 +160,8 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: SCRL_DN, ccw: SCRL_UP, press: ENTER },
           encoder_cw: SCRL_DN,
           encoder_ccw: SCRL_UP,
+          // touches de navigation = cyan
+          key_leds: [null, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }],
         },
       ],
       // SW4 + SW5 → macro "Salut"
@@ -171,6 +176,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Creative',
       layer_count: 2,
+      led: { r: 255, g: 80, b: 0, effect: 'static' }, // orange
       layers: [
         {
           name: 'Base',
@@ -185,6 +191,8 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: 0 },
           encoder_cw: SCRL_UP,
           encoder_ccw: SCRL_DN,
+          // DEL = rouge alerte
+          key_leds: [null, null, null, null, null, null, null, null, null, { r: 255, g: 30, b: 30, effect: 'alert' }],
         },
       ],
       // SW4 + SW5 → screenshot
@@ -199,6 +207,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Media',
       layer_count: 2,
+      led: { r: 180, g: 0, b: 220, effect: 'pulse' }, // violet
       layers: [
         {
           name: 'Base',
@@ -206,6 +215,8 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: PLAY },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
+          // PLAY = vert, STOP = rouge, MUTE = orange
+          key_leds: [{ r: 0, g: 200, b: 60 }, null, null, { r: 200, g: 30, b: 30 }, { r: 255, g: 120, b: 0 }, null, null, null, null, null],
         },
         {
           name: 'Stream',
@@ -227,6 +238,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Gaming',
       layer_count: 2,
+      led: { r: 255, g: 20, b: 20, effect: 'breathe' }, // rouge
       layers: [
         {
           name: 'WASD',
@@ -234,6 +246,8 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
+          // WASD en jaune vif
+          key_leds: [null, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, null, null, null, null, null],
         },
         {
           name: 'Menu',
@@ -310,6 +324,14 @@ export const MOCK_CONFIG: FullConfig = {
 
   encoder: {
     sensitivity: 1,
+  },
+
+  led_key: {
+    brightness: 180,
+    effect: 'static',
+    r: 255,
+    g: 255,
+    b: 255,
   },
 
   led_extension: {

@@ -33,12 +33,15 @@ import {
 import * as ops from '$shared/constants/config-ops.js';
 import {
   defaultConfig,
+  defaultLedKey,
   defaultMacros,
   isMacroUsed,
   MACRO_COUNT,
   MACRO_MAX_STEPS,
   MACRO_NAME_MAX_LEN,
   type FullConfig,
+  type LedProfile,
+  type KeyLedOverride,
   type MacroDef,
   type MacroStep,
 } from '$shared/constants/config-schema.js';
@@ -553,3 +556,32 @@ export function editLayer(profileIdx: number, layerIdx: number, patch: ops.Layer
 export function setProfileIcon(profileIdx: number, iconBase64: string): void {
   editProfile(profileIdx, { icon: iconBase64 });
 }
+
+export function setProfileLed(profileIdx: number, led: LedProfile | undefined): void {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  if (!cfg.profiles[profileIdx]) return;
+  if (led) cfg.profiles[profileIdx].led = led;
+  else delete cfg.profiles[profileIdx].led;
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+}
+
+export function setKeyLedOverride(
+  profileIdx: number,
+  layerIdx: number,
+  keyIdx: number,
+  override: KeyLedOverride | null,
+): void {
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  const layer = cfg.profiles[profileIdx]?.layers[layerIdx];
+  if (!layer) return;
+  if (!layer.key_leds) layer.key_leds = Array(10).fill(null);
+  layer.key_leds[keyIdx] = override;
+  // Nettoyage : si tous null, supprimer le tableau
+  if (layer.key_leds.every((v) => v === null)) delete layer.key_leds;
+  configState.data = cfg;
+  configState.isDirty = true;
+  _autoSave.schedule();
+}
+

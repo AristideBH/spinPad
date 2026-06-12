@@ -2,10 +2,10 @@
   import { configState, updateConfig, exportConfig, importConfig } from '$shared/store/config.svelte.js';
   import { Download, Upload } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
-  import { serial, setTime } from '$shared/store/serial.svelte.js';
+  import { setTime } from '$shared/store/serial.svelte.js';
   import { Card, CardContent, CardHeader, CardTitle } from '$shared/components/ui/card/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
-  import { Switch } from '$shared/components/ui/switch/index.js';
+  import * as NumberField from '$shared/components/ui/number-field/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
@@ -15,17 +15,16 @@
   import NotConnected from '$shared/components/app/NotConnected.svelte';
   import OptionGrid from '$shared/components/app/OptionGrid.svelte';
   import SliderField from '$shared/components/app/SliderField.svelte';
-  import ScreenEditor from '$shared/components/app/studio/dashboard/screen/ScreenEditor.svelte';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
   import { scrollShadow } from '$shared/utils.js';
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
+  import { Scrubber } from '$shared/components/ui/scrubber';
 
   // ── Tabs ──────────────────────────────────────────────────────
   const TABS = [
     { value: 'stats', label: 'Stats' },
     { value: 'bluetooth', label: 'Bluetooth' },
     { value: 'ecran', label: 'Écran & Power' },
-    { value: 'leds', label: 'Extension LED' },
     { value: 'sauvegarde', label: 'Sauvegarde' },
   ];
 
@@ -119,6 +118,59 @@
 
   const SENS_LABELS = ['', '1× (standard)', '2× (réactif)', '3×', '4× (max)'] as const;
 
+  // ── NumberField state ─────────────────────────────────────────
+  let displayTimeout = $state(configState.data?.display?.timeout_s ?? 60);
+  $effect(() => {
+    displayTimeout = configState.data?.display?.timeout_s ?? 60;
+  });
+  $effect(() => {
+    if (displayTimeout !== (configState.data?.display?.timeout_s ?? 60))
+      updateConfig('display.timeout_s', displayTimeout);
+  });
+
+  let sleepTimeout = $state(configState.data?.power?.sleep_timeout_s ?? 300);
+  $effect(() => {
+    sleepTimeout = configState.data?.power?.sleep_timeout_s ?? 300;
+  });
+  $effect(() => {
+    if (sleepTimeout !== (configState.data?.power?.sleep_timeout_s ?? 300))
+      updateConfig('power.sleep_timeout_s', sleepTimeout);
+  });
+
+  let batteryCritical = $state(configState.data?.power?.battery_critical_pct ?? 10);
+  $effect(() => {
+    batteryCritical = configState.data?.power?.battery_critical_pct ?? 10;
+  });
+  $effect(() => {
+    if (batteryCritical !== (configState.data?.power?.battery_critical_pct ?? 10))
+      updateConfig('power.battery_critical_pct', batteryCritical);
+  });
+
+  let extLedCount = $state(configState.data?.led_extension?.count ?? 1);
+  $effect(() => {
+    extLedCount = configState.data?.led_extension?.count ?? 1;
+  });
+  $effect(() => {
+    if (extLedCount !== (configState.data?.led_extension?.count ?? 1)) updateConfig('led_extension.count', extLedCount);
+  });
+
+  // ── ColorPicker state (extension LED) ────────────────────────
+  let extLedPickerColor = $state(
+    rgbToHex(
+      configState.data?.led_extension?.r ?? 255,
+      configState.data?.led_extension?.g ?? 255,
+      configState.data?.led_extension?.b ?? 255,
+    ).toUpperCase(),
+  );
+  $effect(() => {
+    const normalized = rgbToHex(
+      configState.data?.led_extension?.r ?? 255,
+      configState.data?.led_extension?.g ?? 255,
+      configState.data?.led_extension?.b ?? 255,
+    ).toUpperCase();
+    if (extLedPickerColor !== normalized) extLedPickerColor = normalized;
+  });
+
   // ── Backup global ─────────────────────────────────────────────
   let backupFileInput = $state<HTMLInputElement | null>(null);
 
@@ -137,27 +189,6 @@
       toast.error('Import échoué', { description: msg });
     }
     if (backupFileInput) backupFileInput.value = '';
-  }
-
-  // ── Conditions dérivées ───────────────────────────────────────
-  // $derived garantit la réactivité sans boucle d'effet.
-  const ledExtEnabled = $derived(configState.data?.led_extension?.enabled ?? false);
-  const ledExtMode = $derived(configState.data?.led_extension?.mode ?? 0);
-
-  // ── LED extension modes ───────────────────────────────────────
-  const EXT_MODES = [
-    { value: 0, label: 'Off', desc: 'LEDs éteintes' },
-    { value: 1, label: 'Mirror', desc: 'Copie les couleurs des touches' },
-    { value: 2, label: 'Ambient', desc: 'Respiration douce' },
-    { value: 3, label: 'Static', desc: 'Couleur fixe' },
-    { value: 4, label: 'Reactive', desc: 'Flash sur chaque touche pressée' },
-    { value: 5, label: 'Hyperion', desc: 'Frame RGB via bridge Hyperion' },
-  ];
-
-  // ── Helpers couleur ───────────────────────────────────────────
-  function hexToRgb(hex: string) {
-    const m = hex.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-    return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
   }
 
   function rgbToHex(r: number, g: number, b: number) {
@@ -180,7 +211,9 @@
       <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
         <UnderlineTabs.List bind:ref={tabListEl}>
           {#each TABS as tab (tab.value)}
-            <UnderlineTabs.Trigger value={tab.value}>{tab.label}</UnderlineTabs.Trigger>
+            <UnderlineTabs.Trigger value={tab.value}>
+              {tab.label}
+            </UnderlineTabs.Trigger>
           {/each}
         </UnderlineTabs.List>
       </UnderlineTabs.Root>
@@ -199,9 +232,9 @@
           <div class="flex flex-col max-w-md gap-4">
             <Card>
               <CardHeader>
-                <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
-                  >Appareil</CardTitle
-                >
+                <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
+                  Appareil
+                </CardTitle>
               </CardHeader>
               <CardContent class="pt-0">
                 <Field>
@@ -255,18 +288,22 @@
             <!-- Écran SSD1315 -->
             <Card class="">
               <CardHeader>
-                <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
-                  >Écran SSD1315</CardTitle
-                >
+                <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
+                  Écran SSD1315
+                </CardTitle>
               </CardHeader>
               <CardContent class="pt-0">
-                <div class="mb-5">
-                  <SliderField
-                    label="Luminosité"
+                <div class="flex flex-col gap-1.5">
+                  <Label class="block mb-1.5 text-sm">Luminosité</Label>
+                  <Scrubber
+                    bind:value={brightness}
                     min={10}
                     max={255}
-                    bind:value={brightness}
-                    onCommit={() => updateConfig('display.brightness', brightness)}
+                    step={24.5}
+                    tickStep={1}
+                    percentage
+                    decimals={0}
+                    onCommit={() => updateConfig('led_key.brightness', brightness)}
                   />
                 </div>
 
@@ -275,33 +312,15 @@
                   description="Durée d'inactivité avant extinction de l'écran"
                 >
                   {#snippet children()}
-                    <Input
-                      type="number"
-                      min={5}
-                      max={600}
-                      class="w-20 text-right"
-                      value={data.display?.timeout_s}
-                      onchange={(e: Event) => updateConfig('display.timeout_s', +(e.target as HTMLInputElement).value)}
-                    />
+                    <NumberField.Root min={5} max={600} bind:value={displayTimeout}>
+                      <NumberField.Group>
+                        <NumberField.Decrement />
+                        <NumberField.Input class="w-20" />
+                        <NumberField.Increment />
+                      </NumberField.Group>
+                    </NumberField.Root>
                   {/snippet}
                 </SettingsField>
-
-                <!-- Widget editor (grille mosaïque 4×4) -->
-                <div class="mt-4">
-                  <div class="flex items-center justify-between mb-3">
-                    <Label class="text-sm font-medium">Widgets OLED</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      class="text-xs h-7"
-                      onclick={syncClock}
-                      disabled={!serial.connected}
-                    >
-                      Sync heure
-                    </Button>
-                  </div>
-                  <ScreenEditor />
-                </div>
               </CardContent>
             </Card>
 
@@ -315,29 +334,25 @@
               <CardContent class="pt-0">
                 <SettingsField label="Deep sleep après" description="Secondes d'inactivité avant veille profonde">
                   {#snippet children()}
-                    <Input
-                      type="number"
-                      min={30}
-                      max={3600}
-                      class="w-20 text-right"
-                      value={data.power?.sleep_timeout_s}
-                      onchange={(e: Event) =>
-                        updateConfig('power.sleep_timeout_s', +(e.target as HTMLInputElement).value)}
-                    />
+                    <NumberField.Root min={30} max={3600} bind:value={sleepTimeout}>
+                      <NumberField.Group>
+                        <NumberField.Decrement />
+                        <NumberField.Input class="w-20" />
+                        <NumberField.Increment />
+                      </NumberField.Group>
+                    </NumberField.Root>
                   {/snippet}
                 </SettingsField>
 
                 <SettingsField label="Batterie critique" description="Pourcentage déclenchant l'alerte">
                   {#snippet children()}
-                    <Input
-                      type="number"
-                      min={3}
-                      max={30}
-                      class="w-20 text-right"
-                      value={data.power?.battery_critical_pct}
-                      onchange={(e: Event) =>
-                        updateConfig('power.battery_critical_pct', +(e.target as HTMLInputElement).value)}
-                    />
+                    <NumberField.Root min={3} max={30} bind:value={batteryCritical}>
+                      <NumberField.Group>
+                        <NumberField.Decrement />
+                        <NumberField.Input class="w-20" />
+                        <NumberField.Increment />
+                      </NumberField.Group>
+                    </NumberField.Root>
                   {/snippet}
                 </SettingsField>
 
@@ -422,113 +437,7 @@
             </Card>
           </div>
         </section>
-
         <!-- ══ Extension LED ════════════════════════════════════════ -->
-        <section bind:this={sectionEls['leds']} data-cat="leds">
-          <h3 class="mb-4 text-base font-semibold">Extension LED</h3>
-          <div class="max-w-2xl">
-            <Card>
-              <CardHeader>
-                <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
-                  >LEDs supplémentaires</CardTitle
-                >
-              </CardHeader>
-              <CardContent class="pt-0">
-                <p class="mb-4 text-sm text-muted-foreground">
-                  Le connecteur d'extension sur le PCB permet de brancher jusqu'à 50 LEDs WS2812 supplémentaires (ruban,
-                  ambilight…).
-                </p>
-
-                <SettingsField
-                  label="Activer l'extension"
-                  description="Active les LEDs branchées sur le connecteur d'extension"
-                >
-                  {#snippet children()}
-                    <Switch
-                      checked={ledExtEnabled}
-                      onCheckedChange={(v: boolean) => updateConfig('led_extension.enabled', v)}
-                    />
-                  {/snippet}
-                </SettingsField>
-
-                {#if ledExtEnabled}
-                  <SettingsField label="Nombre de LEDs" description="1–50 LEDs WS2812 branchées sur le connecteur">
-                    {#snippet children()}
-                      <Input
-                        type="number"
-                        min={1}
-                        max={50}
-                        class="w-20 text-right"
-                        value={data.led_extension?.count}
-                        onchange={(e: Event) =>
-                          updateConfig(
-                            'led_extension.count',
-                            Math.min(50, Math.max(1, +(e.target as HTMLInputElement).value)),
-                          )}
-                      />
-                    {/snippet}
-                  </SettingsField>
-
-                  <!-- Mode -->
-                  <div class="mt-4 mb-4">
-                    <Label class="block mb-3 text-sm">Mode d'éclairage</Label>
-                    <OptionGrid
-                      options={EXT_MODES}
-                      value={ledExtMode}
-                      onSelect={(v) => updateConfig('led_extension.mode', v)}
-                      gridClass="grid grid-cols-2 gap-2 sm:grid-cols-3"
-                      buttonClass="flex flex-col gap-0.5 px-3 py-2.5 text-left"
-                    >
-                      {#snippet item(m)}
-                        <span class="text-sm font-medium">{m.label}</span>
-                        <span class="text-xs leading-snug text-muted-foreground">{m.desc}</span>
-                      {/snippet}
-                    </OptionGrid>
-                  </div>
-
-                  <!-- Couleur (masquée en modes Mirror et Hyperion) -->
-                  {#if ledExtMode !== 1 && ledExtMode !== 5}
-                    <SettingsField
-                      label="Couleur"
-                      description={ledExtMode === 4 ? 'Couleur du flash réactif' : 'Couleur de base'}
-                    >
-                      {#snippet children()}
-                        <input
-                          type="color"
-                          class="w-10 h-8 cursor-pointer rounded border border-border bg-transparent p-0.5"
-                          value={rgbToHex(
-                            data.led_extension?.r ?? 255,
-                            data.led_extension?.g ?? 255,
-                            data.led_extension?.b ?? 255,
-                          )}
-                          oninput={(e: Event) => {
-                            const rgb = hexToRgb((e.target as HTMLInputElement).value);
-                            if (rgb) {
-                              updateConfig('led_extension.r', rgb.r);
-                              updateConfig('led_extension.g', rgb.g);
-                              updateConfig('led_extension.b', rgb.b);
-                            }
-                          }}
-                        />
-                      {/snippet}
-                    </SettingsField>
-                  {/if}
-
-                  <!-- Luminosité extension -->
-                  <div class="mt-4">
-                    <SliderField
-                      label="Luminosité"
-                      min={0}
-                      max={255}
-                      bind:value={ledExtBright}
-                      onCommit={() => updateConfig('led_extension.brightness', ledExtBright)}
-                    />
-                  </div>
-                {/if}
-              </CardContent>
-            </Card>
-          </div>
-        </section>
 
         <!-- ══ Sauvegarde globale ════════════════════════════════ -->
         <section bind:this={sectionEls['sauvegarde']} data-cat="sauvegarde" class="flex flex-col gap-3">

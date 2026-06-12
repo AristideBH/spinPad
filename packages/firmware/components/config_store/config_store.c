@@ -75,7 +75,7 @@ static void set_layer(kb_layer_t *l, const char *name,
 //  4 profils riches (miroir de mock/keyboard-config.ts) : un
 //  nouveau board démarre directement avec des layouts utiles et
 //  de quoi exercer toute l'UI de config.
-//  Ordre des touches : [SW1, SW8, SW2, SW7, SW9, SW3, SW6, SW10, SW4, SW5]
+//  Ordre des touches : [SW1, SW7, SW2, SW6, SW8, SW3, SW5, SW9, SW4, SW10]
 // ─────────────────────────────────────────────────────────────
 static void apply_defaults(void)
 {
@@ -416,6 +416,12 @@ static esp_err_t parse_json_to_config(const char *json_str)
                         if (cJSON_IsNumber(ccw)) kl->encoder_ccw = (uint16_t)ccw->valuedouble;
                         cJSON *press = cJSON_GetObjectItem(enc, "press");
                         if (cJSON_IsNumber(press)) kl->encoder_press = (uint16_t)press->valuedouble;
+                    }
+                    // Per-layer sensitivity override (0 = inherit global)
+                    cJSON *lsens = cJSON_GetObjectItem(layer, "encoder_sensitivity");
+                    if (cJSON_IsNumber(lsens)) {
+                        uint8_t s = (uint8_t)lsens->valuedouble;
+                        kl->encoder_sensitivity = (s >= 1 && s <= 4) ? s : 0;
                     }
                 }
             }
@@ -775,6 +781,10 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
             cJSON_AddNumberToObject(enc, "cw",    kl->encoder_cw);
             cJSON_AddNumberToObject(enc, "ccw",   kl->encoder_ccw);
             cJSON_AddNumberToObject(enc, "press", kl->encoder_press);
+
+            if (kl->encoder_sensitivity > 0) {
+                cJSON_AddNumberToObject(layer, "encoder_sensitivity", kl->encoder_sensitivity);
+            }
 
             cJSON_AddItemToArray(layers, layer);
         }

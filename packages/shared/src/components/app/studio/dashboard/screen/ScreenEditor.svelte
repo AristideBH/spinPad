@@ -171,7 +171,6 @@
           readOnly={!editable}
           onpointerup={onPointerUp}
           fastStart
-          autoCompress
           scroller={gridRef as HTMLElement}
         >
           {#snippet children({ movePointerDown, dataItem }: SnippetArgs)}

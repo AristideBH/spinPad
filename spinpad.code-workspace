@@ -2,24 +2,24 @@
   "folders": [
     {
       "path": "packages/firmware",
-      "name": "💽 Firmware"
+      "name": "💽 Firmware",
     },
     {
       "path": "packages/studio",
-      "name": "🖌️ Studio"
+      "name": "🖌️ Studio",
     },
     {
       "path": "packages/shared",
-      "name": "📦 Shared"
+      "name": "📦 Shared",
     },
     {
       "path": "packages/website",
-      "name": "🌐 Website"
+      "name": "🌐 Website",
     },
     {
       "path": ".",
-      "name": "♾️ Root"
-    }
+      "name": "♾️ Root",
+    },
   ],
   "settings": {
     "idf.idfContainerPath": "${workspaceFolder:💽 Firmware}",
@@ -53,7 +53,7 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "hide-files.files": [],
-    "liveServer.settings.multiRootWorkspaceName": "🖌️ Studio",
+    "liveServer.settings.multiRootWorkspaceName": "♾️ Root",
     "liveServer.settings.port": 5501,
     "[html]": {
       "editor.defaultFormatter": "vscode.html-language-features",
@@ -69,5 +69,5 @@
       "dbaeumer.vscode-eslint",
     ],
     "unwantedRecommendations": ["ardenivanov.svelte-intellisense"],
-  }
+  },
 }

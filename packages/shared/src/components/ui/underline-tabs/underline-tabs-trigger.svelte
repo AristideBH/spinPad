@@ -42,7 +42,7 @@
   {#if state.rootState.hoveredTab === value}
     <div
       class={cn(
-        'bg-accent absolute top-0 z-1 h-[calc(100%-3px)] w-full rounded-md opacity-0 transition-opacity duration-300 peer-focus-visible:opacity-100',
+        'bg-accent/10 absolute top-0 z-1 h-[calc(100%-3px)] w-full rounded-md opacity-0 transition-opacity duration-300 peer-focus-visible:opacity-100',
         state.rootState.isHovered && 'opacity-100',
       )}
       in:receive={{ key: `${state.rootState.opts.id.current}-tab-hover`, duration: 300 }}

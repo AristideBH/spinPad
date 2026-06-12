@@ -18,7 +18,7 @@ export const CONFIG_NUM_KEYS = 10; // SW1–SW10
 export const CONFIG_MAX_PROFILES = 4;
 export const CONFIG_MAX_LAYERS = 6; // par profil (cap réel firmware)
 export const CONFIG_NAME_MAX_LEN = 32; // octets, '\0' inclus → 31 chars utiles
-export const CONFIG_FORMAT_VERSION = 3; // v3 : widgets OLED span-based (grille 4×4)
+export const CONFIG_FORMAT_VERSION = 4; // v4 : per-layer encoder sensitivity override
 
 // Bornes basses pour la CRUD (un profil/layer minimum)
 export const MIN_PROFILES = 1;
@@ -162,6 +162,53 @@ export function isMacroUsed(m: MacroDef | undefined): boolean {
   return !!m && m.steps.length >= 1;
 }
 
+// ── LED ─────────────────────────────────────────────────────────
+
+/**
+ * Effets LED disponibles — miroir exact des modes de led-matrix.svelte.
+ * Chaque niveau de la hiérarchie n'expose qu'un sous-ensemble :
+ *   Global   : tous les modes
+ *   Profil   : off | static | breathe | pulse  (pas de position-dépendants)
+ *   Par-key  : off | static | breathe | alert
+ */
+export type LedMode = 'off' | 'static' | 'pulse' | 'breathe' | 'flow' | 'sweep' | 'alert' | 'rainbow';
+export type LedModeProfile = Extract<LedMode, 'off' | 'static' | 'breathe' | 'pulse'>;
+export type LedModeKey = Extract<LedMode, 'off' | 'static' | 'breathe' | 'alert'>;
+
+/** Presets de dégradé pour les effets flow/sweep. Index 0 = défaut initial. */
+export const GRADIENT_PRESETS = [
+  { label: 'Teal–Bleu',  colors: ['#34d399', '#22d3ee', '#3b82f6', '#34d399'] },
+  { label: 'Coucher',    colors: ['#f97316', '#ef4444', '#ec4899', '#f97316'] },
+  { label: 'Aurora',     colors: ['#8b5cf6', '#06b6d4', '#10b981', '#8b5cf6'] },
+  { label: 'Feu',        colors: ['#fbbf24', '#f97316', '#ef4444', '#fbbf24'] },
+] as const;
+
+/** Config LED globale pour les 10 touches (dans FullConfig). */
+export interface LedKeyGlobal {
+  brightness: number; // 0–255
+  effect: LedMode;
+  r: number; // 0–255
+  g: number;
+  b: number;
+  gradient_preset?: number; // index dans GRADIENT_PRESETS, actif si effect=flow|sweep
+}
+
+/** Couleur/effet LED d'identité de profil — hérite du global si absent. */
+export interface LedProfile {
+  r: number;
+  g: number;
+  b: number;
+  effect?: LedModeProfile;
+}
+
+/** Override LED par touche dans un layer — null = hérite du layer/profil/global. */
+export interface KeyLedOverride {
+  r: number;
+  g: number;
+  b: number;
+  effect?: LedModeKey;
+}
+
 // ── Types ───────────────────────────────────────────────────────
 
 export interface LayerConfig {
@@ -174,6 +221,11 @@ export interface LayerConfig {
   // Suit le layer lors d'un réordonnancement pour stabiliser sa couleur. Voir
   // layer-colors.ts. Réassigné par position à l'entrée si absent (round-trip device).
   color?: number;
+  // Overrides LED par touche (index = index de key, null = hérite). App-only sauf
+  // si le firmware est mis à jour pour lire ces champs.
+  key_leds?: (KeyLedOverride | null)[];
+  // Override de sensibilité encodeur pour ce layer. null/absent = hérite du global.
+  encoder_sensitivity?: number | null;
 }
 
 export interface ProfileConfig {
@@ -183,6 +235,7 @@ export interface ProfileConfig {
   icon?: string; // base64 d'un bitmap 24×24 1bpp (PROFILE_ICON_BYTES octets)
   combos?: unknown[];
   combo_count?: number;
+  led?: LedProfile; // couleur d'identité du profil (absent = hérite du global)
 }
 
 export interface FullConfig {
@@ -213,6 +266,7 @@ export interface FullConfig {
   encoder: {
     sensitivity: number; // 1–4
   };
+  led_key: LedKeyGlobal; // config LED globale des 10 touches
   led_extension: {
     enabled: boolean;
     count: number; // 0–50
@@ -231,6 +285,10 @@ export type ValidationResult<T> = { ok: true; config: T } | { ok: false; error: 
 
 export function defaultKeyAction(): number {
   return 0x0000; // KC_NONE
+}
+
+export function defaultLedKey(): LedKeyGlobal {
+  return { brightness: 180, effect: 'static', r: 255, g: 255, b: 255 };
 }
 
 export function defaultLayer(name = 'Base'): LayerConfig {
@@ -275,6 +333,7 @@ export function defaultConfig(): FullConfig {
     encoder: {
       sensitivity: 1, // 1–4
     },
+    led_key: defaultLedKey(),
     led_extension: {
       enabled: false,
       count: 0,
@@ -336,6 +395,7 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
           : defaults.encoder.sensitivity,
     },
 
+    led_key: mergeLedKey(r.led_key, defaults.led_key),
     led_extension: {
       enabled: (r.led_extension as any)?.enabled ?? defaults.led_extension.enabled,
       count: (r.led_extension as any)?.count ?? defaults.led_extension.count,
@@ -352,6 +412,71 @@ export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
   return { ok: true, config };
 }
 
+const LED_MODES_ALL: LedMode[] = ['off', 'static', 'pulse', 'breathe', 'flow', 'sweep', 'alert', 'rainbow'];
+const LED_MODES_PROFILE: LedModeProfile[] = ['off', 'static', 'breathe', 'pulse'];
+const LED_MODES_KEY: LedModeKey[] = ['off', 'static', 'breathe', 'alert'];
+
+function clampU8(v: unknown, def: number): number {
+  return typeof v === 'number' ? Math.min(255, Math.max(0, Math.round(v))) : def;
+}
+
+function mergeLedKey(raw: unknown, def: LedKeyGlobal): LedKeyGlobal {
+  if (typeof raw !== 'object' || raw === null) return def;
+  const r = raw as Record<string, unknown>;
+  const effect = typeof r.effect === 'string' && LED_MODES_ALL.includes(r.effect as LedMode)
+    ? (r.effect as LedMode)
+    : def.effect;
+  const gp = typeof r.gradient_preset === 'number' && r.gradient_preset >= 0 && r.gradient_preset < GRADIENT_PRESETS.length
+    ? r.gradient_preset
+    : def.gradient_preset;
+  return {
+    brightness: clampU8(r.brightness, def.brightness),
+    effect,
+    r: clampU8(r.r, def.r),
+    g: clampU8(r.g, def.g),
+    b: clampU8(r.b, def.b),
+    ...(gp !== undefined ? { gradient_preset: gp } : {}),
+  };
+}
+
+function mergeLedProfile(raw: unknown): LedProfile | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined;
+  const r = raw as Record<string, unknown>;
+  const effect = typeof r.effect === 'string' && LED_MODES_PROFILE.includes(r.effect as LedModeProfile)
+    ? (r.effect as LedModeProfile)
+    : undefined;
+  return {
+    r: clampU8(r.r, 255),
+    g: clampU8(r.g, 255),
+    b: clampU8(r.b, 255),
+    ...(effect ? { effect } : {}),
+  };
+}
+
+function mergeKeyLeds(raw: unknown): (KeyLedOverride | null)[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: (KeyLedOverride | null)[] = [];
+  for (let i = 0; i < CONFIG_NUM_KEYS; i++) {
+    const item = raw[i];
+    if (item === null || item === undefined) {
+      out.push(null);
+      continue;
+    }
+    if (typeof item !== 'object') { out.push(null); continue; }
+    const r = item as Record<string, unknown>;
+    const effect = typeof r.effect === 'string' && LED_MODES_KEY.includes(r.effect as LedModeKey)
+      ? (r.effect as LedModeKey)
+      : undefined;
+    out.push({
+      r: clampU8(r.r, 255),
+      g: clampU8(r.g, 255),
+      b: clampU8(r.b, 255),
+      ...(effect ? { effect } : {}),
+    });
+  }
+  return out.some((x) => x !== null) ? out : undefined;
+}
+
 function mergeProfile(raw: unknown, def: ProfileConfig = defaultProfile()): ProfileConfig {
   if (typeof raw !== 'object' || raw === null) return def;
   const r = raw as Record<string, unknown>;
@@ -359,10 +484,12 @@ function mergeProfile(raw: unknown, def: ProfileConfig = defaultProfile()): Prof
     Array.isArray(r.layers) && r.layers.length > 0
       ? (r.layers as unknown[]).slice(0, CONFIG_MAX_LAYERS).map((l, i) => mergeLayer(l, def.layers[i]))
       : def.layers;
+  const led = mergeLedProfile(r.led);
   return {
     name: typeof r.name === 'string' ? r.name : def.name,
     icon: typeof r.icon === 'string' ? r.icon : (def.icon ?? ''),
     layers,
+    ...(led ? { led } : {}),
   };
 }
 
@@ -433,6 +560,10 @@ function mergeMacros(raw: unknown): MacroDef[] {
 function mergeLayer(raw: unknown, def: LayerConfig = defaultLayer()): LayerConfig {
   if (typeof raw !== 'object' || raw === null) return def;
   const r = raw as Record<string, unknown>;
+  const key_leds = mergeKeyLeds(r.key_leds);
+  const rawSens = r.encoder_sensitivity;
+  const encoder_sensitivity =
+    typeof rawSens === 'number' ? Math.min(Math.max(Math.round(rawSens), 1), 4) : null;
   return {
     name: typeof r.name === 'string' ? r.name : def.name,
     keys: Array.isArray(r.keys)
@@ -441,5 +572,7 @@ function mergeLayer(raw: unknown, def: LayerConfig = defaultLayer()): LayerConfi
     encoder_cw: typeof r.encoder_cw === 'number' ? r.encoder_cw : def.encoder_cw,
     encoder_ccw: typeof r.encoder_ccw === 'number' ? r.encoder_ccw : def.encoder_ccw,
     ...(typeof r.color === 'number' ? { color: r.color } : {}),
+    ...(key_leds ? { key_leds } : {}),
+    ...(encoder_sensitivity !== null ? { encoder_sensitivity } : {}),
   };
 }

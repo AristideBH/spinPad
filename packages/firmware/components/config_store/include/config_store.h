@@ -55,6 +55,7 @@ typedef struct {
     uint16_t encoder_cw;                   // Encodeur sens horaire
     uint16_t encoder_ccw;                  // Encodeur sens anti-horaire
     uint16_t encoder_press;                // Bouton de l'encodeur
+    uint8_t  encoder_sensitivity;          // 0 = hérite du global, 1–4 = override
 } kb_layer_t;
 
 // ── Un profil : plusieurs layers + combos + macros ───────────

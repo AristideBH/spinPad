@@ -9,6 +9,7 @@
   import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
+  import { KEY_LAYOUT } from '$shared/constants/key-layout.js';
 
   const visualsActive = $derived(serial.connected || devMode.active);
 
@@ -56,19 +57,6 @@
     }
     return out;
   }
-
-  const KEY_LAYOUT = [
-    { sw: 'SW8', idx: 1, row: 1, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW1', idx: 0, row: 1, col: 2, rowSpan: 1, colSpan: 2 },
-    { sw: 'SW9', idx: 4, row: 2, col: 1, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW7', idx: 3, row: 2, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW2', idx: 2, row: 2, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW10', idx: 7, row: 3, col: 1, rowSpan: 2, colSpan: 1 },
-    { sw: 'SW6', idx: 6, row: 3, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW3', idx: 5, row: 3, col: 3, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW5', idx: 9, row: 4, col: 2, rowSpan: 1, colSpan: 1 },
-    { sw: 'SW4', idx: 8, row: 4, col: 3, rowSpan: 1, colSpan: 1 },
-  ] as const;
 </script>
 
 {#if ctx.layer}
@@ -104,13 +92,21 @@
       >
         <!-- Pass 1 : pulses (peintes avant tous les keycaps ; ne chevauchent jamais les voisines). -->
         {#if visualsActive}
+          {@const led = ctx.profile?.led}
+          {@const pulseColor = led ? `rgb(${led.r},${led.g},${led.b})` : undefined}
           {#each KEY_LAYOUT as key (key.idx)}
+            {@const kl = ctx.layer?.key_leds?.[key.idx]}
+            {@const keyOverrideColor =
+              kl && (kl.effect ?? 'off') !== 'off' ? `rgb(${kl.r},${kl.g},${kl.b})` : undefined}
+            {@const finalPulseColor = keyOverrideColor ?? pulseColor}
             {#key keyVisuals.pressNonce[key.idx]}
               {#if keyVisuals.pressNonce[key.idx] > 0}
                 <span
                   class="keycap-pulse"
-                  style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
                   aria-hidden="true"
+                  style=" grid-row: {key.row} / span {key.rowSpan}; 
+                          grid-column: {key.col} / span {key.colSpan}; 
+                          {finalPulseColor ? ` --pulse-color: ${finalPulseColor};` : ''}"
                 ></span>
               {/if}
             {/key}
@@ -118,13 +114,13 @@
         {/if}
 
         <!-- Pass 2 : keycaps. -->
-        {#each KEY_LAYOUT as key}
+        {#each KEY_LAYOUT as key (key.idx)}
           <button
             style="grid-row: {key.row} / span {key.rowSpan}; grid-column: {key.col} / span {key.colSpan};"
             class={cn(
               'keycap',
               ctx.editingKey === key.idx && ctx.editingField === 'key' ? 'keycap--active' : '',
-              key.sw === 'SW1' || key.sw === 'SW10' ? 'keycap--alt' : '',
+              key.rowSpan === 2 || key.colSpan === 2 ? 'keycap--alt' : '',
               visualsActive && keyVisuals.pressed[key.idx] ? 'keycap--press-sim' : '',
             )}
             onclick={() => ctx.openKeyPicker(key.idx)}
@@ -137,6 +133,13 @@
                     ></span>
                   {/each}
                 </span>
+              {/if}
+              {#if (ctx.layer?.key_leds?.[key.idx]?.effect ?? 'off') !== 'off'}
+                {@const kl = ctx.layer!.key_leds![key.idx]!}
+                <span
+                  class="keycap-led-dot"
+                  style="background:rgb({kl.r},{kl.g},{kl.b});box-shadow:0 0 5px 0px rgb({kl.r},{kl.g},{kl.b})"
+                ></span>
               {/if}
             </div>
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
@@ -292,10 +295,12 @@
   .keycap-pulse {
     border-radius: var(--keycap-radius);
     pointer-events: none;
+    --pulse-color: var(--chart-5);
+    --pulse-boosted: oklch(from var(--pulse-color) min(calc(l + 1), 0.95) calc(c * 1.4) h);
     background: radial-gradient(
       closest-side,
-      color-mix(in oklch, var(--chart-5) 70%, transparent) 0%,
-      color-mix(in oklch, var(--chart-5) 30%, transparent) 55%,
+      color-mix(in oklch, var(--pulse-boosted) 85%, transparent) 0%,
+      color-mix(in oklch, var(--pulse-boosted) 35%, transparent) 55%,
       transparent 100%
     );
     opacity: 0;
@@ -354,5 +359,14 @@
     aspect-ratio: 1;
     border-radius: 9999px;
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
+  }
+
+  .keycap-led-dot {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
   }
 </style>

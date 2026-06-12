@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Slider } from "$shared/components/ui/slider/index.js";
+  import { Slider } from '$shared/components/ui/slider/index.js';
 
   let {
     label,
@@ -9,7 +9,7 @@
     step = 1,
     onCommit,
     valueText,
-    valueClass = "text-muted-foreground",
+    valueClass = 'text-muted-foreground',
     minLabel,
     maxLabel,
   }: {

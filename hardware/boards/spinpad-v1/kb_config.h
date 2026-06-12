@@ -10,15 +10,17 @@
 // ── Matrice de touches ────────────────────────────────────────
 // Matrice 4 lignes × 3 colonnes = 12 cellules, dont 2 vides = 10 touches.
 //
-// Layout physique (vue de dessus, axe X-miroir) :
-//   COL0           COL1           COL2
-//   [SW8 ]         [SW1 -----2u horizontal-----]   ROW0  ← SW1 occupe COL1+COL2
-//   [SW9 ]         [SW7 ]         [SW2 ]           ROW1
-//   [SW10 2u vert] [SW6 ]         [SW3 ]           ROW2  ← SW10 occupe ROW2+ROW3
-//   [            ] [SW5 ]         [SW4 ]           ROW3
+// Layout physique (vue de dessus) :
+//   COL0                  COL1     COL2
+//   [SW1 -----2u horizontal-----]  [SW7 ]   ROW0  ← SW1 occupe COL0+COL1
+//   [SW2 ]                [SW6 ]   [SW8 ]   ROW1
+//   [SW3 2u vert]         [SW5 ]   [SW9 ]   ROW2  ← SW3 occupe ROW2+ROW3
+//   [           ]         [SW4 ]   [SW10]   ROW3
 //
 // Cellules vides dans la matrice électrique (pas de switch câblé) :
-//   (ROW0, COL0) et (ROW3, COL0)
+//   (ROW0, COL1) et (ROW3, COL0)
+//
+// Index order mirrors packages/shared/src/constants/key-layout.ts
 
 #define KB_MATRIX_ROWS      4       // Nombre de lignes (ROW)
 #define KB_MATRIX_COLS      3       // Nombre de colonnes (COL)
@@ -41,31 +43,31 @@ static const gpio_num_t KB_COL_PINS[KB_MATRIX_COLS] = {
 
 // Validité des cellules de la matrice — false = pas de switch câblé
 static const bool KB_MATRIX_VALID[KB_MATRIX_ROWS][KB_MATRIX_COLS] = {
-    {false, true,  true },  // ROW0: VIDE, SW8, SW1
-    {true,  true,  true },  // ROW1: SW9, SW7, SW2
-    {true,  true,  true },  // ROW2: SW10, SW6, SW3
-    {false, true,  true },  // ROW3: VIDE, SW5, SW4
+    {true,  false, true },  // ROW0: SW1, VIDE, SW7
+    {true,  true,  true },  // ROW1: SW2, SW6, SW8
+    {true,  true,  true },  // ROW2: SW3, SW5, SW9
+    {false, true,  true },  // ROW3: VIDE, SW4, SW10
 };
 
 // Correspondance cellule matrice → index logique (0-9), -1 = cellule vide
 static const int8_t KB_MATRIX_TO_KEY[KB_MATRIX_ROWS][KB_MATRIX_COLS] = {
-    {-1,  1,  0},  // ROW0: VIDE, SW8=1, SW1=0
-    { 4,  3,  2},  // ROW1: SW9=4, SW7=3, SW2=2
-    { 7,  6,  5},  // ROW2: SW10=7, SW6=6, SW3=5
-    {-1,  9,  8},  // ROW3: VIDE, SW5=9, SW4=8
+    { 0, -1,  1},  // ROW0: SW1=0, VIDE, SW7=1
+    { 2,  3,  4},  // ROW1: SW2=2, SW6=3, SW8=4
+    { 5,  6,  7},  // ROW2: SW3=5, SW5=6, SW9=7
+    {-1,  8,  9},  // ROW3: VIDE, SW4=8, SW10=9
 };
 
 // Index logiques des touches du clavier (0-9)
-#define SW1   0   // COL2/ROW0 — touche 2u horizontale
-#define SW8   1   // COL0/ROW0
-#define SW2   2   // COL2/ROW1
-#define SW7   3   // COL1/ROW1
-#define SW9   4   // COL0/ROW1
-#define SW3   5   // COL2/ROW2
-#define SW6   6   // COL1/ROW2
-#define SW10  7   // COL0/ROW2 — touche 2u verticale
-#define SW4   8   // COL2/ROW3
-#define SW5   9   // COL1/ROW3
+#define SW1   0   // COL0/ROW0 — touche 2u horizontale
+#define SW7   1   // COL2/ROW0
+#define SW2   2   // COL0/ROW1
+#define SW6   3   // COL1/ROW1
+#define SW8   4   // COL2/ROW1
+#define SW3   5   // COL0/ROW2 — touche 2u verticale
+#define SW5   6   // COL1/ROW2
+#define SW9   7   // COL2/ROW2
+#define SW4   8   // COL1/ROW3
+#define SW10  9   // COL2/ROW3
 
 // Boutons spéciaux hors matrice (GPIO directs, pull-up, actif bas)
 // TODO: ajuster les GPIO selon le PCB final

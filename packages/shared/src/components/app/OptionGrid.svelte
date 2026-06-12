@@ -28,8 +28,8 @@
         'border rounded-lg transition-colors',
         buttonClass,
         value === o.value
-          ? 'border-primary bg-primary/10 text-primary'
-          : 'border-border hover:border-primary/50 hover:bg-accent',
+          ? 'border-primary bg-primary/15 text-primary'
+          : 'border-border hover:border-primary/50 hover:bg-primary/10',
         value === o.value && emphasizeSelected && 'font-semibold',
       ]}
       onclick={() => onSelect(o.value)}

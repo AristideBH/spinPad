@@ -164,7 +164,12 @@ void encoder_process(void)
     //   sensitivity=1 → seuil 4 (1 événement par détent, comportement standard)
     //   sensitivity=2 → seuil 2 (2× plus réactif)
     //   sensitivity=4 → seuil 1 (1 événement par impulsion quadrature)
-    uint8_t sens = config_store_get()->encoder.sensitivity;
+    // Override par layer (0 = hérite du global).
+    uint8_t active_layer_idx = keymap_get_active_layer();
+    uint8_t active_profile_idx = config_store_get()->active_profile;
+    const kb_layer_t *active_layer = &config_store_get()->profiles[active_profile_idx].layers[active_layer_idx];
+    uint8_t sens = active_layer->encoder_sensitivity;
+    if (sens == 0) sens = config_store_get()->encoder.sensitivity;
     if (sens < 1 || sens > 4) sens = 1;
     int8_t threshold = (int8_t)(4 / sens);  // 4, 2, 1, 1
 

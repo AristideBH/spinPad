@@ -18,6 +18,16 @@
   //  figés mais EQ réactif), positions précalculées, arrêt auto de la rAF.
   // ───────────────────────────────────────────────────────────────────────
   import { cn } from '$shared/utils.js';
+  import { KEY_LAYOUT } from '$shared/constants/key-layout.js';
+
+  // Key center positions [nx, ny] normalized to the 3-col × 4-row physical grid
+  const KEY_POS: [number, number][] = [];
+  for (const k of KEY_LAYOUT) {
+    KEY_POS[k.idx] = [
+      (k.col - 1 + (k.colSpan - 1) * 0.5) / 2,
+      (k.row - 1 + (k.rowSpan - 1) * 0.5) / 3,
+    ];
+  }
 
   type Mode = 'off' | 'static' | 'pulse' | 'breathe' | 'flow' | 'sweep' | 'alert' | 'rainbow';
   type ColorMode = 'solid' | 'gradient';
@@ -61,6 +71,12 @@
      * la grille dans le sens de rotation. Ex. `() => keyVisuals.encoderTurn`.
      */
     rotation?: () => number;
+    /**
+     * Overrides de couleur par-touche (optionnel). Clé = index physique de la
+     * touche (0-9) ; valeur = couleur RGB 0–255. Les dots proches de la position
+     * physique de la touche adoptent cette couleur, animation du mode conservée.
+     */
+    overrides?: Map<number, { r: number; g: number; b: number }>;
     class?: string;
   }
 
@@ -79,6 +95,7 @@
     pop = 0,
     eqGain = 0.45,
     rotation,
+    overrides,
     class: className,
   }: Props = $props();
 
@@ -351,6 +368,21 @@
               ? pal[0]
               : paletteAt(pal, d.nx);
 
+        // Per-key color overrides : colore les dots proches de la position physique
+        if (overrides?.size) {
+          let best: RGB | null = null;
+          let minDist = 0.0625; // seuil = 0.25² (rayon en espace nx/ny normalisé)
+          for (const [kidx, ov] of overrides) {
+            const pos = KEY_POS[kidx];
+            if (!pos) continue;
+            const dx = d.nx - pos[0];
+            const dy = d.ny - pos[1];
+            const dist = dx * dx + dy * dy;
+            if (dist < minDist) { minDist = dist; best = [ov.r, ov.g, ov.b]; }
+          }
+          if (best) col = best;
+        }
+
         let tv = d.mask * v; // luminance de base (mode × blob)
 
         // ── EQ : soulève la lueur de la colonne (fondu dans le mode) ──
@@ -486,6 +518,7 @@
       void pop;
       void eqGain;
       void animated;
+      void overrides;
       run();
     });
 

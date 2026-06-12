@@ -3,27 +3,14 @@ import type { LayerConfig, ProfileConfig } from '$shared/constants/config-schema
 import { configState, setEncoderAction, setKeyAction } from '$shared/store/config.svelte.js';
 import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
 import { getKeycodeLabel } from '$shared/constants/keycodes.js';
+import { SW_BY_IDX } from '$shared/constants/key-layout.js';
 
 const CTX_KEY = Symbol('keypad');
 
 export type KeycodeOption = { value: number; label: string; category: string };
 
-/** Étapes de navigation du picker en deux temps. */
-export type PickerStage = 'menu' | 'record' | 'list';
-
-/** idx logique → label SW (miroir de KEY_LAYOUT dans KeyGrid.svelte). */
-const SW_BY_IDX: Record<number, string> = {
-  0: 'SW1',
-  1: 'SW8',
-  2: 'SW2',
-  3: 'SW7',
-  4: 'SW9',
-  5: 'SW3',
-  6: 'SW6',
-  7: 'SW10',
-  8: 'SW4',
-  9: 'SW5',
-};
+/** Étapes de navigation du picker. */
+export type PickerStage = 'menu' | 'record' | 'list' | 'led';
 
 const ENCODER_FIELD_LABEL: Record<string, string> = {
   encoder_cw: 'Encodeur → Rotation ↻',
