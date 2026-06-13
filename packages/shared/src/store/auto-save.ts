@@ -16,6 +16,11 @@ export class AutoSave {
     this.#delay  = delayMs;
   }
 
+  /** `true` si une sauvegarde différée est en attente (timer armé). */
+  get pending(): boolean {
+    return this.#timer !== null;
+  }
+
   /** Planifie une sauvegarde différée (debounce). */
   schedule(): void {
     if (this.#timer) clearTimeout(this.#timer);

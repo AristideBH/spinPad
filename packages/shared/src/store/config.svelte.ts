@@ -192,6 +192,11 @@ export async function saveConfig(): Promise<void> {
   await _autoSave.flush();
 }
 
+/** `true` si une sauvegarde auto est encore en attente (fenêtre debounce). */
+export function hasPendingSave(): boolean {
+  return _autoSave.pending;
+}
+
 export async function factoryReset(): Promise<void> {
   configState.isLoading = true;
   try {

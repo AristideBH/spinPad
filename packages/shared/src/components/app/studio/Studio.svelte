@@ -1,7 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { APP_CONFIG } from '$shared/app.config.js';
-  import { configState, redo, undo, loadConfig } from '$shared/store/config.svelte.js';
+  import {
+    configState,
+    redo,
+    undo,
+    loadConfig,
+    saveConfig,
+    hasPendingSave,
+  } from '$shared/store/config.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
   import { serial } from '$shared/store/serial.svelte.js';
   import { Toaster } from 'svelte-sonner';
@@ -14,6 +21,16 @@
   onMount(() => {
     if (!configState.data && !configState.isLoading) loadConfig();
   });
+
+  // Filet de sécurité : si une sauvegarde auto est encore dans la fenêtre
+  // debounce (800ms) quand l'utilisateur quitte/recharge, on la flush
+  // immédiatement et on demande confirmation — l'écriture transport étant
+  // asynchrone, le prompt laisse une chance au write d'aboutir.
+  function handleBeforeUnload(e: BeforeUnloadEvent) {
+    if (!hasPendingSave()) return;
+    void saveConfig();
+    e.preventDefault();
+  }
 
   function handleKeydown(e: KeyboardEvent) {
     const tag = document.activeElement?.tagName;
@@ -28,7 +45,7 @@
   }
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onbeforeunload={handleBeforeUnload} />
 
 <svelte:head>
   <title>{APP_CONFIG.name} — Studio</title>
