@@ -13,8 +13,8 @@
   import { serial, connect, disconnect } from '$shared/store/serial.svelte.js';
   import { listProfilePresets, type ProfilePreset } from '$shared/constants/profile-presets.js';
   import { CONFIG_MAX_PROFILES, CONFIG_MAX_LAYERS } from '$shared/constants/config-schema.js';
-  import IconPreview from './IconPreview.svelte';
-  import IconEditor from './IconEditor.svelte';
+  import IconPreview from '../studio/IconPreview.svelte';
+  import IconEditor from '../studio/IconEditor.svelte';
   import { Input } from '$shared/components/ui/input/index.js';
 
   // ── Presets disponibles (builtin + futures sources) ──

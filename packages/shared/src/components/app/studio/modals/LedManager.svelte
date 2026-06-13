@@ -6,9 +6,9 @@
   import { Switch } from '$shared/components/ui/switch/index.js';
   import { Lightbulb } from '@lucide/svelte';
   import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
-  import OptionGrid from '$shared/components/app/OptionGrid.svelte';
-  import SliderField from '$shared/components/app/SliderField.svelte';
-  import SettingsField from '$shared/components/app/SettingsField.svelte';
+  import OptionGrid from '$shared/components/app/studio/settings/OptionGrid.svelte';
+  import SliderField from '$shared/components/app/studio/settings/SliderField.svelte';
+  import SettingsField from '$shared/components/app/studio/settings/SettingsField.svelte';
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
   import { configState, updateConfig } from '$shared/store/config.svelte.js';
   import { type LedMode, GRADIENT_PRESETS } from '$shared/constants/config-schema.js';

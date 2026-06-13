@@ -3,7 +3,7 @@
   import { Lightbulb, X } from '@lucide/svelte';
   import { configState, setKeyLedOverride } from '$shared/store/config.svelte.js';
   import type { LedModeKey } from '$shared/constants/config-schema.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import * as ColorPicker from '$shared/components/ui/color-picker/index.js';
   import * as Popover from '$shared/components/ui/popover/index.js';
 

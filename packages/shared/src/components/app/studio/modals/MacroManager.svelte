@@ -15,8 +15,8 @@
     GripVertical,
     ChevronDown,
   } from '@lucide/svelte';
-  import Sortable from './sortable/Sortable.svelte';
-  import SaveBadge from './SaveBadge.svelte';
+  import Sortable from '../Sortable.svelte';
+  import SaveBadge from '../SaveBadge.svelte';
   import { ACTION_TYPES, action } from '$shared/constants/action-types.js';
   import {
     MACRO_COUNT,

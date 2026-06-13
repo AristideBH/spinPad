@@ -8,7 +8,7 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import * as Popover from '$shared/components/ui/popover/index.js';
-  import DemoSettings from './DemoSettings.svelte';
+  import DemoSettings from './connect/DemoSettings.svelte';
   import { cn } from '$shared';
   import SaveBadge from './SaveBadge.svelte';
 

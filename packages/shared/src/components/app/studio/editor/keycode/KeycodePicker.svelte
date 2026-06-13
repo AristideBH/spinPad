@@ -6,7 +6,7 @@
   import { Kbd } from '$shared/components/ui/kbd/index.js';
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
   import { HasFinePointer } from '$shared/lib/hooks/pointer.svelte.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import KeycodeList from './KeycodeList.svelte';
   import LiveRecordPanel from './LiveRecordPanel.svelte';
   import KeyLedPicker from './KeyLedPicker.svelte';

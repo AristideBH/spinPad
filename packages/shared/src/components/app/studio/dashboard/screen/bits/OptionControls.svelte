@@ -8,8 +8,8 @@
   import { Switch } from '$shared/components/ui/switch/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
   import * as Dialog from '$shared/components/ui/dialog/index.js';
-  import IconPreview from '$shared/components/app/profiles/IconPreview.svelte';
-  import IconEditor from '$shared/components/app/profiles/IconEditor.svelte';
+  import IconPreview from '$shared/components/app/studio/IconPreview.svelte';
+  import IconEditor from '$shared/components/app/studio/IconEditor.svelte';
   import type { WidgetConfig } from '$shared/constants/config-schema.js';
   import type { WidgetOption } from '../widgets/index.js';
 

@@ -140,6 +140,8 @@
                   class="keycap-led-dot"
                   style="background:rgb({kl.r},{kl.g},{kl.b});box-shadow:0 0 5px 0px rgb({kl.r},{kl.g},{kl.b})"
                 ></span>
+              {:else}
+                <span class="keycap-led-dot" style="background:rgb(0,0,0)"></span>
               {/if}
             </div>
             <div class="select-none keycap-labels" style="transform: rotate({-ctx.orientDeg}deg)">
@@ -230,14 +232,14 @@
       inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.12);
   }
 
-  .keycap--active {
+  /* .keycap--active {
     --keycap-color: color-mix(in oklch, var(--keycap-color-active) 25%, var(--card));
     box-shadow:
       var(--depth-x) var(--depth-y) 0 var(--keycap-side-color),
       inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(255, 255, 255, 0.18),
       inset var(--top-x) var(--top-y) 0 rgba(0, 0, 0, 0.22),
       0 0 0 1.5px var(--keycap-color-active);
-  }
+  } */
 
   .keycap--alt {
     --keycap-color: var(--muted);
@@ -363,10 +365,10 @@
 
   .keycap-led-dot {
     position: absolute;
-    bottom: 4px;
-    left: 4px;
-    width: 4px;
-    height: 4px;
+    bottom: 6px;
+    left: 7px;
+    width: 7px;
+    height: 3px;
     border-radius: 9999px;
   }
 </style>

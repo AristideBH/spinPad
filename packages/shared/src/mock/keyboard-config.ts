@@ -145,7 +145,18 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
           // SW1 (MO layer) = blanc → indicateur de layer shift
-          key_leds: [{ r: 255, g: 255, b: 255, effect: 'static' }, null, null, null, null, null, null, null, null, null],
+          key_leds: [
+            { r: 255, g: 255, b: 255, effect: 'static' },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
         },
         {
           name: 'Fn',
@@ -161,7 +172,18 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_cw: SCRL_DN,
           encoder_ccw: SCRL_UP,
           // touches de navigation = cyan
-          key_leds: [null, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }, { r: 0, g: 220, b: 200 }],
+          key_leds: [
+            null,
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+            { r: 0, g: 220, b: 200 },
+          ],
         },
       ],
       // SW4 + SW5 → macro "Salut"
@@ -216,7 +238,18 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
           // PLAY = vert, STOP = rouge, MUTE = orange
-          key_leds: [{ r: 0, g: 200, b: 60 }, null, null, { r: 200, g: 30, b: 30 }, { r: 255, g: 120, b: 0 }, null, null, null, null, null],
+          key_leds: [
+            { r: 0, g: 200, b: 60 },
+            null,
+            null,
+            { r: 200, g: 30, b: 30 },
+            { r: 255, g: 120, b: 0 },
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
         },
         {
           name: 'Stream',
@@ -247,7 +280,18 @@ export const MOCK_CONFIG: FullConfig = {
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
           // WASD en jaune vif
-          key_leds: [null, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, { r: 255, g: 220, b: 0 }, null, null, null, null, null],
+          key_leds: [
+            null,
+            { r: 255, g: 220, b: 0 },
+            { r: 255, g: 220, b: 0 },
+            { r: 255, g: 220, b: 0 },
+            { r: 255, g: 220, b: 0 },
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
         },
         {
           name: 'Menu',
@@ -335,7 +379,7 @@ export const MOCK_CONFIG: FullConfig = {
   },
 
   led_extension: {
-    enabled: true,
+    enabled: false,
     count: 12,
     mode: 3, // STATIC
     r: 60,

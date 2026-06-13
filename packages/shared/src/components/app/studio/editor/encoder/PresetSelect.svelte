@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Select from '$shared/components/ui/select/index.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import { ENCODER_PRESETS, applyEncoderPreset, matchPreset } from './encoder-presets.js';
 
   const ctx = getKeypadContext();

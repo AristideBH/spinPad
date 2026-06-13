@@ -3,7 +3,7 @@
   import { addLayer, configState, deleteLayer, duplicateLayer, editLayer, undo } from '$shared/store/config.svelte.js';
   import { toast } from 'svelte-sonner';
   import { getKeypadContext } from './keypad-context.svelte.js';
-  import Sortable from '../sortable/Sortable.svelte';
+  import Sortable from '../Sortable.svelte';
   import { CONFIG_MAX_LAYERS, type LayerConfig } from '$shared/constants/config-schema.js';
   import { BadgeCheckIcon, ChevronRightIcon, EllipsisVertical, GripVertical } from '@lucide/svelte';
   import * as RadioGroup from '$shared/components/ui/radio-group/index.js';

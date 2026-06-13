@@ -4,7 +4,7 @@
   import { getKeycodeLabel } from '$shared/constants/keycodes.js';
   import { configState } from '$shared/store/config.svelte.js';
   import { cn } from '$shared/utils.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import type { EncoderKnob } from './encoder.svelte.js';
 
   let { knob }: { knob: EncoderKnob } = $props();

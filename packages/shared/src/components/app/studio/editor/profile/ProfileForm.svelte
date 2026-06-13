@@ -12,7 +12,7 @@
   import { Button } from '$shared/components/ui/button/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
-  import IconEditor from '../../profiles/IconEditor.svelte';
+  import IconEditor from '../../IconEditor.svelte';
   import {
     defaultProfile,
     defaultLayer,

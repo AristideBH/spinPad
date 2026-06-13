@@ -13,7 +13,7 @@
   import { KeyboardLayout } from '$shared/lib/hooks/keyboard-layout.svelte.js';
   import { Keyboard, Zap } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
 
   const ctx = getKeypadContext();
   const layout = new KeyboardLayout();

@@ -2,7 +2,7 @@
   import { Label } from '$shared/components/ui/label/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import { Scrubber } from '$shared/components/ui/scrubber/index.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import { EncoderKnob, setActiveEncoderKnob } from './encoder.svelte.js';
   import Knob from './Knob.svelte';
   import EncoderButtons from './EncoderButtons.svelte';

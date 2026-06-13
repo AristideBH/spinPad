@@ -13,7 +13,7 @@
   import ResponsiveSheet from '$shared/components/ui/responsive-sheet/responsive-sheet.svelte';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as Item from '$shared/components/ui/item/index.js';
-  import IconPreview from '../../profiles/IconPreview.svelte';
+  import IconPreview from '../../IconPreview.svelte';
   import ProfileForm from './ProfileForm.svelte';
   import { addProfile } from '$shared/store/config.svelte.js';
   import { listProfilePresets, type ProfilePreset } from '$shared/constants/profile-presets.js';

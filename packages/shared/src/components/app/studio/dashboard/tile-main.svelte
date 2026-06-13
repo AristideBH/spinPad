@@ -22,9 +22,9 @@
   import { loadConfig, configState } from '$shared/store/config.svelte.js';
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
   import { devMode } from '$shared/store/devMode.svelte.js';
-  import MacroManager from '$shared/components/app/studio/MacroManager.svelte';
-  import LedManager from '$shared/components/app/studio/LedManager.svelte';
-  import StatusCard from '../../StatusCard.svelte';
+  import MacroManager from '$shared/components/app/studio/modals/MacroManager.svelte';
+  import LedManager from '$shared/components/app/studio/modals/LedManager.svelte';
+  import StatusCard from './StatusCard.svelte';
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
   import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
   import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';

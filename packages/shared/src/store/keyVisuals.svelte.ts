@@ -9,7 +9,7 @@
 
 import { keyMonitor, onMessage, serial } from './serial.svelte.js';
 import { devMode } from './devMode.svelte.js';
-import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder.svelte.js';
+import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder/encoder.svelte.js';
 
 const DEV_KEY_MAP: Record<string, number> = {
   Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,

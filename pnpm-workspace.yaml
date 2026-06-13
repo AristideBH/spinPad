@@ -1,6 +1,11 @@
 packages:
-  - "packages/*"
-  - "tools/*"
+  - '.'
+  - 'packages/*'
+  - 'packages/website'
+  - 'packages/studio'
+  - 'packages/shared'
+  - 'packages/firmware'
+  - 'tools/*'
 
 # Allow builds for specific native modules
 allowBuilds:

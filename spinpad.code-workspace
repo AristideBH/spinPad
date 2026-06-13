@@ -1,6 +1,10 @@
 {
   "folders": [
     {
+      "path": ".",
+      "name": "♾️ Root",
+    },
+    {
       "path": "packages/firmware",
       "name": "💽 Firmware",
     },
@@ -15,10 +19,6 @@
     {
       "path": "packages/website",
       "name": "🌐 Website",
-    },
-    {
-      "path": ".",
-      "name": "♾️ Root",
     },
   ],
   "settings": {
@@ -59,6 +59,9 @@
       "editor.defaultFormatter": "vscode.html-language-features",
     },
     "editor.formatOnPaste": true,
+    "fallow.lspPath": "C:/Users/arist/Code/keyboard-firmware/node_modules/.pnpm/@fallow-cli+win32-x64-msvc@2.95.0/node_modules/@fallow-cli/win32-x64-msvc/fallow-lsp.exe",
+    "fallow.autoDownload": true,
+    "fallow.workspace": "",
   },
   "extensions": {
     "recommendations": [

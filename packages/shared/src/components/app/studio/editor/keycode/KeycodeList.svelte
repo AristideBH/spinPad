@@ -4,7 +4,7 @@
   import { keycodeGroups, keycodesFlat, type Keycode } from '$shared/constants/keycodes.js';
   import { configState } from '$shared/store/config.svelte.js';
   import { cn, scrollShadow } from '$shared/utils.js';
-  import { getKeypadContext } from './keypad-context.svelte.js';
+  import { getKeypadContext } from '../keypad-context.svelte.js';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
 
   const ctx = getKeypadContext();

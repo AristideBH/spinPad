@@ -31,6 +31,7 @@ import {
   SPINPAD_PROFILES_FILE_TYPE,
 } from '$shared/constants/config-migrations.js';
 import * as ops from '$shared/constants/config-ops.js';
+import { MOCK_CONFIG } from '$shared/mock/keyboard-config.js';
 import {
   defaultConfig,
   defaultLedKey,
@@ -143,7 +144,7 @@ export async function loadConfig(): Promise<void> {
     // Pas de device branché (hors mode démo / HTTP) → prévisualiser la config
     // par défaut au lieu d'échouer sur "Non connecté".
     if (_transportMode() === 'serial' && !serial.connected) {
-      const cfg = defaultConfig();
+      const cfg = structuredClone(MOCK_CONFIG) as unknown as FullConfig;
       backfillLayerColors(cfg.profiles);
       configState.data = cfg;
       configState.activeProfileIndex = cfg.active_profile ?? 0;

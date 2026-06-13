@@ -3,9 +3,9 @@
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
   import { createKeypadContext } from '../editor/keypad-context.svelte.js';
   import KeyGrid from '../editor/KeyGrid.svelte';
-  import KeycodePicker from '../editor/KeycodePicker.svelte';
-  import ProfileSwitcher from '../editor/ProfileSwitcher.svelte';
-  import Encoder from '../editor/Encoder.svelte';
+  import KeycodePicker from '../editor/keycode/KeycodePicker.svelte';
+  import ProfileSwitcher from '../editor/profile/ProfileSwitcher.svelte';
+  import Encoder from '../editor/encoder/Encoder.svelte';
   import LayerSwitcher from '../editor/LayerSwitcher.svelte';
   import { fly } from 'svelte/transition';
 

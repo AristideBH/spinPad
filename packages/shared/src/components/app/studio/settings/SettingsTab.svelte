@@ -11,10 +11,10 @@
   import { Button } from '$shared/components/ui/button/index.js';
   import { Kbd } from '$shared/components/ui/kbd/index.js';
   import { Field, FieldLabel } from '$shared/components/ui/field/index.js';
-  import SettingsField from '$shared/components/app/SettingsField.svelte';
-  import NotConnected from '$shared/components/app/NotConnected.svelte';
-  import OptionGrid from '$shared/components/app/OptionGrid.svelte';
-  import SliderField from '$shared/components/app/SliderField.svelte';
+  import SettingsField from './SettingsField.svelte';
+  import NotConnected from './NotConnected.svelte';
+  import OptionGrid from './OptionGrid.svelte';
+  import SliderField from './SliderField.svelte';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
   import { scrollShadow } from '$shared/utils.js';
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
