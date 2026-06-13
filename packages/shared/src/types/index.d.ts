@@ -46,17 +46,17 @@ export type {
 export type {
   Transport,
   DeviceStatusTransport,
-} from './transport.js';
+} from './transport';
 
 // ── Serial ───────────────────────────────────────────────────────
 export type {
   RpcQueueEntry,
   MessageHandler,
-} from './serial.js';
+} from './serial';
 
 // ── Dev Mode ─────────────────────────────────────────────────────
 export type {
   BatteryScenario,
   ConnectionScenario,
   MockOptions,
-} from './dev-mode.js';
+} from './dev-mode';

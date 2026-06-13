@@ -2,5 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "rules": {
     "unused-files": "error"
-  }
+  },
+  "ignorePatterns": [
+    "**/components/ui/**",
+    "**/components/button.svelte",
+    "**/hooks/use-ramp.svelte.ts",
+    "**/hooks/use-toc.svelte.ts",
+    "packages/website/src/lib/utils.ts",
+    "**/svelte.config.js"
+  ]
 }
