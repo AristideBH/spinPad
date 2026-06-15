@@ -1,0 +1,10 @@
+/* Indicateur LED — pastille réutilisée par KeyGrid (par touche) et ProfileCard (par profil).
+   Forme + position uniquement ; la couleur + le halo restent inline (dynamiques par LED). */
+.keycap-led-dot {
+  position: absolute;
+  bottom: 6px;
+  left: 7px;
+  width: 7px;
+  height: 3px;
+  border-radius: 9999px;
+}

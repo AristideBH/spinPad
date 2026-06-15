@@ -11,6 +11,7 @@
   import {
     CONFIG_MAX_PROFILES,
     MIN_PROFILES,
+    GRADIENT_PRESETS,
     type ProfileConfig,
   } from '$shared/constants/config-schema.js';
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
@@ -55,13 +56,41 @@
     return { mapped, total };
   }
 
-  function ledHex(p: ProfileConfig): string | null {
-    if (!p.led || p.led.effect === 'off') return null;
-    return `#${[p.led.r, p.led.g, p.led.b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+  function hex(r: number, g: number, b: number): string {
+    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  // Spectre complet pour l'effet global `rainbow` (pas de couleur unique représentative).
+  const RAINBOW_GRADIENT =
+    'linear-gradient(90deg,#ff0000,#ff8000,#ffe000,#00c853,#00b0ff,#3d5afe,#aa00ff)';
+
+  type LedDot =
+    | { kind: 'solid'; color: string; inherited: boolean }
+    | { kind: 'gradient'; css: string };
+
+  /**
+   * Pastille LED résolue du profil.
+   * - LED propre allumée → couleur unie ; éteinte explicitement → null (pastille noire).
+   * - Absente → hérite du global (`led_key`). Effets animés (rainbow/flow/sweep) → dégradé,
+   *   car aucune couleur unique ne les représente ; sinon couleur unie héritée. Global éteint → null.
+   */
+  function ledDot(p: ProfileConfig): LedDot | null {
+    if (p.led) {
+      if (p.led.effect === 'off') return null;
+      return { kind: 'solid', color: hex(p.led.r, p.led.g, p.led.b), inherited: false };
+    }
+    const g = configState.data?.led_key;
+    if (!g || g.effect === 'off') return null;
+    if (g.effect === 'rainbow') return { kind: 'gradient', css: RAINBOW_GRADIENT };
+    if (g.effect === 'flow' || g.effect === 'sweep') {
+      const cols = GRADIENT_PRESETS[g.gradient_preset ?? 0]?.colors ?? GRADIENT_PRESETS[0].colors;
+      return { kind: 'gradient', css: `linear-gradient(90deg,${cols.join(',')})` };
+    }
+    return { kind: 'solid', color: hex(g.r, g.g, g.b), inherited: true };
   }
 
   const fill = $derived(profileFill(prof));
-  const dot = $derived(ledHex(prof));
+  const dot = $derived(ledDot(prof));
 
   function renameProfile(name: string) {
     editProfile(index, { name });
@@ -118,16 +147,21 @@
     {/if}
   </Item.Media>
 
+  {#if dot === null}
+    <span class="keycap-led-dot" style="background:rgb(0,0,0)" title="LED éteinte"></span>
+  {:else if dot.kind === 'gradient'}
+    <span class="keycap-led-dot" style="background:{dot.css}" title="Effet LED animé hérité du global"></span>
+  {:else}
+    <span
+      class="keycap-led-dot"
+      style="background:{dot.color};box-shadow:0 0 5px 0px {dot.color}"
+      title={dot.inherited ? 'Couleur LED héritée du global' : 'Couleur LED du profil'}
+    ></span>
+  {/if}
+
   <Item.Content>
     <Item.Title class="flex items-center gap-1.5 line-clamp-1">{prof.name}</Item.Title>
     <Item.Description class="text-xs line-clamp-2 flex items-center gap-1.5">
-      {#if dot}
-        <span
-          class="inline-block rounded-full size-2 shrink-0 ring-1 ring-white/20"
-          style="background:{dot}"
-          title="Couleur LED du profil"
-        ></span>
-      {/if}
       {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} touches
     </Item.Description>
   </Item.Content>

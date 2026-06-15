@@ -363,12 +363,4 @@
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
   }
 
-  .keycap-led-dot {
-    position: absolute;
-    bottom: 6px;
-    left: 7px;
-    width: 7px;
-    height: 3px;
-    border-radius: 9999px;
-  }
 </style>
