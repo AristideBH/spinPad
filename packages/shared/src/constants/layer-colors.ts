@@ -2,7 +2,7 @@
 // Used by KeyGrid (cross-layer dots) and LayerSwitcher (row marker).
 // One entry per layer up to CONFIG_MAX_LAYERS (8).
 
-export const LAYER_COLORS = [
+const LAYER_COLORS = [
   'border-b-sky-500!',
   'border-b-emerald-500!',
   'border-b-amber-500!',
@@ -32,9 +32,7 @@ export function allocColorSlot(layers: ReadonlyArray<{ color?: number }>): numbe
 // en place). Appelé à chaque entrée de config (chargement device/import) car le
 // firmware ne renvoie pas `color`. Typage structurel pour éviter une dépendance
 // circulaire avec config-schema.
-export function backfillLayerColors(
-  profiles: ReadonlyArray<{ layers?: Array<{ color?: number }> }>,
-): void {
+export function backfillLayerColors(profiles: ReadonlyArray<{ layers?: Array<{ color?: number }> }>): void {
   for (const p of profiles) {
     (p.layers ?? []).forEach((l, i) => {
       if (typeof l.color !== 'number') l.color = i;

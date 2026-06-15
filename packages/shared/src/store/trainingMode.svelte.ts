@@ -17,15 +17,29 @@ import { devMode } from './devMode.svelte.js';
 import { testMode } from './testMode.svelte.js';
 
 const DEV_KEY_MAP: Record<string, number> = {
-  Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
-  Digit6: 5, Digit7: 6, Digit8: 7, Digit9: 8, Digit0: 9,
-  Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3, Numpad5: 4,
-  Numpad6: 5, Numpad7: 6, Numpad8: 7, Numpad9: 8, Numpad0: 9,
+  Digit1: 0,
+  Digit2: 1,
+  Digit3: 2,
+  Digit4: 3,
+  Digit5: 4,
+  Digit6: 5,
+  Digit7: 6,
+  Digit8: 7,
+  Digit9: 8,
+  Digit0: 9,
+  Numpad1: 0,
+  Numpad2: 1,
+  Numpad3: 2,
+  Numpad4: 3,
+  Numpad5: 4,
+  Numpad6: 5,
+  Numpad7: 6,
+  Numpad8: 7,
+  Numpad9: 8,
+  Numpad0: 9,
 };
 
-export type TrainingTarget =
-  | { kind: 'key'; idx: number }
-  | { kind: 'encoder'; field: 'cw' | 'ccw' | 'press' };
+type TrainingTarget = { kind: 'key'; idx: number } | { kind: 'encoder'; field: 'cw' | 'ccw' | 'press' };
 
 class TrainingModeState {
   active = $state(false);
@@ -52,10 +66,20 @@ class TrainingModeState {
       const onKey = (e: KeyboardEvent) => {
         if (e.repeat) return;
         const idx = DEV_KEY_MAP[e.code];
-        if (idx !== undefined) { this.#triggerKey(idx); return; }
-        if (e.code === 'ArrowRight') { e.preventDefault(); this.#triggerEncoder('cw'); }
-        else if (e.code === 'ArrowLeft') { e.preventDefault(); this.#triggerEncoder('ccw'); }
-        else if (e.code === 'Space') { e.preventDefault(); this.#triggerEncoder('press'); }
+        if (idx !== undefined) {
+          this.#triggerKey(idx);
+          return;
+        }
+        if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          this.#triggerEncoder('cw');
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          this.#triggerEncoder('ccw');
+        } else if (e.code === 'Space') {
+          e.preventDefault();
+          this.#triggerEncoder('press');
+        }
       };
       window.addEventListener('keydown', onKey, true);
       this.#cleanup = () => window.removeEventListener('keydown', onKey, true);
@@ -78,7 +102,11 @@ class TrainingModeState {
     this.#cleanup = null;
     this.requestedTarget = null;
     if (devMode.active) return;
-    try { await trainingModeCmd(false); } catch { /* device may be disconnected */ }
+    try {
+      await trainingModeCmd(false);
+    } catch {
+      /* device may be disconnected */
+    }
   }
 
   async toggle(): Promise<void> {
