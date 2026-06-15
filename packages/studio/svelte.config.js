@@ -18,7 +18,11 @@ const config = {
             pages: BUILD_DIR,
             assets: BUILD_DIR,
             fallback: 'index.html',
-            precompress: false,
+            // Précompression pour le build embarqué uniquement. adapter-static
+            // génère .gz ET .br ; le firmware ne sert que les .gz, donc le script
+            // post-build (package.json build:embedded) supprime les originaux non
+            // compressés et les .br pour ne flasher que les .gz.
+            precompress: process.env.VITE_TRANSPORT === 'http',
         }),
 
         // Studio n'a pas de src/lib propre — tout vit dans @spinpad/shared.

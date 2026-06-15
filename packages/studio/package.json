@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "build:embedded": "cross-env VITE_TRANSPORT=http VITE_BUILD_DIR=build-embedded vite build --outDir build-embedded",
+    "build:embedded": "cross-env VITE_TRANSPORT=http VITE_BUILD_DIR=build-embedded vite build --outDir build-embedded && node scripts/strip-uncompressed.mjs build-embedded",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"

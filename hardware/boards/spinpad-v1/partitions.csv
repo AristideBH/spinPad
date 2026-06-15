@@ -5,4 +5,5 @@
 nvs,       data,  nvs,      0x9000,    0x6000
 phy_init,  data,  phy,      0xf000,    0x1000
 factory,   app,   factory,  0x10000,   0x300000
-spiffs,    data,  spiffs,   0x310000,  0x0F0000
+spiffs,    data,  spiffs,   0x310000,  0x180000
+# 0x490000–0x800000 (~3.4MB) réservé : futur slot OTA (ota_0/ota_1) + otadata

@@ -175,22 +175,46 @@ static void set_cors_headers(httpd_req_t *req)
     httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
 }
 
-// Envoyer un fichier depuis SPIFFS
+// Envoyer un fichier depuis SPIFFS.
+//
+// Le build embarqué ne stocke que des fichiers gzip (.gz) pour les types
+// compressibles (html/js/css/json/svg), les assets déjà compressés
+// (woff2/png/ico) restant bruts. On résout donc d'abord le chemin brut,
+// puis sa version .gz. Le type MIME est toujours dérivé du chemin logique
+// (sans .gz), et Content-Encoding: gzip est ajouté quand on sert un .gz.
 static esp_err_t serve_file(httpd_req_t *req, const char *spiffs_path)
 {
     struct stat st;
+    char gz_path[160];
+    const char *fs_path = spiffs_path;
+    bool is_gzip = false;
+
     if (stat(spiffs_path, &st) != 0) {
-        // Fichier non trouvé → fallback vers index.html (SPA routing)
-        return serve_file(req, "/spiffs/index.html");
+        // Pas de version brute → tenter la version gzip
+        snprintf(gz_path, sizeof(gz_path), "%s.gz", spiffs_path);
+        if (stat(gz_path, &st) == 0) {
+            fs_path  = gz_path;
+            is_gzip  = true;
+        } else if (strcmp(spiffs_path, "/spiffs/index.html") == 0) {
+            // Même index.html introuvable → 404 (évite la récursion infinie)
+            httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Not found");
+            return ESP_FAIL;
+        } else {
+            // Fichier non trouvé → fallback vers index.html (SPA routing)
+            return serve_file(req, "/spiffs/index.html");
+        }
     }
 
-    FILE *f = fopen(spiffs_path, "r");
+    FILE *f = fopen(fs_path, "r");
     if (!f) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Cannot open file");
         return ESP_FAIL;
     }
 
-    httpd_resp_set_type(req, mime_type(spiffs_path));
+    httpd_resp_set_type(req, mime_type(spiffs_path));  // type depuis le chemin logique
+    if (is_gzip) {
+        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+    }
     // Cache long pour les assets immutables (_app/immutable/*)
     if (strstr(spiffs_path, "immutable") || strstr(spiffs_path, "_app")) {
         httpd_resp_set_hdr(req, "Cache-Control", "public, max-age=31536000, immutable");

@@ -93,12 +93,12 @@ jobs:
         run: |
           SIZE=$(du -sb packages/studio/build-embedded | cut -f1)
           echo "Build-embedded size: ${SIZE} bytes"
-          # 983040 = 960KB SPIFFS partition
-          if [ "$SIZE" -gt 983040 ]; then
-            echo "❌ build-embedded trop grand pour la partition SPIFFS (${SIZE} > 983040 bytes)"
+          # 1572864 = 1.5MB SPIFFS partition (0x180000)
+          if [ "$SIZE" -gt 1572864 ]; then
+            echo "❌ build-embedded trop grand pour la partition SPIFFS (${SIZE} > 1572864 bytes)"
             exit 1
           fi
-          echo "✅ OK (${SIZE}/983040 bytes)"
+          echo "✅ OK (${SIZE}/1572864 bytes)"
 
       - name: Upload embedded artifact
         uses: actions/upload-artifact@v4

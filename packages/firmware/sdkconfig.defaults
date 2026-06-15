@@ -51,8 +51,16 @@ CONFIG_NVS_PAGE_SIZE=4096
 # Tick rate à 1000Hz pour une meilleure précision des timers (combos, tap-hold)
 CONFIG_FREERTOS_HZ=1000
 
+# ── Taille du flash (ESP32-S3, 8MB) ──────────────────────────
+# Doit être défini explicitement : sinon ESP-IDF retombe sur 2MB par défaut,
+# ce qui est incohérent avec la table de partitions (app 3MB + SPIFFS au-delà
+# de 0x400000) et empêche le boot.
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+
 # ── Table de partitions ──────────────────────────────────────
-# Partition custom : NVS + app 3MB + SPIFFS 960KB pour Studio Mode
+# Partition custom : NVS + app 3MB + SPIFFS 1.5MB pour Studio Mode
+# (~3.4MB de flash réservés en fin pour un futur slot OTA)
 CONFIG_PARTITION_TABLE_CUSTOM=y
 CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="../../hardware/boards/spinpad-v1/partitions.csv"
 

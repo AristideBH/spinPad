@@ -65,7 +65,7 @@ jobs:
           python $IDF_PATH/components/spiffs/spiffsgen.py \
             --page-size 256 \
             --obj-name-len 64 \
-            983040 \
+            1572864 \
             packages/studio/build-embedded \
             packages/firmware/build/spiffs_image.bin
 
