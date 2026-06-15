@@ -121,7 +121,7 @@
   }
 
   /*- Text selection */
-  ::moz-selection {
+  :moz-selection {
     background: var(--foreground);
     color: var(--background);
   }
