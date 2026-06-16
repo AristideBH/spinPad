@@ -37,6 +37,7 @@
   import { Slider } from '$shared/components/ui/slider/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
+  import * as Select from '$shared/components/ui/select/index.js';
 
   interface Props {
     value?: string; // base64 courante (prop externe)
@@ -228,6 +229,16 @@
     dirty = false;
   }
 
+  // ── Presets (Select) ──────────────────────────────────────────
+  const CUSTOM_ICON = '__custom__';
+  const matchedPreset = $derived(PROFILE_ICON_LIBRARY.find((e) => e.data === currentBase64) ?? null);
+  const selectedPreset = $derived(matchedPreset?.id ?? CUSTOM_ICON);
+
+  function onPresetChange(id: string) {
+    const entry = PROFILE_ICON_LIBRARY.find((e) => e.id === id);
+    if (entry) loadPreset(entry.grid);
+  }
+
   // ── Actions rapides ───────────────────────────────────────────
   function loadPreset(g: BoolGrid) {
     grid = g.slice();
@@ -361,13 +372,22 @@
   <!-- ── Presets ── -->
   <div class="flex flex-wrap items-center gap-2">
     <span class="text-xs text-muted-foreground">Presets :</span>
-    <ButtonGroup.Root>
-      {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
-        <Button size="xs" variant="outline" title={entry.label} onclick={() => loadPreset(entry.grid)}>
-          {entry.label}
-        </Button>
-      {/each}
-    </ButtonGroup.Root>
+    <Select.Root type="single" name="icon-presets" value={selectedPreset} onValueChange={onPresetChange}>
+      <Select.Trigger class="w-[180px]">
+        {matchedPreset ? matchedPreset.label : 'Personnalisé'}
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Group>
+          <Select.Label>Presets</Select.Label>
+          {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
+            <Select.Item value={entry.id} label={entry.label}>{entry.label}</Select.Item>
+          {/each}
+          {#if !matchedPreset}
+            <Select.Item value={CUSTOM_ICON} label="Personnalisé" disabled>Personnalisé</Select.Item>
+          {/if}
+        </Select.Group>
+      </Select.Content>
+    </Select.Root>
   </div>
 
   <!-- ── Export / Import ── -->

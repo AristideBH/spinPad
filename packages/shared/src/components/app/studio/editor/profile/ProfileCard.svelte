@@ -5,7 +5,6 @@
     deleteProfile,
     clearProfile,
     editProfile,
-    setProfileIcon,
     undo,
   } from '$shared/store/config.svelte.js';
   import {
@@ -17,14 +16,12 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as Item from '$shared/components/ui/item/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
-  import * as Dialog from '$shared/components/ui/dialog/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import IconPreview from '../../IconPreview.svelte';
-  import IconEditor from '../../IconEditor.svelte';
-  import ProfileLedDialog from './ProfileLedDialog.svelte';
+  import ProfileAppearanceSheet from './ProfileAppearanceSheet.svelte';
   import { cn } from '$shared/utils.js';
-  import { BrushCleaning, CopyPlus, GripVertical, Lightbulb, Palette, Settings2, Trash2 } from '@lucide/svelte';
+  import { BrushCleaning, CopyPlus, GripVertical, Palette, Settings2, Trash2 } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
   import { fade } from 'svelte/transition';
 
@@ -40,8 +37,7 @@
     handlePointerDown: (e: PointerEvent) => void;
   } = $props();
 
-  let ledOpen = $state(false);
-  let iconOpen = $state(false);
+  let appearanceOpen = $state(false);
 
   const profileCount = $derived(configState.data?.profiles.length ?? 0);
 
@@ -198,13 +194,9 @@
           </InputGroup.Root>
         </div>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item onSelect={() => (iconOpen = true)}>
+        <DropdownMenu.Item onSelect={() => (appearanceOpen = true)}>
           <Palette />
-          Modifier l'icône
-        </DropdownMenu.Item>
-        <DropdownMenu.Item onSelect={() => (ledOpen = true)}>
-          <Lightbulb />
-          Couleur LED du profil
+          Icône & LED
         </DropdownMenu.Item>
         <DropdownMenu.Item disabled={profileCount >= CONFIG_MAX_PROFILES} onSelect={duplicateProfile}>
           <CopyPlus />
@@ -227,14 +219,4 @@
   {/if}
 </Item.Root>
 
-<Dialog.Root open={iconOpen} onOpenChange={(o) => { if (!o) iconOpen = false; }}>
-  <Dialog.Content class="sm:max-w-fit">
-    <Dialog.Header>
-      <Dialog.Title>Icône — {prof.name ?? `Profil ${index + 1}`}</Dialog.Title>
-      <Dialog.Description class="sr-only">Dessine ou choisis une icône pour ce profil.</Dialog.Description>
-    </Dialog.Header>
-    <IconEditor value={prof.icon ?? ''} onchange={(b64) => setProfileIcon(index, b64)} />
-  </Dialog.Content>
-</Dialog.Root>
-
-<ProfileLedDialog bind:open={ledOpen} profileIndex={index} />
+<ProfileAppearanceSheet bind:open={appearanceOpen} profileIndex={index} />
