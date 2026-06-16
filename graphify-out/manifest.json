@@ -10,8 +10,8 @@
     "semantic_hash": "f7463edbd5a0f7f338d0d265a8cb7e05"
   },
   ".claude/settings.json": {
-    "mtime": 1781527451.0809479,
-    "ast_hash": "e66faab716c8f2123039b9676cf04118",
+    "mtime": 1781604574.058777,
+    "ast_hash": "77bcf503e150af57c62b7becc2d04ec6",
     "semantic_hash": ""
   },
   ".mcp.json": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "packages/shared/src/components/app/studio/dashboard/Dashboard.svelte": {
-    "mtime": 1781593322.8819973,
-    "ast_hash": "42380758d382ed91ed442358c0d167e8",
+    "mtime": 1781593530.237143,
+    "ast_hash": "c3cded5006683a6f0871f8252b0a1532",
     "semantic_hash": ""
   },
   "packages/shared/src/components/app/studio/dashboard/led-matrix.svelte": {
@@ -340,9 +340,9 @@
     "semantic_hash": "abfe00449bd1a6622001d7ee526586bc"
   },
   "packages/shared/src/components/app/studio/dashboard/tile-battery.svelte": {
-    "mtime": 1780662993.1394417,
-    "ast_hash": "3a7e327c33cccefc6dc77305c426eeff",
-    "semantic_hash": "3a7e327c33cccefc6dc77305c426eeff"
+    "mtime": 1781595799.9088242,
+    "ast_hash": "a9323c618d239b2694f5e66f1cddc77e",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/app/studio/dashboard/tile-firmware.svelte": {
     "mtime": 1780662993.1404433,
@@ -1295,9 +1295,9 @@
     "semantic_hash": "d6f7615c9d018c805b1e0c24a3f58819"
   },
   "packages/shared/src/components/ui/sidebar/sidebar-inset.svelte": {
-    "mtime": 1779994120.6815596,
-    "ast_hash": "f619204e26c7d1c0224df15bfcbce4ab",
-    "semantic_hash": "f619204e26c7d1c0224df15bfcbce4ab"
+    "mtime": 1781604902.0131345,
+    "ast_hash": "c1bd456adcf543d7553af0ea0e4ee9a5",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/ui/sidebar/sidebar-menu-action.svelte": {
     "mtime": 1779994120.6825597,
@@ -1345,14 +1345,14 @@
     "semantic_hash": "037bacc318359bb6e2d4b8ab8afd59d1"
   },
   "packages/shared/src/components/ui/sidebar/sidebar-provider.svelte": {
-    "mtime": 1779994120.6880705,
-    "ast_hash": "9295841f79df269e0ef8d1c6b83c692d",
-    "semantic_hash": "9295841f79df269e0ef8d1c6b83c692d"
+    "mtime": 1781595292.9562256,
+    "ast_hash": "9ef185f14c092ad7b169846ee41802a6",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/ui/sidebar/sidebar-rail.svelte": {
-    "mtime": 1779994120.6890755,
-    "ast_hash": "f98fc462a56451aed0faa4b2ae7a74b8",
-    "semantic_hash": "f98fc462a56451aed0faa4b2ae7a74b8"
+    "mtime": 1781605378.664439,
+    "ast_hash": "a5fb95b0b99aadf7992c49059e3e0fb7",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/ui/sidebar/sidebar-separator.svelte": {
     "mtime": 1779994120.6890755,
@@ -1360,14 +1360,14 @@
     "semantic_hash": "1d7ec14f0ee824da7687955b1ab2edb1"
   },
   "packages/shared/src/components/ui/sidebar/sidebar-trigger.svelte": {
-    "mtime": 1779994120.6900759,
-    "ast_hash": "9a6dad31c6911114d12ed91389e33012",
-    "semantic_hash": "9a6dad31c6911114d12ed91389e33012"
+    "mtime": 1781604977.545151,
+    "ast_hash": "526be6d4ba8cb26d04758f4ff70ee6b6",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/ui/sidebar/sidebar.svelte": {
-    "mtime": 1779994120.6910765,
-    "ast_hash": "df7c320b2144cbd254e6bddc1a297fe6",
-    "semantic_hash": "df7c320b2144cbd254e6bddc1a297fe6"
+    "mtime": 1781605136.4791865,
+    "ast_hash": "7b434b4ed0a2e3949b6449f9d818bc44",
+    "semantic_hash": ""
   },
   "packages/shared/src/components/ui/skeleton/index.ts": {
     "mtime": 1779781582.3356376,
@@ -1775,9 +1775,9 @@
     "semantic_hash": "d16fa4664af2f95bba251baf79175b77"
   },
   "packages/website/src/lib/components/ui/app-sidebar.svelte": {
-    "mtime": 1780521149.118362,
-    "ast_hash": "9ccce2f5047bfa0c2ad96bfdab8bc991",
-    "semantic_hash": "9ccce2f5047bfa0c2ad96bfdab8bc991"
+    "mtime": 1781604510.638828,
+    "ast_hash": "6ba9efb74f7d43ac9d7820a929b872a3",
+    "semantic_hash": ""
   },
   "packages/website/src/lib/docs/index.ts": {
     "mtime": 1780519712.0416942,
@@ -1805,9 +1805,9 @@
     "semantic_hash": "a3ea9ea08207c7b05cbd99746e37e7de"
   },
   "packages/website/src/routes/+layout.svelte": {
-    "mtime": 1780519211.6627407,
-    "ast_hash": "583463fe40e92c05d7e613b5754c8605",
-    "semantic_hash": "583463fe40e92c05d7e613b5754c8605"
+    "mtime": 1781605774.5279784,
+    "ast_hash": "d4cfa7043afede3be1ee68524ce6be5b",
+    "semantic_hash": ""
   },
   "packages/website/src/routes/+layout.ts": {
     "mtime": 1779989073.308966,

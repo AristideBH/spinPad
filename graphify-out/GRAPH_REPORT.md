@@ -1,16 +1,16 @@
 # Graph Report - keyboard-firmware  (2026-06-16)
 
 ## Corpus Check
-- 480 files · ~207,874 words
+- 482 files · ~208,497 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2500 nodes · 3957 edges · 263 communities (175 shown, 88 thin omitted)
+- 2510 nodes · 3979 edges · 270 communities (176 shown, 94 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 146 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `74c4c43b`
+- Built from commit: `13d96b54`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -103,6 +103,7 @@
 - [[_COMMUNITY_Constants Config Schema Defaultprofile|Constants Config Schema Defaultprofile]]
 - [[_COMMUNITY_Constants Config Schema Defaultwidgets|Constants Config Schema Defaultwidgets]]
 - [[_COMMUNITY_Constants Config Schema Iconwidget|Constants Config Schema Iconwidget]]
+- [[_COMMUNITY_Constants Config Schema Ismacroused|Constants Config Schema Ismacroused]]
 - [[_COMMUNITY_Constants Config Schema Layerwidget|Constants Config Schema Layerwidget]]
 - [[_COMMUNITY_Constants Config Schema Macrostep|Constants Config Schema Macrostep]]
 - [[_COMMUNITY_Constants Config Schema Macrosteptype|Constants Config Schema Macrosteptype]]
@@ -113,6 +114,7 @@
 - [[_COMMUNITY_Constants Device Status Schema Batteryabsent|Constants Device Status Schema Batteryabsent]]
 - [[_COMMUNITY_Constants Device Status Schema Batterypresent|Constants Device Status Schema Batterypresent]]
 - [[_COMMUNITY_Constants Device Status Schema Batterypresentconfig|Constants Device Status Schema Batterypresentconfig]]
+- [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Constants Device Status Schema Connectionstatus|Constants Device Status Schema Connectionstatus]]
 - [[_COMMUNITY_Constants Device Status Schema Firmwareinfo|Constants Device Status Schema Firmwareinfo]]
 - [[_COMMUNITY_Constants Keycodes Buildcombomacrosteps|Constants Keycodes Buildcombomacrosteps]]
@@ -121,6 +123,7 @@
 - [[_COMMUNITY_Constants Keycodes Hidusagetocode|Constants Keycodes Hidusagetocode]]
 - [[_COMMUNITY_Constants Keycodes Ismodifiercode|Constants Keycodes Ismodifiercode]]
 - [[_COMMUNITY_Constants Keycodes Keycodecategory|Constants Keycodes Keycodecategory]]
+- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Constants Keycodes Keycodesflat|Constants Keycodes Keycodesflat]]
 - [[_COMMUNITY_Constants Keycodes Keyeventtokeycode|Constants Keycodes Keyeventtokeycode]]
 - [[_COMMUNITY_Constants Keycodes Macrokeycodes|Constants Keycodes Macrokeycodes]]
@@ -130,6 +133,7 @@
 - [[_COMMUNITY_Constants Profile Icon Base64Togrid|Constants Profile Icon Base64Togrid]]
 - [[_COMMUNITY_Constants Profile Icon Bytestobase64|Constants Profile Icon Bytestobase64]]
 - [[_COMMUNITY_Constants Profile Icon Bytestogrid|Constants Profile Icon Bytestogrid]]
+- [[_COMMUNITY_Community 119|Community 119]]
 - [[_COMMUNITY_Constants Profile Icon Drawdisc|Constants Profile Icon Drawdisc]]
 - [[_COMMUNITY_Constants Profile Icon Drawellipse|Constants Profile Icon Drawellipse]]
 - [[_COMMUNITY_Constants Profile Icon Drawellipsefill|Constants Profile Icon Drawellipsefill]]
@@ -138,13 +142,15 @@
 - [[_COMMUNITY_Constants Profile Icon Drawrectfill|Constants Profile Icon Drawrectfill]]
 - [[_COMMUNITY_Constants Profile Icon Emptygrid|Constants Profile Icon Emptygrid]]
 - [[_COMMUNITY_Constants Profile Icon Filliconpixels|Constants Profile Icon Filliconpixels]]
-- [[_COMMUNITY_Constants Profile Icon Gridindex|Constants Profile Icon Gridindex]]
+- [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Constants Profile Icon Gridtobase64|Constants Profile Icon Gridtobase64]]
+- [[_COMMUNITY_Community 131|Community 131]]
 - [[_COMMUNITY_Constants Profile Icon Gridtoimagedata|Constants Profile Icon Gridtoimagedata]]
 - [[_COMMUNITY_Constants Profile Icon Imagedatatogrid|Constants Profile Icon Imagedatatogrid]]
 - [[_COMMUNITY_Constants Profile Icon Isemptyicon|Constants Profile Icon Isemptyicon]]
 - [[_COMMUNITY_Constants Profile Icon Library Libraryicon|Constants Profile Icon Library Libraryicon]]
 - [[_COMMUNITY_Constants Profile Icon Setpixel|Constants Profile Icon Setpixel]]
+- [[_COMMUNITY_Community 137|Community 137]]
 - [[_COMMUNITY_Constants Profile Presets Listprofilepresets|Constants Profile Presets Listprofilepresets]]
 - [[_COMMUNITY_Constants Profile Presets Profilepresetsource|Constants Profile Presets Profilepresetsource]]
 - [[_COMMUNITY_Constants Profile Presets Registerpresetsource|Constants Profile Presets Registerpresetsource]]
@@ -169,6 +175,7 @@
 - [[_COMMUNITY_Editor Encoder Presets Encoderpreset|Editor Encoder Presets Encoderpreset]]
 - [[_COMMUNITY_Editor Encoder Presets Matchpreset|Editor Encoder Presets Matchpreset]]
 - [[_COMMUNITY_Editor Encoder Svelte Encoderfield|Editor Encoder Svelte Encoderfield]]
+- [[_COMMUNITY_Community 162|Community 162]]
 - [[_COMMUNITY_Editor Encoder Svelte Getactiveencoderknob|Editor Encoder Svelte Getactiveencoderknob]]
 - [[_COMMUNITY_Editor Encoder Svelte Setactiveencoderknob|Editor Encoder Svelte Setactiveencoderknob]]
 - [[_COMMUNITY_Editor Keypad Context Svelte Createkeypadcontext|Editor Keypad Context Svelte Createkeypadcontext]]
@@ -177,6 +184,7 @@
 - [[_COMMUNITY_Editor Keypad Context Svelte Keypadcontext|Editor Keypad Context Svelte Keypadcontext]]
 - [[_COMMUNITY_Editor Keypad Context Svelte Pickerstage|Editor Keypad Context Svelte Pickerstage]]
 - [[_COMMUNITY_Encoder Encoder C Encoder Init|Encoder Encoder C Encoder Init]]
+- [[_COMMUNITY_Community 171|Community 171]]
 - [[_COMMUNITY_Hooks Is Mobile Svelte Ismobile|Hooks Is Mobile Svelte Ismobile]]
 - [[_COMMUNITY_Hooks Keyboard Layout Svelte Keyboardlayout|Hooks Keyboard Layout Svelte Keyboardlayout]]
 - [[_COMMUNITY_Hooks Pointer Svelte Hasfinepointer|Hooks Pointer Svelte Hasfinepointer]]
@@ -192,6 +200,7 @@
 - [[_COMMUNITY_Lib Nav Breadcrumbitem|Lib Nav Breadcrumbitem]]
 - [[_COMMUNITY_Lib Nav Getbreadcrumbs|Lib Nav Getbreadcrumbs]]
 - [[_COMMUNITY_Lib Nav Navitem|Lib Nav Navitem]]
+- [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Lib Simulate Typing Simulatetyping|Lib Simulate Typing Simulatetyping]]
 - [[_COMMUNITY_Lib Simulate Typing Simulatetypingoptions|Lib Simulate Typing Simulatetypingoptions]]
 - [[_COMMUNITY_Mock Device Status Currentmockpercent|Mock Device Status Currentmockpercent]]
@@ -213,9 +222,9 @@
 - [[_COMMUNITY_Sheet Sheet Root Component|Sheet Sheet Root Component]]
 - [[_COMMUNITY_Sheet Sheet Trigger Component|Sheet Sheet Trigger Component]]
 - [[_COMMUNITY_Sidebar Constants Sidebar Width|Sidebar Constants Sidebar Width]]
+- [[_COMMUNITY_Community 209|Community 209]]
 - [[_COMMUNITY_Sidebar Context Svelte Sidebarstateprops|Sidebar Context Svelte Sidebarstateprops]]
 - [[_COMMUNITY_Sidebar Context Svelte Usesidebar|Sidebar Context Svelte Usesidebar]]
-- [[_COMMUNITY_Src Utils Cn|Src Utils Cn]]
 - [[_COMMUNITY_Src Utils Safecapitalize|Src Utils Safecapitalize]]
 - [[_COMMUNITY_Src Utils Withelementref|Src Utils Withelementref]]
 - [[_COMMUNITY_Src Utils Withoutchild|Src Utils Withoutchild]]
@@ -227,8 +236,6 @@
 - [[_COMMUNITY_Store Config Svelte Factoryreset|Store Config Svelte Factoryreset]]
 - [[_COMMUNITY_Store Config Svelte Importprofiles|Store Config Svelte Importprofiles]]
 - [[_COMMUNITY_Store Config Svelte Redo|Store Config Svelte Redo]]
-- [[_COMMUNITY_Store Config Svelte Saveconfig|Store Config Svelte Saveconfig]]
-- [[_COMMUNITY_Store Config Svelte Setencoderaction|Store Config Svelte Setencoderaction]]
 - [[_COMMUNITY_Store Config Svelte Setkeyaction|Store Config Svelte Setkeyaction]]
 - [[_COMMUNITY_Store Config Svelte Setmacroname|Store Config Svelte Setmacroname]]
 - [[_COMMUNITY_Store Config Svelte Setmacrosteps|Store Config Svelte Setmacrosteps]]
@@ -275,8 +282,8 @@
   CONTRIBUTING.md → README.md
 - `finish-task Skill` --conceptually_related_to--> `Commit Conventions (type/scope)`  [INFERRED]
   .claude/skills/finish-task/SKILL.md → CONTRIBUTING.md
-- `keymap_process_events()` --calls--> `led_engine_notify_activity()`  [INFERRED]
-  packages/firmware/components/keymap/keymap.c → packages/firmware/components/led_engine/led_engine.c
+- `IsMobile Class` --conceptually_related_to--> `KeyVisualsState`  [AMBIGUOUS]
+  packages/shared/src/store/is-mobile.svelte.ts → packages/shared/src/store/keyVisuals.svelte.ts
 
 ## Import Cycles
 - 1-file cycle: `packages/shared/src/components/ui/toc/toc.svelte -> packages/shared/src/components/ui/toc/toc.svelte`
@@ -298,23 +305,23 @@
 - **TileScreen composes ScreenEditor and ScreenAddMenu as the OLED config pipeline** — screen_tile_screen, screen_screeneditor, screen_screenaddmenu, screen_bits_optioncontrols, screen_bits_sizegrid [INFERRED 0.95]
 - **Dashboard tiles (firmware, main, stats) all consume deviceStatus and config stores** — dashboard_tile_firmware, dashboard_tile_main, dashboard_tile_stats, store_devicestatus, store_config [INFERRED 0.95]
 
-## Communities (263 total, 88 thin omitted)
+## Communities (270 total, 94 thin omitted)
 
 ### Community 0 - "Studio App Components"
 Cohesion: 0.25
 Nodes (11): KEYCODES, Layer Colors Constants, ScreenEditor Component, StatsTile Component, KeyGrid Component, KeypadContext Class, LayerSwitcher Component, KeyboardLayout Hook (+3 more)
 
 ### Community 1 - "UI Primitives (Avatar-Card)"
-Cohesion: 0.08
-Nodes (27): ButtonGroup Root Component, ButtonGroupSeparator Component, ButtonGroupText Component, ButtonGroup UI Index, FieldContent Component, FieldDescription Component, FieldError Component, FieldGroup Component (+19 more)
+Cohesion: 0.13
+Nodes (15): ButtonGroup Root Component, ButtonGroupSeparator Component, ButtonGroupText Component, ButtonGroup UI Index, FieldContent Component, FieldDescription Component, FieldError Component, FieldGroup Component (+7 more)
 
 ### Community 2 - "Firmware C Components"
 Cohesion: 0.06
 Nodes (60): battery_get_percent, battery_get_voltage_mv, battery_init, battery_is_present, battery_source_str, battery_update, ble_hid_consumer_press, ble_hid_consumer_release (+52 more)
 
 ### Community 3 - "Widget & Config System"
-Cohesion: 0.13
-Nodes (19): WIDGET_TYPE, WidgetConfig, WidgetType, deviceStatus, battery, ble, clock, customText (+11 more)
+Cohesion: 0.10
+Nodes (25): Widget Registry Pattern (no switch statements), WIDGET_TYPE, WidgetConfig, OptionControls Component, SizeGrid Component, deviceStatus, battery, ble (+17 more)
 
 ### Community 4 - "App Layout Components"
 Cohesion: 0.25
@@ -329,8 +336,8 @@ Cohesion: 0.25
 Nodes (11): SIDEBAR_KEYBOARD_SHORTCUT, setSidebar (context setter), SidebarState (context class), useSidebar (context getter), SidebarMenuButton, SidebarProvider, SidebarRail, SidebarSeparator (+3 more)
 
 ### Community 7 - "UI Dropdown & Item Primitives"
-Cohesion: 0.10
-Nodes (26): Dropdown Menu Checkbox Item Component, Dropdown Menu Content Component, Dropdown Menu Group Heading Component, Dropdown Menu Item Component, Dropdown Menu Label Component, Dropdown Menu Portal Component, Dropdown Menu Radio Item Component, ItemActions Component (+18 more)
+Cohesion: 0.09
+Nodes (29): Dropdown Menu Checkbox Item Component, Dropdown Menu Group Heading Component, Dropdown Menu Item Component, Dropdown Menu Label Component, Dropdown Menu Radio Item Component, Field Component, FieldSet Component, FieldTitle Component (+21 more)
 
 ### Community 8 - "Firmware Build System"
 Cohesion: 0.09
@@ -341,8 +348,8 @@ Cohesion: 0.06
 Nodes (38): action-types.js as Single Source of Truth, Dual Transport (WebSerial / HTTP), Hyperion Extension Serial Protocol, encoder CMakeLists, Hyperion configuration, Install, Options, Requirements (+30 more)
 
 ### Community 10 - "Device State Stores"
-Cohesion: 0.18
-Nodes (18): DeviceStatus, factoryReset(), _flushSave(), loadConfig(), reconcileActiveProfile(), setActiveProfileLocal(), DeviceStatusState, _poll() (+10 more)
+Cohesion: 0.17
+Nodes (19): DeviceStatus, factoryReset(), _flushSave(), loadConfig(), reconcileActiveProfile(), setActiveProfileLocal(), DeviceStatusState, _poll() (+11 more)
 
 ### Community 11 - "UI Button & Input Group"
 Cohesion: 0.18
@@ -369,8 +376,8 @@ Cohesion: 0.29
 Nodes (8): Responsive Sheet Index, ResponsiveSheet Component, Sheet Index, SheetClose Component, SheetContent Component, SheetOverlay, SheetPortal, Button (ui/button)
 
 ### Community 17 - "Config Data Layer"
-Cohesion: 0.11
-Nodes (18): createSpinpadFile(), FileMeta, MigrationFn, migrations, ParseResult, parseSpinpadFile(), SpinpadFileWrapper, OpResult (+10 more)
+Cohesion: 0.13
+Nodes (17): createSpinpadFile(), FileMeta, MigrationFn, migrations, ParseResult, parseSpinpadFile(), ProfilesParseResult, SpinpadFileWrapper (+9 more)
 
 ### Community 18 - "Website Navigation & Docs"
 Cohesion: 0.31
@@ -381,16 +388,16 @@ Cohesion: 0.28
 Nodes (9): config-schema constants, device-status-schema constants, profile-icon constants, profile-icon-library constants, profile-presets constants, Dev Mode types, Shared Types barrel index, Serial types (+1 more)
 
 ### Community 20 - "Constants Action Types Media Codes"
-Cohesion: 0.12
-Nodes (8): $shared/components/ui/dialog/index.js, $shared/components/ui/input/index.js, $shared/components/ui/kbd/index.js, $shared/components/ui/skeleton/index.js, $shared/components/ui/switch/index.js, $lib/components/Keypad.svelte, ./ProfileImportExportDialog.svelte, allSelected
+Cohesion: 0.21
+Nodes (5): $shared/components/ui/button/index.js, $shared/store/macroManager.svelte.js, ./ProfileImportExportDialog.svelte, allSelected, ./ScreenAddMenu.svelte
 
 ### Community 22 - "Constants Action Types Action Fn"
-Cohesion: 0.11
-Nodes (18): action() Encode Helper, ACTION_TYPES Constants, ActionType, getActionType(), getActionValue(), MediaCode, SPECIAL_CODES Constants, SpecialCode (+10 more)
+Cohesion: 0.07
+Nodes (27): action() Encode Helper, ACTION_TYPES Constants, ActionType, getActionType(), getActionValue(), MEDIA_CODES Constants, MediaCode, SPECIAL_CODES Constants (+19 more)
 
 ### Community 23 - "Constants Action Types Action Types"
 Cohesion: 0.15
-Nodes (29): addLayer(), addProfile(), clamp(), clearProfile(), clone(), deleteLayer(), deleteProfile(), duplicateLayer() (+21 more)
+Nodes (30): addLayer(), addProfile(), clamp(), clearProfile(), clone(), deleteLayer(), deleteProfile(), duplicateLayer() (+22 more)
 
 ### Community 24 - "Concept Layer Actions"
 Cohesion: 0.47
@@ -398,7 +405,7 @@ Nodes (6): Layer Activation Actions (MO/TG/TO), Profile (Complete Keyboard Confi
 
 ### Community 25 - "Dropdown Menu Content Content"
 Cohesion: 0.18
-Nodes (10): ../keypad-context.svelte, $shared/components/ui/label/index.js, $shared/components/ui/radio-group/index.js, $shared/components/ui/scroll-area/index.js, $shared/constants/layer-colors.js, $shared/lib/hooks/keyboard-layout.svelte.js, $shared/lib/simulate-typing, $shared/lib/simulate-typing.js (+2 more)
+Nodes (13): MacroStepType, WidgetType, BatteryAbsent, BatteryPresent, BatteryPresentConfig, BatterySource, BatteryStatus, ConnectionStatus (+5 more)
 
 ### Community 26 - "Tooltip Index Exports"
 Cohesion: 0.40
@@ -409,16 +416,16 @@ Cohesion: 0.40
 Nodes (6): Underline Tabs Content Component, Underline Tabs UI Index, Underline Tabs List Component, Underline Tabs Trigger Component, Underline Tabs Root Component, Underline Tabs State Logic
 
 ### Community 28 - "Collapsible Collapsible Content"
-Cohesion: 0.24
-Nodes (9): defaultConfig(), defaultLedKey(), defaultMacros(), defaultWidgets(), mergeMacros(), mergeWidgets(), validateConfig(), backfillLayerColors() (+1 more)
+Cohesion: 0.18
+Nodes (10): ../keypad-context.svelte, $shared/components/ui/label/index.js, $shared/components/ui/radio-group/index.js, $shared/components/ui/scroll-area/index.js, $shared/constants/layer-colors.js, $shared/lib/hooks/keyboard-layout.svelte.js, $shared/lib/simulate-typing, $shared/lib/simulate-typing.js (+2 more)
 
 ### Community 29 - "Constants Config Schema Defaultconfig"
-Cohesion: 0.10
-Nodes (26): BatteryWidget, BleWidget, clampU8(), ClockWidget, CustomTextWidget, GRADIENT_PRESETS, IconWidget, KNOWN_WIDGET_TYPES (+18 more)
+Cohesion: 0.09
+Nodes (33): BatteryWidget, BleWidget, clampU8(), ClockWidget, CustomTextWidget, defaultConfig(), defaultLedKey(), defaultMacros() (+25 more)
 
 ### Community 30 - "Store Config Svelte Reconcileactiveprofile"
-Cohesion: 0.16
-Nodes (12): devMode, IsMobile Class, DEV_KEY_MAP, KeyVisualsState, keyMonitor(), onKeyEvent(), onMessage(), serial (+4 more)
+Cohesion: 0.09
+Nodes (16): EncoderField, EncoderKnobOptions, getActiveEncoderKnob(), easeRandom(), EasingPreset, simulateTyping(), SimulateTypingOptions, svelte/motion (+8 more)
 
 ### Community 31 - "Ui App Sidebar Appsidebar"
 Cohesion: 0.50
@@ -429,8 +436,8 @@ Cohesion: 1.33
 Nodes (3): UseToc Hook, TOC UI Index, TOC Component
 
 ### Community 33 - "Lib Components Ui Button Button Component"
-Cohesion: 0.05
-Nodes (11): $shared/components/ui/tooltip/index.js, svelte/elements, @lucide/svelte/icons/more-horizontal, @lucide/svelte/icons/panel-left, ./constants.js, ./context.svelte.js, Getter, SidebarState (+3 more)
+Cohesion: 0.07
+Nodes (8): $shared/components/ui/tooltip/index.js, svelte/elements, @lucide/svelte/icons/panel-left, ./constants.js, ./context.svelte.js, Getter, SidebarStateProps, useSidebar()
 
 ### Community 34 - "Lib Header Right Svelte Use Header Right"
 Cohesion: 0.67
@@ -443,10 +450,6 @@ Nodes (3): Studio component (shared), Studio Root Page, Website Studio App Page
 ### Community 37 - "Shared Styles Index Css"
 Cohesion: 0.67
 Nodes (3): Shared styles index.css, Studio App CSS, Studio Root Layout
-
-### Community 39 - "Constants Config Migrations Createspinpadfile"
-Cohesion: 0.05
-Nodes (5): @lucide/svelte/icons/check, Collapsible Root Component, Collapsible UI Index, ./index.js, @lucide/svelte/icons/search
 
 ### Community 40 - "Constants Device Status Schema Batterystatus"
 Cohesion: 0.04
@@ -465,24 +468,20 @@ Cohesion: 0.06
 Nodes (33): Baseline Comparison Tracks Issue Identity, `--changed-since` Shows Only New Issues, Class Instance Members Are Tracked, Decorated Members Are Skipped By Default, Don't Create Config Unless Needed, Duplication Modes Affect What's Detected, Dynamically Loaded Files: Use `dynamicallyLoaded`, Exit Code 1 vs 2 (+25 more)
 
 ### Community 52 - "Constants Action Types Action"
-Cohesion: 0.22
-Nodes (14): action(), KC(), MACRO(), MEDIA(), MO(), MOD(), TG(), TO() (+6 more)
-
-### Community 53 - "Constants Action Types Actiontype"
-Cohesion: 0.29
-Nodes (6): description, license, name, private, type, version
+Cohesion: 0.18
+Nodes (16): action(), modKc(), BUILTIN_PROFILE_PRESETS, KC(), MACRO(), MEDIA(), MO(), MOD() (+8 more)
 
 ### Community 54 - "Constants Action Types Getactiontype"
 Cohesion: 0.06
-Nodes (33): devDependencies, clsx, csstype, @fontsource-variable/inter, @internationalized/date, @lucide/svelte, shadcn-svelte, svelte (+25 more)
+Nodes (32): devDependencies, clsx, csstype, @fontsource-variable/inter, @internationalized/date, @lucide/svelte, shadcn-svelte, svelte (+24 more)
 
 ### Community 55 - "Constants Action Types Getactionvalue"
-Cohesion: 0.15
-Nodes (20): $shared/components/ui/button/index.js, $shared/components/ui/dropdown-menu/index.js, $shared/components/ui/input-group/index.js, $shared/components/ui/item/index.js, $shared/constants/config-schema.js, $shared/constants/profile-icon.js, $shared/constants/profile-icon-library.js, $shared/constants/profile-presets.js (+12 more)
+Cohesion: 0.17
+Nodes (19): $shared/components/ui/dialog/index.js, $shared/components/ui/dropdown-menu/index.js, $shared/components/ui/input-group/index.js, $shared/components/ui/input/index.js, $shared/components/ui/item/index.js, $shared/constants/config-schema.js, $shared/constants/profile-icon.js, $shared/constants/profile-icon-library.js (+11 more)
 
 ### Community 56 - "Constants Action Types Mediacode"
-Cohesion: 0.10
-Nodes (20): devDependencies, clsx, csstype, @fontsource-variable/inter, mdsvex, rehype-slug, shadcn-svelte, svelte (+12 more)
+Cohesion: 0.06
+Nodes (32): description, devDependencies, clsx, csstype, @fontsource-variable/inter, mdsvex, rehype-slug, shadcn-svelte (+24 more)
 
 ### Community 57 - "Constants Action Types Specialcode"
 Cohesion: 0.15
@@ -493,20 +492,20 @@ Cohesion: 0.10
 Nodes (26): createProfilesFile(), parseProfilesFile(), Selection, isMacroUsed(), KeyLedOverride, LedProfile, addLayer(), addProfile() (+18 more)
 
 ### Community 59 - "Constants Config Migrations Filemeta"
-Cohesion: 0.11
-Nodes (14): $shared/components/ui/field/index.js, $shared/components/ui/number-field, $shared/components/ui/number-field/index.js, $shared/components/ui/responsive-sheet/index.js, $shared/components/ui/scrubber, $shared/components/ui/slider/index.js, ./NotConnected.svelte, ./OptionGrid.svelte (+6 more)
+Cohesion: 0.08
+Nodes (18): $shared/components/ui/field/index.js, $shared/components/ui/kbd/index.js, $shared/components/ui/number-field, $shared/components/ui/number-field/index.js, $shared/components/ui/responsive-sheet/index.js, $shared/components/ui/scrubber, $shared/components/ui/skeleton/index.js, $shared/components/ui/slider/index.js (+10 more)
 
 ### Community 60 - "Constants Config Migrations Migrationfn"
 Cohesion: 0.11
-Nodes (20): ble_hid_consumer_press(), ble_hid_consumer_release(), ble_hid_key_press(), ble_hid_key_release(), ble_hid_refresh_modifier(), encoder_process(), send_encoder_action(), hid_report_type_t (+12 more)
+Nodes (20): ble_hid_consumer_press(), ble_hid_consumer_release(), ble_hid_key_press(), ble_hid_key_release(), ble_hid_refresh_modifier(), encoder_init(), encoder_process(), send_encoder_action() (+12 more)
 
 ### Community 61 - "Constants Config Migrations Parseprofilesfile"
-Cohesion: 0.06
-Nodes (30): description, devDependencies, @lucide/svelte, shadcn-svelte, svelte-toolbelt, @sveltejs/vite-plugin-svelte-inspector, tailwindcss, tsx (+22 more)
+Cohesion: 0.07
+Nodes (29): description, devDependencies, @lucide/svelte, shadcn-svelte, @sveltejs/vite-plugin-svelte-inspector, tailwindcss, tsx, @types/w3c-web-serial (+21 more)
 
 ### Community 62 - "Constants Config Ops Addlayer"
 Cohesion: 0.12
-Nodes (24): display_set_clock(), check_pairing_longpress(), check_studio_mode_longpress(), combo_find_match(), _debounce_update(), keymap_has_activity(), keymap_init(), keymap_process_events() (+16 more)
+Nodes (23): display_set_clock(), combo_find_match(), _debounce_update(), keymap_has_activity(), keymap_init(), keymap_process_events(), keymap_reload_from_config(), keymap_scan_matrix() (+15 more)
 
 ### Community 63 - "Constants Config Ops Clearprofile"
 Cohesion: 0.14
@@ -517,24 +516,24 @@ Cohesion: 0.08
 Nodes (25): dependencies, bits-ui, description, devDependencies, @changesets/cli, eslint-plugin-svelte, fallow, prettier (+17 more)
 
 ### Community 65 - "Constants Config Ops Deleteprofile"
-Cohesion: 0.14
-Nodes (21): ble_addr_t, ble_hid_enter_pairing_mode(), ble_hid_publish_battery(), ble_hid_set_idle_conn_interval(), ble_hid_switch_device(), ble_hs_on_sync(), clear_bonded_address(), gap_event_handler() (+13 more)
+Cohesion: 0.13
+Nodes (22): ble_addr_t, ble_hid_enter_pairing_mode(), ble_hid_publish_battery(), ble_hid_set_idle_conn_interval(), ble_hid_switch_device(), ble_hs_on_sync(), clear_bonded_address(), gap_event_handler() (+14 more)
 
 ### Community 66 - "Constants Config Ops Duplicatelayer"
-Cohesion: 0.23
-Nodes (24): httpd_req_t, led_engine_apply_config(), esp_err_t, TimerHandle_t, _backup_config(), _backup_exists(), _delete_backup(), handle_factory_reset() (+16 more)
+Cohesion: 0.21
+Nodes (26): httpd_req_t, check_studio_mode_longpress(), led_engine_apply_config(), esp_err_t, TimerHandle_t, _backup_config(), _backup_exists(), _delete_backup() (+18 more)
 
 ### Community 67 - "Constants Config Ops Editprofile"
-Cohesion: 0.14
-Nodes (22): adc_read_voltage_mv(), adc_setup(), battery_get_percent(), battery_get_voltage_mv(), battery_init(), battery_is_present(), battery_source_str(), battery_update() (+14 more)
+Cohesion: 0.15
+Nodes (21): adc_read_voltage_mv(), adc_setup(), battery_get_percent(), battery_get_voltage_mv(), battery_init(), battery_is_present(), battery_source_str(), battery_update() (+13 more)
 
 ### Community 68 - "Constants Config Ops Layerpatch"
 Cohesion: 0.06
-Nodes (3): $shared/components/ui/separator/index.js, $shared/components/ui/textarea/index.js, $shared/utils.js
+Nodes (3): $shared/components/ui/textarea/index.js, $shared/utils.js, ./index.js
 
 ### Community 69 - "Constants Config Ops Movelayer"
-Cohesion: 0.06
-Nodes (34): @lucide/svelte/icons/alert-circle, @lucide/svelte/icons/badge-check, @lucide/svelte/icons/bell, @lucide/svelte/icons/book-open, $shared/components/ui/avatar/index.js, $shared/components/ui/breadcrumb/index.js, $shared/components/ui/collapsible/index.js, $shared/components/ui/sidebar/index.js (+26 more)
+Cohesion: 0.15
+Nodes (14): @lucide/svelte/icons/book-open, $shared/components/ui/collapsible/index.js, $shared/components/ui/sidebar/index.js, $lib/docs, $lib/nav.js, @lucide/svelte/icons/chevron-right, @lucide/svelte/icons/command, @lucide/svelte/icons/external-link (+6 more)
 
 ### Community 70 - "Constants Config Ops Moveprofile"
 Cohesion: 0.18
@@ -561,8 +560,8 @@ Cohesion: 0.13
 Nodes (14): 1. Quand faire un changeset ?, 2. Créer un changeset, 3. Publier une release, 4. Conventions de commit, Ajouter une nouvelle action firmware, Codegen (shared → firmware), Contributing to SpinPad, Developer Certificate of Origin (DCO) (+6 more)
 
 ### Community 76 - "Constants Config Ops Setprofileicon"
-Cohesion: 0.20
-Nodes (12): breathe_factor(), led_engine_init(), led_engine_notify_activity(), led_engine_set_all(), led_engine_set_key(), led_engine_tick(), power_scale_factor(), render_extension() (+4 more)
+Cohesion: 0.22
+Nodes (11): breathe_factor(), led_engine_init(), led_engine_set_all(), led_engine_set_key(), led_engine_tick(), power_scale_factor(), render_extension(), render_frame() (+3 more)
 
 ### Community 77 - "Constants Config Schema Batterywidget"
 Cohesion: 0.30
@@ -573,8 +572,8 @@ Cohesion: 0.14
 Nodes (13): Async Svelte, Avoid legacy features, Context, `$derived`, Each blocks, `$effect`, Events, `$inspect.trace` (+5 more)
 
 ### Community 79 - "Constants Config Schema Clockwidget"
-Cohesion: 0.05
-Nodes (25): $shared/components/ui/button, $shared/components/ui/button-group, $shared/components/ui/command, $shared/components/ui/input, ./types, $shared/components/ui/popover, $shared/components/ui/spinner, $shared/utils (+17 more)
+Cohesion: 0.15
+Nodes (10): $shared/components/ui/button, $shared/components/ui/button-group, $shared/components/ui/command, $shared/components/ui/input, $shared/components/ui/popover, $shared/components/ui/spinner, $shared/components/button.svelte, loading (+2 more)
 
 ### Community 80 - "Constants Config Schema Customtextwidget"
 Cohesion: 0.32
@@ -585,12 +584,12 @@ Cohesion: 0.21
 Nodes (9): args, buildRainbow(), extractSpinpadFrame(), handleHyperionMessage(), hslToRgb(), hue2rgb(), OPT, sendFrame() (+1 more)
 
 ### Community 82 - "Constants Config Schema Defaultlayer"
-Cohesion: 0.22
-Nodes (9): dependencies, @arisbh/svelte-mosaic, bits-ui, clsx, @internationalized/date, svelte-sonner, tailwind-merge, tailwind-variants (+1 more)
+Cohesion: 0.15
+Nodes (12): dependencies, @arisbh/svelte-mosaic, bits-ui, clsx, @internationalized/date, runed, svelte-sonner, tailwind-merge (+4 more)
 
 ### Community 83 - "Constants Config Schema Defaultmacro"
-Cohesion: 0.15
-Nodes (12): Combined Dead Code + Duplication, Custom Plugin Setup, Fallow: Common Workflow Patterns & Recipes, Full audit (default), Option 1: Inline framework config, Option 2: External plugin file, Option 3: Plugin directory, Production audit (+4 more)
+Cohesion: 0.17
+Nodes (11): Combined Dead Code + Duplication, Fallow: Common Workflow Patterns & Recipes, Full audit (default), PR Dead Code Check, Production audit, Production vs Full Audit, Step 1: Analyze changed files, Step 1: Run combined analysis (+3 more)
 
 ### Community 84 - "Constants Config Schema Defaultmacros"
 Cohesion: 0.15
@@ -609,7 +608,7 @@ Cohesion: 0.18
 Nodes (10): finish-task, Guardrails, Purpose, Step 1 — Confirm scope, Step 2 — Check working tree, Step 3 — Determine branch name, Step 4 — Stage and commit, Step 5 — Push and open PR (+2 more)
 
 ### Community 90 - "Constants Config Schema Macrostep"
-Cohesion: 0.14
+Cohesion: 0.12
 Nodes (17): MACRO_STEP_TYPE, MacroStep, CODE_TO_HID, eventModifierKeycodes(), findByValue(), getKeycodeLabel(), HID_TO_CODE, isModifierCode() (+9 more)
 
 ### Community 91 - "Constants Config Schema Macrosteptype"
@@ -621,28 +620,28 @@ Cohesion: 0.40
 Nodes (3): $shared/constants/action-types.js, onRecordKeydown(), pick()
 
 ### Community 93 - "Constants Config Schema Validateconfig"
-Cohesion: 0.33
-Nodes (6): scripts, build, check, check:watch, dev, preview
+Cohesion: 0.22
+Nodes (8): $shared/components/ui/breadcrumb/index.js, ../app.css, $lib/docs/index.js, $lib/header-right.svelte.js, $lib/page-transitions, $lib/components/PageCurtain.svelte, @lucide/svelte/icons/dot, $app/state
 
 ### Community 94 - "Constants Config Schema Validationresult"
-Cohesion: 0.50
-Nodes (4): Field Component, FieldSet Component, FieldTitle Component, Field UI Index
+Cohesion: 0.18
+Nodes (5): ctx, NumberFieldButtonProps, NumberFieldInputContext, NumberFieldRootContext, NumberFieldRootProps
 
 ### Community 95 - "Constants Config Schema Widgettype"
 Cohesion: 0.20
 Nodes (9): access, baseBranch, changelog, commit, fixed, ignore, linked, $schema (+1 more)
 
-### Community 96 - "Constants Device Status Schema Batteryabsent"
-Cohesion: 0.12
-Nodes (5): EncoderField, EncoderKnob, EncoderKnobOptions, getActiveEncoderKnob(), svelte/motion
-
 ### Community 97 - "Constants Device Status Schema Batterypresent"
-Cohesion: 0.50
-Nodes (3): runed, runed, runed
+Cohesion: 0.24
+Nodes (11): Select Index, Select Root Component, SelectContent Component, SelectGroup Component, SelectGroupHeading Component, SelectItem Component, SelectLabel Component, SelectPortal Component (+3 more)
 
 ### Community 98 - "Constants Device Status Schema Batterypresentconfig"
 Cohesion: 0.20
 Nodes (9): mode-watcher, dependencies, bits-ui, cross-env, marked, mode-watcher, @spinpad/shared, svelte-sonner (+1 more)
+
+### Community 99 - "Community 99"
+Cohesion: 0.17
+Nodes (5): ./types, $shared/utils, @lucide/svelte/icons/minus, @lucide/svelte/icons/plus, svelte-toolbelt
 
 ### Community 100 - "Constants Device Status Schema Connectionstatus"
 Cohesion: 0.22
@@ -665,8 +664,8 @@ Cohesion: 0.22
 Nodes (8): Bill of Materials, LED extension connector, Matrix layout, OLED, PCB files, Pinmap, RF Compliance note, SpinPad v1 — Hardware
 
 ### Community 107 - "Constants Keycodes Ismodifiercode"
-Cohesion: 0.33
-Nodes (3): trainingModeCmd(), TestModeState, TrainingModeState
+Cohesion: 0.21
+Nodes (7): trainingModeCmd(), testMode, TestModeState, DEV_KEY_MAP, trainingMode, TrainingModeState, TrainingTarget
 
 ### Community 108 - "Constants Keycodes Keycodecategory"
 Cohesion: 0.22
@@ -693,8 +692,8 @@ Cohesion: 0.25
 Nodes (7): Attachment factories, Conditional attachments, Controlling when attachments re-run, Converting actions to attachments, Creating attachments programmatically, Inline attachments, Passing attachments to components
 
 ### Community 115 - "Constants Profile Icon Base64Tobytes"
-Cohesion: 0.07
-Nodes (50): MEDIA_CODES Constants, ProfilesParseResult, SpinpadProfilesWrapper, LayerConfig, MacroStepType, ProfileConfig, BatteryAbsent, BatteryPresent (+42 more)
+Cohesion: 0.17
+Nodes (25): base64ToBytes(), base64ToGrid(), BoolGrid, bytesToBase64(), bytesToGrid(), drawCircle(), drawDisc(), drawEllipse() (+17 more)
 
 ### Community 116 - "Constants Profile Icon Base64Togrid"
 Cohesion: 0.25
@@ -703,6 +702,10 @@ Nodes (8): Actionable error messages, `activate` flags, Clock skew, Exit Codes, 
 ### Community 117 - "Constants Profile Icon Bytestobase64"
 Cohesion: 0.25
 Nodes (8): Examples, Exit Codes, Flags, `health`: Function Complexity & File Health Analysis, Health Trend, JSON Output Structure, Vital Signs, Vital Signs Snapshots
+
+### Community 119 - "Community 119"
+Cohesion: 0.31
+Nodes (5): cn(), WithElementRef, WithoutChild, WithoutChildren, WithoutChildrenOrChild
 
 ### Community 120 - "Constants Profile Icon Drawdisc"
 Cohesion: 0.29
@@ -736,13 +739,13 @@ Nodes (6): CLI Tools, Get Documentation, List Documentation Sections, Svelte 5 C
 Cohesion: 0.33
 Nodes (5): Before exploring, read these, Domain Docs, File structure, Flag ADR conflicts, Use the glossary's vocabulary
 
-### Community 129 - "Constants Profile Icon Gridindex"
-Cohesion: 0.33
-Nodes (5): Widget Registry Pattern (no switch statements), Ajouter un widget — de bout en bout, Anatomie d'un `WidgetDef`, Options disponibles, Widgets OLED — registre
-
 ### Community 130 - "Constants Profile Icon Gridtobase64"
 Cohesion: 0.33
 Nodes (5): GITHUB_TOKEN, uvx, github-projects, svelte, mcp-github-projects
+
+### Community 131 - "Community 131"
+Cohesion: 0.25
+Nodes (7): @lucide/svelte/icons/badge-check, @lucide/svelte/icons/bell, $shared/components/ui/avatar/index.js, @lucide/svelte/icons/chevrons-up-down, @lucide/svelte/icons/credit-card, @lucide/svelte/icons/log-out, @lucide/svelte/icons/sparkles
 
 ### Community 132 - "Constants Profile Icon Gridtoimagedata"
 Cohesion: 0.33
@@ -832,6 +835,10 @@ Nodes (4): Examples, Flags, `flags`: Feature Flag Detection, JSON Output Structu
 Cohesion: 0.50
 Nodes (4): All-in-one with `--ci`, GitHub Code Scanning Integration, Step 1: Generate SARIF output, Step 2: Upload via GitHub Action
 
+### Community 162 - "Community 162"
+Cohesion: 0.40
+Nodes (4): UseRampOptions, NumberFieldButtonProps, NumberFieldInputProps, NumberFieldRootProps
+
 ### Community 163 - "Editor Encoder Svelte Getactiveencoderknob"
 Cohesion: 0.50
 Nodes (4): AlertAction Component, AlertDescription Component, AlertTitle Component, Alert Index / Barrel
@@ -841,24 +848,36 @@ Cohesion: 0.67
 Nodes (3): Kbd Index, Kbd Group Component, Kbd Component
 
 ### Community 168 - "Editor Keypad Context Svelte Keypadcontext"
-Cohesion: 0.16
-Nodes (7): KeypadContext, easeRandom(), EasingPreset, simulateTyping(), SimulateTypingOptions, setKeyAction(), keyVisuals
+Cohesion: 0.15
+Nodes (6): KeypadContext, applyEncoderPreset(), ENCODER_PRESETS, EncoderPreset, setEncoderAction(), setKeyAction()
 
 ### Community 169 - "Editor Keypad Context Svelte Pickerstage"
 Cohesion: 0.67
 Nodes (3): `config`: Show Resolved Config, Exit Codes, Flags
 
+### Community 171 - "Community 171"
+Cohesion: 0.47
+Nodes (5): AXIS, CurtainDir, curtainIn(), curtainOut(), reduced()
+
+### Community 172 - "Hooks Is Mobile Svelte Ismobile"
+Cohesion: 0.40
+Nodes (4): @lucide/svelte/icons/alert-circle, @lucide/svelte/icons/file-question, @lucide/svelte/icons/server-crash, $app/stores
+
+### Community 174 - "Hooks Pointer Svelte Hasfinepointer"
+Cohesion: 0.40
+Nodes (4): @lucide/svelte/icons/ellipsis, @lucide/svelte/icons/folder, @lucide/svelte/icons/share, @lucide/svelte/icons/trash-2
+
 ### Community 175 - "Hooks Use Toc Svelte Heading"
-Cohesion: 0.24
-Nodes (6): $shared/hooks/use-toc.svelte, addChildren(), getToc(), Heading, HeadingKind, UseToc
+Cohesion: 0.10
+Nodes (11): $shared/hooks/use-toc.svelte, IsMobile, HasFinePointer, addChildren(), getToc(), Heading, HeadingKind, UseToc (+3 more)
 
 ### Community 176 - "Hooks Use Toc Svelte Headingkind"
 Cohesion: 0.67
 Nodes (3): Examples, Flags, `init`: Config Generation
 
 ### Community 181 - "Lib Components Test Component"
-Cohesion: 0.67
-Nodes (3): PR Dead Code Check, Step 1: Analyze changed files, Step 2: If issues found, show specifics
+Cohesion: 0.50
+Nodes (4): Custom Plugin Setup, Option 1: Inline framework config, Option 2: External plugin file, Option 3: Plugin directory
 
 ### Community 182 - "Lib Header Right Svelte Createheaderright"
 Cohesion: 0.33
@@ -876,17 +895,9 @@ Nodes (3): SidebarMenuSkeleton, Skeleton Index (re-exports), Skeleton
 Cohesion: 0.20
 Nodes (9): DeviceStats, makeMockDeviceStatus(), makeMockStats(), resetMockDischarge(), START_TS, tickMockCharge(), tickMockDischarge(), MOCK_CONFIG (+1 more)
 
-### Community 212 - "Src Utils Cn"
-Cohesion: 0.15
-Nodes (5): cn(), WithElementRef, WithoutChild, WithoutChildren, WithoutChildrenOrChild
-
-### Community 237 - "Store Config Svelte Setencoderaction"
-Cohesion: 0.22
-Nodes (5): applyEncoderPreset(), ENCODER_PRESETS, EncoderPreset, ConfigState, setEncoderAction()
-
 ### Community 248 - "Store Serial Svelte Disconnect"
-Cohesion: 0.16
-Nodes (16): _cancelQueuedRpcs(), connect(), disconnect(), encoder, _enqueueRpc(), factoryReset(), getDeviceStatus(), handleIncomingMessage() (+8 more)
+Cohesion: 0.15
+Nodes (19): _cancelQueuedRpcs(), connect(), disconnect(), encoder, _enqueueRpc(), factoryReset(), getConfig(), getDeviceStatus() (+11 more)
 
 ### Community 270 - "Types Dev Mode D Batteryscenario"
 Cohesion: 0.50
@@ -897,7 +908,7 @@ Cohesion: 0.50
 Nodes (3): MessageHandler, RpcQueueEntry, SerialStateSnapshot
 
 ### Community 278 - "Underline Tabs Underline Tabs Svelte Useunderlinetabs"
-Cohesion: 0.16
+Cohesion: 0.22
 Nodes (5): ctx, [send, receive], UnderlineTabsRootProps, UnderlineTabsRootState, UnderlineTabsTriggerProps
 
 ## Ambiguous Edges - Review These
@@ -905,24 +916,24 @@ Nodes (5): ctx, [send, receive], UnderlineTabsRootProps, UnderlineTabsRootState,
   packages/shared/src/store/is-mobile.svelte.ts · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **984 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+979 more)
+- **986 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+981 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **88 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **94 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `KeyVisualsState` and `IsMobile Class`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `$shared/utils.js` connect `Constants Config Ops Layerpatch` to `Keymap Editor Components`, `UI Dialog Primitives`, `Card Card Content`, `Docs Index Doctreeleaf`, `Underline Tabs Underline Tabs Svelte Useunderlinetabs`, `Dropdown Menu Content Content`, `Lib Components Ui Button Button Component`, `Constants Config Migrations Createspinpadfile`, `Editor Keypad Context Svelte Keycodeoption`, `Hooks Use Toc Svelte Heading`, `Constants Action Types Getactionvalue`, `Constants Config Migrations Filemeta`, `Constants Config Schema Clockwidget`, `Constants Config Schema Customtextwidget`, `Src Utils Cn`, `Constants Config Schema Defaultprofile`, `Constants Config Schema Ismacroused`, `Constants Config Schema Profilewidget`, `Constants Device Status Schema Batteryabsent`, `Constants Device Status Schema Devicestats`, `Constants Keycodes Keyeventtokeycode`?**
-  _High betweenness centrality (0.125) - this node is a cross-community bridge._
-- **Why does `./context.svelte.js` connect `Lib Components Ui Button Button Component` to `UI Index Re-exports`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
-- **Why does `./ScreenEditor.svelte` connect `Constants Action Types Getactionvalue` to `Widget & Config System`, `Constants Config Ops Layerpatch`, `Constants Config Schema Customtextwidget`, `Constants Action Types Media Codes`, `Constants Action Types Specialcode`, `Constants Config Schema Defaultconfig`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `$shared/utils.js` connect `Constants Config Ops Layerpatch` to `Community 128`, `Constants Profile Icon Gridindex`, `Keymap Editor Components`, `UI Dialog Primitives`, `Constants Action Types Media Codes`, `Card Card Content`, `Docs Index Doctreeleaf`, `Collapsible Collapsible Content`, `Store Config Svelte Reconcileactiveprofile`, `Lib Components Ui Button Button Component`, `Constants Config Migrations Createspinpadfile`, `Hooks Use Toc Svelte Heading`, `Constants Action Types Actiontype`, `Constants Action Types Getactionvalue`, `Constants Config Migrations Filemeta`, `Community 187`, `Constants Config Schema Customtextwidget`, `Constants Config Schema Defaultprofile`, `Constants Config Schema Ismacroused`, `Constants Config Schema Profilewidget`, `Community 99`, `Constants Device Status Schema Devicestats`, `Constants Keycodes Keyeventtokeycode`, `Community 119`?**
+  _High betweenness centrality (0.121) - this node is a cross-community bridge._
+- **Why does `./context.svelte.js` connect `Lib Components Ui Button Button Component` to `UI Index Re-exports`, `Hooks Use Toc Svelte Heading`?**
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
+- **Why does `SIDEBAR_KEYBOARD_SHORTCUT` connect `UI Index Re-exports` to `Lib Components Ui Button Button Component`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **What connects `$schema`, `changelog`, `commit` to the rest of the system?**
-  _990 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _992 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `UI Primitives (Avatar-Card)` be split into smaller, more focused modules?**
-  _Cohesion score 0.08262108262108261 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
 - **Should `Firmware C Components` be split into smaller, more focused modules?**
   _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._

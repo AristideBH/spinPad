@@ -2,6 +2,8 @@
   import * as Collapsible from '$shared/components/ui/collapsible/index.js';
   import * as Sidebar from '$shared/components/ui/sidebar/index.js';
   import { page } from '$app/state';
+  import { afterNavigate } from '$app/navigation';
+  import { slide } from 'svelte/transition';
   import HomeIcon from '@lucide/svelte/icons/house';
   import BookOpenIcon from '@lucide/svelte/icons/book-open';
   import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
@@ -13,6 +15,11 @@
   import { WrenchIcon, ShoppingCart } from '@lucide/svelte';
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+  // Close the mobile drawer after navigating (collapsible toggles don't navigate,
+  // so expanding/collapsing the nav sections leaves the drawer open).
+  const sidebar = Sidebar.useSidebar();
+  afterNavigate(() => sidebar.setOpenMobile(false));
 
   const docsTree = getDocsTree();
   const toolsItem =
@@ -130,19 +137,25 @@
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>
-              <Collapsible.Content>
-                <Sidebar.MenuSub>
-                  {#each toolsChildren as item (item.title)}
-                    <Sidebar.MenuSubItem>
-                      <Sidebar.MenuSubButton
-                        href={item.url}
-                        isActive={page.url.pathname === item.url}
-                      >
-                        {item.title}
-                      </Sidebar.MenuSubButton>
-                    </Sidebar.MenuSubItem>
-                  {/each}
-                </Sidebar.MenuSub>
+              <Collapsible.Content forceMount>
+                {#snippet child({ props, open })}
+                  {#if open}
+                    <div {...props} transition:slide={{ duration: 200 }}>
+                      <Sidebar.MenuSub>
+                        {#each toolsChildren as item (item.title)}
+                          <Sidebar.MenuSubItem>
+                            <Sidebar.MenuSubButton
+                              href={item.url}
+                              isActive={page.url.pathname === item.url}
+                            >
+                              {item.title}
+                            </Sidebar.MenuSubButton>
+                          </Sidebar.MenuSubItem>
+                        {/each}
+                      </Sidebar.MenuSub>
+                    </div>
+                  {/if}
+                {/snippet}
               </Collapsible.Content>
             </Sidebar.MenuItem>
           {/snippet}
@@ -164,10 +177,16 @@
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>
-              <Collapsible.Content>
-                <Sidebar.MenuSub>
-                  {@render docNodes(docsTree, 0)}
-                </Sidebar.MenuSub>
+              <Collapsible.Content forceMount>
+                {#snippet child({ props, open })}
+                  {#if open}
+                    <div {...props} transition:slide={{ duration: 200 }}>
+                      <Sidebar.MenuSub>
+                        {@render docNodes(docsTree, 0)}
+                      </Sidebar.MenuSub>
+                    </div>
+                  {/if}
+                {/snippet}
               </Collapsible.Content>
             </Sidebar.MenuItem>
           {/snippet}

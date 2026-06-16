@@ -58,16 +58,16 @@
   });
 </script>
 
-<Card.Root class="@container/card flex flex-col h-full">
+<Card.Root class="@container/card flex flex-col h-full ">
   <Card.Header class="h-full">
     <Card.Description>Batterie</Card.Description>
     <Card.Action>
       <BatteryIcon class="size-4 text-muted-foreground" />
     </Card.Action>
 
-    <div class="flex flex-col col-span-2 mt-auto">
+    <div class="flex flex-col col-span-2">
       {#if !batteryPresent}
-        <p class="text-base font-medium text-muted-foreground">Pas de batterie</p>
+        <p class="mt-auto text-base font-medium text-muted-foreground">Pas de batterie</p>
         <p class="text-xs text-muted-foreground">
           {batterySource === 'forced_no' ? 'Désactivée par configuration' : 'Mode USB-only'}
         </p>
