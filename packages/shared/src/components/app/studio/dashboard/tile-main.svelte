@@ -3,18 +3,7 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import {
-    Usb,
-    Bluetooth,
-    RefreshCw,
-    LogOut,
-    Activity,
-    Settings,
-    PanelRightClose,
-    PanelRightOpen,
-    PanelBottomClose,
-    PanelBottomOpen,
-  } from '@lucide/svelte';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Activity, Settings } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -28,17 +17,7 @@
   import SaveBadge from '$shared/components/app/studio/SaveBadge.svelte';
   import LedMatrix from '$shared/components/app/studio/dashboard/led-matrix.svelte';
   import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
-  import { IsMobile } from '$shared/lib/hooks/is-mobile.svelte';
   import { type LedMode, GRADIENT_PRESETS } from '$shared/constants/config-schema.js';
-  let {
-    showAnnex = false,
-    onToggle,
-  }: {
-    showAnnex?: boolean;
-    onToggle?: () => void;
-  } = $props();
-
-  let isMobile = $derived(new IsMobile(976));
 
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
@@ -94,7 +73,7 @@
   });
 </script>
 
-<Card.Root class="@container/card relative h-full py-0 gap-0 z-10">
+<Card.Root class="@container/card relative h-full py-0 gap-0 z-10 w-full">
   <Card.Header
     class="relative h-full py-4 overflow-hidden isolate shadow-[inset_0_0px_50px_rgba(0,0,0,1)] shadow-black/50"
   >
@@ -165,14 +144,6 @@
         <SettingsTab />
       </div>
     </ResponsiveSheet>
-
-    <Button variant="outline" size="icon" onclick={onToggle}>
-      {#if isMobile.current}
-        {#if showAnnex}<PanelBottomOpen />{:else}<PanelBottomClose />{/if}
-      {:else}
-        {#if showAnnex}<PanelRightOpen />{:else}<PanelRightClose />{/if}
-      {/if}
-    </Button>
 
     <ButtonGroup.Root>
       <Button variant="outline" size="icon" onclick={handleReload}>
