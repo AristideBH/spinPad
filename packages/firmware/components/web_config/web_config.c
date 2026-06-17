@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  web_config.c — Studio Mode : WiFi AP + serveur HTTP + SPIFFS
+//  web_config.c — Studio Mode : WiFi AP + HTTP server + SPIFFS
 // ═══════════════════════════════════════════════════════════════
 
 #include "web_config.h"
@@ -30,14 +30,14 @@
 static const char *TAG = "WEB_CONFIG";
 
 // ─────────────────────────────────────────────────────────────
-//  BACKUP CONFIG (NVS) — protection contre corruption/perte
+//  BACKUP CONFIG (NVS) — protection against corruption/loss
 //
-//  À l'entrée en Studio Mode, la config courante est sauvegardée
-//  dans un namespace NVS séparé "kb_backup".
-//  À la sortie propre, le backup est supprimé.
-//  Si un Studio Mode précédent n'a pas été quitté proprement
-//  (coupure de courant, crash...), le backup est restauré
-//  automatiquement à l'entrée du prochain Studio Mode.
+//  On entering Studio Mode, the current config is saved
+//  in a separate NVS namespace "kb_backup".
+//  On clean exit, the backup is deleted.
+//  If a previous Studio Mode was not exited cleanly
+//  (power loss, crash...), the backup is restored
+//  automatically on entering the next Studio Mode.
 // ─────────────────────────────────────────────────────────────
 
 #define BACKUP_NVS_NAMESPACE    "kb_backup"
@@ -51,7 +51,7 @@ static esp_err_t _backup_config(void)
 
     esp_err_t err = config_store_to_json(buf, BACKUP_JSON_MAX_SIZE);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Impossible de sérialiser la config pour backup");
+        ESP_LOGE(TAG, "Unable to serialize config for backup");
         free(buf);
         return err;
     }
@@ -66,9 +66,9 @@ static esp_err_t _backup_config(void)
 
     free(buf);
     if (err == ESP_OK) {
-        ESP_LOGI(TAG, "Backup config sauvegardé en NVS (%s/%s)", BACKUP_NVS_NAMESPACE, BACKUP_NVS_KEY);
+        ESP_LOGI(TAG, "Backup config saved in NVS (%s/%s)", BACKUP_NVS_NAMESPACE, BACKUP_NVS_KEY);
     } else {
-        ESP_LOGW(TAG, "Échec sauvegarde backup config : %s", esp_err_to_name(err));
+        ESP_LOGW(TAG, "Backup config save failed : %s", esp_err_to_name(err));
     }
     return err;
 }
@@ -80,7 +80,7 @@ static void _delete_backup(void)
         nvs_erase_key(nvs, BACKUP_NVS_KEY);
         nvs_commit(nvs);
         nvs_close(nvs);
-        ESP_LOGI(TAG, "Backup config supprimé (sortie propre Studio Mode)");
+        ESP_LOGI(TAG, "Backup config deleted (clean exit Studio Mode)");
     }
 }
 
@@ -101,9 +101,9 @@ static esp_err_t _restore_backup(void)
         err = config_store_update_from_json(buf);
         if (err == ESP_OK) {
             config_store_save();
-            ESP_LOGW(TAG, "⚠ Config restaurée depuis le backup (Studio Mode interrompu)");
+            ESP_LOGW(TAG, "Config restored from backup (Studio Mode interrupted)");
         } else {
-            ESP_LOGE(TAG, "Échec restauration backup — config potentiellement corrompue");
+            ESP_LOGE(TAG, "Backup restoration failed — config potentially corrupted");
         }
     }
 
@@ -122,23 +122,23 @@ static bool _backup_exists(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ÉTAT INTERNE
+//  INTERNAL STATE
 // ─────────────────────────────────────────────────────────────
 
 static bool             g_running      = false;
 static httpd_handle_t   g_server       = NULL;
 static TimerHandle_t    g_idle_timer   = NULL;
-static bool             g_netif_init   = false;   // esp_netif initialisé une seule fois
-static bool             g_event_loop   = false;   // event loop créé une seule fois
+static bool             g_netif_init   = false;   // esp_netif initialized only once
+static bool             g_event_loop   = false;   // event loop created only once
 static bool             g_spiffs_mounted = false;
 
 // ─────────────────────────────────────────────────────────────
-//  TIMER D'INACTIVITÉ
+//  INACTIVITY TIMER
 // ─────────────────────────────────────────────────────────────
 
 static void idle_timeout_cb(TimerHandle_t timer)
 {
-    ESP_LOGI(TAG, "Timeout inactivité → arrêt Studio Mode");
+    ESP_LOGI(TAG, "Inactivity timeout → stop Studio Mode");
     web_config_stop();
 }
 
@@ -150,7 +150,7 @@ static void reset_idle_timer(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  HELPERS — SERVIR DES FICHIERS STATIQUES DEPUIS SPIFFS
+//  HELPERS — SERVE STATIC FILES FROM SPIFFS
 // ─────────────────────────────────────────────────────────────
 
 static const char *mime_type(const char *path)
@@ -175,13 +175,13 @@ static void set_cors_headers(httpd_req_t *req)
     httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
 }
 
-// Envoyer un fichier depuis SPIFFS.
+// Send a file from SPIFFS.
 //
-// Le build embarqué ne stocke que des fichiers gzip (.gz) pour les types
-// compressibles (html/js/css/json/svg), les assets déjà compressés
-// (woff2/png/ico) restant bruts. On résout donc d'abord le chemin brut,
-// puis sa version .gz. Le type MIME est toujours dérivé du chemin logique
-// (sans .gz), et Content-Encoding: gzip est ajouté quand on sert un .gz.
+// The embedded build only stores gzip files (.gz) for compressible
+// types (html/js/css/json/svg), the already-compressed assets
+// (woff2/png/ico) remaining raw. So we first resolve the raw path,
+// then its .gz version. The MIME type is always derived from the logical
+// path (without .gz), and Content-Encoding: gzip is added when serving a .gz.
 static esp_err_t serve_file(httpd_req_t *req, const char *spiffs_path)
 {
     struct stat st;
@@ -190,17 +190,17 @@ static esp_err_t serve_file(httpd_req_t *req, const char *spiffs_path)
     bool is_gzip = false;
 
     if (stat(spiffs_path, &st) != 0) {
-        // Pas de version brute → tenter la version gzip
+        // No raw version → try the gzip version
         snprintf(gz_path, sizeof(gz_path), "%s.gz", spiffs_path);
         if (stat(gz_path, &st) == 0) {
             fs_path  = gz_path;
             is_gzip  = true;
         } else if (strcmp(spiffs_path, "/spiffs/index.html") == 0) {
-            // Même index.html introuvable → 404 (évite la récursion infinie)
+            // Even index.html not found → 404 (avoids infinite recursion)
             httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Not found");
             return ESP_FAIL;
         } else {
-            // Fichier non trouvé → fallback vers index.html (SPA routing)
+            // File not found → fallback to index.html (SPA routing)
             return serve_file(req, "/spiffs/index.html");
         }
     }
@@ -211,11 +211,11 @@ static esp_err_t serve_file(httpd_req_t *req, const char *spiffs_path)
         return ESP_FAIL;
     }
 
-    httpd_resp_set_type(req, mime_type(spiffs_path));  // type depuis le chemin logique
+    httpd_resp_set_type(req, mime_type(spiffs_path));  // type from the logical path
     if (is_gzip) {
         httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
     }
-    // Cache long pour les assets immutables (_app/immutable/*)
+    // Long cache for immutable assets (_app/immutable/*)
     if (strstr(spiffs_path, "immutable") || strstr(spiffs_path, "_app")) {
         httpd_resp_set_hdr(req, "Cache-Control", "public, max-age=31536000, immutable");
     } else {
@@ -228,15 +228,15 @@ static esp_err_t serve_file(httpd_req_t *req, const char *spiffs_path)
         httpd_resp_send_chunk(req, buf, n);
     }
     fclose(f);
-    httpd_resp_send_chunk(req, NULL, 0);  // Fin du chunked transfer
+    httpd_resp_send_chunk(req, NULL, 0);  // End of chunked transfer
     return ESP_OK;
 }
 
 // ─────────────────────────────────────────────────────────────
-//  HANDLERS REST
+//  REST HANDLERS
 // ─────────────────────────────────────────────────────────────
 
-// GET /api/config → retourne la config JSON complète
+// GET /api/config → returns the full JSON config
 static esp_err_t handle_get_config(httpd_req_t *req)
 {
     reset_idle_timer();
@@ -261,7 +261,7 @@ static esp_err_t handle_get_config(httpd_req_t *req)
     return ESP_OK;
 }
 
-// POST /api/config — body = JSON config complet
+// POST /api/config — body = full JSON config
 static esp_err_t handle_post_config(httpd_req_t *req)
 {
     reset_idle_timer();
@@ -292,10 +292,10 @@ static esp_err_t handle_post_config(httpd_req_t *req)
 
     if (err == ESP_OK) {
         config_store_save();
-        // Recharger le keymap avec la nouvelle config
+        // Reload the keymap with the new config
         extern void keymap_reload_from_config(void);
         keymap_reload_from_config();
-        // Recharger les LEDs (luminosité peut avoir changé dans la config)
+        // Reload the LEDs (brightness may have changed in the config)
         led_engine_apply_config();
         httpd_resp_set_type(req, "application/json");
         httpd_resp_sendstr(req, "{\"ok\":true}");
@@ -306,9 +306,9 @@ static esp_err_t handle_post_config(httpd_req_t *req)
     return ESP_OK;
 }
 
-// POST /api/active_profile — bascule légère du profil actif.
-// Corps : {"idx":N}. Évite de renvoyer toute la config juste pour changer
-// de profil. keymap_set_active_profile clamp l'index et persiste en NVS.
+// POST /api/active_profile — lightweight switch of the active profile.
+// Body : {"idx":N}. Avoids returning the whole config just to change
+// profile. keymap_set_active_profile clamps the index and persists in NVS.
 static esp_err_t handle_post_active_profile(httpd_req_t *req)
 {
     reset_idle_timer();
@@ -344,7 +344,7 @@ static esp_err_t handle_post_active_profile(httpd_req_t *req)
     return ESP_OK;
 }
 
-// GET /api/status — télémétrie live (batterie, connexion, fw)
+// GET /api/status — live telemetry (battery, connection, fw)
 static esp_err_t handle_get_status(httpd_req_t *req)
 {
     reset_idle_timer();
@@ -368,7 +368,7 @@ static esp_err_t handle_factory_reset(httpd_req_t *req)
     reset_idle_timer();
     set_cors_headers(req);
 
-    ESP_LOGW(TAG, "Factory reset demandé via Studio Mode");
+    ESP_LOGW(TAG, "Factory reset requested via Studio Mode");
     config_store_factory_reset();
     config_store_save();
 
@@ -389,17 +389,17 @@ static esp_err_t handle_options(httpd_req_t *req)
     return ESP_OK;
 }
 
-// GET /* — Servir les fichiers statiques depuis SPIFFS
+// GET /* — Serve static files from SPIFFS
 static esp_err_t handle_static(httpd_req_t *req)
 {
     reset_idle_timer();
     set_cors_headers(req);
 
-    // Construire le chemin SPIFFS
+    // Build the SPIFFS path
     char path[128];
     const char *uri = req->uri;
 
-    // Racine → index.html
+    // Root → index.html
     if (strcmp(uri, "/") == 0) {
         snprintf(path, sizeof(path), "/spiffs/index.html");
     } else {
@@ -410,7 +410,7 @@ static esp_err_t handle_static(httpd_req_t *req)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  DÉMARRAGE DU SERVEUR HTTP
+//  HTTP SERVER STARTUP
 // ─────────────────────────────────────────────────────────────
 
 static esp_err_t start_http_server(void)
@@ -421,7 +421,7 @@ static esp_err_t start_http_server(void)
     config.stack_size       = 8192;
 
     if (httpd_start(&g_server, &config) != ESP_OK) {
-        ESP_LOGE(TAG, "Échec démarrage serveur HTTP");
+        ESP_LOGE(TAG, "HTTP server startup failed");
         return ESP_FAIL;
     }
 
@@ -462,19 +462,19 @@ static esp_err_t start_http_server(void)
     };
     httpd_register_uri_handler(g_server, &options_uri);
 
-    // ── Fichiers statiques (wildcard, doit être en dernier) ───
+    // ── Static files (wildcard, must be last) ───
     httpd_uri_t static_uri = {
         .uri = "/*", .method = HTTP_GET,
         .handler = handle_static, .user_ctx = NULL
     };
     httpd_register_uri_handler(g_server, &static_uri);
 
-    ESP_LOGI(TAG, "Serveur HTTP démarré sur http://%s/", WEB_CONFIG_AP_IP);
+    ESP_LOGI(TAG, "HTTP server started on http://%s/", WEB_CONFIG_AP_IP);
     return ESP_OK;
 }
 
 // ─────────────────────────────────────────────────────────────
-//  API PUBLIQUE
+//  PUBLIC API
 // ─────────────────────────────────────────────────────────────
 
 esp_err_t web_config_init(void)
@@ -487,27 +487,27 @@ esp_err_t web_config_init(void)
         ESP_ERROR_CHECK(esp_event_loop_create_default());
         g_event_loop = true;
     }
-    ESP_LOGI(TAG, "web_config pré-initialisé");
+    ESP_LOGI(TAG, "web_config pre-initialized");
     return ESP_OK;
 }
 
 esp_err_t web_config_start(void)
 {
     if (g_running) {
-        ESP_LOGW(TAG, "Studio Mode déjà actif");
+        ESP_LOGW(TAG, "Studio Mode already active");
         return ESP_OK;
     }
 
-    ESP_LOGI(TAG, "Démarrage Studio Mode...");
+    ESP_LOGI(TAG, "Studio Mode startup...");
 
-    // ── 0. Backup / restauration config ──────────────────────
-    // Si un backup existe, cela signifie que le précédent Studio Mode a été
-    // interrompu sans sortie propre (coupure, crash...). On restaure d'abord.
+    // ── 0. Backup / config restoration ──────────────────────
+    // If a backup exists, it means the previous Studio Mode was
+    // interrupted without a clean exit (power loss, crash...). We restore first.
     if (_backup_exists()) {
-        ESP_LOGW(TAG, "Backup détecté — Studio Mode précédent interrompu. Restauration...");
+        ESP_LOGW(TAG, "Backup detected — previous Studio Mode interrupted. Restoring...");
         _restore_backup();
     }
-    // Sauvegarder la config actuelle comme point de restauration
+    // Save the current config as a restore point
     _backup_config();
 
     // ── 1. WiFi AP ────────────────────────────────────────────
@@ -516,7 +516,7 @@ esp_err_t web_config_start(void)
     wifi_init_config_t wifi_init_cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
 
-    // Limiter la puissance TX à 10 dBm (contrainte hardware)
+    // Limit TX power to 10 dBm (hardware constraint)
     ESP_ERROR_CHECK(esp_wifi_set_max_tx_power(WEB_CONFIG_WIFI_TX_POWER_DBM));
 
     wifi_config_t ap_config = {
@@ -533,12 +533,12 @@ esp_err_t web_config_start(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    esp_wifi_set_ps(WIFI_PS_MIN_MODEM);  // Économie énergie entre les requêtes HTTP
+    esp_wifi_set_ps(WIFI_PS_MIN_MODEM);  // Power saving between HTTP requests
 
-    ESP_LOGI(TAG, "WiFi AP démarré — SSID: %s, IP: %s",
+    ESP_LOGI(TAG, "WiFi AP started — SSID: %s, IP: %s",
              WEB_CONFIG_AP_SSID, WEB_CONFIG_AP_IP);
 
-    // ── 2. Monter SPIFFS ──────────────────────────────────────
+    // ── 2. Mount SPIFFS ──────────────────────────────────────
     esp_vfs_spiffs_conf_t spiffs_conf = {
         .base_path              = "/spiffs",
         .partition_label        = "spiffs",
@@ -547,19 +547,19 @@ esp_err_t web_config_start(void)
     };
     esp_err_t spiffs_err = esp_vfs_spiffs_register(&spiffs_conf);
     if (spiffs_err != ESP_OK) {
-        ESP_LOGW(TAG, "SPIFFS non monté (err=%d) — Studio sans fichiers statiques", spiffs_err);
-        // On continue quand même (API REST fonctionnelle sans UI)
+        ESP_LOGW(TAG, "SPIFFS not mounted (err=%d) — Studio without static files", spiffs_err);
+        // We continue anyway (REST API functional without UI)
     } else {
         g_spiffs_mounted = true;
         size_t total = 0, used = 0;
         esp_spiffs_info("spiffs", &total, &used);
-        ESP_LOGI(TAG, "SPIFFS monté — %d/%d bytes utilisés", (int)used, (int)total);
+        ESP_LOGI(TAG, "SPIFFS mounted — %d/%d bytes used", (int)used, (int)total);
     }
 
-    // ── 3. Démarrer le serveur HTTP ───────────────────────────
+    // ── 3. Start the HTTP server ───────────────────────────
     esp_err_t http_err = start_http_server();
     if (http_err != ESP_OK) {
-        ESP_LOGE(TAG, "Échec démarrage HTTP — annulation Studio Mode");
+        ESP_LOGE(TAG, "HTTP startup failed — cancelling Studio Mode");
         esp_wifi_stop();
         esp_wifi_deinit();
         if (g_spiffs_mounted) {
@@ -569,24 +569,24 @@ esp_err_t web_config_start(void)
         return http_err;
     }
 
-    // ── 4. Timer de timeout ───────────────────────────────────
+    // ── 4. Timeout timer ───────────────────────────────────
     g_idle_timer = xTimerCreate(
         "web_idle",
         pdMS_TO_TICKS(WEB_CONFIG_IDLE_TIMEOUT_MS),
-        pdFALSE,    // Ne se répète pas
+        pdFALSE,    // Does not repeat
         NULL,
         idle_timeout_cb
     );
     if (g_idle_timer) xTimerStart(g_idle_timer, 0);
 
-    // ── 5. Mettre à jour l'écran OLED ────────────────────────
+    // ── 5. Update the OLED screen ────────────────────────
     display_show_studio_mode(WEB_CONFIG_AP_SSID, WEB_CONFIG_AP_IP);
 
-    // ── 6. Dimmer les LEDs touches (~20% puissance RF) ────────
+    // ── 6. Dim the key LEDs (~20% RF power) ────────
     led_engine_set_brightness_global(WEB_CONFIG_LED_DIM_BRIGHTNESS);
 
     g_running = true;
-    ESP_LOGI(TAG, "Studio Mode actif — http://%s/", WEB_CONFIG_AP_IP);
+    ESP_LOGI(TAG, "Studio Mode active — http://%s/", WEB_CONFIG_AP_IP);
     return ESP_OK;
 }
 
@@ -594,43 +594,43 @@ esp_err_t web_config_stop(void)
 {
     if (!g_running) return ESP_OK;
 
-    ESP_LOGI(TAG, "Arrêt Studio Mode...");
+    ESP_LOGI(TAG, "Studio Mode stop...");
 
-    // ── 1. Arrêter le timer ───────────────────────────────────
+    // ── 1. Stop the timer ───────────────────────────────────
     if (g_idle_timer) {
         xTimerStop(g_idle_timer, 0);
         xTimerDelete(g_idle_timer, 0);
         g_idle_timer = NULL;
     }
 
-    // ── 2. Arrêter le serveur HTTP ────────────────────────────
+    // ── 2. Stop the HTTP server ────────────────────────────
     if (g_server) {
         httpd_stop(g_server);
         g_server = NULL;
     }
 
-    // ── 3. Arrêter le WiFi ────────────────────────────────────
+    // ── 3. Stop the WiFi ────────────────────────────────────
     esp_wifi_stop();
     esp_wifi_deinit();
-    ESP_LOGI(TAG, "WiFi AP arrêté");
+    ESP_LOGI(TAG, "WiFi AP stopped");
 
-    // ── 4. Démonter SPIFFS ────────────────────────────────────
+    // ── 4. Unmount SPIFFS ────────────────────────────────────
     if (g_spiffs_mounted) {
         esp_vfs_spiffs_unregister("spiffs");
         g_spiffs_mounted = false;
     }
 
-    // ── 5. Restaurer l'écran OLED ─────────────────────────────
-    display_show_status();  // Retour à l'écran de statut normal
+    // ── 5. Restore the OLED screen ─────────────────────────────
+    display_show_status();  // Return to the normal status screen
 
-    // ── 6. Restaurer la luminosité LED ────────────────────────
-    led_engine_apply_config();  // Relit brightness depuis config_store
+    // ── 6. Restore LED brightness ────────────────────────
+    led_engine_apply_config();  // Re-reads brightness from config_store
 
-    // ── 7. Supprimer le backup (sortie propre) ────────────────
+    // ── 7. Delete the backup (clean exit) ────────────────
     _delete_backup();
 
     g_running = false;
-    ESP_LOGI(TAG, "Studio Mode arrêté");
+    ESP_LOGI(TAG, "Studio Mode stopped");
     return ESP_OK;
 }
 

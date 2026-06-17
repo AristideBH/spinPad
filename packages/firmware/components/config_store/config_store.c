@@ -1,15 +1,15 @@
-// ═══════════════════════════════════════════════════════════════
-//  config_store.c — Persistence JSON ↔ NVS
+// ===============================================================
+//  config_store.c - Persistence JSON <-> NVS
 //
-//  cJSON est inclus dans ESP-IDF (composant "json").
-//  C'est une lib légère pour parser/générer du JSON en C.
+//  cJSON is included in ESP-IDF (the "json" component).
+//  It is a lightweight lib to parse/generate JSON in C.
 //
-//  Analogie JS :
-//    cJSON_Parse(str)          ≈  JSON.parse(str)
-//    cJSON_GetObjectItem(o,k)  ≈  obj[key]
-//    cJSON_GetNumberValue(i)   ≈  Number(item)
-//    cJSON_PrintUnformatted(o) ≈  JSON.stringify(obj)
-// ═══════════════════════════════════════════════════════════════
+//  JS analogy:
+//    cJSON_Parse(str)          ~  JSON.parse(str)
+//    cJSON_GetObjectItem(o,k)  ~  obj[key]
+//    cJSON_GetNumberValue(i)   ~  Number(item)
+//    cJSON_PrintUnformatted(o) ~  JSON.stringify(obj)
+// ===============================================================
 
 #include "config_store.h"
 #include "keymap.h"
@@ -23,20 +23,20 @@
 
 static const char *TAG = "CONFIG";
 
-// Namespace NVS (comme un "préfixe" de clé)
+// NVS namespace (like a key "prefix")
 #define NVS_NAMESPACE   "kb_config"
-// Clé sous laquelle on stocke le JSON complet
+// Key under which the full JSON is stored
 #define NVS_KEY_JSON    "cfg_json"
 
-// Config en RAM — une seule instance globale
+// Config in RAM - a single global instance
 static kb_config_t g_config;
-// Flag : config chargée ?
+// Flag: config loaded?
 static bool g_initialized = false;
 
-// ─────────────────────────────────────────────────────────────
-//  Keycodes supplémentaires pour les profils par défaut
-//  (non définis dans keymap.h — encodés directement)
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+//  Extra keycodes for the default profiles
+//  (not defined in keymap.h - encoded directly)
+// -------------------------------------------------------------
 #define KC_F6        ACTION(ACTION_TYPE_KC, 0x3F)
 #define KC_RIGHT     ACTION(ACTION_TYPE_KC, 0x4F)
 #define KC_LEFT      ACTION(ACTION_TYPE_KC, 0x50)
@@ -56,7 +56,7 @@ static bool g_initialized = false;
 #define KC_MACRO0    ACTION(ACTION_TYPE_MACRO, 0x00)
 #define KC_MACRO1    ACTION(ACTION_TYPE_MACRO, 0x01)
 
-// Remplir un layer : nom, 10 keycodes, et les 3 actions d'encodeur.
+// Fill a layer: name, 10 keycodes, and the 3 encoder actions.
 static void set_layer(kb_layer_t *l, const char *name,
                       const uint16_t keys[CONFIG_NUM_KEYS],
                       uint16_t cw, uint16_t ccw, uint16_t press)
@@ -68,18 +68,18 @@ static void set_layer(kb_layer_t *l, const char *name,
     l->encoder_press = press;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  CONFIG PAR DÉFAUT
-//  Appliquée quand aucune config n'existe en NVS
+// -------------------------------------------------------------
+//  DEFAULT CONFIG
+//  Applied when no config exists in NVS
 //
-//  4 profils riches (miroir de mock/keyboard-config.ts) : un
-//  nouveau board démarre directement avec des layouts utiles et
-//  de quoi exercer toute l'UI de config.
-//  Ordre des touches : [SW1, SW7, SW2, SW6, SW8, SW3, SW5, SW9, SW4, SW10]
-// ─────────────────────────────────────────────────────────────
+//  4 rich profiles (mirror of mock/keyboard-config.ts): a new
+//  board starts directly with useful layouts and enough to
+//  exercise the whole config UI.
+//  Key order: [SW1, SW7, SW2, SW6, SW8, SW3, SW5, SW9, SW4, SW10]
+// -------------------------------------------------------------
 static void apply_defaults(void)
 {
-    // memset met tout à zéro (équivalent à initialiser toutes les valeurs à 0/false)
+    // memset sets everything to zero (equivalent to initializing all values to 0/false)
     memset(&g_config, 0, sizeof(kb_config_t));
 
     g_config.version        = CONFIG_FORMAT_VERSION;
@@ -88,9 +88,9 @@ static void apply_defaults(void)
 
     kb_profile_t *p;
 
-    // ══════════════════════════════════════════════════════════
-    //  PROFIL 1 — "Productivity" : Base + Fn (MO) + Nav (TG)
-    // ══════════════════════════════════════════════════════════
+    // ==========================================================
+    //  PROFILE 1 - "Productivity": Base + Fn (MO) + Nav (TG)
+    // ==========================================================
     p = &g_config.profiles[0];
     strncpy(p->name, "Productivity", CONFIG_NAME_MAX_LEN - 1);
     p->layer_count = 3;
@@ -106,13 +106,13 @@ static void apply_defaults(void)
         TO(0),     KC_UP,     KC_PGUP,   KC_HOME,   KC_END,
         KC_LEFT,   KC_DOWN,   KC_RIGHT,  KC_PGDN,   KC_ENTER,
     }, KC_SCRL_D, KC_SCRL_U, KC_ENTER);
-    // SW4 + SW5 → macro "Salut"
+    // SW4 + SW5 -> macro "Salut"
     p->combo_count = 1;
     p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_MACRO0, .window_ms = 50, .active = true };
 
-    // ══════════════════════════════════════════════════════════
-    //  PROFIL 2 — "Creative" : Base + Tools (MO)
-    // ══════════════════════════════════════════════════════════
+    // ==========================================================
+    //  PROFILE 2 - "Creative": Base + Tools (MO)
+    // ==========================================================
     p = &g_config.profiles[1];
     strncpy(p->name, "Creative", CONFIG_NAME_MAX_LEN - 1);
     p->layer_count = 2;
@@ -124,13 +124,13 @@ static void apply_defaults(void)
         KC_NONE,   KC_W,      KC_E,      KC_R,      KC_T,
         KC_F,      KC_D,      KC_N,      KC_A,      KC_DEL,
     }, KC_SCRL_U, KC_SCRL_D, KC_NONE);
-    // SW4 + SW5 → screenshot
+    // SW4 + SW5 -> screenshot
     p->combo_count = 1;
     p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_SCRSHOT, .window_ms = 50, .active = true };
 
-    // ══════════════════════════════════════════════════════════
-    //  PROFIL 3 — "Media" : Base + Stream (TG)
-    // ══════════════════════════════════════════════════════════
+    // ==========================================================
+    //  PROFILE 3 - "Media": Base + Stream (TG)
+    // ==========================================================
     p = &g_config.profiles[2];
     strncpy(p->name, "Media", CONFIG_NAME_MAX_LEN - 1);
     p->layer_count = 2;
@@ -142,13 +142,13 @@ static void apply_defaults(void)
         TO(0),     KC_MUTE,   KC_MACRO0, KC_MACRO1, KC_APP_BROW,
         KC_APP_CALC, KC_BRT_DN, KC_BRT_UP, KC_SCRSHOT, KC_PLAY,
     }, KC_SCRL_U, KC_SCRL_D, KC_MUTE);
-    // SW4 + SW5 → mute
+    // SW4 + SW5 -> mute
     p->combo_count = 1;
     p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_MUTE, .window_ms = 50, .active = true };
 
-    // ══════════════════════════════════════════════════════════
-    //  PROFIL 4 — "Gaming" : WASD + Menu (TG)
-    // ══════════════════════════════════════════════════════════
+    // ==========================================================
+    //  PROFILE 4 - "Gaming": WASD + Menu (TG)
+    // ==========================================================
     p = &g_config.profiles[3];
     strncpy(p->name, "Gaming", CONFIG_NAME_MAX_LEN - 1);
     p->layer_count = 2;
@@ -160,13 +160,13 @@ static void apply_defaults(void)
         TG(1),     KC_ESC,    KC_F1,     KC_F2,     KC_F3,
         KC_F4,     KC_F5,     KC_F6,     KC_ENTER,  KC_NONE,
     }, KC_SCRL_U, KC_SCRL_D, KC_ENTER);
-    // SW4 + SW5 → Enter
+    // SW4 + SW5 -> Enter
     p->combo_count = 1;
     p->combos[0] = (kb_combo_t){ .keys = {8, 9}, .key_count = 2, .action = KC_ENTER, .window_ms = 50, .active = true };
 
-    // ── Macros globales de démo (référencées par Media/Stream) ──
+    // -- Global demo macros (referenced by Media/Stream) --
     g_config.macro_count = 2;
-    // Macro 0 : "Salut" → tape H A L U T
+    // Macro 0: "Salut" -> types H A L U T
     strncpy(g_config.macros[0].name, "Salut", MACRO_NAME_MAX_LEN - 1);
     {
         const uint16_t letters[] = { 0x0B, 0x04, 0x0F, 0x18, 0x17 }; // H A L U T
@@ -177,7 +177,7 @@ static void apply_defaults(void)
             m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_UP,   letters[i] };
         }
     }
-    // Macro 1 : "Entrée x2" → Enter, pause 100ms, Enter
+    // Macro 1: "Enter x2" -> Enter, pause 100ms, Enter
     strncpy(g_config.macros[1].name, "Entree x2", MACRO_NAME_MAX_LEN - 1);
     {
         kb_macro_t *m = &g_config.macros[1];
@@ -189,29 +189,29 @@ static void apply_defaults(void)
         m->steps[m->step_count++] = (kb_macro_step_t){ MACRO_STEP_KEY_UP,   0x28 };
     }
 
-    // ── Orientation ────────────────────────────────────────
+    // -- Orientation --
     g_config.orientation = ORIENTATION_0;
 
-    // ── BLE ────────────────────────────────────────────────
+    // -- BLE --
     strncpy(g_config.ble.device_name, "SpinPad", CONFIG_NAME_MAX_LEN - 1);
     strncpy(g_config.ble.slot_names[0], "PC", CONFIG_NAME_MAX_LEN - 1);
     strncpy(g_config.ble.slot_names[1], "HomeAssistant", CONFIG_NAME_MAX_LEN - 1);
     g_config.ble.active_slot = 0;
 
-    // ── Écran ──────────────────────────────────────────────
+    // -- Screen --
     g_config.display.brightness  = 180;
     g_config.display.timeout_s   = 30;
-    // Layout v1 par défaut (grille 4×4) — cf. defaultWidgets() côté TS.
-    // Champs : { type, x, y, w, h, opts={0,0}, custom_text="" }
+    // Default v1 layout (4x4 grid) - cf. defaultWidgets() on the TS side.
+    // Fields: { type, x, y, w, h, opts={0,0}, custom_text="" }
     g_config.display.widget_count = 3;
-    g_config.display.widgets[0] = (kb_widget_t){ WIDGET_BATTERY, 0, 0, 2, 1, {0,0}, "" }; // batterie haut-gauche
-    g_config.display.widgets[1] = (kb_widget_t){ WIDGET_CLOCK,   2, 0, 2, 1, {0,0}, "" }; // heure haut-droite 2×1
-    g_config.display.widgets[2] = (kb_widget_t){ WIDGET_PROFILE, 0, 1, 4, 3, {0,0}, "" }; // profil 4×3, 2ᵉ rangée
+    g_config.display.widgets[0] = (kb_widget_t){ WIDGET_BATTERY, 0, 0, 2, 1, {0,0}, "" }; // battery top-left
+    g_config.display.widgets[1] = (kb_widget_t){ WIDGET_CLOCK,   2, 0, 2, 1, {0,0}, "" }; // clock top-right 2x1
+    g_config.display.widgets[2] = (kb_widget_t){ WIDGET_PROFILE, 0, 1, 4, 3, {0,0}, "" }; // profile 4x3, 2nd row
 
-    // ── Encodeur ───────────────────────────────────────────
-    g_config.encoder.sensitivity = 1;   // 1 événement par détent
+    // -- Encoder --
+    g_config.encoder.sensitivity = 1;   // 1 event per detent
 
-    // ── Extension LED ──────────────────────────────────────
+    // -- LED extension --
     g_config.led_extension.enabled     = false;
     g_config.led_extension.count       = 10;
     g_config.led_extension.mode        = LED_EXT_MODE_MIRROR;
@@ -219,43 +219,43 @@ static void apply_defaults(void)
     g_config.led_extension.g           = 60;
     g_config.led_extension.b           = 80;
     g_config.led_extension.brightness  = 128;
-    g_config.led_extension.max_power_mw = 500;  // 500mW max par défaut (sécurité USB)
+    g_config.led_extension.max_power_mw = 500;  // 500mW max by default (USB safety)
 
-    // ── Power ──────────────────────────────────────────────
+    // -- Power --
     g_config.power.sleep_timeout_s      = 300;   // 5 minutes
     g_config.power.battery_critical_pct = 10;
     strncpy(g_config.power.battery_present, "auto", sizeof(g_config.power.battery_present) - 1);
     g_config.power.debounce_press_scans   = 3;
     g_config.power.debounce_release_scans = 5;
 
-    ESP_LOGI(TAG, "Config par défaut appliquée");
+    ESP_LOGI(TAG, "Default config applied");
 }
 
-// ─────────────────────────────────────────────────────────────
-//  PARSING JSON → STRUCT
+// -------------------------------------------------------------
+//  PARSING JSON -> STRUCT
 //
-//  Pattern récurrent en cJSON :
+//  Recurring cJSON pattern:
 //    cJSON *item = cJSON_GetObjectItem(parent, "key");
 //    if (cJSON_IsString(item)) { strncpy(dest, item->valuestring, max); }
 //    if (cJSON_IsNumber(item)) { dest = (uint8_t)item->valuedouble; }
 //    if (cJSON_IsBool(item))   { dest = cJSON_IsTrue(item); }
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
 static esp_err_t parse_json_to_config(const char *json_str)
 {
-    // Parser le JSON — retourne NULL si JSON invalide
+    // Parse the JSON - returns NULL if JSON is invalid
     cJSON *root = cJSON_Parse(json_str);
     if (!root) {
-        ESP_LOGE(TAG, "JSON invalide : %s", cJSON_GetErrorPtr());
+        ESP_LOGE(TAG, "Invalid JSON: %s", cJSON_GetErrorPtr());
         return ESP_ERR_INVALID_ARG;
     }
 
-    // ── Version ─────────────────────────────────────────────
+    // -- Version --
     cJSON *version = cJSON_GetObjectItem(root, "version");
     if (cJSON_IsNumber(version)) {
         g_config.version = (uint8_t)version->valuedouble;
     }
 
-    // ── BLE ─────────────────────────────────────────────────
+    // -- BLE --
     cJSON *ble = cJSON_GetObjectItem(root, "ble");
     if (cJSON_IsObject(ble)) {
         cJSON *name = cJSON_GetObjectItem(ble, "device_name");
@@ -277,7 +277,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
         }
     }
 
-    // ── Display ─────────────────────────────────────────────
+    // -- Display --
     cJSON *disp = cJSON_GetObjectItem(root, "display");
     if (cJSON_IsObject(disp)) {
         cJSON *br = cJSON_GetObjectItem(disp, "brightness");
@@ -305,7 +305,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
                 kw->w = cJSON_IsNumber(ww) ? (uint8_t)ww->valuedouble : 1;
                 cJSON *wh = cJSON_GetObjectItem(w, "h");
                 kw->h = cJSON_IsNumber(wh) ? (uint8_t)wh->valuedouble : 1;
-                // Options par type (cf. WIDGET_OPT_*)
+                // Options per type (cf. WIDGET_OPT_*)
                 if (cJSON_IsTrue(cJSON_GetObjectItem(w, "clock_24h")))
                     kw->opts[0] |= WIDGET_OPT_CLOCK_24H;
                 if (cJSON_IsTrue(cJSON_GetObjectItem(w, "clock_show_date")))
@@ -315,7 +315,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
                     strncpy(kw->custom_text, wtxt->valuestring, WIDGET_MAX_CUSTOM_LEN - 1);
                     kw->custom_text[WIDGET_MAX_CUSTOM_LEN - 1] = '\0';
                 }
-                // Icône (base64 → 72 octets 1bpp ; type ICON uniquement)
+                // Icon (base64 -> 72 bytes 1bpp; ICON type only)
                 cJSON *wicon = cJSON_GetObjectItem(w, "icon");
                 if (cJSON_IsString(wicon) && wicon->valuestring[0]) {
                     size_t olen = 0;
@@ -327,7 +327,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
         }
     }
 
-    // ── Power ───────────────────────────────────────────────
+    // -- Power --
     cJSON *power = cJSON_GetObjectItem(root, "power");
     if (cJSON_IsObject(power)) {
         cJSON *st = cJSON_GetObjectItem(power, "sleep_timeout_s");
@@ -338,7 +338,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
 
         cJSON *bp = cJSON_GetObjectItem(power, "battery_present");
         if (cJSON_IsString(bp) && bp->valuestring) {
-            // Accepter uniquement "auto" / "yes" / "no"
+            // Accept only "auto" / "yes" / "no"
             const char *v = bp->valuestring;
             if (strcmp(v, "auto") == 0 || strcmp(v, "yes") == 0 || strcmp(v, "no") == 0) {
                 strncpy(g_config.power.battery_present, v, sizeof(g_config.power.battery_present) - 1);
@@ -353,7 +353,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
             g_config.power.debounce_release_scans = (uint8_t)drs->valuedouble;
     }
 
-    // ── Profils ─────────────────────────────────────────────
+    // -- Profiles --
     cJSON *profiles = cJSON_GetObjectItem(root, "profiles");
     if (cJSON_IsArray(profiles)) {
         int profile_count = cJSON_GetArraySize(profiles);
@@ -369,18 +369,18 @@ static esp_err_t parse_json_to_config(const char *json_str)
                 strncpy(kp->name, pname->valuestring, CONFIG_NAME_MAX_LEN - 1);
             }
 
-            // ── Icône du profil (base64 → 72 octets 1bpp) ──
+            // -- Profile icon (base64 -> 72 bytes 1bpp) --
             memset(kp->icon, 0, PROFILE_ICON_BYTES);
             cJSON *picon = cJSON_GetObjectItem(prof, "icon");
             if (cJSON_IsString(picon) && picon->valuestring[0]) {
                 size_t olen = 0;
-                // Décodage tolérant : on ignore une icône mal formée.
+                // Tolerant decoding: a malformed icon is ignored.
                 mbedtls_base64_decode(kp->icon, PROFILE_ICON_BYTES, &olen,
                                       (const unsigned char *)picon->valuestring,
                                       strlen(picon->valuestring));
             }
 
-            // ── Layers du profil ──────────────────────────
+            // -- Profile layers --
             cJSON *layers = cJSON_GetObjectItem(prof, "layers");
             if (cJSON_IsArray(layers)) {
                 int lcount = cJSON_GetArraySize(layers);
@@ -396,7 +396,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
                         strncpy(kl->name, lname->valuestring, CONFIG_NAME_MAX_LEN - 1);
                     }
 
-                    // Tableau de keycodes
+                    // Keycode array
                     cJSON *keys = cJSON_GetObjectItem(layer, "keys");
                     if (cJSON_IsArray(keys)) {
                         for (int k = 0; k < CONFIG_NUM_KEYS && k < cJSON_GetArraySize(keys); k++) {
@@ -426,7 +426,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
                 }
             }
 
-            // ── Combos du profil ──────────────────────────
+            // -- Profile combos --
             cJSON *combos = cJSON_GetObjectItem(prof, "combos");
             if (cJSON_IsArray(combos)) {
                 int ccount = cJSON_GetArraySize(combos);
@@ -460,7 +460,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
         }
     }
 
-    // ── Macros globales (niveau racine, partagées par tous les profils) ──
+    // -- Global macros (root level, shared by all profiles) --
     cJSON *macros = cJSON_GetObjectItem(root, "macros");
     if (cJSON_IsArray(macros)) {
         int mcount = cJSON_GetArraySize(macros);
@@ -513,14 +513,14 @@ static esp_err_t parse_json_to_config(const char *json_str)
         g_config.active_profile = (uint8_t)ap->valuedouble;
     }
 
-    // ── Orientation ─────────────────────────────────────────
+    // -- Orientation --
     cJSON *orient = cJSON_GetObjectItem(root, "orientation");
     if (cJSON_IsNumber(orient)) {
         uint8_t o = (uint8_t)orient->valuedouble;
         if (o <= ORIENTATION_270) g_config.orientation = (kb_orientation_t)o;
     }
 
-    // ── Encodeur ────────────────────────────────────────────
+    // -- Encoder --
     cJSON *enc_cfg = cJSON_GetObjectItem(root, "encoder");
     if (cJSON_IsObject(enc_cfg)) {
         cJSON *sens = cJSON_GetObjectItem(enc_cfg, "sensitivity");
@@ -530,7 +530,7 @@ static esp_err_t parse_json_to_config(const char *json_str)
         }
     }
 
-    // ── Extension LED ────────────────────────────────────────
+    // -- LED extension --
     cJSON *led_ext = cJSON_GetObjectItem(root, "led_extension");
     if (cJSON_IsObject(led_ext)) {
         cJSON *en = cJSON_GetObjectItem(led_ext, "enabled");
@@ -562,32 +562,32 @@ static esp_err_t parse_json_to_config(const char *json_str)
         if (cJSON_IsNumber(mp)) g_config.led_extension.max_power_mw = (uint16_t)mp->valuedouble;
     }
 
-    // Libérer la mémoire allouée par cJSON
+    // Free the memory allocated by cJSON
     cJSON_Delete(root);
-    ESP_LOGI(TAG, "JSON parsé avec succès");
+    ESP_LOGI(TAG, "JSON parsed successfully");
     return ESP_OK;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+//  PUBLIC FUNCTIONS
+// -------------------------------------------------------------
 
 esp_err_t config_store_init(void)
 {
-    apply_defaults();  // Toujours partir des defaults
+    apply_defaults();  // Always start from the defaults
 
-    // Ouvrir le namespace NVS en lecture seule
+    // Open the NVS namespace read-only
     nvs_handle_t nvs;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
-        // Pas encore de config sauvegardée → garder les defaults
-        ESP_LOGI(TAG, "Pas de config en NVS, utilisation des défauts");
+        // No config saved yet -> keep the defaults
+        ESP_LOGI(TAG, "No config in NVS, using defaults");
         g_initialized = true;
         return ESP_OK;
     }
     if (err != ESP_OK) return err;
 
-    // Lire la taille du JSON stocké
+    // Read the size of the stored JSON
     size_t json_size = 0;
     err = nvs_get_str(nvs, NVS_KEY_JSON, NULL, &json_size);
     if (err != ESP_OK || json_size == 0) {
@@ -596,8 +596,8 @@ esp_err_t config_store_init(void)
         return ESP_OK;
     }
 
-    // Allouer et lire le JSON
-    // malloc en C = allouer de la mémoire dynamiquement (comme new en JS)
+    // Allocate and read the JSON
+    // malloc in C = allocate memory dynamically (like new in JS)
     char *json_buf = malloc(json_size);
     if (!json_buf) {
         nvs_close(nvs);
@@ -611,7 +611,7 @@ esp_err_t config_store_init(void)
         parse_json_to_config(json_buf);
     }
 
-    free(json_buf);  // Libérer la mémoire (comme GC manuel)
+    free(json_buf);  // Free the memory (like manual GC)
     g_initialized = true;
     return ESP_OK;
 }
@@ -635,7 +635,7 @@ esp_err_t config_store_set_active_profile(uint8_t idx, uint8_t *applied)
 
     if (applied) *applied = idx;
 
-    // No-op si déjà actif : éviter une écriture NVS inutile.
+    // No-op if already active: avoid a useless NVS write.
     if (g_config.active_profile == idx) return ESP_OK;
 
     g_config.active_profile = idx;
@@ -644,14 +644,14 @@ esp_err_t config_store_set_active_profile(uint8_t idx, uint8_t *applied)
 
 esp_err_t config_store_save(void)
 {
-    // Sérialiser en JSON
+    // Serialize to JSON
     char *json_buf = malloc(CONFIG_JSON_MAX_SIZE);
     if (!json_buf) return ESP_ERR_NO_MEM;
 
     esp_err_t err = config_store_to_json(json_buf, CONFIG_JSON_MAX_SIZE);
     if (err != ESP_OK) { free(json_buf); return err; }
 
-    // Écrire en NVS
+    // Write to NVS
     nvs_handle_t nvs;
     err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs);
     if (err != ESP_OK) { free(json_buf); return err; }
@@ -662,13 +662,13 @@ esp_err_t config_store_save(void)
     nvs_close(nvs);
     free(json_buf);
 
-    ESP_LOGI(TAG, "Config sauvegardée en NVS");
+    ESP_LOGI(TAG, "Config saved to NVS");
     return err;
 }
 
 esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
 {
-    // Construire le JSON depuis la struct
+    // Build the JSON from the struct
     cJSON *root = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(root, "version",        g_config.version);
@@ -724,7 +724,7 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
                 if (kw->icon[bi]) { icon_set = true; break; }
             }
             if (icon_set) {
-                unsigned char icon_b64[128];   // 72 o → 96 chars + marge
+                unsigned char icon_b64[128];   // 72 b -> 96 chars + margin
                 size_t b64_len = 0;
                 if (mbedtls_base64_encode(icon_b64, sizeof(icon_b64), &b64_len,
                                           kw->icon, PROFILE_ICON_BYTES) == 0) {
@@ -744,20 +744,20 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
     cJSON_AddNumberToObject(power, "debounce_press_scans",   g_config.power.debounce_press_scans);
     cJSON_AddNumberToObject(power, "debounce_release_scans", g_config.power.debounce_release_scans);
 
-    // Profils
+    // Profiles
     cJSON *profiles = cJSON_AddArrayToObject(root, "profiles");
     for (int p = 0; p < g_config.profile_count; p++) {
         kb_profile_t *kp = &g_config.profiles[p];
         cJSON *prof = cJSON_CreateObject();
         cJSON_AddStringToObject(prof, "name", kp->name);
 
-        // Icône → base64 (uniquement si non vide, pour économiser de la place)
+        // Icon -> base64 (only if non-empty, to save space)
         bool icon_set = false;
         for (int bi = 0; bi < PROFILE_ICON_BYTES; bi++) {
             if (kp->icon[bi]) { icon_set = true; break; }
         }
         if (icon_set) {
-            unsigned char icon_b64[128];  // 72 o → 96 chars + marge
+            unsigned char icon_b64[128];  // 72 b -> 96 chars + margin
             size_t b64_len = 0;
             if (mbedtls_base64_encode(icon_b64, sizeof(icon_b64), &b64_len,
                                       kp->icon, PROFILE_ICON_BYTES) == 0) {
@@ -806,7 +806,7 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
         cJSON_AddItemToArray(profiles, prof);
     }
 
-    // ── Macros globales (niveau racine) ───────────────────────
+    // -- Global macros (root level) --
     cJSON *macros_out = cJSON_AddArrayToObject(root, "macros");
     for (int mi = 0; mi < MACRO_COUNT; mi++) {
         kb_macro_t *km = &g_config.macros[mi];
@@ -827,7 +827,7 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
         cJSON_AddItemToArray(macros_out, macro_obj);
     }
 
-    // Sérialiser en string (non formatté pour économiser de la place)
+    // Serialize to a string (unformatted to save space)
     char *json_str = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
 
@@ -847,7 +847,7 @@ esp_err_t config_store_to_json(char *buffer, size_t buffer_size)
 esp_err_t config_store_factory_reset(void)
 {
     apply_defaults();
-    // Effacer la clé en NVS
+    // Erase the key in NVS
     nvs_handle_t nvs;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs);
     if (err == ESP_OK) {
@@ -855,6 +855,6 @@ esp_err_t config_store_factory_reset(void)
         nvs_commit(nvs);
         nvs_close(nvs);
     }
-    ESP_LOGI(TAG, "Factory reset effectué");
+    ESP_LOGI(TAG, "Factory reset done");
     return ESP_OK;
 }

@@ -1,18 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
-//  display.c — Écran SSD1306 72×40px via I2C
+//  display.c — SSD1306 72×40px screen via I2C
 //
-//  Framebuffer 72×40 (5 pages de 8px × 72 colonnes = 360 bytes).
-//  Le SSD1306 72×40 a son buffer actif décalé à la colonne 28
-//  dans la mémoire interne 128 colonnes (offset géré dans fb_flush).
+//  Framebuffer 72×40 (5 pages of 8px × 72 columns = 360 bytes).
+//  The SSD1306 72×40 has its active buffer shifted to column 28
+//  in the internal 128-column memory (offset handled in fb_flush).
 //
 //  Layout 72×40 :
-//    y= 0- 7  BLE status (icône + nom du slot)
-//    y= 8     séparateur
-//    y= 9-16  Layer actif
-//    y=17     séparateur
-//    y=18-25  Profil actif
-//    y=26     séparateur
-//    y=27-34  Batterie (icône + barre + %)
+//    y= 0- 7  BLE status (icon + slot name)
+//    y= 8     separator
+//    y= 9-16  Active layer
+//    y=17     separator
+//    y=18-25  Active profile
+//    y=26     separator
+//    y=27-34  Battery (icon + bar + %)
 // ═══════════════════════════════════════════════════════════════
 
 #include "display.h"
@@ -48,12 +48,12 @@ static esp_lcd_panel_handle_t g_panel = NULL;
 static bool g_display_on = true;
 
 // ─────────────────────────────────────────────────────────────
-//  POLICE 5×7
+//  5×7 FONT
 // ─────────────────────────────────────────────────────────────
 #include "font5x7.h"
 
 // ─────────────────────────────────────────────────────────────
-//  PRIMITIVES DE DESSIN
+//  DRAWING PRIMITIVES
 // ─────────────────────────────────────────────────────────────
 
 static void fb_clear(void)
@@ -88,7 +88,7 @@ static int fb_draw_char(int x, int y, char c, bool invert)
             fb_draw_pixel(x + col, y + row, pixel);
         }
     }
-    return 6;  // 5px + 1px espace
+    return 6;  // 5px + 1px space
 }
 
 static void fb_draw_string(int x, int y, const char *str, bool invert)
@@ -99,20 +99,20 @@ static void fb_draw_string(int x, int y, const char *str, bool invert)
     }
 }
 
-// Envoie le framebuffer vers le SSD1306 72×40.
-// Pour 0°/180°, la rotation est gérée en hardware via panel_mirror().
-// Pour 90°/270°, on fait une rotation logicielle pixel par pixel.
+// Sends the framebuffer to the SSD1306 72×40.
+// For 0°/180°, the rotation is handled in hardware via panel_mirror().
+// For 90°/270°, we do a software rotation pixel by pixel.
 static void fb_flush(void)
 {
     if (!g_panel || !g_display_on) return;
 
     if (g_orientation == ORIENTATION_0 || g_orientation == ORIENTATION_180) {
-        // Hardware mirror, envoi direct
+        // Hardware mirror, direct send
         esp_lcd_panel_draw_bitmap(g_panel, 0, 0, FB_WIDTH, FB_HEIGHT, g_framebuffer);
     } else {
-        // Rotation logicielle 90° / 270°
-        // Le framebuffer source est 72×40.
-        // Après rotation, on envoie un buffer 72×40 (même dimensions physiques).
+        // Software rotation 90° / 270°
+        // The source framebuffer is 72×40.
+        // After rotation, we send a 72×40 buffer (same physical dimensions).
         static uint8_t rotated[FB_PAGES][FB_WIDTH];
         memset(rotated, 0, sizeof(rotated));
 
@@ -131,7 +131,7 @@ static void fb_flush(void)
                     dx = sy;
                     dy = FB_WIDTH - 1 - sx;
                 }
-                // Clip aux dimensions physiques
+                // Clip to physical dimensions
                 if (dx >= 0 && dx < FB_WIDTH && dy >= 0 && dy < FB_HEIGHT) {
                     rotated[dy / 8][dx] |= (1 << (dy % 8));
                 }
@@ -142,7 +142,7 @@ static void fb_flush(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ICÔNES 8×8
+//  8×8 ICONS
 // ─────────────────────────────────────────────────────────────
 
 static const uint8_t ICON_BATTERY[8] = {
@@ -160,30 +160,30 @@ static void fb_draw_icon(int x, int y, const uint8_t icon[8])
 }
 
 // ─────────────────────────────────────────────────────────────
-//  GRILLE MOSAÏQUE 4×4
+//  4×4 MOSAIC GRID
 //
-//  Layout logique 4×4 dessiné en espace orientation-0 (framebuffer
-//  72×40). L'anneau extérieur (col/row 0 et 3) = bande fixe de
-//  WIDGET_MIN_BAND_PX ; les 2 pistes centrales se partagent le reste
-//  (1fr). L'orientation physique est appliquée par fb_flush (rotation
-//  logicielle 90/270, mirror hardware 180/270) — le rendu reste 72×40.
+//  Logical 4×4 layout drawn in orientation-0 space (framebuffer
+//  72×40). The outer ring (col/row 0 and 3) = fixed band of
+//  WIDGET_MIN_BAND_PX ; the 2 central tracks share the rest
+//  (1fr). The physical orientation is applied by fb_flush (software
+//  rotation 90/270, hardware mirror 180/270) — the render stays 72×40.
 //
-//  Chaque widget occupe une boîte (x, y, w, h) en cellules. Chaque
-//  paire (type, taille) = une variante de dessin distincte.
+//  Each widget occupies a box (x, y, w, h) in cells. Each
+//  pair (type, size) = a distinct drawing variant.
 // ─────────────────────────────────────────────────────────────
 
-// Bord gauche (px) de la colonne de grille c ∈ [0..WIDGET_GRID_COLS].
+// Left edge (px) of grid column c ∈ [0..WIDGET_GRID_COLS].
 static int cell_col_edge(int c)
 {
     const int band = WIDGET_MIN_BAND_PX;
     const int mid  = (FB_WIDTH - 2 * band) / (WIDGET_GRID_COLS - 2);
     if (c <= 0)                    return 0;
     if (c >= WIDGET_GRID_COLS)     return FB_WIDTH;
-    if (c == WIDGET_GRID_COLS - 1) return FB_WIDTH - band;   // dernière piste = bande
+    if (c == WIDGET_GRID_COLS - 1) return FB_WIDTH - band;   // last track = band
     return band + (c - 1) * mid;
 }
 
-// Bord haut (px) de la rangée de grille r ∈ [0..WIDGET_GRID_ROWS].
+// Top edge (px) of grid row r ∈ [0..WIDGET_GRID_ROWS].
 static int cell_row_edge(int r)
 {
     const int band = WIDGET_MIN_BAND_PX;
@@ -194,11 +194,11 @@ static int cell_row_edge(int r)
     return band + (r - 1) * mid;
 }
 
-// Dessine une chaîne centrée (H+V) dans la boîte (bx,by,bw,bh), clippée.
+// Draws a centered string (H+V) in the box (bx,by,bw,bh), clipped.
 static void fb_draw_string_in(int bx, int by, int bw, int bh, const char *str, bool invert)
 {
     int len = (int)strlen(str);
-    int tw  = len > 0 ? len * 6 - 1 : 0;   // dernière lettre sans l'espace
+    int tw  = len > 0 ? len * 6 - 1 : 0;   // last letter without the space
     int x   = bx + (bw - tw) / 2;
     int y   = by + (bh - 7) / 2;
     if (x < bx) x = bx;
@@ -222,7 +222,7 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
     switch (w->type) {
 
     case WIDGET_BLE_STATUS:
-        // 1×1 : icône BLE (état = connecté/non géré ailleurs par l'app).
+        // 1×1 : BLE icon (state = connected/not handled elsewhere by the app).
         if (ble_hid_is_connected())
             fb_draw_icon(px + (pw - 8) / 2, py + (ph - 8) / 2, ICON_BLE);
         break;
@@ -231,13 +231,13 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
         if (!battery_is_present()) break;
         uint8_t pct = battery_get_percent();
         if (wide) {
-            // 2×1 : icône + pourcentage
+            // 2×1 : icon + percentage
             fb_draw_icon(px + 1, py + (ph - 8) / 2, ICON_BATTERY);
             char b[6];
             snprintf(b, sizeof(b), "%u%%", pct);
             fb_draw_string_in(px + 11, py, pw - 11, ph, b, false);
         } else {
-            // 1×1 : icône seule
+            // 1×1 : icon only
             fb_draw_icon(px + (pw - 8) / 2, py + (ph - 8) / 2, ICON_BATTERY);
         }
         break;
@@ -247,11 +247,11 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
         uint8_t layer = keymap_get_active_layer();
         char b[16];
         if (wide) {
-            // 2×1 : "L:<nom>"
+            // 2×1 : "L:<name>"
             const char *ln = cfg->profiles[cfg->active_profile].layers[layer].name;
             snprintf(b, sizeof(b), "L:%s", ln);
         } else {
-            // 1×1 : numéro du layer
+            // 1×1 : layer number
             snprintf(b, sizeof(b), "%u", (unsigned)(layer + 1));
         }
         fb_draw_string_in(px, py, pw, ph, b, false);
@@ -259,7 +259,7 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
     }
 
     case WIDGET_PROFILE: {
-        // 2×1 / 2×2 : nom du profil centré (variante 2×2 = plus d'espace vertical)
+        // 2×1 / 2×2 : centered profile name (variant 2×2 = more vertical space)
         fb_draw_string_in(px, py, pw, ph, cfg->profiles[cfg->active_profile].name, false);
         break;
     }
@@ -282,7 +282,7 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
         snprintf(tbuf, sizeof(tbuf), "%02u:%02u", disp_h, min);
 
         if (tall && (w->opts[0] & WIDGET_OPT_CLOCK_SHOW_DATE)) {
-            // 2×2 + date : heure en haut, JJ/MM en bas
+            // 2×2 + date : time on top, DD/MM at the bottom
             fb_draw_string_in(px, py, pw, ph / 2, tbuf, false);
             time_t    t = (time_t)unix_now;
             struct tm tmv;
@@ -297,8 +297,8 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
     }
 
     case WIDGET_ICON: {
-        // Bitmap 24×24 1bpp mis à l'échelle (nearest-neighbor) dans la boîte (px,py,pw,ph).
-        // Layout colonne-majeur : byteIndex = x * 3 + (y >> 3), bit = y & 7.
+        // Bitmap 24×24 1bpp scaled (nearest-neighbor) in the box (px,py,pw,ph).
+        // Column-major layout : byteIndex = x * 3 + (y >> 3), bit = y & 7.
         if (pw <= 0 || ph <= 0) break;
         for (int dy = 0; dy < ph; dy++) {
             int sy = (dy * PROFILE_ICON_H) / ph;
@@ -329,7 +329,7 @@ static void render_screen(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
+//  PUBLIC FUNCTIONS
 // ─────────────────────────────────────────────────────────────
 
 esp_err_t display_init(void)
@@ -367,20 +367,20 @@ esp_err_t display_init(void)
     ESP_ERROR_CHECK(esp_lcd_panel_reset(g_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_init(g_panel));
 
-    // Le SSD1306 72×40 n'utilise que 72 des 128 colonnes internes.
-    // L'offset colonne 28 est appliqué via mirror/gap pour que les
-    // données envoyées à x=0 arrivent bien sur la colonne physique 0.
+    // The SSD1306 72×40 only uses 72 of the 128 internal columns.
+    // The column 28 offset is applied via mirror/gap so that the
+    // data sent at x=0 arrives properly on physical column 0.
     ESP_ERROR_CHECK(esp_lcd_panel_set_gap(g_panel, DISPLAY_COL_OFFSET, 0));
 
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(g_panel, true));
 
     fb_clear();
 
-    // Appliquer l'orientation depuis la config initiale
+    // Apply the orientation from the initial config
     const kb_config_t *cfg = config_store_get();
     display_apply_orientation(cfg->orientation);
 
-    ESP_LOGI(TAG, "Écran SSD1306 %dx%d initialisé", FB_WIDTH, FB_HEIGHT);
+    ESP_LOGI(TAG, "SSD1306 %dx%d screen initialized", FB_WIDTH, FB_HEIGHT);
     return ESP_OK;
 }
 
@@ -390,18 +390,18 @@ void display_apply_orientation(kb_orientation_t orient)
 
     if (!g_panel) return;
 
-    // 0° et 90° : pas de mirror hardware (ou géré par la rotation logicielle)
-    // 180° et 270° : mirror horizontal+vertical pour compléter la rotation hardware
+    // 0° and 90° : no hardware mirror (or handled by the software rotation)
+    // 180° and 270° : horizontal+vertical mirror to complete the hardware rotation
     bool mirror_x = (orient == ORIENTATION_180 || orient == ORIENTATION_270);
     bool mirror_y = (orient == ORIENTATION_180 || orient == ORIENTATION_270);
     esp_lcd_panel_mirror(g_panel, mirror_x, mirror_y);
-    ESP_LOGI(TAG, "Orientation %d° appliquée", orient * 90);
+    ESP_LOGI(TAG, "Orientation %d° applied", orient * 90);
 }
 
 void display_show_boot_screen(void)
 {
     fb_clear();
-    // Centre approximatif : 72/2 - 9*6/2 = 36 - 27 = 9
+    // Approximate center : 72/2 - 9*6/2 = 36 - 27 = 9
     fb_draw_string(9, 10, "SpinPad", false);
     fb_draw_string(6, 24, "Loading...", false);
     fb_flush();
@@ -425,15 +425,15 @@ void display_set_sleep(bool sleep)
 
 // ── Studio Mode ──────────────────────────────────────────────
 //
-//  Écran Studio Mode :
+//  Studio Mode screen :
 //    ╔══════════════════╗
-//    ║  STUDIO MODE     ║   y= 2 (ligne 1)
-//    ║──────────────────║   y= 9 (séparateur)
+//    ║  STUDIO MODE     ║   y= 2 (line 1)
+//    ║──────────────────║   y= 9 (separator)
 //    ║  SpinPad-Config  ║   y=13 (SSID)
 //    ║  192.168.4.1     ║   y=25 (IP)
 //    ╚══════════════════╝
 
-static bool g_studio_mode_screen = false;    // True = écran verrouillé sur Studio Mode
+static bool g_studio_mode_screen = false;    // True = screen locked on Studio Mode
 static kb_orientation_t g_orientation = ORIENTATION_0;
 
 void display_show_studio_mode(const char *ssid, const char *ip)
@@ -442,17 +442,17 @@ void display_show_studio_mode(const char *ssid, const char *ip)
 
     fb_clear();
 
-    // Titre centré
+    // Centered title
     int title_x = (FB_WIDTH - (int)(strlen("STUDIO MODE") * 6)) / 2;
     if (title_x < 0) title_x = 0;
     fb_draw_string(title_x, 1, "STUDIO MODE", false);
 
-    // Séparateur horizontal
+    // Horizontal separator
     for (int x = 0; x < FB_WIDTH; x++) {
-        g_framebuffer[1][x] |= 0x01;   // Pixel tout en bas de la page 1 (y=8)
+        g_framebuffer[1][x] |= 0x01;   // Pixel at the very bottom of page 1 (y=8)
     }
 
-    // SSID (tronqué si trop long pour 72px)
+    // SSID (truncated if too long for 72px)
     char ssid_buf[13];
     snprintf(ssid_buf, sizeof(ssid_buf), "%s", ssid);
     int ssid_x = (FB_WIDTH - (int)(strlen(ssid_buf) * 6)) / 2;
@@ -465,13 +465,13 @@ void display_show_studio_mode(const char *ssid, const char *ip)
     fb_draw_string(ip_x, 25, ip, false);
 
     fb_flush();
-    ESP_LOGI(TAG, "Écran Studio Mode affiché — %s / %s", ssid, ip);
+    ESP_LOGI(TAG, "Studio Mode screen displayed — %s / %s", ssid, ip);
 }
 
 void display_show_status(void)
 {
     g_studio_mode_screen = false;
-    // Forcer une mise à jour vers l'écran de statut normal
+    // Force an update to the normal status screen
     display_update();
 }
 
@@ -480,5 +480,5 @@ void display_set_clock(uint32_t unix_ts)
     kb_config_t *cfg = (kb_config_t *)config_store_get();  // cast const away for clock only
     cfg->display.clock_base_unix_ts  = unix_ts;
     cfg->display.clock_base_uptime_ms = (uint64_t)(esp_timer_get_time() / 1000);
-    ESP_LOGI(TAG, "Horloge synchronisée : %lu", (unsigned long)unix_ts);
+    ESP_LOGI(TAG, "Clock synced : %lu", (unsigned long)unix_ts);
 }

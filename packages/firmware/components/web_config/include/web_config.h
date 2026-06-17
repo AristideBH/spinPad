@@ -1,14 +1,14 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════
-//  web_config.h — Studio Mode : WiFi AP + serveur HTTP
+//  web_config.h — Studio Mode : WiFi AP + HTTP server
 //
-//  Le Studio Mode permet de configurer le SpinPad sans fil :
-//  - Démarre un point d'accès WiFi "SpinPad-Config"
-//  - Sert l'app Studio via HTTP depuis la partition SPIFFS
-//  - Expose une API REST pour lire/écrire la config JSON
+//  Studio Mode lets you configure the SpinPad wirelessly :
+//  - Starts a WiFi access point "SpinPad-Config"
+//  - Serves the Studio app via HTTP from the SPIFFS partition
+//  - Exposes a REST API to read/write the JSON config
 //
-//  Déclenchement : SW8 + SW9 maintenus 3 secondes (dans keymap.c)
-//  Auto-exit : timeout de WEB_CONFIG_IDLE_TIMEOUT_MS sans activité HTTP
+//  Trigger : SW8 + SW9 held for 3 seconds (in keymap.c)
+//  Auto-exit : timeout of WEB_CONFIG_IDLE_TIMEOUT_MS without HTTP activity
 // ═══════════════════════════════════════════════════════════════
 
 #include "esp_err.h"
@@ -17,49 +17,49 @@
 // ── Configuration ────────────────────────────────────────────────
 
 #define WEB_CONFIG_AP_SSID            "SpinPad-Config"
-#define WEB_CONFIG_AP_PASS            ""               // Réseau ouvert
+#define WEB_CONFIG_AP_PASS            ""               // Open network
 #define WEB_CONFIG_AP_CHANNEL         1
 #define WEB_CONFIG_AP_MAX_CONNECTIONS 4
-#define WEB_CONFIG_AP_IP              "192.168.4.1"    // IP par défaut softAP ESP32
+#define WEB_CONFIG_AP_IP              "192.168.4.1"    // ESP32 softAP default IP
 
-// Puissance TX WiFi max : 10 dBm (contrainte hardware VSYS > 4.5V)
-#define WEB_CONFIG_WIFI_TX_POWER_DBM  40               // Unité = 0.25 dBm → 10 dBm
+// Max WiFi TX power : 10 dBm (hardware constraint VSYS > 4.5V)
+#define WEB_CONFIG_WIFI_TX_POWER_DBM  40               // Unit = 0.25 dBm → 10 dBm
 
-// Timeout d'inactivité avant exit automatique : 5 minutes
+// Inactivity timeout before automatic exit : 5 minutes
 #define WEB_CONFIG_IDLE_TIMEOUT_MS    (5 * 60 * 1000)
 
-// Luminosité des LEDs touches en Studio Mode (environ 20% de la normale)
+// Brightness of the key LEDs in Studio Mode (about 20% of normal)
 #define WEB_CONFIG_LED_DIM_BRIGHTNESS 50               // 0–255
 
-// ── API publique ─────────────────────────────────────────────────
+// ── Public API ─────────────────────────────────────────────────
 
 /**
- * Pré-initialiser le réseau (esp_netif).
- * À appeler une seule fois dans app_main(), avant keymap_init().
+ * Pre-initialize the network (esp_netif).
+ * To be called only once in app_main(), before keymap_init().
  */
 esp_err_t web_config_init(void);
 
 /**
- * Démarrer le Studio Mode :
- *  - Lance le WiFi AP
- *  - Monte SPIFFS
- *  - Démarre le serveur HTTP
- *  - Envoie la commande LED dim
- *  - Met à jour l'écran OLED
+ * Start Studio Mode :
+ *  - Launches the WiFi AP
+ *  - Mounts SPIFFS
+ *  - Starts the HTTP server
+ *  - Sends the LED dim command
+ *  - Updates the OLED screen
  */
 esp_err_t web_config_start(void);
 
 /**
- * Arrêter le Studio Mode :
- *  - Arrête le serveur HTTP
- *  - Stoppe le WiFi
- *  - Démonte SPIFFS
- *  - Restaure la luminosité LEDs
- *  - Remet l'écran OLED en mode normal
+ * Stop Studio Mode :
+ *  - Stops the HTTP server
+ *  - Stops the WiFi
+ *  - Unmounts SPIFFS
+ *  - Restores the LED brightness
+ *  - Returns the OLED screen to normal mode
  */
 esp_err_t web_config_stop(void);
 
 /**
- * Retourne true si le Studio Mode est actif.
+ * Returns true if Studio Mode is active.
  */
 bool web_config_is_running(void);

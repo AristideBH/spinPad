@@ -1,27 +1,27 @@
 // ═══════════════════════════════════════════════════════════════
-//  main.c — Point d'entrée du firmware
+//  main.c — Firmware entry point
 //
-//  Rôle : initialiser tous les composants dans le bon ordre,
-//  puis lancer la tâche principale de scan clavier.
+//  Role: initialize all components in the right order,
+//  then start the main keyboard scan task.
 //
-//  Ordre d'init important :
-//    1. NVS (stockage flash) — en premier, tout le monde en a besoin
-//    2. Config — charge le JSON depuis NVS
-//    3. Keymap — initialise avec la config chargée
-//    4. USB HID / BLE HID — interfaces avec l'OS
-//    5. Encoder, Display, Battery — périphériques
-//    6. Power manager — en dernier (gère le wake-up du sleep)
+//  Important init order:
+//    1. NVS (flash storage) — first, everyone needs it
+//    2. Config — loads the JSON from NVS
+//    3. Keymap — initializes with the loaded config
+//    4. USB HID / BLE HID — interfaces with the OS
+//    5. Encoder, Display, Battery — peripherals
+//    6. Power manager — last (handles wake from sleep)
 // ═══════════════════════════════════════════════════════════════
 
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "nvs_flash.h"          // Stockage clé-valeur en flash
-#include "esp_log.h"            // Système de logs ESP-IDF
+#include "nvs_flash.h"          // Key-value storage in flash
+#include "esp_log.h"            // ESP-IDF logging system
 #include "esp_task_wdt.h"       // Task watchdog
 #include "esp_heap_caps.h"      // Heap monitoring
 
-// Nos composants
+// Our components
 #include "kb_config.h"
 #include "config_store.h"
 #include "keymap.h"
@@ -34,80 +34,80 @@
 #include "power_mgmt.h"
 #include "web_config.h"
 
-// Tag pour les logs — apparaît dans la console comme "[MAIN] message"
+// Tag for logs — appears in the console as "[MAIN] message"
 static const char *TAG = "MAIN";
 
 // ─────────────────────────────────────────────────────────────
-//  Tâche principale : scan de la matrice de touches
+//  Main task: scan the key matrix
 //
-//  Une "tâche" FreeRTOS = un thread qui tourne en boucle.
-//  vTaskDelay(pdMS_TO_TICKS(5)) = attendre 5ms entre chaque scan.
+//  A FreeRTOS "task" = a thread that runs in a loop.
+//  vTaskDelay(pdMS_TO_TICKS(5)) = wait 5ms between each scan.
 // ─────────────────────────────────────────────────────────────
-#define HEAP_WARN_THRESHOLD 8192   // Log avertissement si heap libre < 8 Ko
-#define HEAP_CHECK_EVERY_N  200    // Vérifier le heap toutes les N itérations (~1s)
+#define HEAP_WARN_THRESHOLD 8192   // Log warning if free heap < 8 KB
+#define HEAP_CHECK_EVERY_N  200    // Check the heap every N iterations (~1s)
 
 static void keyboard_scan_task(void *pvParameters)
 {
-    ESP_LOGI(TAG, "Tâche scan clavier démarrée");
-    esp_task_wdt_add(NULL);   // Enregistre cette tâche auprès du TWDT
+    ESP_LOGI(TAG, "Keyboard scan task started");
+    esp_task_wdt_add(NULL);   // Register this task with the TWDT
 
     uint32_t heap_check_counter = 0;
 
     while (1) {
-        esp_task_wdt_reset();  // Nourrit le watchdog — doit arriver < 10s
+        esp_task_wdt_reset();  // Feed the watchdog — must happen < 10s
 
-        // 1. Scanner la matrice physique → détecter les touches pressées
+        // 1. Scan the physical matrix → detect pressed keys
         keymap_scan_matrix();
 
-        // 2. Traiter les événements (combos, tap-hold, layers)
+        // 2. Process events (combos, tap-hold, layers)
         keymap_process_events();
 
-        // 3. Envoyer les rapports HID si nécessaire
-        //    (keymap appelle usb_hid_send() ou ble_hid_send() selon le mode)
+        // 3. Send HID reports if needed
+        //    (keymap calls usb_hid_send() or ble_hid_send() depending on mode)
 
-        // 4. Notifier le power manager qu'il y a eu activité
-        //    (réinitialise le timer d'inactivité)
+        // 4. Notify the power manager that there was activity
+        //    (resets the inactivity timer)
         if (keymap_has_activity()) {
             power_mgmt_reset_idle_timer();
         }
 
-        // 5. Tick LED engine (met à jour les effets animés + refresh WS2812)
+        // 5. Tick LED engine (updates animated effects + refreshes WS2812)
         led_engine_tick();
 
-        // 6. Surveillance heap (périodique, pas à chaque tick)
+        // 6. Heap monitoring (periodic, not every tick)
         if (++heap_check_counter >= HEAP_CHECK_EVERY_N) {
             heap_check_counter = 0;
             size_t free_heap = esp_get_free_heap_size();
             if (free_heap < HEAP_WARN_THRESHOLD) {
-                ESP_LOGW(TAG, "Heap bas : %u octets libres", (unsigned)free_heap);
+                ESP_LOGW(TAG, "Low heap: %u bytes free", (unsigned)free_heap);
             }
         }
 
-        // Pause de 5ms avant le prochain scan
-        // pdMS_TO_TICKS convertit des millisecondes en "ticks" FreeRTOS
+        // Pause of 5ms before the next scan
+        // pdMS_TO_TICKS converts milliseconds into FreeRTOS "ticks"
         vTaskDelay(pdMS_TO_TICKS(KB_SCAN_INTERVAL_MS));
     }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  app_main() — équivalent du "main()" en C standard pour ESP-IDF
-//  Appelé automatiquement au démarrage par le framework.
+//  app_main() — equivalent of standard C "main()" for ESP-IDF
+//  Called automatically at startup by the framework.
 // ─────────────────────────────────────────────────────────────
 void app_main(void)
 {
-    ESP_LOGI(TAG, "=== SpinPad démarrage ===");
+    ESP_LOGI(TAG, "=== SpinPad startup ===");
 
-    // ── 0. Pré-init réseau (requis avant keymap pour web_config) ─
-    // esp_netif et l'event loop doivent être créés une seule fois.
+    // ── 0. Network pre-init (required before keymap for web_config) ─
+    // esp_netif and the event loop must be created only once.
     ESP_ERROR_CHECK(web_config_init());
 
     // ── 1. NVS (Non-Volatile Storage) ────────────────────────
-    // NVS = espace flash pour stocker des données persistantes
-    // (config, bonds BLE, état des profils...)
+    // NVS = flash space to store persistent data
+    // (config, BLE bonds, profile state...)
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        // NVS corrompu ou ancienne version → effacer et réinitialiser
-        ESP_LOGW(TAG, "NVS corrompu, effacement...");
+        // NVS corrupted or old version → erase and reinitialize
+        ESP_LOGW(TAG, "NVS corrupted, erasing...");
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
@@ -115,66 +115,66 @@ void app_main(void)
     ESP_LOGI(TAG, "NVS OK");
 
     // ── 2. Config store ──────────────────────────────────────
-    // Charge le JSON de config depuis NVS.
-    // Si aucune config n'existe, charge les valeurs par défaut.
+    // Loads the config JSON from NVS.
+    // If no config exists, loads the default values.
     ESP_ERROR_CHECK(config_store_init());
-    ESP_LOGI(TAG, "Config chargée");
+    ESP_LOGI(TAG, "Config loaded");
 
-    // ── 3. Moteur keymap ─────────────────────────────────────
-    // Initialise la matrice GPIO, les layers, et le moteur de combos.
+    // ── 3. Keymap engine ─────────────────────────────────────
+    // Initializes the GPIO matrix, the layers, and the combo engine.
     ESP_ERROR_CHECK(keymap_init());
-    ESP_LOGI(TAG, "Keymap initialisée");
+    ESP_LOGI(TAG, "Keymap initialized");
 
     // ── 4a. USB HID ──────────────────────────────────────────
-    // Démarre TinyUSB et enregistre les descripteurs HID clavier.
+    // Starts TinyUSB and registers the keyboard HID descriptors.
     ESP_ERROR_CHECK(usb_hid_init());
-    ESP_LOGI(TAG, "USB HID prêt");
+    ESP_LOGI(TAG, "USB HID ready");
 
-    // ── 4b. Batterie + LED RGB ──────────────────────────────
-    // Doit être init AVANT ble_hid pour que le service BAS sache
-    // s'il doit être annoncé (présence détectée via ADC).
+    // ── 4b. Battery + RGB LED ──────────────────────────────
+    // Must be init BEFORE ble_hid so the BAS service knows
+    // whether it should be advertised (presence detected via ADC).
     ESP_ERROR_CHECK(battery_init());
-    ESP_LOGI(TAG, "Batterie initialisée");
+    ESP_LOGI(TAG, "Battery initialized");
 
     // ── 4c. BLE HID ──────────────────────────────────────────
-    // Démarre NimBLE, charge les bonds depuis NVS,
-    // et tente de se reconnecter au dernier appareil utilisé.
+    // Starts NimBLE, loads the bonds from NVS,
+    // and tries to reconnect to the last used device.
     ESP_ERROR_CHECK(ble_hid_init());
-    ESP_LOGI(TAG, "BLE HID prêt");
+    ESP_LOGI(TAG, "BLE HID ready");
 
-    // ── 5a. Encodeur ─────────────────────────────────────────
+    // ── 5a. Encoder ─────────────────────────────────────────
     ESP_ERROR_CHECK(encoder_init());
-    ESP_LOGI(TAG, "Encodeur prêt");
+    ESP_LOGI(TAG, "Encoder ready");
 
-    // ── 5b. Écran SSD1315 ────────────────────────────────────
+    // ── 5b. SSD1315 screen ────────────────────────────────────
     ESP_ERROR_CHECK(display_init());
-    display_show_boot_screen();   // Affiche le splash screen au démarrage
-    ESP_LOGI(TAG, "Écran prêt");
+    display_show_boot_screen();   // Shows the splash screen at startup
+    ESP_LOGI(TAG, "Screen ready");
 
-    // ── 5d. LED Engine (chaîne WS2812 touches) ───────────────
-    // Initialiser après battery_init pour éviter un conflit RMT au démarrage.
+    // ── 5d. LED Engine (WS2812 key chain) ───────────────
+    // Initialize after battery_init to avoid an RMT conflict at startup.
     ESP_ERROR_CHECK(led_engine_init());
-    ESP_LOGI(TAG, "LED Engine prêt");
+    ESP_LOGI(TAG, "LED Engine ready");
 
     // ── 6. Power manager ─────────────────────────────────────
-    // Doit être initialisé en dernier pour connaître
-    // la raison du wake-up (touche ? timer ?) et agir en conséquence.
+    // Must be initialized last to know
+    // the wake reason (key? timer?) and act accordingly.
     ESP_ERROR_CHECK(power_mgmt_init());
-    ESP_LOGI(TAG, "Power manager prêt");
+    ESP_LOGI(TAG, "Power manager ready");
 
-    // ── Lancement de la tâche de scan ────────────────────────
-    // xTaskCreate(fonction, nom, taille_stack, params, priorité, handle)
-    // Stack de 4096 bytes suffit pour le scan.
-    // Priorité 5 = plus haute que les tâches background (1-2).
+    // ── Launch the scan task ────────────────────────
+    // xTaskCreate(function, name, stack_size, params, priority, handle)
+    // A 4096-byte stack is enough for the scan.
+    // Priority 5 = higher than background tasks (1-2).
     xTaskCreate(
-        keyboard_scan_task,   // Fonction à exécuter
-        "kb_scan",            // Nom (pour le debug)
-        4096,                 // Taille de la pile en bytes
-        NULL,                 // Paramètres (aucun ici)
-        5,                    // Priorité (1=bas, 25=max)
-        NULL                  // Handle de la tâche (on n'en a pas besoin)
+        keyboard_scan_task,   // Function to execute
+        "kb_scan",            // Name (for debugging)
+        4096,                 // Stack size in bytes
+        NULL,                 // Parameters (none here)
+        5,                    // Priority (1=low, 25=max)
+        NULL                  // Task handle (we don't need one)
     );
 
-    ESP_LOGI(TAG, "=== Démarrage terminé ===");
-    // app_main() peut se terminer ici — les tâches continuent de tourner
+    ESP_LOGI(TAG, "=== Startup finished ===");
+    // app_main() can end here — the tasks keep running
 }

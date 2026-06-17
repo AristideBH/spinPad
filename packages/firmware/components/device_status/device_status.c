@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  device_status.c — Construction du payload device_status
+//  device_status.c — Building the device_status payload
 // ═══════════════════════════════════════════════════════════════
 
 #include "device_status.h"
@@ -33,7 +33,7 @@ cJSON *device_status_build(void)
     int64_t uptime_us = esp_timer_get_time();
     cJSON_AddNumberToObject(root, "uptime_s", (double)(uptime_us / 1000000));
 
-    // ── profil actif (pour la synchro studio ↔ device) ─────
+    // ── active profile (for the studio ↔ device sync) ─────
     cJSON_AddNumberToObject(root, "active_profile", config_store_get()->active_profile);
 
     // ── connection ──────────────────────────────────────────
@@ -43,7 +43,7 @@ cJSON *device_status_build(void)
     cJSON_AddNumberToObject(conn, "ble_slot",     ble_hid_get_active_slot());
     cJSON_AddBoolToObject  (conn, "studio_mode",  web_config_is_running());
 
-    // ── battery (union discriminée sur "present") ───────────
+    // ── battery (union discriminated on "present") ───────────
     cJSON *batt = cJSON_AddObjectToObject(root, "battery");
     bool present = battery_is_present();
     cJSON_AddBoolToObject(batt, "present", present);
@@ -71,7 +71,7 @@ esp_err_t device_status_to_json(char *buf, size_t buf_size,
     size_t len = strlen(json_str);
     size_t need = len + (line_terminated ? 1 : 0) + 1;
     if (need > buf_size) {
-        ESP_LOGW(TAG, "buffer trop petit (%u < %u)", (unsigned)buf_size, (unsigned)need);
+        ESP_LOGW(TAG, "buffer too small (%u < %u)", (unsigned)buf_size, (unsigned)need);
         free(json_str);
         return ESP_ERR_NO_MEM;
     }
