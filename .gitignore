@@ -33,6 +33,7 @@ firmware/.clangd
 # ── Node / pnpm ───────────────────────────
 node_modules/
 .pnpm-store/
+coverage/
 
 # ── Studio / SvelteKit ────────────────────
 **/.svelte-kit/

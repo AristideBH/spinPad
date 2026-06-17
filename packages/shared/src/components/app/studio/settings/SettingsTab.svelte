@@ -16,9 +16,11 @@
   import OptionGrid from './OptionGrid.svelte';
   import SliderField from './SliderField.svelte';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
-  import { scrollShadow } from '$shared/utils.js';
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import { Scrubber } from '$shared/components/ui/scrubber';
+  import { rgbToHex } from '$shared/lib/color.js';
+  import { SyncedHexColor } from '$shared/lib/hooks/synced-hex-color.svelte.js';
+  import { ScrollSyncedTabs } from '$shared/lib/hooks/scroll-synced-tabs.svelte.js';
 
   // ── Tabs ──────────────────────────────────────────────────────
   const TABS = [
@@ -28,66 +30,8 @@
     { value: 'sauvegarde', label: 'Backup' },
   ];
 
-  let tabValue = $state('stats');
-  let listEl = $state<HTMLDivElement | null>(null);
-  let tabListEl = $state<HTMLElement | null>(null);
-  let tabWrapperEl = $state<HTMLElement | null>(null);
-  let sectionEls = $state<Record<string, HTMLElement | null>>({});
-  let isSyncingFromTab = false;
-
-  function scrollToSection(val: string) {
-    isSyncingFromTab = true;
-    if (val === TABS[0].value) {
-      listEl?.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      sectionEls[val]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    setTimeout(() => (isSyncingFromTab = false), 700);
-  }
-
-  $effect(() => {
-    if (!listEl) return;
-    const keys = Object.keys(sectionEls);
-    if (keys.length === 0) return;
-
-    const visibleSections = new Set<string>();
-
-    const observer = new IntersectionObserver(
-      (ioEntries) => {
-        if (isSyncingFromTab) return;
-        for (const entry of ioEntries) {
-          const cat = entry.target.getAttribute('data-cat')!;
-          if (entry.isIntersecting) visibleSections.add(cat);
-          else visibleSections.delete(cat);
-        }
-        if (visibleSections.size === 0) {
-          tabValue = TABS[0].value;
-          return;
-        }
-        const first = TABS.find(({ value }) => visibleSections.has(value));
-        if (first) tabValue = first.value;
-      },
-      { root: listEl, threshold: 0.1, rootMargin: '-5% 0px -50% 0px' },
-    );
-
-    for (const cat of keys) {
-      const el = sectionEls[cat];
-      if (el) observer.observe(el);
-    }
-
-    return () => observer.disconnect();
-  });
-
-  $effect(() => {
-    tabValue;
-    const active = tabListEl?.querySelector<HTMLElement>('[data-state="active"]');
-    active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  });
-
-  $effect(() => {
-    if (!tabListEl || !tabWrapperEl) return;
-    return scrollShadow(tabListEl, tabWrapperEl);
-  });
+  const tabs = new ScrollSyncedTabs(TABS[0].value);
+  tabs.bind(() => TABS.map((t) => t.value));
 
   // ── Orientation ───────────────────────────────────────────────
   const ORIENTATIONS = [
@@ -155,21 +99,14 @@
   });
 
   // ── ColorPicker state (extension LED) ────────────────────────
-  let extLedPickerColor = $state(
+  const extLedPickerColor = new SyncedHexColor(() =>
     rgbToHex(
       configState.data?.led_extension?.r ?? 255,
       configState.data?.led_extension?.g ?? 255,
       configState.data?.led_extension?.b ?? 255,
-    ).toUpperCase(),
+    ),
   );
-  $effect(() => {
-    const normalized = rgbToHex(
-      configState.data?.led_extension?.r ?? 255,
-      configState.data?.led_extension?.g ?? 255,
-      configState.data?.led_extension?.b ?? 255,
-    ).toUpperCase();
-    if (extLedPickerColor !== normalized) extLedPickerColor = normalized;
-  });
+  extLedPickerColor.bind();
 
   // ── Backup global ─────────────────────────────────────────────
   let backupFileInput = $state<HTMLInputElement | null>(null);
@@ -191,10 +128,6 @@
     if (backupFileInput) backupFileInput.value = '';
   }
 
-  function rgbToHex(r: number, g: number, b: number) {
-    return '#' + [r, g, b].map((v) => v?.toString(16).padStart(2, '0') ?? '00').join('');
-  }
-
   // ── Widget system ─────────────────────────────────────────────
   // Editing the OLED widgets (4×4 mosaic grid) lives in ScreenEditor.
   function syncClock() {
@@ -207,9 +140,9 @@
 {:else}
   {@const data = configState.data!}
   <div class="flex flex-col flex-1 w-full max-w-md min-h-0 gap-0 mx-auto">
-    <div bind:this={tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--card)]">
-      <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
-        <UnderlineTabs.List bind:ref={tabListEl}>
+    <div bind:this={tabs.tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--card)]">
+      <UnderlineTabs.Root bind:value={tabs.value} onValueChange={tabs.scrollToSection} class="gap-0">
+        <UnderlineTabs.List bind:ref={tabs.tabListEl}>
           {#each TABS as tab (tab.value)}
             <UnderlineTabs.Trigger value={tab.value}>
               {tab.label}
@@ -219,15 +152,15 @@
       </UnderlineTabs.Root>
     </div>
 
-    <div bind:this={listEl} class="flex-1 min-h-0 pr-1 overflow-y-auto">
+    <div bind:this={tabs.listEl} class="flex-1 min-h-0 pr-1 overflow-y-auto">
       <div class="flex flex-col gap-8 m-[1px] pt-4">
         <!-- ══ Stats ════════════════════════════════════════════════ -->
-        <section bind:this={sectionEls['stats']} data-cat="stats">
+        <section bind:this={tabs.sectionEls['stats']} data-cat="stats">
           <StatsTile />
         </section>
 
         <!-- ══ BLE ══════════════════════════════════════════════════ -->
-        <section bind:this={sectionEls['bluetooth']} data-cat="bluetooth">
+        <section bind:this={tabs.sectionEls['bluetooth']} data-cat="bluetooth">
           <h3 class="mb-4 text-base font-semibold">Bluetooth</h3>
           <div class="flex flex-col max-w-md gap-4">
             <Card>
@@ -282,7 +215,7 @@
         </section>
 
         <!-- ══ Screen & Power ═══════════════════════════════════════ -->
-        <section bind:this={sectionEls['ecran']} data-cat="ecran" class="">
+        <section bind:this={tabs.sectionEls['ecran']} data-cat="ecran" class="">
           <h3 class="mb-4 text-base font-semibold">Screen & Power</h3>
           <div class="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-1">
             <!-- SSD1315 screen -->
@@ -440,7 +373,7 @@
         <!-- ══ LED Extension ════════════════════════════════════════ -->
 
         <!-- ══ Global backup ═════════════════════════════════════ -->
-        <section bind:this={sectionEls['sauvegarde']} data-cat="sauvegarde" class="flex flex-col gap-3">
+        <section bind:this={tabs.sectionEls['sauvegarde']} data-cat="sauvegarde" class="flex flex-col gap-3">
           <h2 class="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Backup</h2>
           <Card>
             <CardHeader>

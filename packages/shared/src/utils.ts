@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { tick } from 'svelte';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -69,4 +70,66 @@ export function scrollShadow(scroller: HTMLElement, container: HTMLElement = scr
     shadowLeft.remove();
     shadowRight.remove();
   };
+}
+
+/**
+ * Drives horizontal scroll from touch drags on `viewport` (bits-ui hides the native
+ * scrollbar and the touch-action chain doesn't engage native finger-scroll otherwise).
+ * A drag started on a `[data-grip]` handle is left alone for reordering. Returns the cleanup function.
+ */
+export function bindTouchDragScroll(viewport: HTMLElement): () => void {
+  viewport.style.touchAction = 'pan-x';
+
+  let startX = 0;
+  let startScroll = 0;
+  let dragging = false;
+
+  function onStart(e: TouchEvent) {
+    if ((e.target as HTMLElement)?.closest('[data-grip]')) return;
+    dragging = true;
+    startX = e.touches[0].clientX;
+    startScroll = viewport.scrollLeft;
+  }
+  function onMove(e: TouchEvent) {
+    if (!dragging) return;
+    viewport.scrollLeft = startScroll - (e.touches[0].clientX - startX);
+  }
+  function onEnd() {
+    dragging = false;
+  }
+
+  viewport.addEventListener('touchstart', onStart, { passive: true });
+  viewport.addEventListener('touchmove', onMove, { passive: true });
+  viewport.addEventListener('touchend', onEnd, { passive: true });
+  return () => {
+    viewport.removeEventListener('touchstart', onStart);
+    viewport.removeEventListener('touchmove', onMove);
+    viewport.removeEventListener('touchend', onEnd);
+  };
+}
+
+/**
+ * Scrolls the `label[for="targetId"]` tab into view inside `viewport`, respecting a sticky
+ * `[data-add-btn]` on the right edge. tick() flushes Svelte's DOM, rAF waits for layout so
+ * scrollWidth/getBoundingClientRect are accurate.
+ */
+export async function scrollLabelIntoView(viewport: HTMLElement, targetId: string): Promise<void> {
+  await tick();
+  requestAnimationFrame(() => {
+    if (viewport.scrollWidth <= viewport.clientWidth) return;
+    const el = viewport.querySelector(`label[for="${targetId}"]`) as HTMLElement | null;
+    if (!el) return;
+    const addBtn = viewport.querySelector('[data-add-btn]') as HTMLElement | null;
+    const stickyW = addBtn ? addBtn.offsetWidth : 0;
+    const vpRect = viewport.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const elL = elRect.left - vpRect.left;
+    const elR = elRect.right - vpRect.left;
+    const available = viewport.clientWidth - stickyW;
+    if (elL < 0) {
+      viewport.scrollBy({ left: elL - 8, behavior: 'smooth' });
+    } else if (elR > available) {
+      viewport.scrollBy({ left: elR - available + 8, behavior: 'smooth' });
+    }
+  });
 }

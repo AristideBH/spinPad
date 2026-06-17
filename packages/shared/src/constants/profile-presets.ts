@@ -27,13 +27,6 @@ export interface ProfilePreset {
   profile:      ProfileConfig;   // complete template
 }
 
-/** Preset source — allows aggregating builtin + future remote sources. */
-export interface ProfilePresetSource {
-  id:    string;
-  label: string;
-  list(): Promise<ProfilePreset[]>;
-}
-
 // ── Construction helpers ────────────────────────────────────────
 
 function emptyKeys(): number[] {
@@ -108,41 +101,51 @@ export const BUILTIN_PROFILE_PRESETS: ProfilePreset[] = [
 ];
 
 // ── Sources ─────────────────────────────────────────────────────
+//
+// Not wired up yet — no caller needs a remote source today. Kept here,
+// commented out, as scaffolding for when a remote/community preset store
+// is actually built (see ProfilePresetSource design below).
+//
+// /** Preset source — allows aggregating builtin + future remote sources. */
+// export interface ProfilePresetSource {
+//   id:    string;
+//   label: string;
+//   list(): Promise<ProfilePreset[]>;
+// }
+//
+// export const builtinPresetSource: ProfilePresetSource = {
+//   id: 'builtin',
+//   label: 'Built-in',
+//   list: () => Promise.resolve(BUILTIN_PROFILE_PRESETS),
+// };
+//
+// /**
+//  * STUB — remote source (future store / community repo).
+//  * Not wired up: the interface is in place to hook a fetch in later.
+//  */
+// export function remotePresetSource(url: string): ProfilePresetSource {
+//   return {
+//     id: `remote:${url}`,
+//     label: 'Community',
+//     list: async () => {
+//       // TODO: fetch and validate remote presets (validateConfig on each profile).
+//       return [];
+//     },
+//   };
+// }
+//
+// // Registry of active sources (builtin only for now).
+// const sources: ProfilePresetSource[] = [builtinPresetSource];
+//
+// export function registerPresetSource(source: ProfilePresetSource): void {
+//   if (!sources.some((s) => s.id === source.id)) sources.push(source);
+// }
+//
+// export function getPresetById(id: string): ProfilePreset | undefined {
+//   return BUILTIN_PROFILE_PRESETS.find((p) => p.id === id);
+// }
 
-export const builtinPresetSource: ProfilePresetSource = {
-  id: 'builtin',
-  label: 'Built-in',
-  list: () => Promise.resolve(BUILTIN_PROFILE_PRESETS),
-};
-
-/**
- * STUB — remote source (future store / community repo).
- * Not wired up: the interface is in place to hook a fetch in later.
- */
-export function remotePresetSource(url: string): ProfilePresetSource {
-  return {
-    id: `remote:${url}`,
-    label: 'Community',
-    list: async () => {
-      // TODO: fetch and validate remote presets (validateConfig on each profile).
-      return [];
-    },
-  };
-}
-
-// Registry of active sources (builtin only for now).
-const sources: ProfilePresetSource[] = [builtinPresetSource];
-
-export function registerPresetSource(source: ProfilePresetSource): void {
-  if (!sources.some((s) => s.id === source.id)) sources.push(source);
-}
-
-/** Aggregates the presets from all registered sources. */
+/** Aggregates the presets from all registered sources (builtin only, for now). */
 export async function listProfilePresets(): Promise<ProfilePreset[]> {
-  const all = await Promise.all(sources.map((s) => s.list().catch(() => [])));
-  return all.flat();
-}
-
-export function getPresetById(id: string): ProfilePreset | undefined {
-  return BUILTIN_PROFILE_PRESETS.find((p) => p.id === id);
+  return BUILTIN_PROFILE_PRESETS;
 }

@@ -9,4 +9,6 @@ export interface MockOptions {
   battery?:        BatteryScenario;
   connection?:     ConnectionScenario;
   batteryPercent?: number;
+  activeProfile?:  number;
+  profileCount?:   number;
 }

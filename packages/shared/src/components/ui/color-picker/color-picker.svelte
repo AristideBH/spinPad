@@ -29,13 +29,20 @@
   let s = $state(0);
   let v = $state(0);
   let a = $state(1);
-  let activeFormat = $state<ColorFormat>(defaultFormat);
+  // Initialize to a safe default; sync with prop in an effect to avoid
+  // capturing `defaultFormat` at initialization time (Svelte warning).
+  let activeFormat = $state<ColorFormat>('hex');
   let isDragging = $state(false);
 
   let sbRef: HTMLDivElement | undefined = $state();
   let hueRef: HTMLDivElement | undefined = $state();
   let alphaRef: HTMLDivElement | undefined = $state();
   let formatOpen = $state(false);
+
+  // Sync activeFormat with incoming prop defaultFormat
+  $effect(() => {
+    activeFormat = defaultFormat;
+  });
 
   $effect(() => {
     if (!isDragging) {

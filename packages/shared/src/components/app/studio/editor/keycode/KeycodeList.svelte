@@ -3,9 +3,10 @@
   import { Input } from '$shared/components/ui/input/index.js';
   import { keycodeGroups, keycodesFlat, type Keycode } from '$shared/constants/keycodes.js';
   import { configState } from '$shared/store/config.svelte.js';
-  import { cn, scrollShadow } from '$shared/utils.js';
+  import { cn } from '$shared/utils.js';
   import { getKeypadContext } from '../keypad-context.svelte.js';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
+  import { ScrollSyncedTabs } from '$shared/lib/hooks/scroll-synced-tabs.svelte.js';
 
   const ctx = getKeypadContext();
 
@@ -46,12 +47,7 @@
     macros: 'Macros',
   };
 
-  let tabValue = $state('all');
-  let listEl = $state<HTMLDivElement | null>(null);
-  let tabListEl = $state<HTMLElement | null>(null);
-  let tabWrapperEl = $state<HTMLElement | null>(null);
-  let sectionEls = $state<Record<string, HTMLElement | null>>({});
-  let isSyncingFromTab = false;
+  const tabs = new ScrollSyncedTabs('all');
 
   const entries = $derived(Object.entries(keycodeGroups(configState.data?.macros)) as [string, Keycode[]][]);
 
@@ -63,61 +59,7 @@
       : null,
   );
 
-  function scrollToSection(val: string) {
-    isSyncingFromTab = true;
-    if (val === 'all') {
-      listEl?.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      sectionEls[val]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    setTimeout(() => (isSyncingFromTab = false), 700);
-  }
-
-  // Sync active tab from scroll position via IntersectionObserver
-  $effect(() => {
-    if (!listEl) return;
-    const keys = Object.keys(sectionEls);
-    if (keys.length === 0) return;
-
-    const visibleCats = new Set<string>();
-
-    const observer = new IntersectionObserver(
-      (ioEntries) => {
-        if (isSyncingFromTab) return;
-        for (const entry of ioEntries) {
-          const cat = entry.target.getAttribute('data-cat')!;
-          if (entry.isIntersecting) visibleCats.add(cat);
-          else visibleCats.delete(cat);
-        }
-        if (visibleCats.size === 0) {
-          tabValue = 'all';
-          return;
-        }
-        const first = entries.find(([cat]) => visibleCats.has(cat));
-        if (first) tabValue = first[0];
-      },
-      { root: listEl, threshold: 0.1, rootMargin: '-5% 0px -50% 0px' },
-    );
-
-    for (const cat of keys) {
-      const el = sectionEls[cat];
-      if (el) observer.observe(el);
-    }
-
-    return () => observer.disconnect();
-  });
-
-  // Scroll active trigger into view in the tab list when tabValue changes
-  $effect(() => {
-    tabValue;
-    const active = tabListEl?.querySelector<HTMLElement>('[data-state="active"]');
-    active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  });
-
-  $effect(() => {
-    if (!tabListEl || !tabWrapperEl) return;
-    return scrollShadow(tabListEl, tabWrapperEl);
-  });
+  tabs.bind(() => entries.map(([cat]) => cat));
 </script>
 
 {#snippet keyButton(kc: Keycode)}
@@ -131,9 +73,9 @@
   <Input type="text" placeholder="Rechercher un keycode…" bind:value={ctx.searchQuery} class="shrink-0" />
 
   {#if !filteredKeycodes}
-    <div bind:this={tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--popover)]">
-      <UnderlineTabs.Root bind:value={tabValue} onValueChange={scrollToSection} class="gap-0">
-        <UnderlineTabs.List bind:ref={tabListEl}>
+    <div bind:this={tabs.tabWrapperEl} class="shrink-0 [--scroll-shadow-color:var(--popover)]">
+      <UnderlineTabs.Root bind:value={tabs.value} onValueChange={tabs.scrollToSection} class="gap-0">
+        <UnderlineTabs.List bind:ref={tabs.tabListEl}>
           {#each entries as [cat] (cat)}
             <UnderlineTabs.Trigger value={cat}>{GROUP_LABELS[cat] ?? cat}</UnderlineTabs.Trigger>
           {/each}
@@ -142,7 +84,7 @@
     </div>
   {/if}
 
-  <div bind:this={listEl} class="flex-1 min-h-0 pr-1 overflow-y-auto">
+  <div bind:this={tabs.listEl} class="flex-1 min-h-0 pr-1 overflow-y-auto">
     {#if filteredKeycodes}
       {#if filteredKeycodes.length === 0}
         <p class="py-6 text-sm text-center text-muted-foreground">No results</p>
@@ -155,7 +97,7 @@
       {/if}
     {:else}
       {#each entries as [cat, keys] (cat)}
-        <div bind:this={sectionEls[cat]} data-cat={cat} class="mb-4">
+        <div bind:this={tabs.sectionEls[cat]} data-cat={cat} class="mb-4">
           <h3 class="sticky top-0 z-10 py-1 mb-2 text-xs font-semibold uppercase bg-popover text-muted-foreground">
             {GROUP_LABELS[cat] ?? cat}
           </h3>

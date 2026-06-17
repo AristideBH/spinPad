@@ -11,13 +11,12 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
-  import { cn, scrollShadow } from '$shared/utils.js';
+  import { bindTouchDragScroll, cn, scrollLabelIntoView, scrollShadow } from '$shared/utils.js';
   import { layerColor } from '$shared/constants/layer-colors.js';
   import { BrushCleaning, CopyPlus, Plus, Trash2 } from '@lucide/svelte';
   import * as Kbd from '$shared/components/ui/kbd/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
   import { fade } from 'svelte/transition';
-  import { tick } from 'svelte';
   import * as Item from '$shared/components/ui/item/index.js';
   import { simulateTyping } from '$shared/lib/simulate-typing.js';
 
@@ -64,65 +63,16 @@
   // from the touch drags. A drag started on the handle (data-grip) is
   // left to mosaic for reordering.
   $effect(() => {
-    if (!horizontal) return;
-    const vp = viewport;
-    if (!vp) return;
-    vp.style.touchAction = 'pan-x';
-
-    let startX = 0;
-    let startScroll = 0;
-    let dragging = false;
-
-    function onStart(e: TouchEvent) {
-      if ((e.target as HTMLElement)?.closest('[data-grip]')) return;
-      dragging = true;
-      startX = e.touches[0].clientX;
-      startScroll = vp!.scrollLeft;
-    }
-    function onMove(e: TouchEvent) {
-      if (!dragging) return;
-      vp!.scrollLeft = startScroll - (e.touches[0].clientX - startX);
-    }
-    function onEnd() {
-      dragging = false;
-    }
-
-    vp.addEventListener('touchstart', onStart, { passive: true });
-    vp.addEventListener('touchmove', onMove, { passive: true });
-    vp.addEventListener('touchend', onEnd, { passive: true });
-    return () => {
-      vp.removeEventListener('touchstart', onStart);
-      vp.removeEventListener('touchmove', onMove);
-      vp.removeEventListener('touchend', onEnd);
-    };
+    if (!horizontal || !viewport) return;
+    return bindTouchDragScroll(viewport);
   });
 
   // Scroll the active layer tab into view, respecting the sticky add-button on the right.
-  // tick() flushes Svelte's DOM, rAF waits for browser layout so scrollWidth is accurate.
   $effect(() => {
     const idx = configState.activeLayerIndex;
     const _count = layerCount; // re-fire on add/remove
     if (!horizontal || !viewport) return;
-    const vp = viewport;
-    void tick().then(() =>
-      requestAnimationFrame(() => {
-        if (vp.scrollWidth <= vp.clientWidth) return;
-        const el = vp.querySelector(`label[for="l-${idx}"]`) as HTMLElement | null;
-        if (!el) return;
-        const addBtn = vp.querySelector('[data-add-btn]') as HTMLElement | null;
-        const stickyW = addBtn ? addBtn.offsetWidth : 0;
-        const vpRect = vp.getBoundingClientRect();
-        const elRect = el.getBoundingClientRect();
-        const elL = elRect.left - vpRect.left;
-        const elR = elRect.right - vpRect.left;
-        const available = vp.clientWidth - stickyW;
-        if (elL < 0) {
-          vp.scrollBy({ left: elL - 8, behavior: 'smooth' });
-        } else if (elR > available) {
-          vp.scrollBy({ left: elR - available + 8, behavior: 'smooth' });
-        }
-      }),
-    );
+    void scrollLabelIntoView(viewport, `l-${idx}`);
   });
 
   function onLayerChange(v: string) {

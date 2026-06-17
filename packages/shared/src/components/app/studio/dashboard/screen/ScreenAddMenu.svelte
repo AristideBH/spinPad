@@ -24,6 +24,7 @@
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import { buttonVariants } from '$shared/components/ui/button/index.js';
   import { cn } from '$shared/utils.js';
+  import { buildOccupancyGrid, findFreeSpace } from '$shared/lib/widget-grid.js';
   import { Plus } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
 
@@ -39,25 +40,11 @@
     return WIDGET_DEFS[t].singleton && usedTypes.has(t);
   }
 
-  // First free space for a w×h box on the 4×4 grid.
-  function findFreeSpace(w: number, h: number): { x: number; y: number } | null {
-    const g = Array.from({ length: ROWS }, () => Array<boolean>(COLS).fill(false));
-    for (const wd of widgets)
-      for (let yy = wd.y; yy < wd.y + wd.h; yy++)
-        for (let xx = wd.x; xx < wd.x + wd.w; xx++) if (g[yy]?.[xx] !== undefined) g[yy][xx] = true;
-    for (let y = 0; y <= ROWS - h; y++)
-      for (let x = 0; x <= COLS - w; x++) {
-        let ok = true;
-        for (let yy = y; yy < y + h && ok; yy++) for (let xx = x; xx < x + w && ok; xx++) if (g[yy][xx]) ok = false;
-        if (ok) return { x, y };
-      }
-    return null;
-  }
-
   function add(type: PlaceableWidgetType) {
     if (disabled(type)) return;
     const size = widgetDefaultSize(type);
-    const pos = findFreeSpace(size.w, size.h);
+    const grid = buildOccupancyGrid(widgets, ROWS, COLS);
+    const pos = findFreeSpace(grid, size.w, size.h, ROWS, COLS);
     if (!pos) {
       toast('No more space on the screen. Make some room!');
       return;

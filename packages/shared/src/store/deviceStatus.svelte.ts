@@ -11,7 +11,7 @@
 
 import { browser } from '$app/environment';
 import { activeStatusTransport, transportMode } from './transport.js';
-import { reconcileActiveProfile } from './config.svelte.js';
+import { configState, reconcileActiveProfile } from './config.svelte.js';
 import { onProfileEvent } from './serial.svelte.js';
 import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 
@@ -35,7 +35,10 @@ async function _poll(): Promise<void> {
   if (_inFlight) return;
   _inFlight = true;
   try {
-    const status = await activeStatusTransport().getDeviceStatus();
+    const status = await activeStatusTransport().getDeviceStatus({
+      activeProfile: () => configState.data?.active_profile,
+      profileCount:  () => configState.data?.profiles?.length,
+    });
     deviceStatus.data  = status;
     deviceStatus.error = null;
     // Active profile sync: the device is the source of truth of the live profile.

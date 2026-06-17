@@ -37,8 +37,10 @@
   },
   "devDependencies": {
     "@lucide/svelte": "^1.17.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@sveltejs/vite-plugin-svelte-inspector": "^5.0.2",
     "@types/w3c-web-serial": "^1.0.8",
+    "@vitest/coverage-istanbul": "^4.1.7",
     "shadcn-svelte": "^1.2.7",
     "svelte-toolbelt": "^0.10.6",
     "tailwindcss": "^4.3.0",

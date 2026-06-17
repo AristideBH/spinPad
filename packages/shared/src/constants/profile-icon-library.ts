@@ -79,7 +79,7 @@ export const PROFILE_ICON_LIBRARY: IconLibraryEntry[] = [
   ),
 ];
 
-export function iconLibraryEntry(id: string): IconLibraryEntry | undefined {
+function iconLibraryEntry(id: string): IconLibraryEntry | undefined {
   return PROFILE_ICON_LIBRARY.find((e) => e.id === id);
 }
 

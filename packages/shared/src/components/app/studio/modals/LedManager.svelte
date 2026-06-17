@@ -17,6 +17,8 @@
   import * as NumberField from '$shared/components/ui/number-field';
   import { Scrubber } from '$shared/components/ui/scrubber';
   import * as Card from '$shared/components/ui/card/index.js';
+  import { hexToRgb, rgbToHex } from '$shared/lib/color.js';
+  import { SyncedHexColor } from '$shared/lib/hooks/synced-hex-color.svelte.js';
 
   let open = $state(false);
 
@@ -27,13 +29,9 @@
   const ledEffect: LedMode = $derived(ledKey?.effect ?? 'static');
   const hexColor = $derived(rgbToHex(ledKey?.r ?? 255, ledKey?.g ?? 255, ledKey?.b ?? 255));
 
-  let pickerColor = $state(
-    rgbToHex(
-      configState.data?.led_key?.r ?? 255,
-      configState.data?.led_key?.g ?? 255,
-      configState.data?.led_key?.b ?? 255,
-    ).toUpperCase(),
-  );
+  // Sync store → picker (e.g., preset applied externally)
+  const pickerColor = new SyncedHexColor(() => hexColor);
+  pickerColor.bind();
 
   let extLedCount = $state(configState.data?.led_extension?.count ?? 1);
 
@@ -47,26 +45,13 @@
     }
   });
 
-  // Sync store → picker (e.g., preset applied externally)
-  $effect(() => {
-    const normalized = hexColor.toUpperCase();
-    if (pickerColor !== normalized) pickerColor = normalized;
-  });
-
   const ledExtEnabled = $derived(ledExt?.enabled ?? false);
   const ledExtMode = $derived(ledExt?.mode ?? 0);
 
-  let extLedPickerColor = $state(
-    rgbToHex(
-      configState.data?.led_extension?.r ?? 255,
-      configState.data?.led_extension?.g ?? 255,
-      configState.data?.led_extension?.b ?? 255,
-    ).toUpperCase(),
+  const extLedPickerColor = new SyncedHexColor(() =>
+    rgbToHex(ledExt?.r ?? 255, ledExt?.g ?? 255, ledExt?.b ?? 255),
   );
-  $effect(() => {
-    const normalized = rgbToHex(ledExt?.r ?? 255, ledExt?.g ?? 255, ledExt?.b ?? 255).toUpperCase();
-    if (extLedPickerColor !== normalized) extLedPickerColor = normalized;
-  });
+  extLedPickerColor.bind();
 
   // Local values for the sliders (buffer during the drag)
   let localBrightness = $state(180);
@@ -77,17 +62,6 @@
   $effect(() => {
     localExtBright = ledExt?.brightness ?? 128;
   });
-
-  function rgbToHex(r: number, g: number, b: number): string {
-    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-  }
-
-  function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const m = hex.match(/^#?([0-9a-f]{6})$/i);
-    if (!m) return null;
-    const n = parseInt(m[1], 16);
-    return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff };
-  }
 
   const KEY_EFFECTS: { value: LedMode; label: string; desc: string }[] = [
     { value: 'off', label: 'Off', desc: 'LEDs off' },
@@ -226,13 +200,13 @@
                     variant="outline"
                     size="icon"
                     class="bg-(--bg)! rounded-full"
-                    style="--bg: {pickerColor}"
+                    style="--bg: {pickerColor.value}"
                   ></Button>
                 {/snippet}
               </Popover.Trigger>
               <Popover.Content class="w-auto p-0!">
                 <ColorPicker.Root
-                  bind:value={pickerColor}
+                  bind:value={pickerColor.value}
                   onchange={(color) => {
                     const rgb = hexToRgb(color);
                     if (rgb) {
@@ -298,14 +272,14 @@
                     <button
                       {...props}
                       class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
-                      style="background-color: {extLedPickerColor}"
+                      style="background-color: {extLedPickerColor.value}"
                     ></button>
                   {/snippet}
                 </Popover.Trigger>
                 <Popover.Content class="w-auto p-0!">
                   <ColorPicker.Root
                     formats={['hsl', 'hex']}
-                    bind:value={extLedPickerColor}
+                    bind:value={extLedPickerColor.value}
                     onchange={(color) => {
                       const rgb = hexToRgb(color);
                       if (rgb) {

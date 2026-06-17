@@ -18,7 +18,17 @@ export interface Transport {
   setActiveProfile(idx: number): Promise<unknown>;
 }
 
+/**
+ * Profile data needed by the mock transport to simulate a device status; ignored by serial/http.
+ * Passed as getters (not snapshot values) so the mock can read the current state after its
+ * simulated network delay, instead of a value captured before the delay.
+ */
+export interface DeviceStatusOpts {
+  activeProfile?: () => number | undefined;
+  profileCount?:  () => number | undefined;
+}
+
 /** Minimal interface for status polling. */
 export interface DeviceStatusTransport {
-  getDeviceStatus(): Promise<DeviceStatus>;
+  getDeviceStatus(opts?: DeviceStatusOpts): Promise<DeviceStatus>;
 }

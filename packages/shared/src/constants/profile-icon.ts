@@ -27,7 +27,7 @@ export function emptyGrid(): BoolGrid {
   return new Array(PROFILE_ICON_W * PROFILE_ICON_H).fill(false);
 }
 
-export function gridIndex(x: number, y: number): number {
+function gridIndex(x: number, y: number): number {
   return y * PROFILE_ICON_W + x;
 }
 
@@ -68,13 +68,13 @@ export function bytesToGrid(bytes: Uint8Array): BoolGrid {
 
 // ── Uint8Array ↔ base64 ─────────────────────────────────────────
 
-export function bytesToBase64(bytes: Uint8Array): string {
+function bytesToBase64(bytes: Uint8Array): string {
   let bin = '';
   for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin);
 }
 
-export function base64ToBytes(b64: string): Uint8Array {
+function base64ToBytes(b64: string): Uint8Array {
   const bin = atob(b64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -120,15 +120,23 @@ export function isEmptyIcon(b64: string | undefined | null): boolean {
 
 export function drawLine(g: BoolGrid, x0: number, y0: number, x1: number, y1: number, on = true): void {
   // Bresenham
-  let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);
-  const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let dx = Math.abs(x1 - x0),
+    dy = -Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1,
+    sy = y0 < y1 ? 1 : -1;
   let err = dx + dy;
   for (;;) {
     setPixel(g, x0, y0, on);
     if (x0 === x1 && y0 === y1) break;
     const e2 = 2 * err;
-    if (e2 >= dy) { err += dy; x0 += sx; }
-    if (e2 <= dx) { err += dx; y0 += sy; }
+    if (e2 >= dy) {
+      err += dy;
+      x0 += sx;
+    }
+    if (e2 <= dx) {
+      err += dx;
+      y0 += sy;
+    }
   }
 }
 
@@ -145,7 +153,7 @@ export function drawRectFill(g: BoolGrid, x0: number, y0: number, x1: number, y1
   for (let y = a; y <= b; y++) for (let x = c; x <= d; x++) setPixel(g, x, y, on);
 }
 
-export function drawCircle(g: BoolGrid, cx: number, cy: number, r: number, on = true): void {
+function drawCircle(g: BoolGrid, cx: number, cy: number, r: number, on = true): void {
   if (r < 0) return;
   for (let y = -r; y <= r; y++) {
     for (let x = -r; x <= r; x++) {
@@ -154,7 +162,7 @@ export function drawCircle(g: BoolGrid, cx: number, cy: number, r: number, on = 
   }
 }
 
-export function drawDisc(g: BoolGrid, cx: number, cy: number, r: number, on = true): void {
+function drawDisc(g: BoolGrid, cx: number, cy: number, r: number, on = true): void {
   if (r < 0) return;
   for (let y = -r; y <= r; y++) {
     for (let x = -r; x <= r; x++) {
@@ -172,9 +180,12 @@ export function drawEllipse(g: BoolGrid, x0: number, y0: number, x1: number, y1:
   const [ty, by] = y0 <= y1 ? [y0, y1] : [y1, y0];
   const cx = (lx + rx) / 2;
   const cy = (ty + by) / 2;
-  const a  = (rx - lx) / 2;   // semi-axis X
-  const b  = (by - ty) / 2;   // semi-axis Y
-  if (a < 0.5 && b < 0.5) { setPixel(g, Math.round(cx), Math.round(cy), on); return; }
+  const a = (rx - lx) / 2; // semi-axis X
+  const b = (by - ty) / 2; // semi-axis Y
+  if (a < 0.5 && b < 0.5) {
+    setPixel(g, Math.round(cx), Math.round(cy), on);
+    return;
+  }
   // Midpoint ellipse — iterate by longer axis for gap-free outline
   const steps = Math.ceil(Math.max(a, b) * Math.PI * 2) * 2;
   for (let i = 0; i < steps; i++) {
@@ -191,8 +202,8 @@ export function drawEllipseFill(g: BoolGrid, x0: number, y0: number, x1: number,
   const [ty, by] = y0 <= y1 ? [y0, y1] : [y1, y0];
   const cx = (lx + rx) / 2;
   const cy = (ty + by) / 2;
-  const a  = (rx - lx) / 2;
-  const b  = (by - ty) / 2;
+  const a = (rx - lx) / 2;
+  const b = (by - ty) / 2;
   for (let y = ty; y <= by; y++) {
     for (let x = lx; x <= rx; x++) {
       const dx = (x - cx) / (a + 0.5);
@@ -219,8 +230,7 @@ export function fillIconPixels(
   ctx.fillRect(0, 0, totalW, totalH);
   ctx.fillStyle = fg;
   for (let y = 0; y < PROFILE_ICON_H; y++)
-    for (let x = 0; x < PROFILE_ICON_W; x++)
-      if (getPixel(grid, x, y)) ctx.fillRect(x * cell, y * cell, cell, cell);
+    for (let x = 0; x < PROFILE_ICON_W; x++) if (getPixel(grid, x, y)) ctx.fillRect(x * cell, y * cell, cell, cell);
 }
 
 /** PNG-agnostic bitmap: converts a grid into ImageData (NxN, white on transparent). */
@@ -252,7 +262,7 @@ export function imageDataToGrid(img: ImageData, threshold = 128): BoolGrid {
       const sy = Math.floor((y / PROFILE_ICON_H) * img.height);
       const i = (sy * img.width + sx) * 4;
       const a = img.data[i + 3];
-      const lum = (img.data[i] * 0.299 + img.data[i + 1] * 0.587 + img.data[i + 2] * 0.114);
+      const lum = img.data[i] * 0.299 + img.data[i + 1] * 0.587 + img.data[i + 2] * 0.114;
       setPixel(g, x, y, a > 32 && lum > threshold);
     }
   }

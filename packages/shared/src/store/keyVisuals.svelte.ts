@@ -10,13 +10,7 @@
 import { keyMonitor, onMessage, serial } from './serial.svelte.js';
 import { devMode } from './devMode.svelte.js';
 import { getActiveEncoderKnob } from '$shared/components/app/studio/editor/encoder/encoder.svelte.js';
-
-const DEV_KEY_MAP: Record<string, number> = {
-  Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
-  Digit6: 5, Digit7: 6, Digit8: 7, Digit9: 8, Digit0: 9,
-  Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3, Numpad5: 4,
-  Numpad6: 5, Numpad7: 6, Numpad8: 7, Numpad9: 8, Numpad0: 9,
-};
+import { bindDevKeySimulation } from '$shared/lib/dev-key-simulation.js';
 
 class KeyVisualsState {
   pressNonce = $state<number[]>(Array(10).fill(0));
@@ -44,20 +38,12 @@ class KeyVisualsState {
     if (this.#cleanup) return;
 
     if (devMode.active) {
-      const onKey = (e: KeyboardEvent) => {
-        if (e.repeat) return;
-        const idx = DEV_KEY_MAP[e.code];
-        if (idx !== undefined) {
-          this.fire(idx);
-          return;
-        }
-        const knob = getActiveEncoderKnob();
-        if (e.code === 'ArrowRight') { e.preventDefault(); knob?.pulseCW(); this.encoderTurn++; }
-        else if (e.code === 'ArrowLeft') { e.preventDefault(); knob?.pulseCCW(); this.encoderTurn--; }
-        else if (e.code === 'Space') { e.preventDefault(); knob?.pulsePress(); this.encoderPress++; }
-      };
-      window.addEventListener('keydown', onKey, true);
-      this.#cleanup = () => window.removeEventListener('keydown', onKey, true);
+      this.#cleanup = bindDevKeySimulation({
+        onKey: (idx) => this.fire(idx),
+        onEncoderCW: () => { getActiveEncoderKnob()?.pulseCW(); this.encoderTurn++; },
+        onEncoderCCW: () => { getActiveEncoderKnob()?.pulseCCW(); this.encoderTurn--; },
+        onEncoderPress: () => { getActiveEncoderKnob()?.pulsePress(); this.encoderPress++; },
+      });
       return;
     }
 

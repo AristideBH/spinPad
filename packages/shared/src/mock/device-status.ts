@@ -8,18 +8,21 @@
 
 import type { DeviceStatus, DeviceStats } from '$shared/constants/device-status-schema.js';
 import type { MockOptions } from '$shared/types/dev-mode.js';
-import { configState } from '$shared/store/config.svelte.js';
 
 const FW_VERSION = '0.1.0';
 const FW_BUILD = 'devmock';
 
 /**
- * Builds a mock device_status.
+ * Builds a mock device_status. activeProfile/profileCount come from the
+ * caller (configState lives in store/, which this module must not depend
+ * on — it would close an import cycle through transport/mock.ts).
  */
 export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
   const battery = opts.battery ?? 'present';
   const connection = opts.connection ?? 'usb';
   const pct = opts.batteryPercent ?? (battery === 'low' ? 12 : 85);
+  const activeProfile = opts.activeProfile ?? 0;
+  const profileCount = opts.profileCount ?? 4;
 
   const usbConnected = connection === 'usb' || connection === 'both';
   const batteryStatus: DeviceStatus['battery'] =
@@ -41,7 +44,7 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
     },
     uptime_s: Math.floor((Date.now() - START_TS) / 1000),
     // The mock plays the role of the device: its active profile follows the loaded config.
-    active_profile: configState.data?.active_profile ?? 0,
+    active_profile: activeProfile,
     connection: {
       usb: connection === 'usb' || connection === 'both',
       ble: connection === 'ble' || connection === 'both',
@@ -49,7 +52,7 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
       studio_mode: false,
     },
     battery: batteryStatus,
-    stats: makeMockStats(),
+    stats: makeMockStats(profileCount),
   };
 }
 
@@ -58,8 +61,8 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
  * profiles in the config changes, so that the per-profile distribution stays
  * consistent with what is loaded in the UI.
  */
-function makeMockStats(): DeviceStats {
-  const profCount = Math.max(1, configState.data?.profiles?.length ?? 4);
+function makeMockStats(profileCount: number): DeviceStats {
+  const profCount = Math.max(1, profileCount);
   if (!_cachedStats || _cachedProfCount !== profCount) {
     _cachedProfCount = profCount;
     // Plausible decreasing distribution (profile 1 stays the most used).
@@ -109,6 +112,6 @@ export function resetMockDischarge(pct = 85): void {
   _readCount = 0;
 }
 
-export function currentMockPercent(): number {
+function currentMockPercent(): number {
   return _pct;
 }

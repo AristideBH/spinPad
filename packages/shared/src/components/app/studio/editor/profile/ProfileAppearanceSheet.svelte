@@ -12,6 +12,8 @@
   import * as Select from '$shared/components/ui/select/index.js';
   import IconEditor from '../../IconEditor.svelte';
   import type { LedModeProfile } from '$shared/constants/config-schema.js';
+  import { hexToRgb, rgbToHex } from '$shared/lib/color.js';
+  import { SyncedHexColor } from '$shared/lib/hooks/synced-hex-color.svelte.js';
 
   let { open = $bindable(false), profileIndex }: { open?: boolean; profileIndex: number } = $props();
 
@@ -49,24 +51,10 @@
     }
   }
 
-  function rgbToHex(r: number, g: number, b: number): string {
-    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-  }
-  function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const m = hex.match(/^#?([0-9a-f]{6})$/i);
-    if (!m) return null;
-    const n = parseInt(m[1], 16);
-    return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff };
-  }
-
-  const pendingLedColor = $derived(
+  const profilePickerColor = new SyncedHexColor(() =>
     currentLed ? rgbToHex(currentLed.r, currentLed.g, currentLed.b) : '#ffffff',
   );
-  let profilePickerColor = $state('#ffffff');
-  $effect(() => {
-    const normalized = pendingLedColor.toUpperCase();
-    if (profilePickerColor !== normalized) profilePickerColor = normalized;
-  });
+  profilePickerColor.bind();
 </script>
 
 <ResponsiveSheet
@@ -119,7 +107,7 @@
                   <button
                     {...props}
                     class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
-                    style="background-color: {profilePickerColor}"
+                    style="background-color: {profilePickerColor.value}"
                     aria-label="Choose the LED color"
                   ></button>
                 {/snippet}
@@ -127,7 +115,7 @@
               <Popover.Content class="w-auto p-0!">
                 <ColorPicker.Root
                   formats={['hsl', 'hex']}
-                  bind:value={profilePickerColor}
+                  bind:value={profilePickerColor.value}
                   onchange={(color) => {
                     const rgb = hexToRgb(color);
                     if (rgb) setProfileLed(profileIndex, { ...currentLed, ...rgb });

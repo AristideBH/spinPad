@@ -7,9 +7,8 @@
   import { Button, buttonVariants } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import { Plus, Share } from '@lucide/svelte';
-  import { cn, scrollShadow } from '$shared/utils.js';
+  import { bindTouchDragScroll, cn, scrollLabelIntoView, scrollShadow } from '$shared/utils.js';
   import { ScrollArea } from '$shared/components/ui/scroll-area/index.js';
-  import { tick } from 'svelte';
   import AddProfileSheet from './AddProfileSheet.svelte';
   import ProfileCard from './ProfileCard.svelte';
   import ProfileImportExportDialog from './ProfileImportExportDialog.svelte';
@@ -32,34 +31,8 @@
   });
 
   $effect(() => {
-    const vp = viewport;
-    if (!vp) return;
-    vp.style.touchAction = 'pan-x';
-
-    let startX = 0;
-    let startScroll = 0;
-    let dragging = false;
-
-    function onStart(e: TouchEvent) {
-      if ((e.target as HTMLElement)?.closest('[data-grip]')) return;
-      dragging = true;
-      startX = e.touches[0].clientX;
-      startScroll = vp!.scrollLeft;
-    }
-    function onMove(e: TouchEvent) {
-      if (!dragging) return;
-      vp!.scrollLeft = startScroll - (e.touches[0].clientX - startX);
-    }
-    function onEnd() { dragging = false; }
-
-    vp.addEventListener('touchstart', onStart, { passive: true });
-    vp.addEventListener('touchmove', onMove, { passive: true });
-    vp.addEventListener('touchend', onEnd, { passive: true });
-    return () => {
-      vp.removeEventListener('touchstart', onStart);
-      vp.removeEventListener('touchmove', onMove);
-      vp.removeEventListener('touchend', onEnd);
-    };
+    if (!viewport) return;
+    return bindTouchDragScroll(viewport);
   });
 
   $effect(() => {
@@ -71,26 +44,7 @@
     const idx = configState.activeProfileIndex;
     const _count = profileList.length;
     if (!viewport) return;
-    const vp = viewport;
-    void tick().then(() =>
-      requestAnimationFrame(() => {
-        if (vp.scrollWidth <= vp.clientWidth) return;
-        const el = vp.querySelector(`label[for="p-${idx}"]`) as HTMLElement | null;
-        if (!el) return;
-        const addBtn = vp.querySelector('[data-add-btn]') as HTMLElement | null;
-        const stickyW = addBtn ? addBtn.offsetWidth : 0;
-        const vpRect = vp.getBoundingClientRect();
-        const elRect = el.getBoundingClientRect();
-        const elL = elRect.left - vpRect.left;
-        const elR = elRect.right - vpRect.left;
-        const available = vp.clientWidth - stickyW;
-        if (elL < 0) {
-          vp.scrollBy({ left: elL - 8, behavior: 'smooth' });
-        } else if (elR > available) {
-          vp.scrollBy({ left: elR - available + 8, behavior: 'smooth' });
-        }
-      }),
-    );
+    void scrollLabelIntoView(viewport, `p-${idx}`);
   });
 
   function onProfileChange(v: string) {

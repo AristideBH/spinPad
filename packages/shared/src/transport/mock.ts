@@ -20,6 +20,7 @@ import {
 import type { FullConfig }   from '$shared/constants/config-schema.js';
 import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 import type { BatteryScenario } from '$shared/types/dev-mode.js';
+import type { DeviceStatusOpts } from '$shared/types/transport.js';
 
 // ── Config transport ──────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export async function setActiveProfile(_idx: number): Promise<{ status: string }
 
 let _prevBattery: BatteryScenario | null = null;
 
-export async function getDeviceStatus(): Promise<DeviceStatus> {
+export async function getDeviceStatus(opts: DeviceStatusOpts = {}): Promise<DeviceStatus> {
   await new Promise<void>(r => setTimeout(r, 50));
 
   if (_prevBattery !== devMode.battery) {
@@ -73,5 +74,7 @@ export async function getDeviceStatus(): Promise<DeviceStatus> {
     battery:        devMode.battery,
     connection:     devMode.connection,
     batteryPercent: pct,
+    activeProfile:  opts.activeProfile?.(),
+    profileCount:   opts.profileCount?.(),
   });
 }

@@ -199,18 +199,22 @@ export async function factoryReset(): Promise<void> {
 //  IMPORT / EXPORT .spinpad
 // ─────────────────────────────────────────────────────────────
 
-export function exportConfig(): void {
-  if (!configState.data) return;
-  const wrapper = createSpinpadFile(configState.data);
-  const blob = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
+function downloadJson(filename: string, data: unknown): void {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `spinpad-config-${new Date().toISOString().slice(0, 10)}.spinpad`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+export function exportConfig(): void {
+  if (!configState.data) return;
+  const wrapper = createSpinpadFile(configState.data);
+  downloadJson(`spinpad-config-${new Date().toISOString().slice(0, 10)}.spinpad`, wrapper);
   toast.success('Config exported');
 }
 
@@ -251,19 +255,11 @@ export function exportProfiles(indices: number[]): void {
     .map((i) => structuredClone($state.snapshot(all[i])));
   if (selected.length === 0) return;
   const wrapper = createProfilesFile(selected);
-  const blob = new Blob([JSON.stringify(wrapper, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
   const stem =
     selected.length === 1
       ? _filenameSafe(selected[0].name ?? 'profile')
       : `profiles-${selected.length}`;
-  a.download = `spinpad-${stem}-${new Date().toISOString().slice(0, 10)}.spinpad-profiles`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadJson(`spinpad-${stem}-${new Date().toISOString().slice(0, 10)}.spinpad-profiles`, wrapper);
   toast.success(`${selected.length} profile(s) exported`);
 }
 

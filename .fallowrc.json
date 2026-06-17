@@ -9,6 +9,102 @@
     "**/hooks/use-ramp.svelte.ts",
     "**/hooks/use-toc.svelte.ts",
     "packages/website/src/lib/utils.ts",
-    "**/svelte.config.js"
+    "**/svelte.config.js",
+    ".claude/**"
+  ],
+  "ignoreDependencies": [
+    "bits-ui",
+    "tailwind-variants",
+    "vaul-svelte",
+    "svelte-toolbelt",
+    "clsx",
+    "csstype",
+    "mdsvex",
+    "rehype-slug",
+    "mode-watcher",
+    "runed",
+    "svelte-sonner",
+    "shadcn-svelte",
+    "tailwind-merge",
+    "@internationalized/date",
+    "@sveltejs/vite-plugin-svelte-inspector",
+    "@fontsource-variable/inter"
+  ],
+  "ignoreExports": [
+    {
+      "file": "packages/shared/src/constants/config-ops.ts",
+      "exports": [
+        "addLayer",
+        "addProfile",
+        "clearProfile",
+        "deleteLayer",
+        "deleteProfile",
+        "duplicateLayer",
+        "editLayer",
+        "editProfile",
+        "setProfileIcon"
+      ]
+    },
+    {
+      "file": "packages/shared/src/store/config.svelte.ts",
+      "exports": [
+        "addLayer",
+        "addProfile",
+        "clearProfile",
+        "deleteLayer",
+        "deleteProfile",
+        "duplicateLayer",
+        "editLayer",
+        "editProfile",
+        "setProfileIcon",
+        "factoryReset"
+      ]
+    },
+    {
+      "file": "packages/shared/src/store/serial.svelte.ts",
+      "exports": [
+        "factoryReset",
+        "getConfig",
+        "getDeviceStatus",
+        "setActiveProfile",
+        "setConfig"
+      ]
+    },
+    {
+      "file": "packages/shared/src/transport/http.ts",
+      "exports": [
+        "factoryReset",
+        "getConfig",
+        "getDeviceStatus",
+        "setActiveProfile",
+        "setConfig"
+      ]
+    },
+    {
+      "file": "packages/shared/src/transport/mock.ts",
+      "exports": [
+        "factoryReset",
+        "getConfig",
+        "getDeviceStatus",
+        "setActiveProfile",
+        "setConfig"
+      ]
+    },
+    {
+      "file": "packages/website/src/lib/nav.ts",
+      "exports": ["navTree"]
+    }
+  ],
+  "usedClassMembers": [
+    "pulseCW",
+    "pulseCCW",
+    "pulsePress",
+    "orientDeg",
+    "openKeyPicker",
+    "openEncoderPicker",
+    "setStage",
+    "editTargetLabel",
+    "assignMacro",
+    "resetLayer"
   ]
 }

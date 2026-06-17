@@ -34,16 +34,17 @@ export class KeypadContext {
   readonly layer = $derived(this.profile?.layers?.[configState.activeLayerIndex] as LayerConfig | undefined);
   readonly orientDeg = $derived(([0, 90, 180, 270] as const)[configState.data?.orientation ?? 0] ?? 0);
 
-  readonly profile_count = $derived(configState.data?.profiles?.length);
-  readonly active_profile = $derived(configState.activeProfileIndex);
-
-  getActiveProfile(): ProfileConfig | undefined {
-    return configState.data?.profiles?.[configState.activeProfileIndex ?? 0];
-  }
-
-  getBleActiveSlotName(): string | undefined {
-    return configState.data?.ble?.slot_names?.[configState.data?.ble?.active_slot ?? 0];
-  }
+  // Unused — kept for upcoming BLE-slot-name UI work.
+  // readonly profile_count = $derived(configState.data?.profiles?.length);
+  // readonly active_profile = $derived(configState.activeProfileIndex);
+  //
+  // getActiveProfile(): ProfileConfig | undefined {
+  //   return configState.data?.profiles?.[configState.activeProfileIndex ?? 0];
+  // }
+  //
+  // getBleActiveSlotName(): string | undefined {
+  //   return configState.data?.ble?.slot_names?.[configState.data?.ble?.active_slot ?? 0];
+  // }
 
   // ── Picker methods ────────────────────────────────────────────
   openKeyPicker(keyIndex: number): void {

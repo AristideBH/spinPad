@@ -46,6 +46,7 @@ export async function setActiveProfile(idx: number): Promise<{ ok: boolean }> {
 }
 
 export async function getDeviceStatus(): Promise<DeviceStatus> {
+  // opts (active profile/count) are mock-only — the real device reports its own state.
   const r = await fetch(`${BASE}/api/status`);
   if (!r.ok) throw new Error(`HTTP error ${r.status} while loading the status`);
   return r.json() as Promise<DeviceStatus>;

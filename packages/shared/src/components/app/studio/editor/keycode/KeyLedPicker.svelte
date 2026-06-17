@@ -6,6 +6,8 @@
   import { getKeypadContext } from '../keypad-context.svelte.js';
   import * as ColorPicker from '$shared/components/ui/color-picker/index.js';
   import * as Popover from '$shared/components/ui/popover/index.js';
+  import { hexToRgb, rgbToHex } from '$shared/lib/color.js';
+  import { SyncedHexColor } from '$shared/lib/hooks/synced-hex-color.svelte.js';
 
   const ctx = getKeypadContext();
 
@@ -31,22 +33,8 @@
       : '#ffffff'
   );
 
-  let pickerColor = $state('#ffffff');
-  $effect(() => {
-    const normalized = hexColor.toUpperCase();
-    if (pickerColor !== normalized) pickerColor = normalized;
-  });
-
-  function rgbToHex(r: number, g: number, b: number): string {
-    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-  }
-
-  function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const m = hex.match(/^#?([0-9a-f]{6})$/i);
-    if (!m) return null;
-    const n = parseInt(m[1], 16);
-    return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff };
-  }
+  const pickerColor = new SyncedHexColor(() => hexColor);
+  pickerColor.bind();
 
   function setEffect(effect: LedModeKey) {
     if (ki === null) return;
@@ -124,14 +112,14 @@
             <button
               {...props}
               class="ms-auto w-8 h-8 rounded-full border border-border shadow-sm cursor-pointer"
-              style="background-color: {pickerColor}"
+              style="background-color: {pickerColor.value}"
             ></button>
           {/snippet}
         </Popover.Trigger>
         <Popover.Content class="w-auto p-0!">
           <ColorPicker.Root
             formats={['hsl', 'hex']}
-            bind:value={pickerColor}
+            bind:value={pickerColor.value}
             onchange={(color) => setColor(color)}
           />
         </Popover.Content>

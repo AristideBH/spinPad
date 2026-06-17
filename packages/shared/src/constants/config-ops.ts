@@ -36,11 +36,11 @@ const LAYER_REF_TYPES: ReadonlySet<number> = new Set([
 
 export interface Selection {
   profile: number;
-  layer:   number;
+  layer: number;
 }
 
 export interface OpResult {
-  config:    FullConfig;
+  config: FullConfig;
   selection: Selection;
 }
 
@@ -48,13 +48,13 @@ export interface OpResult {
 export type ProfileTemplate = ProfileConfig;
 
 export interface ProfilePatch {
-  name?:   string;
-  icon?:   string;
+  name?: string;
+  icon?: string;
   moveTo?: number;
 }
 
 export interface LayerPatch {
-  name?:   string;
+  name?: string;
   moveTo?: number;
 }
 
@@ -85,7 +85,7 @@ function uniqueName(base: string, existing: string[]): string {
 
 /** New index of a tracked element after removal of `removed`. */
 function indexAfterRemove(tracked: number, removed: number): number {
-  if (tracked === removed) return -1;        // the tracked element was removed
+  if (tracked === removed) return -1; // the tracked element was removed
   return tracked > removed ? tracked - 1 : tracked;
 }
 
@@ -135,11 +135,7 @@ function remapProfileLayerRefs(profile: ProfileConfig, from: number, to: number)
  * Adds a profile from a template (preset) or from a blank profile.
  * Selects the new profile. No-op if already at max.
  */
-export function addProfile(
-  config: FullConfig,
-  selection: Selection,
-  template?: ProfileConfig,
-): OpResult {
+export function addProfile(config: FullConfig, selection: Selection, template?: ProfileConfig): OpResult {
   const cfg = clone(config);
   if (cfg.profiles.length >= CONFIG_MAX_PROFILES) {
     return { config: cfg, selection };
@@ -154,11 +150,7 @@ export function addProfile(
 }
 
 /** Deletes a profile (keeps at least MIN_PROFILES). */
-export function deleteProfile(
-  config: FullConfig,
-  selection: Selection,
-  idx: number,
-): OpResult {
+export function deleteProfile(config: FullConfig, selection: Selection, idx: number): OpResult {
   const cfg = clone(config);
   if (cfg.profiles.length <= MIN_PROFILES || idx < 0 || idx >= cfg.profiles.length) {
     return { config: cfg, selection };
@@ -175,12 +167,7 @@ export function deleteProfile(
  * Edits a profile in a unified way: rename, icon and/or move.
  * patch = { name?, icon?, moveTo? }
  */
-export function editProfile(
-  config: FullConfig,
-  selection: Selection,
-  idx: number,
-  patch: ProfilePatch,
-): OpResult {
+export function editProfile(config: FullConfig, selection: Selection, idx: number, patch: ProfilePatch): OpResult {
   const cfg = clone(config);
   if (idx < 0 || idx >= cfg.profiles.length) return { config: cfg, selection };
 
@@ -207,11 +194,7 @@ export function editProfile(
  * Keeps the structure (layer count, names), the encoders, the icon and the
  * profile name — same semantics as a layer "reset", applied to all.
  */
-export function clearProfile(
-  config: FullConfig,
-  selection: Selection,
-  idx: number,
-): OpResult {
+export function clearProfile(config: FullConfig, selection: Selection, idx: number): OpResult {
   const cfg = clone(config);
   const profile = cfg.profiles[idx];
   if (!profile) return { config: cfg, selection };
@@ -225,11 +208,7 @@ export function clearProfile(
 // ── Layers ──────────────────────────────────────────────────────
 
 /** Adds a layer to profile pIdx (keeps ≤ CONFIG_MAX_LAYERS) and selects it. */
-export function addLayer(
-  config: FullConfig,
-  selection: Selection,
-  pIdx: number,
-): OpResult {
+export function addLayer(config: FullConfig, selection: Selection, pIdx: number): OpResult {
   const cfg = clone(config);
   const profile = cfg.profiles[pIdx];
   if (!profile || profile.layers.length >= CONFIG_MAX_LAYERS) {
@@ -246,12 +225,7 @@ export function addLayer(
 
 /** Duplicates layer lIdx of profile pIdx (clone + unique name), inserts it just
  *  after and selects it. No-op if already at max. */
-export function duplicateLayer(
-  config: FullConfig,
-  selection: Selection,
-  pIdx: number,
-  lIdx: number,
-): OpResult {
+export function duplicateLayer(config: FullConfig, selection: Selection, pIdx: number, lIdx: number): OpResult {
   const cfg = clone(config);
   const profile = cfg.profiles[pIdx];
   if (!profile || profile.layers.length >= CONFIG_MAX_LAYERS || lIdx < 0 || lIdx >= profile.layers.length) {
@@ -267,12 +241,7 @@ export function duplicateLayer(
 }
 
 /** Deletes a layer (keeps at least MIN_LAYERS). */
-export function deleteLayer(
-  config: FullConfig,
-  selection: Selection,
-  pIdx: number,
-  lIdx: number,
-): OpResult {
+export function deleteLayer(config: FullConfig, selection: Selection, pIdx: number, lIdx: number): OpResult {
   const cfg = clone(config);
   const profile = cfg.profiles[pIdx];
   if (!profile || profile.layers.length <= MIN_LAYERS || lIdx < 0 || lIdx >= profile.layers.length) {
@@ -323,19 +292,19 @@ export function editLayer(
 
 // ── Exposed granular helpers (composables) ──────────────────────
 
-export function renameProfile(config: FullConfig, selection: Selection, idx: number, name: string): OpResult {
+function renameProfile(config: FullConfig, selection: Selection, idx: number, name: string): OpResult {
   return editProfile(config, selection, idx, { name });
 }
-export function moveProfile(config: FullConfig, selection: Selection, from: number, to: number): OpResult {
+function moveProfile(config: FullConfig, selection: Selection, from: number, to: number): OpResult {
   return editProfile(config, selection, from, { moveTo: to });
 }
-export function setProfileIcon(config: FullConfig, selection: Selection, idx: number, icon: string): OpResult {
+function setProfileIcon(config: FullConfig, selection: Selection, idx: number, icon: string): OpResult {
   return editProfile(config, selection, idx, { icon });
 }
-export function renameLayer(config: FullConfig, selection: Selection, pIdx: number, lIdx: number, name: string): OpResult {
+function renameLayer(config: FullConfig, selection: Selection, pIdx: number, lIdx: number, name: string): OpResult {
   return editLayer(config, selection, pIdx, lIdx, { name });
 }
-export function moveLayer(config: FullConfig, selection: Selection, pIdx: number, from: number, to: number): OpResult {
+function moveLayer(config: FullConfig, selection: Selection, pIdx: number, from: number, to: number): OpResult {
   return editLayer(config, selection, pIdx, from, { moveTo: to });
 }
 
