@@ -1,18 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
-//  types/serial.ts — Types internes du transport WebSerial
+//  types/serial.ts — Internal types of the WebSerial transport
 // ═══════════════════════════════════════════════════════════════
 
-/** Entrée dans la file RPC. */
+/** Entry in the RPC queue. */
 export interface RpcQueueEntry {
   fn:      () => Promise<unknown>;
   resolve: (v: unknown) => void;
   reject:  (e: unknown) => void;
 }
 
-/** Handler abonné aux messages entrants. */
+/** Handler subscribed to incoming messages. */
 export type MessageHandler = (msg: unknown) => void;
 
-/** Snapshot de l'état série (utile pour les composants). */
+/** Snapshot of the serial state (useful for components). */
 export interface SerialStateSnapshot {
   connected:        boolean;
   error:            string | null;

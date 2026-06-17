@@ -15,7 +15,7 @@
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
 
-  // ── Veille (issue #14) ───────────────────────────────────────
+  // ── Idle (issue #14) ─────────────────────────────────────────
   const stats = $derived(data?.stats ?? null);
   const sleepPct = $derived.by(() => {
     if (!stats) return null;
@@ -24,12 +24,12 @@
   });
   function formatDuration(s: number): string {
     const h = Math.floor(s / 3600);
-    if (h >= 24) return `${Math.floor(h / 24)}j ${h % 24}h`;
+    if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
     const m = Math.floor((s % 3600) / 60);
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
   }
 
-  // ── Batterie ─────────────────────────────────────────────────
+  // ── Battery ──────────────────────────────────────────────────
   const batteryPresent = $derived(data?.battery?.present === true);
   const batteryPct = $derived(batteryPresent && data?.battery && data.battery.present ? data.battery.percent : 0);
   const batteryMv = $derived(batteryPresent && data?.battery && data.battery.present ? data.battery.voltage_mv : 0);
@@ -60,16 +60,16 @@
 
 <Card.Root class="@container/card flex flex-col h-full ">
   <Card.Header class="h-full">
-    <Card.Description>Batterie</Card.Description>
+    <Card.Description>Battery</Card.Description>
     <Card.Action>
       <BatteryIcon class="size-4 text-muted-foreground" />
     </Card.Action>
 
     <div class="flex flex-col col-span-2">
       {#if !batteryPresent}
-        <p class="mt-auto text-base font-medium text-muted-foreground">Pas de batterie</p>
+        <p class="mt-auto text-base font-medium text-muted-foreground">No battery</p>
         <p class="text-xs text-muted-foreground">
-          {batterySource === 'forced_no' ? 'Désactivée par configuration' : 'Mode USB-only'}
+          {batterySource === 'forced_no' ? 'Disabled by configuration' : 'USB-only mode'}
         </p>
       {:else}
         <div class="flex items-baseline gap-2 my-1">
@@ -79,7 +79,7 @@
           </span>
           <span class="text-xs text-muted-foreground tabular-nums">{(batteryMv / 1000).toFixed(2)}V</span>
           <!-- {#if batteryCharging}
-            <span class="text-xs font-medium text-cyan-500">Charge</span>
+            <span class="text-xs font-medium text-cyan-500">Charging</span>
           {/if} -->
         </div>
         <div class="w-full h-1 overflow-hidden rounded-full bg-muted">
@@ -94,7 +94,7 @@
         </div>
         {#if stats && sleepPct !== null}
           <p class="flex items-baseline gap-1 mt-2 text-[11px] text-muted-foreground tabular-nums">
-            <Moon class="size-3" /> Veille {sleepPct}% · {formatDuration(stats.deep_sleep_s)}
+            <Moon class="size-3" /> Idle {sleepPct}% · {formatDuration(stats.deep_sleep_s)}
           </p>
         {/if}
       {/if}

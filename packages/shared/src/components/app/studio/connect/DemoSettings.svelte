@@ -10,7 +10,7 @@
 
   async function handleDevMode() {
     devMode.active = false;
-    serial.connected = false; // couper le mock serial en quittant la démo
+    serial.connected = false; // cut the mock serial when leaving the demo
     await loadConfig();
   }
 
@@ -19,7 +19,7 @@
   const BATT_SCENARIOS: { v: BatteryScenario; label: string }[] = [
     { v: 'present', label: '78 %' },
     { v: 'low', label: '12 %' },
-    { v: 'absent', label: 'Absente' },
+    { v: 'absent', label: 'Absent' },
   ];
   const CONN_SCENARIOS: { v: ConnScenario; label: string }[] = [
     { v: 'usb', label: 'USB' },
@@ -36,9 +36,9 @@
     refreshDeviceStatus();
   }
 
-  // Mock serial : bascule serial.connected pour ajuster l'UI réservée
-  // au transport WebSerial (mode training, sync heure, key monitor…)
-  // sans device physique branché.
+  // Mock serial: toggles serial.connected to adjust the UI reserved
+  // for the WebSerial transport (training mode, time sync, key monitor…)
+  // without a physical device plugged in.
   function setSerial(connected: boolean) {
     serial.connected = connected;
     refreshDeviceStatus();
@@ -48,12 +48,12 @@
 {#if devMode.active}
   <Card.Root>
     <Card.Header class="mt-2 border-b b">
-      <Card.Title>Démo</Card.Title>
+      <Card.Title>Demo</Card.Title>
     </Card.Header>
 
     <Card.Content class="flex flex-col gap-3 p-2">
       <div class="flex flex-wrap items-center gap-2">
-        <span class="w-20 text-xs text-muted-foreground">Batterie</span>
+        <span class="w-20 text-xs text-muted-foreground">Battery</span>
         <ButtonGroup.Root>
           {#each BATT_SCENARIOS as s}
             <Button variant={devMode.battery === s.v ? 'default' : 'outline'} size="sm" onclick={() => setBatt(s.v)}>
@@ -63,7 +63,7 @@
         </ButtonGroup.Root>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <span class="w-20 text-xs text-muted-foreground">Connexion</span>
+        <span class="w-20 text-xs text-muted-foreground">Connection</span>
         <ButtonGroup.Root>
           {#each CONN_SCENARIOS as s}
             <Button variant={devMode.connection === s.v ? 'default' : 'outline'} size="sm" onclick={() => setConn(s.v)}>
@@ -76,17 +76,17 @@
         <span class="w-20 text-xs text-muted-foreground">Serial</span>
         <ButtonGroup.Root>
           <Button variant={serial.connected ? 'default' : 'outline'} size="sm" onclick={() => setSerial(true)}>
-            Connecté
+            Connected
           </Button>
           <Button variant={!serial.connected ? 'default' : 'outline'} size="sm" onclick={() => setSerial(false)}>
-            Déconnecté
+            Disconnected
           </Button>
         </ButtonGroup.Root>
       </div>
     </Card.Content>
 
     <Card.Footer>
-      <Button variant="outline" size="sm" onclick={handleDevMode}>Quitter le mode démo</Button>
+      <Button variant="outline" size="sm" onclick={handleDevMode}>Exit demo mode</Button>
     </Card.Footer>
   </Card.Root>
 {/if}

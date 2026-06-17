@@ -94,9 +94,9 @@
   }
 }
 
-/* ── Backdrop grille technique (blueprint) ──
-   Lignes fines à la teinte de bordure, fondues vers les bords par un masque
-   radial pour ne pas alourdir. Cadre la « surface de config » du hero. */
+/* ── Technical grid backdrop (blueprint) ──
+   Thin lines in the border tint, faded toward the edges by a radial mask
+   to keep it light. Frames the hero's "config surface". */
 .tech-grid {
   background-image:
     linear-gradient(to right, var(--color-border) 1px, transparent 1px),

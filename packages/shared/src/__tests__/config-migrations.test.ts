@@ -18,7 +18,7 @@ describe('parseSpinpadFile', () => {
 
   it('migrates v1 → v2 : drops per-profile macros, inits global slots', () => {
     const cfg = defaultConfig() as Record<string, unknown> & { profiles: Record<string, unknown>[] };
-    // Simule un ancien profil v1 avec des macros locales
+    // Simulates an old v1 profile with local macros
     cfg.profiles[0].macros = [[{ type: 0, keycode: 0x04 }]];
     delete (cfg as Record<string, unknown>).macros;
     const wrapper = {
@@ -41,7 +41,7 @@ describe('parseSpinpadFile', () => {
   it('throws on wrong _type', () => {
     expect(() =>
       parseSpinpadFile({ _type: 'wrong-type', _format_version: 1, config: defaultConfig() })
-    ).toThrow(/non reconnu/);
+    ).toThrow(/Unrecognized/);
   });
 
   it('throws on future format version', () => {
@@ -50,7 +50,7 @@ describe('parseSpinpadFile', () => {
       _format_version: CURRENT_FORMAT_VERSION + 1,
       config: defaultConfig(),
     };
-    expect(() => parseSpinpadFile(future)).toThrow(/trop récent/);
+    expect(() => parseSpinpadFile(future)).toThrow(/too recent/);
   });
 
   it('accepts current format version without migration', () => {

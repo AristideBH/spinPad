@@ -68,7 +68,7 @@
     if (extLedPickerColor !== normalized) extLedPickerColor = normalized;
   });
 
-  // Valeurs locales pour les sliders (buffer pendant le drag)
+  // Local values for the sliders (buffer during the drag)
   let localBrightness = $state(180);
   let localExtBright = $state(128);
   $effect(() => {
@@ -90,23 +90,23 @@
   }
 
   const KEY_EFFECTS: { value: LedMode; label: string; desc: string }[] = [
-    { value: 'off', label: 'Éteint', desc: 'LEDs éteintes' },
-    { value: 'static', label: 'Statique', desc: 'Couleur fixe' },
-    { value: 'breathe', label: 'Respiration', desc: 'Pulsation lente' },
-    { value: 'pulse', label: 'Pulsation', desc: 'Double battement' },
-    { value: 'flow', label: 'Flux', desc: 'Vague horizontale' },
-    { value: 'sweep', label: 'Balayage', desc: 'Bande voyageuse' },
-    { value: 'alert', label: 'Alerte', desc: 'Stroboscopique' },
-    { value: 'rainbow', label: 'Arc-en-ciel', desc: 'Gradient HSL' },
+    { value: 'off', label: 'Off', desc: 'LEDs off' },
+    { value: 'static', label: 'Static', desc: 'Fixed color' },
+    { value: 'breathe', label: 'Breathe', desc: 'Slow pulse' },
+    { value: 'pulse', label: 'Pulse', desc: 'Double beat' },
+    { value: 'flow', label: 'Flow', desc: 'Horizontal wave' },
+    { value: 'sweep', label: 'Sweep', desc: 'Traveling band' },
+    { value: 'alert', label: 'Alert', desc: 'Strobe' },
+    { value: 'rainbow', label: 'Rainbow', desc: 'HSL gradient' },
   ];
 
   const EXT_MODES = [
-    { value: 0, label: 'Éteint', desc: 'LEDs éteintes' },
-    { value: 1, label: 'Mirror', desc: 'Copie les touches' },
-    { value: 2, label: 'Ambient', desc: 'Respiration douce' },
-    { value: 3, label: 'Statique', desc: 'Couleur fixe' },
-    { value: 4, label: 'Réactif', desc: 'Flash sur pression' },
-    { value: 5, label: 'Hyperion', desc: 'Frame externe' },
+    { value: 0, label: 'Off', desc: 'LEDs off' },
+    { value: 1, label: 'Mirror', desc: 'Mirrors the keys' },
+    { value: 2, label: 'Ambient', desc: 'Gentle breathing' },
+    { value: 3, label: 'Static', desc: 'Fixed color' },
+    { value: 4, label: 'Reactive', desc: 'Flash on press' },
+    { value: 5, label: 'Hyperion', desc: 'External frame' },
   ];
 
   const isGradientEffect = $derived(ledEffect === 'flow' || ledEffect === 'sweep' || ledEffect === 'rainbow');
@@ -122,14 +122,14 @@
   const matrixColorMode: 'solid' | 'gradient' = $derived(isGradientEffect ? 'gradient' : 'solid');
 </script>
 
-<Button variant="outline" class="gap-1.5" title="Contrôle LED" onclick={() => (open = true)}>
+<Button variant="outline" class="gap-1.5" title="LED control" onclick={() => (open = true)}>
   <Lightbulb class="size-4" /> LED
 </Button>
 
 <ResponsiveSheet
   bind:open
-  title="Contrôle LED"
-  description="Effets globaux, couleurs par profil et extension LED."
+  title="LED control"
+  description="Global effects, per-profile colors and LED extension."
   srOnlyTitle={false}
   desktopClass="w-full max-w-md!"
 >
@@ -138,7 +138,7 @@
   {/snippet}
 
   <div class="w-full h-full max-w-md px-4 pt-4 pb-8 mx-auto space-y-6 overflow-y-auto">
-    <!-- Préview animée -->
+    <!-- Animated preview -->
     <div class="w-full border overflow-clip h-42 aspect-video rounded-xl border-border">
       <LedMatrix
         mode={ledEffect}
@@ -153,15 +153,15 @@
       />
     </div>
 
-    <!-- ── LEDs des touches ────────────────────────────────────── -->
+    <!-- ── Key LEDs ────────────────────────────────────────────── -->
     <Card.Root>
       <Card.Header>
-        <Card.Title>LEDs des touches</Card.Title>
+        <Card.Title>Key LEDs</Card.Title>
       </Card.Header>
 
       <Card.Content class="flex flex-col gap-5">
         <div>
-          <Label class="block mb-3 text-sm">Effet</Label>
+          <Label class="block mb-3 text-sm">Effect</Label>
           <OptionGrid
             options={KEY_EFFECTS}
             value={ledEffect}
@@ -178,7 +178,7 @@
 
         {#if ledEffect !== 'off'}
           <div class="flex flex-col gap-1.5">
-            <Label class="block mb-1.5 text-sm">Luminosité</Label>
+            <Label class="block mb-1.5 text-sm">Brightness</Label>
             <Scrubber
               bind:value={localBrightness}
               min={0}
@@ -194,7 +194,7 @@
 
         {#if ledEffect === 'flow' || ledEffect === 'sweep'}
           <div>
-            <Label class="block mb-3 text-sm">Palette de dégradé</Label>
+            <Label class="block mb-3 text-sm">Gradient palette</Label>
             <div class="grid grid-cols-2 gap-2">
               {#each GRADIENT_PRESETS as preset, i (i)}
                 <button
@@ -217,7 +217,7 @@
             </div>
           </div>
         {:else if ledEffect !== 'rainbow' && ledEffect !== 'off'}
-          <SettingsField label="Couleur" description="Couleur globale par défaut des touches">
+          <SettingsField label="Color" description="Global default color of the keys">
             <Popover.Root>
               <Popover.Trigger>
                 {#snippet child({ props })}
@@ -249,14 +249,14 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- ── Extension LED ──────────────────────────────────────── -->
+    <!-- ── LED Extension ──────────────────────────────────────── -->
     <Card.Root>
       <Card.Header>
-        <Card.Title>Extension LED</Card.Title>
+        <Card.Title>LED Extension</Card.Title>
       </Card.Header>
 
       <Card.Content class="flex flex-col gap-5">
-        <SettingsField label="Activer l'extension" description="LEDs WS2812 sur le connecteur d'extension du PCB">
+        <SettingsField label="Enable the extension" description="WS2812 LEDs on the PCB's extension connector">
           <Switch checked={ledExtEnabled} onCheckedChange={(v: boolean) => updateConfig('led_extension.enabled', v)} />
         </SettingsField>
 
@@ -272,7 +272,7 @@
           </SettingsField>
 
           <div>
-            <Label class="block mb-3 text-sm">Mode d'éclairage</Label>
+            <Label class="block mb-3 text-sm">Lighting mode</Label>
             <OptionGrid
               options={EXT_MODES}
               value={ledExtMode}
@@ -289,8 +289,8 @@
 
           {#if ledExtMode !== 1 && ledExtMode !== 5}
             <SettingsField
-              label="Couleur"
-              description={ledExtMode === 4 ? 'Couleur du flash réactif' : 'Couleur de base'}
+              label="Color"
+              description={ledExtMode === 4 ? 'Reactive flash color' : 'Base color'}
             >
               <Popover.Root>
                 <Popover.Trigger>
@@ -320,7 +320,7 @@
             </SettingsField>
           {/if}
           <div class="flex flex-col gap-1.5">
-            <Label class="block mb-1.5 text-sm">Luminosité extension</Label>
+            <Label class="block mb-1.5 text-sm">Extension brightness</Label>
             <Scrubber
               bind:value={localExtBright}
               min={0}

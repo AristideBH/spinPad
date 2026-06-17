@@ -1,9 +1,9 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  ProfileAppearanceSheet — icône + LED d'un profil (responsive sheet)
+  //  ProfileAppearanceSheet — a profile's icon + LED (responsive sheet)
   //
-  //  Réunit l'éditeur d'icône et les réglages LED (couleur/effet) d'un
-  //  profil dans une seule sheet (desktop) / drawer (mobile).
+  //  Brings together the icon editor and the LED settings (color/effect) of a
+  //  profile in a single sheet (desktop) / drawer (mobile).
   // ───────────────────────────────────────────────────────────────
   import ResponsiveSheet from '$shared/components/ui/responsive-sheet/responsive-sheet.svelte';
   import { configState, setProfileIcon, setProfileLed } from '$shared/store/config.svelte.js';
@@ -20,18 +20,18 @@
   const currentLed = $derived(prof?.led);
 
   const LED_PROFILE_EFFECTS: { value: LedModeProfile; label: string }[] = [
-    { value: 'off', label: 'Éteint' },
-    { value: 'static', label: 'Statique' },
-    { value: 'breathe', label: 'Respiration' },
-    { value: 'pulse', label: 'Pulsation' },
+    { value: 'off', label: 'Off' },
+    { value: 'static', label: 'Static' },
+    { value: 'breathe', label: 'Breathe' },
+    { value: 'pulse', label: 'Pulse' },
   ];
 
   const INHERIT = '__inherit__';
   const selectedLed = $derived(currentLed ? (currentLed.effect ?? 'static') : INHERIT);
   const selectedLedLabel = $derived(
     selectedLed === INHERIT
-      ? 'Hérite global'
-      : (LED_PROFILE_EFFECTS.find((o) => o.value === selectedLed)?.label ?? 'Hérite global'),
+      ? 'Inherit global'
+      : (LED_PROFILE_EFFECTS.find((o) => o.value === selectedLed)?.label ?? 'Inherit global'),
   );
 
   function onLedModeChange(value: string) {
@@ -71,27 +71,27 @@
 
 <ResponsiveSheet
   bind:open
-  title="Apparence — {prof?.name ?? `Profil ${profileIndex + 1}`}"
-  description="Icône et couleur LED de ce profil."
+  title="Appearance — {prof?.name ?? `Profile ${profileIndex + 1}`}"
+  description="Icon and LED color of this profile."
   desktop="dialog"
   desktopClass="sm:max-w-fit max-h-[90dvh] flex flex-col p-0 gap-0"
 >
   {#snippet header()}
     <div class="px-4 py-3 border-b">
-      <span class="text-sm font-medium">Apparence — {prof?.name ?? `Profil ${profileIndex + 1}`}</span>
+      <span class="text-sm font-medium">Appearance — {prof?.name ?? `Profile ${profileIndex + 1}`}</span>
     </div>
   {/snippet}
 
   {#if prof}
     <div class="flex flex-col gap-6 p-4 overflow-y-auto">
       <section class="flex flex-col gap-2">
-        <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Icône</h3>
+        <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Icon</h3>
         <IconEditor value={prof.icon ?? ''} onchange={(b64) => setProfileIcon(profileIndex, b64)} />
       </section>
 
       <section class="flex flex-col gap-3">
         <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">LED</h3>
-        <p class="text-xs text-muted-foreground">Couleur et effet LED pour ce profil. Hérite du global si absent.</p>
+        <p class="text-xs text-muted-foreground">LED color and effect for this profile. Inherits from global if absent.</p>
         <div class="flex items-center gap-3">
           <span class="text-sm">Mode</span>
           <Select.Root type="single" name="led-mode" value={selectedLed} onValueChange={onLedModeChange}>
@@ -104,7 +104,7 @@
                 {#each LED_PROFILE_EFFECTS as opt (opt.value)}
                   <Select.Item value={opt.value} label={opt.label}>{opt.label}</Select.Item>
                 {/each}
-                <Select.Item value={INHERIT} label="Hérite global">Hérite global</Select.Item>
+                <Select.Item value={INHERIT} label="Inherit global">Inherit global</Select.Item>
               </Select.Group>
             </Select.Content>
           </Select.Root>
@@ -112,7 +112,7 @@
 
         {#if currentLed && currentLed.effect !== 'off'}
           <div class="flex items-center gap-3">
-            <span class="text-sm">Couleur</span>
+            <span class="text-sm">Color</span>
             <Popover.Root>
               <Popover.Trigger>
                 {#snippet child({ props })}
@@ -120,7 +120,7 @@
                     {...props}
                     class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
                     style="background-color: {profilePickerColor}"
-                    aria-label="Choisir la couleur LED"
+                    aria-label="Choose the LED color"
                   ></button>
                 {/snippet}
               </Popover.Trigger>

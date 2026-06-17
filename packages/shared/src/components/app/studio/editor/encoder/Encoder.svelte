@@ -49,7 +49,7 @@
     <Knob {knob} />
     <div class="flex flex-col gap-1.5">
       <p class="text-xs text-muted-foreground">
-        Sensibilité{layerSensitivity === null ? ' (global)' : ''}
+        Sensitivity{layerSensitivity === null ? ' (global)' : ''}
       </p>
       <Scrubber
         min={1}
@@ -64,8 +64,8 @@
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Réinitialiser (hérite du global)"
-            title="Réinitialiser (hérite du global)"
+            aria-label="Reset (inherits from global)"
+            title="Reset (inherits from global)"
             disabled={layerSensitivity === null}
             onclick={resetLayerSensitivity}
           >

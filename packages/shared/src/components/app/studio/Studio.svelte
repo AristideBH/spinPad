@@ -22,10 +22,10 @@
     if (!configState.data && !configState.isLoading) loadConfig();
   });
 
-  // Filet de sécurité : si une sauvegarde auto est encore dans la fenêtre
-  // debounce (800ms) quand l'utilisateur quitte/recharge, on la flush
-  // immédiatement et on demande confirmation — l'écriture transport étant
-  // asynchrone, le prompt laisse une chance au write d'aboutir.
+  // Safety net: if an auto-save is still within the debounce window (800ms)
+  // when the user leaves/reloads, we flush it immediately and ask for
+  // confirmation — since the transport write is asynchronous, the prompt
+  // gives the write a chance to complete.
   function handleBeforeUnload(e: BeforeUnloadEvent) {
     if (!hasPendingSave()) return;
     void saveConfig();

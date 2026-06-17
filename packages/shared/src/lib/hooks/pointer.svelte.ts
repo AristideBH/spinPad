@@ -1,12 +1,12 @@
 import { MediaQuery } from 'svelte/reactivity';
 
 /**
- * `true` quand un pointeur fin (souris/trackpad) est disponible — proxy
- * raisonnable pour « un vrai clavier physique est probablement présent ».
- * Sert à activer/désactiver le live-record dans le picker.
+ * `true` when a fine pointer (mouse/trackpad) is available — a reasonable
+ * proxy for "a real physical keyboard is probably present".
+ * Used to enable/disable live-record in the picker.
  *
- * Sur un appareil tactile uniquement (téléphone, studio embarqué via AP),
- * `(any-pointer: fine)` ne matche pas → `.current === false`.
+ * On a touch-only device (phone, embedded studio via AP),
+ * `(any-pointer: fine)` does not match → `.current === false`.
  */
 export class HasFinePointer extends MediaQuery {
   constructor() {

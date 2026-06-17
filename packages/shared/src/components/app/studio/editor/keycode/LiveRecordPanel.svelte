@@ -18,10 +18,10 @@
   const ctx = getKeypadContext();
   const layout = new KeyboardLayout();
 
-  // ── Session de capture ────────────────────────────────────────
-  let heldMods = $state<string[]>([]); // codes des modificateurs maintenus
-  let nonModUsed = false; // une touche non-modificatrice a été pressée durant la session
-  let unsupported = $state(false); // dernière touche non mappable
+  // ── Capture session ───────────────────────────────────────────
+  let heldMods = $state<string[]>([]); // codes of the held modifiers
+  let nonModUsed = false; // a non-modifier key was pressed during the session
+  let unsupported = $state(false); // last unmappable key
   let combo = $state<{ label: string; steps: MacroStep[] } | null>(null);
 
   const MOD_LABELS: Record<string, string> = {
@@ -35,7 +35,7 @@
     MetaRight: 'Gui',
   };
 
-  /** Glyphe affiché pour la touche (suit la disposition hôte ; fallback label US). */
+  /** Glyph displayed for the key (follows the host layout; falls back to US label). */
   function keyGlyph(e: KeyboardEvent, key: Keycode): string {
     return layout.label(e.code, key.label);
   }
@@ -45,11 +45,11 @@
   }
 
   function onKeydown(e: KeyboardEvent) {
-    // Escape : laisser passer pour fermer le picker (ne pas l'assigner).
+    // Escape: let it through to close the picker (don't assign it).
     if (e.code === 'Escape') return;
     e.preventDefault();
     e.stopPropagation();
-    if (combo) return; // en attente d'une décision macro → on ignore
+    if (combo) return; // waiting for a macro decision → ignore
 
     if (isModifierCode(e.code)) {
       if (!heldMods.includes(e.code)) heldMods = [...heldMods, e.code];
@@ -68,8 +68,8 @@
     if (mods.length > 0) {
       combo = { label: comboLabel(mods, glyph), steps: buildComboMacroSteps(mods, key) };
     } else {
-      toast.success(`Touche assignée : ${glyph}`);
-      ctx.selectKeycode(key); // ferme le picker
+      toast.success(`Key assigned: ${glyph}`);
+      ctx.selectKeycode(key); // closes the picker
     }
   }
 
@@ -79,7 +79,7 @@
 
     if (isModifierCode(e.code)) {
       heldMods = heldMods.filter((c) => c !== e.code);
-      // Modificateur relâché seul (aucune touche pressée) → on l'assigne tel quel.
+      // Modifier released alone (no key pressed) → assign it as is.
       if (heldMods.length === 0 && !nonModUsed) {
         const kc = keyEventToKeycode(e);
         if (kc) ctx.selectKeycode(kc);
@@ -93,10 +93,10 @@
     const label = combo.label;
     const idx = createMacroFromSteps(label, combo.steps);
     if (idx !== null) {
-      ctx.assignMacro(idx); // ferme le picker
-      toast.success(`Macro créée : ${label}`, {
+      ctx.assignMacro(idx); // closes the picker
+      toast.success(`Macro created: ${label}`, {
         action: {
-          label: 'Réglages',
+          label: 'Settings',
           onClick: () => macroManager.openAt(idx),
         },
       });
@@ -119,11 +119,11 @@
     <Zap class="size-8 text-rose-400" />
     <div>
       <p class="font-mono text-lg font-semibold">{combo.label}</p>
-      <p class="mt-1 text-sm text-muted-foreground">Combo détecté — une touche ne stocke qu'une action.</p>
+      <p class="mt-1 text-sm text-muted-foreground">Combo detected — a key stores only one action.</p>
     </div>
     <div class="flex gap-2">
-      <Button onclick={confirmCombo} class="gap-1.5"><Zap class="size-4" /> Créer une macro</Button>
-      <Button variant="outline" onclick={() => (combo = null)}>Annuler</Button>
+      <Button onclick={confirmCombo} class="gap-1.5"><Zap class="size-4" /> Create a macro</Button>
+      <Button variant="outline" onclick={() => (combo = null)}>Cancel</Button>
     </div>
   {:else}
     <div class="record-cap" class:record-cap--armed={heldMods.length > 0}>
@@ -139,9 +139,9 @@
     {/if}
 
     {#if unsupported}
-      <p class="text-sm text-destructive">Touche non supportée — utilise la liste.</p>
+      <p class="text-sm text-destructive">Unsupported key — use the list.</p>
     {:else}
-      <p class="text-sm text-muted-foreground">Appuie sur une touche de ton clavier pour l'assigner.</p>
+      <p class="text-sm text-muted-foreground">Press a key on your keyboard to assign it.</p>
     {/if}
   {/if}
 </div>

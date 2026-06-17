@@ -1,28 +1,28 @@
 ---
-title: Layers et Keymap
-description: Profils, layers et actions de couche (MO, TG, TO).
+title: Layers and Keymap
+description: Profiles, layers and layer actions (MO, TG, TO).
 order: 1
 group: Keymap
 ---
 
-# Layers et Keymap
+# Layers and Keymap
 
-## Concept de layers
+## Layer concept
 
-Un **layer** est une couche de mapping qui peut être activée temporairement ou
-en permanence. Chaque profil peut avoir plusieurs layers.
+A **layer** is a mapping layer that can be activated temporarily or
+permanently. Each profile can have multiple layers.
 
-## Actions de layer
+## Layer actions
 
 | Action | Description |
 |--------|-------------|
-| `MO(n)` | Active le layer `n` tant que la touche est maintenue |
-| `TG(n)` | Bascule le layer `n` on/off |
-| `TO(n)` | Passe définitivement au layer `n` |
+| `MO(n)` | Activates layer `n` while the key is held |
+| `TG(n)` | Toggles layer `n` on/off |
+| `TO(n)` | Permanently switches to layer `n` |
 
-## Encodeur
+## Encoder
 
-L'encodeur rotatif supporte trois actions :
-- **CW** (sens horaire)
-- **CCW** (sens anti-horaire)
-- **Press** (appui sur l'axe)
+The rotary encoder supports three actions:
+- **CW** (clockwise)
+- **CCW** (counter-clockwise)
+- **Press** (press on the axis)

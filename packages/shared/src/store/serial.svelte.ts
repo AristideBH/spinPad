@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/serial.svelte.ts — Interface WebSerial avec le clavier
+//  store/serial.svelte.ts — WebSerial interface with the keyboard
 //
-//  Protocole : JSON sur une ligne terminée par \n
-//    → {"cmd":"get_config"}              reçoit la config complète
-//    → {"cmd":"set_config","payload":{}} envoie une nouvelle config
-//    → {"cmd":"factory_reset"}           reset usine
+//  Protocol: JSON on a single line terminated by \n
+//    → {"cmd":"get_config"}              receives the full config
+//    → {"cmd":"set_config","payload":{}} sends a new config
+//    → {"cmd":"factory_reset"}           factory reset
 // ═══════════════════════════════════════════════════════════════
 
 import { toast } from 'svelte-sonner';
@@ -13,12 +13,12 @@ import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 import type { RpcQueueEntry, MessageHandler } from '$shared/types/serial.js';
 import { devMode } from './devMode.svelte';
 
-// WebSerial API n'est pas dans les lib TypeScript standard — types locaux.
+// WebSerial API is not in the standard TypeScript libs — local types.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SerialPort = any;
 
 // ─────────────────────────────────────────────────────────────
-//  ÉTAT RÉACTIF (Svelte 5 runes)
+//  REACTIVE STATE (Svelte 5 runes)
 // ─────────────────────────────────────────────────────────────
 
 class SerialState {
@@ -30,7 +30,7 @@ class SerialState {
 export const serial = new SerialState();
 
 // ─────────────────────────────────────────────────────────────
-//  ÉTAT INTERNE
+//  INTERNAL STATE
 // ─────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,9 +65,9 @@ function _startReconnect(savedPort: any): void {
       startReading();
       serial.connected = true;
       serial.error = null;
-      toast.success('Reconnecté');
+      toast.success('Reconnected');
     } catch {
-      // Périphérique pas encore disponible
+      // Device not available yet
     }
   }, RECONNECT_INTERVAL_MS);
 }
@@ -85,7 +85,7 @@ const encoder = new TextEncoder();
 const messageHandlers = new Set<MessageHandler>();
 
 // ─────────────────────────────────────────────────────────────
-//  FILE D'ATTENTE RPC
+//  RPC QUEUE
 // ─────────────────────────────────────────────────────────────
 
 let _rpcBusy = false;
@@ -122,14 +122,14 @@ function _cancelQueuedRpcs(reason: string): void {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  CONNEXION
+//  CONNECTION
 // ─────────────────────────────────────────────────────────────
 
 export async function connect(): Promise<boolean> {
   _stopReconnect();
 
   if (!('serial' in navigator)) {
-    serial.error = 'WebSerial non supporté. Utilise Chrome ou Edge.';
+    serial.error = 'WebSerial not supported. Use Chrome or Edge.';
     return false;
   }
 
@@ -145,13 +145,13 @@ export async function connect(): Promise<boolean> {
 
     serial.connected = true;
     serial.error = null;
-    toast.success('Clavier connecté');
+    toast.success('Keyboard connected');
     return true;
   } catch (err) {
     const e = err as Error;
     if (e.name !== 'NotFoundError') {
-      serial.error = `Erreur connexion : ${e.message}`;
-      toast.error('Connexion échouée', { description: e.message });
+      serial.error = `Connection error: ${e.message}`;
+      toast.error('Connection failed', { description: e.message });
     }
     return false;
   }
@@ -160,38 +160,38 @@ export async function connect(): Promise<boolean> {
 function _handleUnexpectedDisconnect(): void {
   const savedPort = port;
   readBuffer = '';
-  _cancelQueuedRpcs('Déconnecté');
+  _cancelQueuedRpcs('Disconnected');
   writer = null;
   reader = null;
   port = null;
   serial.connected = false;
-  toast.warning('Clavier déconnecté — tentative de reconnexion…');
+  toast.warning('Keyboard disconnected — reconnection attempt…');
   if (savedPort) _startReconnect(savedPort);
 }
 
 export async function disconnect(): Promise<void> {
   _stopReconnect();
-  _cancelQueuedRpcs('Déconnecté');
+  _cancelQueuedRpcs('Disconnected');
   readBuffer = '';
 
   try {
     if (writer) await writer.close();
   } catch {
-    /* port déjà fermé */
+    /* port already closed */
   }
   writer = null;
 
   try {
     if (reader) reader.cancel();
   } catch {
-    /* reader déjà annulé */
+    /* reader already cancelled */
   }
   reader = null;
 
   try {
     if (port) await port.close();
   } catch {
-    /* port déjà fermé */
+    /* port already closed */
   }
   port = null;
 
@@ -200,7 +200,7 @@ export async function disconnect(): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  LECTURE
+//  READING
 // ─────────────────────────────────────────────────────────────
 
 async function startReading(): Promise<void> {
@@ -223,7 +223,7 @@ async function startReading(): Promise<void> {
   } catch (err) {
     const e = err as Error;
     if (e.name !== 'AbortError') {
-      console.error('Erreur lecture serial:', e);
+      console.error('Serial read error:', e);
       serial.connected = false;
     }
   } finally {
@@ -236,7 +236,7 @@ function handleIncomingMessage(line: string): void {
     const msg = JSON.parse(line) as unknown;
     messageHandlers.forEach((handler) => handler(msg));
   } catch {
-    console.warn('Message non-JSON reçu:', line);
+    console.warn('Non-JSON message received:', line);
   }
 }
 
@@ -246,11 +246,11 @@ export function onMessage(handler: MessageHandler): () => void {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ÉCRITURE
+//  WRITING
 // ─────────────────────────────────────────────────────────────
 
 async function sendRaw(jsonString: string): Promise<void> {
-  if (!writer || !serial.connected) throw new Error('Non connecté');
+  if (!writer || !serial.connected) throw new Error('Not connected');
   await writer.write(encoder.encode(jsonString + '\n'));
 }
 
@@ -268,7 +268,7 @@ function _rpcCall<T>(
 
     const timer = setTimeout(() => {
       cleanup?.();
-      reject(new Error(`Timeout — pas de réponse du clavier (${command['cmd']})`));
+      reject(new Error(`Timeout — no response from keyboard (${command['cmd']})`));
     }, timeoutMs);
 
     cleanup = onMessage((msg) => {
@@ -288,11 +288,11 @@ function _rpcCall<T>(
 }
 
 // ─────────────────────────────────────────────────────────────
-//  API PUBLIQUE
+//  PUBLIC API
 // ─────────────────────────────────────────────────────────────
 
 export function getConfig(): Promise<FullConfig> {
-  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  if (!serial.connected) return Promise.reject(new Error('Not connected'));
   return _enqueueRpc(() =>
     _rpcCall<FullConfig>({ cmd: 'get_config' }, (msg) => {
       const m = msg as Record<string, unknown>;
@@ -302,7 +302,7 @@ export function getConfig(): Promise<FullConfig> {
 }
 
 export function setConfig(config: FullConfig): Promise<{ status: string }> {
-  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  if (!serial.connected) return Promise.reject(new Error('Not connected'));
   return _enqueueRpc(() =>
     _rpcCall<{ status: string }>({ cmd: 'set_config', payload: config }, (msg) => {
       const m = msg as Record<string, unknown>;
@@ -312,7 +312,7 @@ export function setConfig(config: FullConfig): Promise<{ status: string }> {
 }
 
 export function factoryReset(): Promise<{ status: string; msg: string }> {
-  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  if (!serial.connected) return Promise.reject(new Error('Not connected'));
   return _enqueueRpc(() =>
     _rpcCall<{ status: string; msg: string }>(
       { cmd: 'factory_reset' },
@@ -326,7 +326,7 @@ export function factoryReset(): Promise<{ status: string; msg: string }> {
 }
 
 export function getDeviceStatus(): Promise<DeviceStatus> {
-  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  if (!serial.connected) return Promise.reject(new Error('Not connected'));
   return _enqueueRpc(() =>
     _rpcCall<DeviceStatus>(
       { cmd: 'device_status' },
@@ -340,13 +340,13 @@ export function getDeviceStatus(): Promise<DeviceStatus> {
 }
 
 /**
- * Bascule légère du profil actif côté firmware : {"cmd":"set_active_profile",
- * "idx":N}. Le device clamp l'index, persiste en NVS, recharge son keymap et
- * émet un événement "profile" sur le stream moniteur. Évite de renvoyer toute
- * la config juste pour changer de profil.
+ * Lightweight switch of the active profile on the firmware side:
+ * {"cmd":"set_active_profile", "idx":N}. The device clamps the index, persists
+ * to NVS, reloads its keymap and emits a "profile" event on the monitor stream.
+ * Avoids resending the entire config just to change profile.
  */
 export function setActiveProfile(idx: number): Promise<{ status: string }> {
-  if (!serial.connected) return Promise.reject(new Error('Non connecté'));
+  if (!serial.connected) return Promise.reject(new Error('Not connected'));
   return _enqueueRpc(() =>
     _rpcCall<{ status: string }>(
       { cmd: 'set_active_profile', idx },
@@ -367,9 +367,9 @@ export function keyMonitor(enable: boolean): Promise<{ status: string }> {
 }
 
 /**
- * Active/désactive le mode training côté firmware : tant qu'il est ON,
- * les actions assignées aux touches/encoder ne s'exécutent PAS (le device
- * continue à streamer les events du monitor pour le studio).
+ * Enables/disables training mode on the firmware side: while it is ON,
+ * the actions assigned to the keys/encoder do NOT execute (the device
+ * keeps streaming the monitor events for the studio).
  */
 export function trainingModeCmd(enable: boolean): Promise<{ status: string }> {
   return _enqueueRpc(() =>
@@ -381,7 +381,7 @@ export function trainingModeCmd(enable: boolean): Promise<{ status: string }> {
   );
 }
 
-/** S'abonne aux événements de touche bruts (sans passer par la file RPC). */
+/** Subscribes to raw key events (without going through the RPC queue). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function onKeyEvent(handler: (msg: any) => void): () => void {
   return onMessage((msg) => {
@@ -391,10 +391,10 @@ export function onKeyEvent(handler: (msg: any) => void): () => void {
 }
 
 /**
- * S'abonne aux événements de bascule de profil émis par le device sur le stream
- * moniteur : {"event":"profile","active":N,"ts_ms":...}. Permet une synchro
- * basse latence quand le profil change on-device (slice 5) ou via le studio,
- * en complément du polling device_status (5 s).
+ * Subscribes to profile-switch events emitted by the device on the monitor
+ * stream: {"event":"profile","active":N,"ts_ms":...}. Allows low-latency sync
+ * when the profile changes on-device (slice 5) or via the studio, in addition
+ * to the device_status polling (5 s).
  */
 export function onProfileEvent(handler: (active: number) => void): () => void {
   return onMessage((msg) => {

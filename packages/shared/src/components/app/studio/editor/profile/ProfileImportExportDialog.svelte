@@ -31,7 +31,7 @@
       open = false;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error('Import échoué', { description: msg });
+      toast.error('Import failed', { description: msg });
     }
     if (fileInput) fileInput.value = '';
   }
@@ -45,17 +45,17 @@
 <Dialog.Root {open} onOpenChange={(o) => { if (!o) open = false; }}>
   <Dialog.Content class="sm:max-w-md">
     <Dialog.Header>
-      <Dialog.Title>Profils — importer / exporter</Dialog.Title>
+      <Dialog.Title>Profiles — import / export</Dialog.Title>
       <Dialog.Description class="text-balance">
-        Sauvegarde ou charge des profils (.spinpad-profiles). L'import écrase les profils actuels.
+        Back up or load profiles (.spinpad-profiles). Importing overwrites the current profiles.
       </Dialog.Description>
     </Dialog.Header>
 
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-medium text-muted-foreground">À exporter</span>
+        <span class="text-xs font-medium text-muted-foreground">To export</span>
         <Button variant="ghost" size="sm" onclick={toggleAll} disabled={profileList.length === 0}>
-          {allSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
+          {allSelected ? 'Deselect all' : 'Select all'}
         </Button>
       </div>
       <div class="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
@@ -78,7 +78,7 @@
             >
               {#if checked}✓{/if}
             </span>
-            <span class="flex-1 truncate">{p.name?.trim() || `Profil ${i + 1}`}</span>
+            <span class="flex-1 truncate">{p.name?.trim() || `Profile ${i + 1}`}</span>
             <span class="text-xs text-muted-foreground">{p.layers?.length ?? 0} layer(s)</span>
           </button>
         {/each}
@@ -91,10 +91,10 @@
           disabled={!configState.data}
           class="gap-1.5"
         >
-          <Upload class="size-4" /> Importer
+          <Upload class="size-4" /> Import
         </Button>
         <Button onclick={onExportClick} disabled={selectedExport.size === 0} class="gap-1.5">
-          <Download class="size-4" /> Exporter ({selectedExport.size})
+          <Download class="size-4" /> Export ({selectedExport.size})
         </Button>
       </div>
 

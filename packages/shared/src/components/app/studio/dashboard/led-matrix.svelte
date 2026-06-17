@@ -1,21 +1,21 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────────────
-  //  LedMatrix.svelte — vitrine LED en grille de points (canvas 2D)
+  //  LedMatrix.svelte — LED showcase as a grid of dots (2D canvas)
   //
-  //  Drop-in, responsive, Svelte 5. Un seul <canvas> + une boucle rAF unique.
+  //  Drop-in, responsive, Svelte 5. A single <canvas> + one rAF loop.
   //
-  //  MOUVEMENT (`mode`) et COULEUR (`color`) découplés :
+  //  MOTION (`mode`) and COLOR (`color`) decoupled:
   //    mode  : off | static | pulse | breathe | flow | sweep | alert | rainbow
-  //    color : solid (colors[0]) | gradient (interpolé sur colors[])
+  //    color : solid (colors[0]) | gradient (interpolated over colors[])
   //
-  //  ÉQUALISEUR (optionnel) : `pulses` fournit des compteurs réactifs (un par
-  //  source, ex. touches). Chaque incrément injecte de l'énergie qui SOULÈVE la
-  //  lueur de la colonne correspondante (gaussienne + gravité), fondue dans le
-  //  mode courant. `pop` 0..1 : 0 = fusion transparente, 1 = colonnes qui pètent.
+  //  EQUALIZER (optional): `pulses` provides reactive counters (one per
+  //  source, e.g. keys). Each increment injects energy that LIFTS the
+  //  glow of the matching column (gaussian + gravity), blended into the
+  //  current mode. `pop` 0..1: 0 = transparent blend, 1 = columns that burst.
   //    <LedMatrix mode="flow" pulses={() => keyVisuals.pressNonce} />
   //
-  //  Efficace : DPR plafonné, pause hors-écran, prefers-reduced-motion (modes
-  //  figés mais EQ réactif), positions précalculées, arrêt auto de la rAF.
+  //  Efficient: capped DPR, pause off-screen, prefers-reduced-motion (frozen
+  //  modes but reactive EQ), precomputed positions, auto-stop of the rAF.
   // ───────────────────────────────────────────────────────────────────────
   import { cn } from '$shared/utils.js';
   import { KEY_LAYOUT } from '$shared/constants/key-layout.js';
@@ -34,47 +34,47 @@
   type Falloff = 'bottom' | 'center' | 'top' | 'none';
 
   interface Props {
-    /** Mouvement du panneau. */
+    /** Panel motion. */
     mode?: Mode;
-    /** `solid` = colors[0] ; `gradient` = interpolation sur colors[]. */
+    /** `solid` = colors[0]; `gradient` = interpolation over colors[]. */
     color?: ColorMode;
-    /** Atténue globalement (panneau « en veille »). */
+    /** Globally dims (panel "idle"). */
     muted?: boolean;
-    /** Palette (hex / rgb / nom CSS / `var(--token)`). */
+    /** Palette (hex / rgb / CSS name / `var(--token)`). */
     colors?: string[];
-    /** Plafond de luminosité 0..1. */
+    /** Brightness ceiling 0..1. */
     brightness?: number;
-    /** Multiplicateur de vitesse d'animation. */
+    /** Animation speed multiplier. */
     speed?: number;
-    /** Pas de la grille en px (densité). */
+    /** Grid step in px (density). */
     cell?: number;
-    /** Diamètre du point / `cell` (0..1). */
+    /** Dot diameter / `cell` (0..1). */
     dotRatio?: number;
-    /** Forme du masque de luminosité (le « blob »). */
+    /** Shape of the brightness mask (the "blob"). */
     falloff?: Falloff;
-    /** Léger bloom : les points vifs grossissent un peu. */
+    /** Slight bloom: bright dots grow a little. */
     glow?: boolean;
     /**
-     * Équaliseur réactif (optionnel). Accesseur RÉACTIF d'un tableau de
-     * compteurs monotones (un par source ; ex. `() => keyVisuals.pressNonce`).
-     * Chaque incrément = une impulsion qui soulève la colonne ~ source. La
-     * physique (attaque/gravité/diffusion) est gérée ici ; émettez juste des pings.
+     * Reactive equalizer (optional). REACTIVE accessor of an array of
+     * monotonic counters (one per source; e.g. `() => keyVisuals.pressNonce`).
+     * Each increment = an impulse that lifts the column ~ source. The
+     * physics (attack/gravity/diffusion) is handled here; just emit pings.
      */
     pulses?: () => number[];
-    /** Style EQ : 0 = fusion transparente, 1 = colonnes éclatantes (boost + teinte claire). */
+    /** EQ style: 0 = transparent blend, 1 = bursting columns (boost + light tint). */
     pop?: number;
-    /** Intensité globale de l'EQ (bulles + vagues). Plus bas = plus discret. */
+    /** Global EQ intensity (bubbles + waves). Lower = more subtle. */
     eqGain?: number;
     /**
-     * Rotation encodeur (optionnel). Accesseur RÉACTIF d'une position cumulée
-     * SIGNÉE (CW +, CCW -). Chaque delta émet une vague horizontale qui balaie
-     * la grille dans le sens de rotation. Ex. `() => keyVisuals.encoderTurn`.
+     * Encoder rotation (optional). REACTIVE accessor of a SIGNED cumulative
+     * position (CW +, CCW -). Each delta emits a horizontal wave that sweeps
+     * the grid in the rotation direction. E.g. `() => keyVisuals.encoderTurn`.
      */
     rotation?: () => number;
     /**
-     * Overrides de couleur par-touche (optionnel). Clé = index physique de la
-     * touche (0-9) ; valeur = couleur RGB 0–255. Les dots proches de la position
-     * physique de la touche adoptent cette couleur, animation du mode conservée.
+     * Per-key color overrides (optional). Key = physical key index
+     * (0-9); value = RGB color 0–255. Dots near the key's physical
+     * position adopt this color, the mode animation is preserved.
      */
     overrides?: Map<number, { r: number; g: number; b: number }>;
     class?: string;
@@ -120,7 +120,7 @@
     return null;
   }
 
-  // Interpolation de palette, écrite dans `out` (zéro allocation, hot path).
+  // Palette interpolation, written into `out` (zero allocation, hot path).
   function writePaletteAt(out: RGB, pal: RGB[], f: number): void {
     const src = pal.length === 1 ? pal[0] : null;
     if (src) {
@@ -148,26 +148,26 @@
 
   const animated = $derived(mode !== 'off' && mode !== 'static');
 
-  // Easing séparé : alpha RAPIDE (anims vives nettes) / couleur LENTE (fondus doux).
+  // Separate easing: FAST alpha (crisp lively anims) / SLOW color (soft fades).
   const TAU_A = 0.07;
   const TAU_C = 0.18;
-  const EPS = 0.004; // seuil de stabilisation -> arrêt rAF
+  const EPS = 0.004; // stabilization threshold -> stop rAF
 
-  // ── Réglages équaliseur ───────────────────────────────────────────────
-  const EQ_BASE = 0.05; // hauteur au repos (fine ligne du bas)
-  const EQ_ATTACK = 0.9; // énergie ajoutée par impulsion
-  const EQ_HALF = 0.35; // demi-vie de la chute (s) — gravité
-  const EQ_SPREAD = 0.06; // σ horizontal (unités nx) de la « colline »
-  const EQ_REACH = 0.92; // hauteur max de montée
-  const EQ_EDGE = 0.28; // douceur du bord supérieur
-  const EQ_FLOOR = 0.55; // part de l'EQ visible pendant les creux du mode
-  // ── Réglages vague (rotation encodeur) ────────────────────────────────
-  const WAVE_DUR = 0.9; // durée de traversée (s)
-  const WAVE_SIGMA = 0.1; // largeur du front (unités nx)
-  const WAVE_AMP = 0.6; // amplitude (avant eqGain)
-  const WAVE_MAX = 6; // file max de vagues simultanées
+  // ── Equalizer settings ────────────────────────────────────────────────
+  const EQ_BASE = 0.05; // height at rest (thin bottom line)
+  const EQ_ATTACK = 0.9; // energy added per impulse
+  const EQ_HALF = 0.35; // half-life of the fall (s) — gravity
+  const EQ_SPREAD = 0.06; // horizontal σ (nx units) of the "hill"
+  const EQ_REACH = 0.92; // max rise height
+  const EQ_EDGE = 0.28; // softness of the top edge
+  const EQ_FLOOR = 0.55; // share of the EQ visible during the mode's troughs
+  // ── Wave settings (encoder rotation) ──────────────────────────────────
+  const WAVE_DUR = 0.9; // crossing duration (s)
+  const WAVE_SIGMA = 0.1; // front width (nx units)
+  const WAVE_AMP = 0.6; // amplitude (before eqGain)
+  const WAVE_MAX = 6; // max queue of simultaneous waves
 
-  // Précalculs constants (fonctions pures des constantes ci-dessus).
+  // Constant precomputations (pure functions of the constants above).
   const EQ_INV2S2 = 1 / (2 * EQ_SPREAD * EQ_SPREAD);
   const WAVE_INV2S2 = 1 / (2 * WAVE_SIGMA * WAVE_SIGMA);
 
@@ -179,32 +179,32 @@
     let cssW = 0;
     let cssH = 0;
     let visible = true;
-    let snap = true; // 1re frame après (re)build : saut direct à la cible
+    let snap = true; // 1st frame after (re)build: jump directly to the target
     let lastNow = 0;
 
     let dots: { x: number; y: number; nx: number; ny: number; mask: number }[] = [];
-    // État affiché lissé, par point (transitions douces).
+    // Smoothed displayed state, per dot (soft transitions).
     let dA = new Float32Array(0);
     let dR = new Float32Array(0);
     let dG = new Float32Array(0);
     let dB = new Float32Array(0);
 
-    // Couleur scratch réutilisée par dot (réécrite à chaque itération) — pas d'alloc.
+    // Scratch color reused per dot (rewritten each iteration) — no alloc.
     const col: RGB = [0, 0, 0];
-    // Contexte de frame : recalculé en tête de `draw`, lu par `commitDot`.
-    let fKA = 1; // easing alpha (rapide)
-    let fKC = 1; // easing couleur (lent)
-    let fCap = 1; // plafond luminosité (brightness × muted)
-    let fR0 = 0; // rayon de base du point
-    let fPal: RGB[] = [[255, 255, 255]]; // palette résolue (RGB) de la frame
+    // Frame context: recomputed at the top of `draw`, read by `commitDot`.
+    let fKA = 1; // alpha easing (fast)
+    let fKC = 1; // color easing (slow)
+    let fCap = 1; // brightness ceiling (brightness × muted)
+    let fR0 = 0; // base dot radius
+    let fPal: RGB[] = [[255, 255, 255]]; // resolved palette (RGB) for the frame
 
-    // Énergie EQ par SOURCE (stable au resize : non liée aux colonnes de points).
+    // EQ energy per SOURCE (stable on resize: not tied to dot columns).
     let nSrc = 0;
     let energy = new Float32Array(0);
     let prevN: number[] = [];
     let srcX: number[] = [];
 
-    // Vagues encodeur : chacune balaie la grille (dir +1 = G->D, -1 = D->G).
+    // Encoder waves: each sweeps the grid (dir +1 = L->R, -1 = R->L).
     let prevR = 0;
     let haveR = false;
     let waves: { dir: number; born: number }[] = [];
@@ -214,8 +214,8 @@
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     let reduce = mq.matches;
 
-    // Résolution couleur tolérante : var()/oklch/nom CSS via couleur calculée,
-    // repli sur normalisation fillStyle. Mémoïsée.
+    // Tolerant color resolution: var()/oklch/CSS name via computed color,
+    // fallback to fillStyle normalization. Memoized.
     function rgb(str: string): RGB {
       const hit = rgbCache.get(str);
       if (hit) return hit;
@@ -238,7 +238,7 @@
       if (falloff === 'none') return 1;
       if (falloff === 'center') return clamp01(1 - Math.hypot(nx - 0.5, ny - 0.5) / 0.7071);
       if (falloff === 'top') return clamp01(1 - Math.hypot((nx - 0.5) * 1.1, ny - 0.1) / 0.95);
-      // bottom (défaut) : lueur concentrée en bas-centre
+      // bottom (default): glow concentrated at bottom-center
       return clamp01(1 - Math.hypot((nx - 0.5) * 1.5, ny - 1.25) / 1);
     }
 
@@ -262,34 +262,34 @@
       snap = true;
     }
 
-    // Facteur de luminosité (mouvement) d'un point à l'instant t.
+    // Brightness factor (motion) of a dot at time t.
     function motion(nx: number, t: number): number {
       switch (mode) {
         case 'off':
-          return 0.1; // éteint = points en couleur atténuée (panneau visible, non allumé)
+          return 0.1; // off = dots in dimmed color (panel visible, not lit)
         case 'static':
           return 1;
         case 'pulse': {
-          // battement « lub-dub » : deux bumps rapprochés puis repos (cadence ~1s)
+          // "lub-dub" heartbeat: two close bumps then rest (cadence ~1s)
           const p = (((t * 0.9) % 1) + 1) % 1;
           const beat = Math.exp(-((p - 0.0) ** 2) / 0.012) + 0.65 * Math.exp(-((p - 0.17) ** 2) / 0.012);
           return 0.2 + 0.8 * Math.min(1, beat);
         }
         case 'breathe': {
-          // gonflement lent et organique : ease-in-out + longue tenue aux extrêmes
+          // slow, organic swell: ease-in-out + long hold at the extremes
           const s = 0.5 + 0.5 * Math.sin(t * 1.0 - Math.PI / 2);
           const eased = s * s * s * (s * (s * 6 - 15) + 10); // smootherstep
           return 0.1 + 0.9 * eased;
         }
         case 'flow':
-          return 0.35 + 0.65 * (0.5 + 0.5 * Math.sin((nx * 1.6 - t) * Math.PI)); // onde douce
+          return 0.35 + 0.65 * (0.5 + 0.5 * Math.sin((nx * 1.6 - t) * Math.PI)); // gentle wave
         case 'sweep': {
-          // bande lumineuse nette se déplaçant de DROITE -> GAUCHE
+          // crisp light band moving from RIGHT -> LEFT
           const band = 0.5 + 0.5 * Math.sin((nx + t * 0.45) * Math.PI * 2);
           return 0.15 + 0.85 * Math.pow(band, 2.5);
         }
         case 'alert': {
-          // strobe urgent : créneau dur (bords adoucis par l'easing alpha)
+          // urgent strobe: hard square wave (edges softened by the alpha easing)
           const p = (((t * 1.5) % 1) + 1) % 1;
           return p < 0.5 ? 1 : 0.12;
         }
@@ -300,8 +300,8 @@
       }
     }
 
-    // Lit les compteurs `pulses`, transforme les incréments en énergie.
-    // Au 1er appel (ou si le nb de sources change) on AMORCE sans salve.
+    // Reads the `pulses` counters, turns increments into energy.
+    // On the 1st call (or if the source count changes) we PRIME without a burst.
     function ingest() {
       const arr = pulses?.();
       if (!arr) return;
@@ -309,27 +309,27 @@
         nSrc = arr.length;
         energy = new Float32Array(nSrc);
         prevN = Array.from(arr);
-        srcX = Array.from({ length: nSrc }, () => Math.random()); // positions aléatoires
-        return; // amorçage : pas d'impulsion pour les compteurs préexistants
+        srcX = Array.from({ length: nSrc }, () => Math.random()); // random positions
+        return; // priming: no impulse for the pre-existing counters
       }
       for (let i = 0; i < nSrc; i++) {
         const dl = arr[i] - prevN[i];
         if (dl > 0) {
-          srcX[i] = Math.random(); // chaque appui retombe à une colonne aléatoire (changeante)
+          srcX[i] = Math.random(); // each press falls back to a random (changing) column
           energy[i] = Math.min(1, energy[i] + EQ_ATTACK * Math.min(dl, 3));
         }
         prevN[i] = arr[i];
       }
     }
 
-    // Lit la rotation encodeur, transforme chaque cran en vague directionnelle.
+    // Reads the encoder rotation, turns each detent into a directional wave.
     function ingestRot(now: number) {
       const r = rotation?.();
       if (r === undefined) return;
       if (!haveR) {
         prevR = r;
         haveR = true;
-        return; // amorçage : pas de vague pour la position initiale
+        return; // priming: no wave for the initial position
       }
       const dr = r - prevR;
       prevR = r;
@@ -344,8 +344,8 @@
 
     type Dot = { x: number; y: number; nx: number; ny: number; mask: number };
 
-    // Couleur de base d'un dot -> écrite dans le scratch `col`.
-    // rainbow / solid / gradient, puis overrides par-touche.
+    // Base color of a dot -> written into the scratch `col`.
+    // rainbow / solid / gradient, then per-key overrides.
     function baseColor(d: Dot, t: number): void {
       if (mode === 'rainbow') {
         const c = hslToRgb((d.nx * 300 + t * 60) % 360, 0.85, 0.6);
@@ -360,10 +360,10 @@
         writePaletteAt(col, fPal, d.nx);
       }
 
-      // Per-key color overrides : colore les dots proches de la position physique
+      // Per-key color overrides: color the dots near the physical position
       if (overrides?.size) {
         let best: { r: number; g: number; b: number } | null = null;
-        let minDist = 0.0625; // seuil = 0.25² (rayon en espace nx/ny normalisé)
+        let minDist = 0.0625; // threshold = 0.25² (radius in normalized nx/ny space)
         for (const [kidx, ov] of overrides) {
           const pos = KEY_POS[kidx];
           if (!pos) continue;
@@ -383,8 +383,8 @@
       }
     }
 
-    // EQ : soulève la lueur de la colonne (fondu dans le mode). Retourne la
-    // contribution additive à `tv` ; applique au passage le « pop » sur `col`.
+    // EQ: lifts the column's glow (blended into the mode). Returns the
+    // additive contribution to `tv`; also applies the "pop" onto `col`.
     function eqLiftAt(d: Dot, v: number): number {
       let H = EQ_BASE;
       for (let sIdx = 0; sIdx < nSrc; sIdx++) {
@@ -394,19 +394,19 @@
         H += e * Math.exp(-(dx * dx) * EQ_INV2S2);
       }
       if (H > EQ_REACH) H = EQ_REACH;
-      const up = 1 - d.ny; // 0 bas .. 1 haut
-      const lift = clamp01((H - up) / EQ_EDGE); // remplissage doux depuis le bas
+      const up = 1 - d.ny; // 0 bottom .. 1 top
+      const lift = clamp01((H - up) / EQ_EDGE); // soft fill from the bottom
       if (lift <= 0) return 0;
       if (pop > 0) {
-        const p = pop * lift; // colonnes qui « pètent » : tirage vers le clair
+        const p = pop * lift; // "bursting" columns: pull toward light
         col[0] += (255 - col[0]) * 0.6 * p;
         col[1] += (255 - col[1]) * 0.6 * p;
         col[2] += (255 - col[2]) * 0.6 * p;
       }
-      return eqGain * lift * (EQ_FLOOR + (1 - EQ_FLOOR) * v); // couplé au mode, avec plancher
+      return eqGain * lift * (EQ_FLOOR + (1 - EQ_FLOOR) * v); // coupled to the mode, with a floor
     }
 
-    // Vagues horizontales directionnelles (encodeur) -> contribution additive à `tv`.
+    // Directional horizontal waves (encoder) -> additive contribution to `tv`.
     function waveLiftAt(nx: number, now: number): number {
       let add = 0;
       for (let w = 0; w < waves.length; w++) {
@@ -418,7 +418,7 @@
       return add;
     }
 
-    // Frame EQ : ingestion + gravité. Retourne l'énergie max (pour l'arrêt rAF).
+    // EQ frame: ingestion + gravity. Returns the max energy (for stopping the rAF).
     function stepEnergy(dt: number): number {
       ingest();
       const grav = Math.pow(0.5, dt / EQ_HALF);
@@ -431,7 +431,7 @@
       return eMax;
     }
 
-    // Frame vagues : ingestion encodeur + vieillissement des vagues expirées.
+    // Wave frame: encoder ingestion + aging of expired waves.
     function stepWaves(now: number): void {
       ingestRot(now);
       for (let w = waves.length - 1; w >= 0; w--) {
@@ -439,7 +439,7 @@
       }
     }
 
-    // Easing par point (alpha rapide / couleur lente) + tracé. Retourne le résidu.
+    // Per-dot easing (fast alpha / slow color) + draw. Returns the residual.
     function commitDot(i: number, tv: number): number {
       const ta = clamp01(fCap * tv);
       const da = ta - dA[i];
@@ -459,21 +459,21 @@
       return Math.abs(da) > dc ? Math.abs(da) : dc;
     }
 
-    // Rend un point : couleur + lifts (EQ/vagues) + easing/tracé. Retourne le résidu.
+    // Renders a dot: color + lifts (EQ/waves) + easing/draw. Returns the residual.
     function renderDot(i: number, t: number, now: number, eqOn: boolean): number {
       const d = dots[i];
       const v = motion(d.nx, t);
-      baseColor(d, t); // remplit le scratch `col`
-      let tv = d.mask * v; // luminance de base (mode × blob)
-      if (eqOn) tv += eqLiftAt(d, v); // EQ : lift + éventuel « pop » sur col
-      if (waves.length) tv += waveLiftAt(d.nx, now); // vagues encodeur
+      baseColor(d, t); // fills the scratch `col`
+      let tv = d.mask * v; // base luminance (mode × blob)
+      if (eqOn) tv += eqLiftAt(d, v); // EQ: lift + possible "pop" on col
+      if (waves.length) tv += waveLiftAt(d.nx, now); // encoder waves
       return commitDot(i, tv);
     }
 
     function draw(now: number): boolean {
       const dt = lastNow ? (now - lastNow) / 1000 : 0;
       lastNow = now;
-      // reduce-motion : fige le temps -> motif statique (l'EQ reste réactif)
+      // reduce-motion: freezes time -> static pattern (the EQ stays reactive)
       const t = reduce ? 0 : ((now - startT) / 1000) * speed;
       fKA = snap ? 1 : 1 - Math.exp(-dt / TAU_A);
       fKC = snap ? 1 : 1 - Math.exp(-dt / TAU_C);
@@ -482,8 +482,8 @@
       fPal = colors.length ? colors.map(rgb) : [[255, 255, 255]];
 
       const eqOn = !!pulses;
-      const eMax = eqOn ? stepEnergy(dt) : 0; // EQ : ingestion + gravité
-      if (rotation) stepWaves(now); // vagues encodeur : ingestion + vieillissement
+      const eMax = eqOn ? stepEnergy(dt) : 0; // EQ: ingestion + gravity
+      if (rotation) stepWaves(now); // encoder waves: ingestion + aging
 
       ctx!.clearRect(0, 0, cssW, cssH);
       let maxd = 0;
@@ -493,7 +493,7 @@
       }
 
       snap = false;
-      // Continue tant que : mode animé, énergie EQ active, ou transition en cours.
+      // Keep going as long as: mode animated, EQ energy active, or transition in progress.
       const running = animated && !reduce && visible;
       return running || eMax > 0.002 || waves.length > 0 || maxd > EPS;
     }
@@ -508,7 +508,7 @@
       else raf = 0;
     }
 
-    // Démarre la boucle si besoin (elle s'auto-arrête une fois stabilisée).
+    // Starts the loop if needed (it auto-stops once stabilized).
     function run() {
       if (!visible) {
         stop();
@@ -524,7 +524,7 @@
       const rect = canvas.getBoundingClientRect();
       cssW = Math.max(1, rect.width);
       cssH = Math.max(1, rect.height);
-      const dpr = Math.min(window.devicePixelRatio || 1, 2); // plafonné : perf
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // capped: perf
       canvas.width = Math.round(cssW * dpr);
       canvas.height = Math.round(cssH * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -549,7 +549,7 @@
 
     resize();
 
-    // Géométrie : reconstruit (changement NET, pas de fondu).
+    // Geometry: rebuilds (HARD change, no fade).
     $effect(() => {
       void cell;
       void falloff;
@@ -559,7 +559,7 @@
       }
     });
 
-    // Apparence/mouvement : re-cible -> transition DOUCE via l'easing par point.
+    // Appearance/motion: re-targets -> SOFT transition via the per-dot easing.
     $effect(() => {
       void mode;
       void color;
@@ -576,8 +576,8 @@
       run();
     });
 
-    // Impulsions EQ / rotation : réveille la boucle dès qu'un compteur bouge.
-    // (Lecture réactive ; l'ingestion réelle se fait dans `draw`.)
+    // EQ / rotation impulses: wakes the loop as soon as a counter moves.
+    // (Reactive read; the actual ingestion happens in `draw`.)
     $effect(() => {
       pulses?.();
       rotation?.();

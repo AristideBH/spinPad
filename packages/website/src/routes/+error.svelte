@@ -7,23 +7,23 @@
 
   const STATUS_MAP: Record<number, { title: string; description: string }> = {
     404: {
-      title: 'Page introuvable',
-      description: "Cette page n'existe pas ou a été déplacée.",
+      title: 'Page not found',
+      description: "This page doesn't exist or has been moved.",
     },
     403: {
-      title: 'Accès refusé',
-      description: "Vous n'avez pas l'autorisation d'accéder à cette ressource.",
+      title: 'Access denied',
+      description: "You don't have permission to access this resource.",
     },
     500: {
-      title: 'Erreur serveur',
-      description: "Une erreur interne s'est produite. Réessayez dans quelques instants.",
+      title: 'Server error',
+      description: 'An internal error occurred. Try again in a few moments.',
     },
   };
 
   const info = $derived(
     STATUS_MAP[$page.status] ?? {
-      title: 'Une erreur est survenue',
-      description: $page.error?.message ?? "Quelque chose s'est mal passé.",
+      title: 'An error occurred',
+      description: $page.error?.message ?? 'Something went wrong.',
     },
   );
 
@@ -33,7 +33,7 @@
 </script>
 
 <svelte:head>
-  <title>Erreur {$page.status} — SpinPad</title>
+  <title>Error {$page.status} — SpinPad</title>
 </svelte:head>
 
 <div class="flex flex-col items-center justify-center min-h-[65vh] px-4 py-16 text-center">
@@ -59,7 +59,7 @@
 
   <!-- Actions -->
   <div class="flex flex-wrap justify-center gap-3">
-    <Button href="/">Retour à l'accueil</Button>
-    <Button variant="outline" onclick={() => history.back()}>Page précédente</Button>
+    <Button href="/">Back to home</Button>
+    <Button variant="outline" onclick={() => history.back()}>Previous page</Button>
   </div>
 </div>

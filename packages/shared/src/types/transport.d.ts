@@ -1,24 +1,24 @@
 // ═══════════════════════════════════════════════════════════════
-//  types/transport.ts — Interfaces des transports SpinPad
+//  types/transport.ts — SpinPad transport interfaces
 //
-//  Les deux transports (WebSerial + HTTP) implémentent Transport.
-//  DeviceStatusTransport est le sous-ensemble utilisé pour
-//  le polling du statut (serial, http, mock).
+//  Both transports (WebSerial + HTTP) implement Transport.
+//  DeviceStatusTransport is the subset used for status polling
+//  (serial, http, mock).
 // ═══════════════════════════════════════════════════════════════
 
 import type { FullConfig } from '$shared/constants/config-schema.js';
 import type { DeviceStatus } from '$shared/constants/device-status-schema.js';
 
-/** Interface minimale d'un transport de config. */
+/** Minimal interface of a config transport. */
 export interface Transport {
   getConfig(): Promise<FullConfig>;
   setConfig(data: FullConfig): Promise<unknown>;
   factoryReset(): Promise<unknown>;
-  /** Bascule légère du profil actif sans renvoyer toute la config. */
+  /** Lightweight switch of the active profile without resending the whole config. */
   setActiveProfile(idx: number): Promise<unknown>;
 }
 
-/** Interface minimale pour le polling de statut. */
+/** Minimal interface for status polling. */
 export interface DeviceStatusTransport {
   getDeviceStatus(): Promise<DeviceStatus>;
 }

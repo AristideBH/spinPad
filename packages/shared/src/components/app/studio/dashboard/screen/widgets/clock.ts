@@ -3,18 +3,18 @@ import { WIDGET_TYPE } from '$shared/constants/config-schema.js';
 import type { WidgetDef } from './types.js';
 
 export const clock: WidgetDef = {
-  label: 'Horloge',
+  label: 'Clock',
   icon: Clock,
   size: { minW: 2, maxW: 2, minH: 1, maxH: 2 },
   singleton: true,
   options: [
-    { key: 'clock_24h', kind: 'bool', label: 'Format 24 h', default: true },
+    { key: 'clock_24h', kind: 'bool', label: '24 h format', default: true },
     {
       key: 'clock_show_date',
       kind: 'bool',
-      label: 'Afficher la date',
+      label: 'Show date',
       default: false,
-      disabled: (w) => w.h < 2, // date seulement en 2×2
+      disabled: (w) => w.h < 2, // date only in 2×2
     },
   ],
   preview: (w, now) => {

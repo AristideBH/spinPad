@@ -15,7 +15,7 @@
 
   async function handleDevMode() {
     devMode.active = true;
-    serial.connected = true; // mock serial branché pour l'UI réservée WebSerial
+    serial.connected = true; // mock serial plugged in for the WebSerial-reserved UI
     await loadConfig();
   }
 </script>
@@ -27,24 +27,24 @@
     <Empty.Media variant="icon">
       <Command />
     </Empty.Media>
-    <Empty.Title>Connecter votre SpinPad</Empty.Title>
-    <Empty.Description>Prérequis : Chrome ou Edge, clavier USB. WebSerial non supporté sur Firefox.</Empty.Description>
+    <Empty.Title>Connect your SpinPad</Empty.Title>
+    <Empty.Description>Requirements: Chrome or Edge, USB keyboard. WebSerial not supported on Firefox.</Empty.Description>
   </Empty.Header>
   <Empty.Content>
     <Button onclick={handleConnect} size="lg" class="gap-2">
       <PlugZap class="size-5" />
-      Connecter le clavier
+      Connect the keyboard
     </Button>
     {#if serial.error}
       <Alert.Root variant="destructive">
-        <Alert.Title>Erreur</Alert.Title>
+        <Alert.Title>Error</Alert.Title>
         <Alert.Description>{serial.error}</Alert.Description>
       </Alert.Root>
     {/if}
 
     <Button variant="ghost" size="sm" onclick={handleDevMode} class="text-amber-400 hover:text-amber-300 gap-1.5">
       <FlaskConical class="size-4" />
-      Lancer le mode démo
+      Launch demo mode
     </Button>
   </Empty.Content>
 </Empty.Root>

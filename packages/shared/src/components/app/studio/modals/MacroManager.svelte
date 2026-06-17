@@ -45,7 +45,7 @@
 
   const finePointer = new HasFinePointer();
 
-  // ── État local ────────────────────────────────────────────────
+  // ── Local state ────────────────────────────────────────────────
   let selected = $state(0);
   let draftName = $state('');
   let draftSteps = $state<MacroStep[]>([]);
@@ -55,7 +55,7 @@
   let pickerStage = $state<'menu' | 'record' | 'list'>('menu');
   let pickerMode: 'tap' | 'hold' | 'release' = $state('tap');
   const pickerTitle = $derived(
-    pickerMode === 'tap' ? 'Touche à taper' : pickerMode === 'hold' ? 'Touche à maintenir' : 'Touche à relâcher',
+    pickerMode === 'tap' ? 'Key to tap' : pickerMode === 'hold' ? 'Key to hold' : 'Key to release',
   );
 
   const macros = $derived<MacroDef[]>(configState.data?.macros ?? []);
@@ -82,7 +82,7 @@
     draftSteps = [];
   }
 
-  // ── Édition des étapes ────────────────────────────────────────
+  // ── Step editing ────────────────────────────────────────
   function addTap(keycode: number) {
     if (draftSteps.length + 2 > MACRO_MAX_STEPS) return;
     draftSteps = [
@@ -99,9 +99,9 @@
     draftSteps = draftSteps.filter((_, i) => i < from || i >= from + count);
   }
 
-  // Réordonne les étapes au niveau des blocs affichés (un "Appui" = 2 steps
-  // down+up). On découpe draftSteps en blocs selon displayItems, on déplace
-  // le bloc dFrom→dTo, puis on aplatit.
+  // Reorders steps at the level of displayed blocks (a "Tap" = 2 steps
+  // down+up). We split draftSteps into blocks per displayItems, move
+  // the block dFrom→dTo, then flatten.
   function reorderSteps(dFrom: number, dTo: number) {
     const blocks = displayItems.map((di) => draftSteps.slice(di.from, di.from + di.count));
     const [moved] = blocks.splice(dFrom, 1);
@@ -109,7 +109,7 @@
     draftSteps = blocks.flat();
   }
 
-  // ── Affichage condensé (Tap = down+up consécutifs même touche) ─
+  // ── Condensed display (Tap = consecutive down+up on same key) ─
   interface DisplayItem {
     kind: 'tap' | 'hold' | 'release' | 'delay';
     label: string;
@@ -147,12 +147,12 @@
     return items;
   });
 
-  // ── Picker de touches (KC uniquement : pas de macros imbriquées) ─
+  // ── Key picker (KC only: no nested macros) ─
   const pickerGroups: [string, Keycode[]][] = [
-    ['Lettres', KEYCODES.letters],
-    ['Chiffres', KEYCODES.number],
-    ['Spéciales', KEYCODES.special],
-    ['Modificateurs', KEYCODES.modifiers],
+    ['Letters', KEYCODES.letters],
+    ['Numbers', KEYCODES.number],
+    ['Special', KEYCODES.special],
+    ['Modifiers', KEYCODES.modifiers],
   ];
   const pickerFlat = $derived(pickerGroups.flatMap(([, ks]) => ks));
   const pickerFiltered = $derived(
@@ -189,31 +189,31 @@
     return () => window.removeEventListener('keydown', onRecordKeydown, true);
   });
 
-  // Synchroniser le brouillon depuis la config quand le tiroir est ouvert et
-  // que le slot sélectionné ou son contenu change (chargement, save, undo/redo).
-  // Ne dépend pas du brouillon → pas de boucle, et n'écrase pas pendant l'édition
-  // (les mutations du brouillon ne changent pas `macros`).
+  // Sync the draft from the config when the drawer is open and
+  // the selected slot or its content changes (load, save, undo/redo).
+  // Does not depend on the draft → no loop, and does not overwrite during editing
+  // (draft mutations don't change `macros`).
   $effect(() => {
     if (!macroManager.open) return;
-    // Slot demandé par un appelant externe (toast, lien…) sinon sélection courante.
+    // Slot requested by an external caller (toast, link…) otherwise current selection.
     const idx = macroManager.requestedIndex ?? selected;
     if (macroManager.requestedIndex !== null) macroManager.requestedIndex = null;
     load(idx);
   });
 </script>
 
-<Button variant="outline" class="gap-1.5" title="Gérer les macros" onclick={() => (macroManager.open = true)}>
+<Button variant="outline" class="gap-1.5" title="Manage macros" onclick={() => (macroManager.open = true)}>
   <Zap class="size-4" /> Macros
 </Button>
 
 <ResponsiveSheet
   bind:open={macroManager.open}
-  title="Macros globales"
-  description="16 macros partagées par tous les profils. Assigne-les à une touche via Macro dans le sélecteur de touche."
+  title="Global macros"
+  description="16 macros shared by all profiles. Assign them to a key via Macro in the key selector."
   srOnlyTitle={false}
 >
   <div class="flex flex-col w-full h-full max-w-md gap-4 px-4 py-4 mx-auto overflow-y-auto">
-    <!-- Sélecteur de slot -->
+    <!-- Slot selector -->
     <div class="grid grid-cols-4 gap-1.5">
       {#each Array.from({ length: MACRO_COUNT }, (_, i) => i) as i (i)}
         <button
@@ -228,16 +228,16 @@
             {isMacroUsed(macros[i]) ? macros[i].name?.trim() || `Macro ${i}` : `M${i}`}
           </span>
           <span class="text-[10px] text-muted-foreground">
-            {isMacroUsed(macros[i]) ? `${macros[i].steps.length} ét.` : 'vide'}
+            {isMacroUsed(macros[i]) ? `${macros[i].steps.length} steps` : 'empty'}
           </span>
         </button>
       {/each}
     </div>
 
-    <!-- Éditeur du slot sélectionné -->
+    <!-- Editor for the selected slot -->
     <div class="flex flex-col gap-3 p-3 border rounded-xl border-border">
       <div class="flex flex-col gap-1.5">
-        <Label for="macro-name" class="text-xs">Nom</Label>
+        <Label for="macro-name" class="text-xs">Name</Label>
         <Input
           id="macro-name"
           bind:value={draftName}
@@ -246,11 +246,11 @@
         />
       </div>
 
-      <!-- Séquence -->
+      <!-- Sequence -->
       <div class="flex flex-col gap-1">
-        <Label class="text-xs">Séquence ({draftSteps.length}/{MACRO_MAX_STEPS})</Label>
+        <Label class="text-xs">Sequence ({draftSteps.length}/{MACRO_MAX_STEPS})</Label>
         {#if displayItems.length === 0}
-          <p class="py-3 text-xs text-center text-muted-foreground">Aucune étape — ajoute une touche ci-dessous.</p>
+          <p class="py-3 text-xs text-center text-muted-foreground">No steps — add a key below.</p>
         {/if}
         {#if displayItems.length > 0}
           <Sortable
@@ -266,25 +266,25 @@
                 <button
                   type="button"
                   class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"
-                  title="Réordonner"
+                  title="Reorder"
                   onpointerdown={handlePointerDown}
                 >
                   <GripVertical class="size-3.5" />
                 </button>
                 <span class="font-medium capitalize text-muted-foreground w-14">
                   {item.kind === 'tap'
-                    ? 'Appui'
+                    ? 'Tap'
                     : item.kind === 'hold'
-                      ? 'Maintien'
+                      ? 'Hold'
                       : item.kind === 'release'
-                        ? 'Relâche'
-                        : 'Délai'}
+                        ? 'Release'
+                        : 'Delay'}
                 </span>
                 <span class="flex-1 font-semibold">{item.label}</span>
                 <button
                   type="button"
                   class="text-muted-foreground hover:text-destructive"
-                  title="Supprimer"
+                  title="Delete"
                   onclick={() => removeRange(item.from, item.count)}
                 >
                   <X class="size-3.5" />
@@ -303,7 +303,7 @@
           onclick={() => openPicker('tap')}
           disabled={draftSteps.length + 2 > MACRO_MAX_STEPS}
         >
-          <Plus class="size-3.5" /> Touche
+          <Plus class="size-3.5" /> Key
         </Button>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
@@ -316,28 +316,28 @@
           <DropdownMenu.Content align="end" class="[--radius:1rem]">
             <DropdownMenu.Group>
               <DropdownMenu.Item onclick={() => openPicker('hold')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
-                <ArrowDownToLine class="size-3.5" /> Maintien
+                <ArrowDownToLine class="size-3.5" /> Hold
               </DropdownMenu.Item>
               <DropdownMenu.Item onclick={() => openPicker('release')} disabled={draftSteps.length >= MACRO_MAX_STEPS}>
-                <ArrowUpFromLine class="size-3.5" /> Relâche
+                <ArrowUpFromLine class="size-3.5" /> Release
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 onclick={() => addStep({ type: MACRO_STEP_TYPE.DELAY_MS, delay: 50 })}
                 disabled={draftSteps.length >= MACRO_MAX_STEPS}
               >
-                <Clock class="size-3.5" /> Délai
+                <Clock class="size-3.5" /> Delay
               </DropdownMenu.Item>
             </DropdownMenu.Group>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
       </ButtonGroup.Root>
 
-      <!-- Édition fine des délais -->
+      <!-- Fine-tuning of the delays -->
       {#each draftSteps as step, si (si)}
         {#if step.type === MACRO_STEP_TYPE.DELAY_MS}
           <div class="flex items-center gap-2 text-xs">
             <Clock class="size-3.5 text-muted-foreground" />
-            <span class="text-muted-foreground">Délai #{si + 1}</span>
+            <span class="text-muted-foreground">Delay #{si + 1}</span>
             <Input
               type="number"
               min={1}
@@ -360,8 +360,8 @@
           <Trash2 class="size-3.5" /> Effacer
         </Button>
         <div class="flex gap-2">
-          <Button size="sm" variant="outline" onclick={() => load(selected)} disabled={!dirty}>Annuler</Button>
-          <Button size="sm" onclick={save} disabled={!dirty}>Enregistrer</Button>
+          <Button size="sm" variant="outline" onclick={() => load(selected)} disabled={!dirty}>Cancel</Button>
+          <Button size="sm" onclick={save} disabled={!dirty}>Save</Button>
         </div>
       </div>
     </div>
@@ -370,7 +370,7 @@
   {#snippet badge()}
     <SaveBadge />
   {/snippet}
-  <!-- Picker de touche pour les étapes (menu → record / list, nested drawer on mobile) -->
+  <!-- Key picker for the steps (menu → record / list, nested drawer on mobile) -->
   <ResponsiveSheet
     bind:open={pickerOpen}
     title={pickerTitle}
@@ -381,7 +381,7 @@
     {#snippet header()}
       <div class="flex items-center max-w-md gap-2 pt-4 pr-12 shrink-0">
         {#if pickerStage !== 'menu'}
-          <Button variant="ghost" size="icon-sm" onclick={() => (pickerStage = 'menu')} title="Retour">
+          <Button variant="ghost" size="icon-sm" onclick={() => (pickerStage = 'menu')} title="Back">
             <ArrowLeft class="size-4" />
           </Button>
         {/if}
@@ -407,11 +407,11 @@
                   >
                     <Item.Media variant="icon"><Activity class="size-5" /></Item.Media>
                     <Item.Content>
-                      <Item.Title>Enregistrer en direct</Item.Title>
+                      <Item.Title>Live recording</Item.Title>
                       <Item.Description>
                         {finePointer.current
-                          ? 'Appuie sur une touche de ton clavier physique.'
-                          : 'Nécessite un clavier physique.'}
+                          ? 'Press a key on your physical keyboard.'
+                          : 'Requires a physical keyboard.'}
                       </Item.Description>
                     </Item.Content>
                   </button>
@@ -426,8 +426,8 @@
                   >
                     <Item.Media variant="icon"><List class="size-5" /></Item.Media>
                     <Item.Content>
-                      <Item.Title>Parcourir la liste</Item.Title>
-                      <Item.Description>Recherche et catégories de keycodes.</Item.Description>
+                      <Item.Title>Browse the list</Item.Title>
+                      <Item.Description>Search and keycode categories.</Item.Description>
                     </Item.Content>
                   </button>
                 {/snippet}
@@ -439,11 +439,11 @@
                 <Keyboard class="size-7 text-muted-foreground" />
               </div>
               <p class="text-sm text-muted-foreground">
-                Appuie sur une touche pour l'ajouter. Les modificateurs sont ignorés.
+                Press a key to add it. Modifiers are ignored.
               </p>
             </div>
           {:else}
-            <Input type="text" placeholder="Rechercher…" bind:value={pickerSearch} class="shrink-0" />
+            <Input type="text" placeholder="Search…" bind:value={pickerSearch} class="shrink-0" />
             <div class="flex-1 pr-1 mt-2 overflow-y-auto">
               {#if pickerFiltered}
                 <div class="flex flex-wrap gap-1.5">

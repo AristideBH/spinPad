@@ -1,48 +1,48 @@
 // ═══════════════════════════════════════════════════════════════
-//  config-schema.ts — Schéma et validation de la config SpinPad
+//  config-schema.ts — SpinPad config schema and validation
 //
-//  Utilisé par :
-//    - packages/studio  (validation import/export .spinpad)
-//    - packages/website (documentation du format)
+//  Used by:
+//    - packages/studio  (.spinpad import/export validation)
+//    - packages/website (format documentation)
 //
-//  Correspond à kb_config_t dans config_store.h (firmware).
+//  Matches kb_config_t in config_store.h (firmware).
 // ═══════════════════════════════════════════════════════════════
 
 import { backfillLayerColors } from './layer-colors.js';
 
-// ── Constantes structurelles ────────────────────────────────────
+// ── Structural constants ────────────────────────────────────────
 
-// Source de vérité unique : ces constantes sont aussi émises en C
-// (config_limits.gen.h) par scripts/codegen.mjs → ne pas dupliquer côté firmware.
+// Single source of truth: these constants are also emitted in C
+// (config_limits.gen.h) by scripts/codegen.mjs → do not duplicate on the firmware side.
 export const CONFIG_NUM_KEYS = 10; // SW1–SW10
 export const CONFIG_MAX_PROFILES = 4;
-export const CONFIG_MAX_LAYERS = 6; // par profil (cap réel firmware)
-export const CONFIG_NAME_MAX_LEN = 32; // octets, '\0' inclus → 31 chars utiles
-export const CONFIG_FORMAT_VERSION = 4; // v4 : per-layer encoder sensitivity override
+export const CONFIG_MAX_LAYERS = 6; // per profile (real firmware cap)
+export const CONFIG_NAME_MAX_LEN = 32; // bytes, '\0' included → 31 usable chars
+export const CONFIG_FORMAT_VERSION = 4; // v4: per-layer encoder sensitivity override
 
-// Bornes basses pour la CRUD (un profil/layer minimum)
+// Lower bounds for the CRUD (one profile/layer minimum)
 export const MIN_PROFILES = 1;
 export const MIN_LAYERS = 1;
 
-// Icône de profil : 24×24 monochrome 1bpp → 72 octets, transportée en base64
+// Profile icon: 24×24 monochrome 1bpp → 72 bytes, transported as base64
 export const PROFILE_ICON_W = 24;
 export const PROFILE_ICON_H = 24;
 export const PROFILE_ICON_BYTES = (PROFILE_ICON_W * PROFILE_ICON_H) / 8; // 72
 
-// ── Widget OLED — grille mosaïque 4×4 (v1, span-based) ──────────
+// ── OLED widget — 4×4 mosaic grid (v1, span-based) ──────────────
 //
-//  Modèle span-based : chaque widget occupe une boîte (x, y, w, h) sur une
-//  grille logique 4×4. L'anneau extérieur (col/row 0 et 3) fait une bande
-//  fixe de WIDGET_MIN_BAND_PX ; les 2 pistes centrales se partagent le reste
-//  (1fr). L'orientation (0–3) est un pur transform au rendu firmware — le
-//  layout logique ne change jamais. Chaque paire (type, size) correspond à
-//  une variante de dessin distincte côté firmware.
+//  Span-based model: each widget occupies a box (x, y, w, h) on a
+//  logical 4×4 grid. The outer ring (col/row 0 and 3) is a fixed band
+//  of WIDGET_MIN_BAND_PX; the 2 central tracks share the rest
+//  (1fr). The orientation (0–3) is a pure transform at firmware render —
+//  the logical layout never changes. Each (type, size) pair maps to
+//  a distinct drawing variant on the firmware side.
 //
-//  ⚠ Doit rester synchronisé avec kb_widget_t / WIDGET_* dans config_store.h.
+//  ⚠ Must stay synchronized with kb_widget_t / WIDGET_* in config_store.h.
 
 export const WIDGET_GRID_COLS = 4;
 export const WIDGET_GRID_ROWS = 4;
-export const WIDGET_MIN_BAND_PX = 10; // bande extérieure fixe (col/row 0 et 3)
+export const WIDGET_MIN_BAND_PX = 10; // fixed outer band (col/row 0 and 3)
 export const DISPLAY_WIDTH_PX = 72; // orientation 0 (paysage)
 export const DISPLAY_HEIGHT_PX = 40;
 export const DISPLAY_MAX_WIDGETS = 8;
@@ -59,16 +59,16 @@ export const WIDGET_TYPE = {
 } as const;
 export type WidgetType = (typeof WIDGET_TYPE)[keyof typeof WIDGET_TYPE];
 
-// Largeur minimale d'un widget : tous les widgets font au moins WIDGET_MIN_W
-// unités de large (pas de variante 1 colonne).
+// Minimum width of a widget: all widgets are at least WIDGET_MIN_W
+// units wide (no 1-column variant).
 export const WIDGET_MIN_W = 2;
 
-// Les métadonnées UI par widget (label, icône, tailles autorisées, singleton,
-// aperçu, options) vivent dans le registre Studio :
+// The per-widget UI metadata (label, icon, allowed sizes, singleton,
+// preview, options) lives in the Studio registry:
 //   components/app/studio/dashboard/screen/widgets/
-// config-schema ne garde que le contrat de données (types, défauts, validation).
+// config-schema only keeps the data contract (types, defaults, validation).
 
-// ── Modèle de données span-based (union discriminée) ────────────
+// ── Span-based data model (discriminated union) ─────────────────
 
 interface WidgetBase {
   x: number; // 0..WIDGET_GRID_COLS-1
@@ -92,7 +92,7 @@ export interface ProfileWidget extends WidgetBase {
 export interface ClockWidget extends WidgetBase {
   type: typeof WIDGET_TYPE.CLOCK;
   clock_24h?: boolean;
-  clock_show_date?: boolean; // 2×2 uniquement
+  clock_show_date?: boolean; // 2×2 only
 }
 export interface CustomTextWidget extends WidgetBase {
   type: typeof WIDGET_TYPE.CUSTOM_TEXT;
@@ -100,7 +100,7 @@ export interface CustomTextWidget extends WidgetBase {
 }
 export interface IconWidget extends WidgetBase {
   type: typeof WIDGET_TYPE.ICON;
-  icon?: string; // bitmap 24×24 1bpp en base64 (même format que l'icône de profil)
+  icon?: string; // 24×24 1bpp bitmap in base64 (same format as the profile icon)
 }
 
 export type WidgetConfig =
@@ -112,12 +112,12 @@ export type WidgetConfig =
   | CustomTextWidget
   | IconWidget;
 
-/** Layout v1 par défaut (orientation 0, grille 4×4). */
+/** Default v1 layout (orientation 0, 4×4 grid). */
 export function defaultWidgets(): WidgetConfig[] {
   return [
-    { type: WIDGET_TYPE.BATTERY, x: 0, y: 0, w: 2, h: 1 }, // batterie, haut-gauche
-    { type: WIDGET_TYPE.CLOCK, x: 2, y: 0, w: 2, h: 1 }, // heure, haut-droite (2×1)
-    { type: WIDGET_TYPE.PROFILE, x: 0, y: 1, w: 4, h: 3 }, // profil, 4×3, à partir de la 2ᵉ rangée
+    { type: WIDGET_TYPE.BATTERY, x: 0, y: 0, w: 2, h: 1 }, // battery, top-left
+    { type: WIDGET_TYPE.CLOCK, x: 2, y: 0, w: 2, h: 1 }, // clock, top-right (2×1)
+    { type: WIDGET_TYPE.PROFILE, x: 0, y: 1, w: 4, h: 3 }, // profile, 4×3, starting from the 2nd row
   ];
 }
 
@@ -137,12 +137,12 @@ export interface MacroStep {
 }
 
 export const MACRO_MAX_STEPS = 32;
-export const MACRO_COUNT = 16; // slots globaux fixes (index 0..15 dans ACTION_TYPE_MACRO)
-export const MACRO_NAME_MAX_LEN = 17; // octets, '\0' inclus → 16 chars utiles
+export const MACRO_COUNT = 16; // fixed global slots (index 0..15 in ACTION_TYPE_MACRO)
+export const MACRO_NAME_MAX_LEN = 17; // bytes, '\0' included → 16 usable chars
 
 /**
- * Une macro globale (partagée par tous les profils). Un slot vide a
- * `steps.length === 0` ; son `name` peut rester vide (fallback "Macro N").
+ * A global macro (shared by all profiles). An empty slot has
+ * `steps.length === 0`; its `name` may stay empty (fallback "Macro N").
  */
 export interface MacroDef {
   name: string;
@@ -157,7 +157,7 @@ export function defaultMacros(): MacroDef[] {
   return Array.from({ length: MACRO_COUNT }, defaultMacro);
 }
 
-/** True si le slot contient au moins une étape (donc "utilisé"). */
+/** True if the slot contains at least one step (i.e. "used"). */
 export function isMacroUsed(m: MacroDef | undefined): boolean {
   return !!m && m.steps.length >= 1;
 }
@@ -165,35 +165,35 @@ export function isMacroUsed(m: MacroDef | undefined): boolean {
 // ── LED ─────────────────────────────────────────────────────────
 
 /**
- * Effets LED disponibles — miroir exact des modes de led-matrix.svelte.
- * Chaque niveau de la hiérarchie n'expose qu'un sous-ensemble :
- *   Global   : tous les modes
- *   Profil   : off | static | breathe | pulse  (pas de position-dépendants)
- *   Par-key  : off | static | breathe | alert
+ * Available LED effects — exact mirror of the led-matrix.svelte modes.
+ * Each level of the hierarchy exposes only a subset:
+ *   Global   : all modes
+ *   Profile  : off | static | breathe | pulse  (no position-dependent ones)
+ *   Per-key  : off | static | breathe | alert
  */
 export type LedMode = 'off' | 'static' | 'pulse' | 'breathe' | 'flow' | 'sweep' | 'alert' | 'rainbow';
 export type LedModeProfile = Extract<LedMode, 'off' | 'static' | 'breathe' | 'pulse'>;
 export type LedModeKey = Extract<LedMode, 'off' | 'static' | 'breathe' | 'alert'>;
 
-/** Presets de dégradé pour les effets flow/sweep. Index 0 = défaut initial. */
+/** Gradient presets for the flow/sweep effects. Index 0 = initial default. */
 export const GRADIENT_PRESETS = [
-  { label: 'Teal–Bleu',  colors: ['#34d399', '#22d3ee', '#3b82f6', '#34d399'] },
-  { label: 'Coucher',    colors: ['#f97316', '#ef4444', '#ec4899', '#f97316'] },
+  { label: 'Teal–Blue',  colors: ['#34d399', '#22d3ee', '#3b82f6', '#34d399'] },
+  { label: 'Sunset',     colors: ['#f97316', '#ef4444', '#ec4899', '#f97316'] },
   { label: 'Aurora',     colors: ['#8b5cf6', '#06b6d4', '#10b981', '#8b5cf6'] },
-  { label: 'Feu',        colors: ['#fbbf24', '#f97316', '#ef4444', '#fbbf24'] },
+  { label: 'Fire',       colors: ['#fbbf24', '#f97316', '#ef4444', '#fbbf24'] },
 ] as const;
 
-/** Config LED globale pour les 10 touches (dans FullConfig). */
+/** Global LED config for the 10 keys (in FullConfig). */
 export interface LedKeyGlobal {
   brightness: number; // 0–255
   effect: LedMode;
   r: number; // 0–255
   g: number;
   b: number;
-  gradient_preset?: number; // index dans GRADIENT_PRESETS, actif si effect=flow|sweep
+  gradient_preset?: number; // index in GRADIENT_PRESETS, active if effect=flow|sweep
 }
 
-/** Couleur/effet LED d'identité de profil — hérite du global si absent. */
+/** Profile identity LED color/effect — inherits from global if absent. */
 export interface LedProfile {
   r: number;
   g: number;
@@ -201,7 +201,7 @@ export interface LedProfile {
   effect?: LedModeProfile;
 }
 
-/** Override LED par touche dans un layer — null = hérite du layer/profil/global. */
+/** Per-key LED override in a layer — null = inherits from layer/profile/global. */
 export interface KeyLedOverride {
   r: number;
   g: number;
@@ -217,14 +217,14 @@ export interface LayerConfig {
   encoder_ccw: number;
   name?: string;
   encoder?: { cw: number; ccw: number; press?: number };
-  // Slot couleur (0..CONFIG_MAX_LAYERS-1) — app-only, ignoré par le firmware.
-  // Suit le layer lors d'un réordonnancement pour stabiliser sa couleur. Voir
-  // layer-colors.ts. Réassigné par position à l'entrée si absent (round-trip device).
+  // Color slot (0..CONFIG_MAX_LAYERS-1) — app-only, ignored by the firmware.
+  // Follows the layer on a reorder to stabilize its color. See
+  // layer-colors.ts. Reassigned by position on entry if absent (device round-trip).
   color?: number;
-  // Overrides LED par touche (index = index de key, null = hérite). App-only sauf
-  // si le firmware est mis à jour pour lire ces champs.
+  // Per-key LED overrides (index = key index, null = inherits). App-only unless
+  // the firmware is updated to read these fields.
   key_leds?: (KeyLedOverride | null)[];
-  // Override de sensibilité encodeur pour ce layer. null/absent = hérite du global.
+  // Encoder sensitivity override for this layer. null/absent = inherits from global.
   encoder_sensitivity?: number | null;
 }
 
@@ -232,16 +232,16 @@ export interface ProfileConfig {
   name: string;
   layers: LayerConfig[]; // 1..CONFIG_MAX_LAYERS
   layer_count?: number;
-  icon?: string; // base64 d'un bitmap 24×24 1bpp (PROFILE_ICON_BYTES octets)
+  icon?: string; // base64 of a 24×24 1bpp bitmap (PROFILE_ICON_BYTES bytes)
   combos?: unknown[];
   combo_count?: number;
-  led?: LedProfile; // couleur d'identité du profil (absent = hérite du global)
+  led?: LedProfile; // profile identity color (absent = inherits from global)
 }
 
 export interface FullConfig {
   active_profile: number;
   profiles: ProfileConfig[]; // 1..CONFIG_MAX_PROFILES
-  macros: MacroDef[]; // MACRO_COUNT slots globaux fixes
+  macros: MacroDef[]; // MACRO_COUNT fixed global slots
   version?: number;
   profile_count?: number;
   display: {
@@ -266,7 +266,7 @@ export interface FullConfig {
   encoder: {
     sensitivity: number; // 1–4
   };
-  led_key: LedKeyGlobal; // config LED globale des 10 touches
+  led_key: LedKeyGlobal; // global LED config of the 10 keys
   led_extension: {
     enabled: boolean;
     count: number; // 0–50
@@ -275,13 +275,13 @@ export interface FullConfig {
     g: number;
     b: number;
     brightness: number;
-    max_power_mw?: number; // 0 = illimité, défaut 500
+    max_power_mw?: number; // 0 = unlimited, default 500
   };
 }
 
 export type ValidationResult<T> = { ok: true; config: T } | { ok: false; error: string };
 
-// ── Valeurs par défaut ──────────────────────────────────────────
+// ── Default values ──────────────────────────────────────────────
 
 export function defaultKeyAction(): number {
   return 0x0000; // KC_NONE
@@ -297,8 +297,8 @@ export function defaultLayer(name = 'Base'): LayerConfig {
     keys: Array(CONFIG_NUM_KEYS).fill(0) as number[],
     encoder_cw: 0,
     encoder_ccw: 0,
-    // Objet `encoder` = format canonique (lu par firmware + UI). Sans lui, l'UI
-    // ne peut pas assigner d'action à l'encodeur sur un layer fraîchement créé.
+    // `encoder` object = canonical format (read by firmware + UI). Without it, the UI
+    // cannot assign an action to the encoder on a freshly created layer.
     encoder: { cw: 0, ccw: 0, press: 0 },
   };
 }
@@ -306,10 +306,10 @@ export function defaultLayer(name = 'Base'): LayerConfig {
 export function defaultProfile(): ProfileConfig {
   const profile: ProfileConfig = {
     name: 'Profile',
-    icon: '', // pas d'icône par défaut (les presets en fournissent une)
-    layers: [defaultLayer('Base')], // un seul layer au départ — ajout à la demande
+    icon: '', // no default icon (presets provide one)
+    layers: [defaultLayer('Base')], // a single layer to start — add on demand
   };
-  backfillLayerColors([profile]); // garantit color: 0 sur le layer de base
+  backfillLayerColors([profile]); // guarantees color: 0 on the base layer
   return profile;
 }
 
@@ -349,12 +349,12 @@ export function defaultConfig(): FullConfig {
 // ── Validation ──────────────────────────────────────────────────
 
 /**
- * Valide et complète une config importée (applique les valeurs par défaut
- * pour les champs manquants, sans erreur fatale sur les champs optionnels).
+ * Validates and completes an imported config (applies the default values
+ * for missing fields, without a fatal error on optional fields).
  */
 export function validateConfig(raw: unknown): ValidationResult<FullConfig> {
   if (typeof raw !== 'object' || raw === null) {
-    return { ok: false, error: 'La config doit être un objet JSON.' };
+    return { ok: false, error: 'The config must be a JSON object.' };
   }
 
   const r = raw as Record<string, unknown>;
@@ -493,17 +493,17 @@ function mergeProfile(raw: unknown, def: ProfileConfig = defaultProfile()): Prof
   };
 }
 
-// Types placeables (NONE exclu) pour la validation du format de fil.
+// Placeable types (NONE excluded) for wire-format validation.
 const KNOWN_WIDGET_TYPES = new Set<number>(
   Object.values(WIDGET_TYPE).filter((t) => t !== WIDGET_TYPE.NONE),
 );
 
 /**
- * Normalise un tableau de widgets span-based : ne garde que les types connus,
- * clampe (x,y,w,h) aux bornes de la grille 4×4 (w ≥ WIDGET_MIN_W), recopie les
- * champs d'options connus, et limite à DISPLAY_MAX_WIDGETS. La légalité fine
- * des tailles par type est affaire de l'UI (registre) ; ici on ne garantit que
- * des coordonnées dans les bornes. Fallback défauts si rien d'exploitable.
+ * Normalizes an array of span-based widgets: keeps only known types,
+ * clamps (x,y,w,h) to the 4×4 grid bounds (w ≥ WIDGET_MIN_W), copies the
+ * known option fields, and limits to DISPLAY_MAX_WIDGETS. The fine legality
+ * of sizes per type is the UI's concern (registry); here we only guarantee
+ * coordinates within bounds. Falls back to defaults if nothing usable.
  */
 function mergeWidgets(raw: unknown): WidgetConfig[] {
   if (!Array.isArray(raw)) return defaultWidgets();
@@ -515,7 +515,7 @@ function mergeWidgets(raw: unknown): WidgetConfig[] {
     const type = r.type as WidgetType;
     if (typeof type !== 'number' || !KNOWN_WIDGET_TYPES.has(type)) continue;
 
-    // Bornes génériques : w ∈ [WIDGET_MIN_W, COLS], h ∈ [1, ROWS], puis x/y dans la grille.
+    // Generic bounds: w ∈ [WIDGET_MIN_W, COLS], h ∈ [1, ROWS], then x/y within the grid.
     const clamp = (v: unknown, lo: number, hi: number) =>
       typeof v === 'number' ? Math.min(Math.max(Math.round(v), lo), hi) : lo;
     const w = clamp(r.w, WIDGET_MIN_W, WIDGET_GRID_COLS);
@@ -541,7 +541,7 @@ function mergeWidgets(raw: unknown): WidgetConfig[] {
   return out.length > 0 ? out : defaultWidgets();
 }
 
-/** Normalise les macros globales en MACRO_COUNT slots fixes. */
+/** Normalizes the global macros into MACRO_COUNT fixed slots. */
 function mergeMacros(raw: unknown): MacroDef[] {
   const out = defaultMacros();
   if (!Array.isArray(raw)) return out;

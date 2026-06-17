@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/devMode.svelte.ts — Mode démo sans device physique
+//  store/devMode.svelte.ts — Demo mode without physical device
 //
-//  Quand active === true, les transports de config et de status
-//  basculent sur des mocks. Les scénarios permettent de tester
-//  les différentes branches de la DeviceStatusCard à chaud.
+//  When active === true, the config and status transports switch
+//  to mocks. The scenarios allow testing the different branches of
+//  the DeviceStatusCard on the fly.
 // ═══════════════════════════════════════════════════════════════
 
 import type { BatteryScenario, ConnectionScenario } from '$shared/types/dev-mode.js';

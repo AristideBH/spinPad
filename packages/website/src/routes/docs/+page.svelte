@@ -8,10 +8,10 @@
 </script>
 
 <svelte:head>
-    <title>Documentation : SpinPad</title>
+    <title>Documentation: SpinPad</title>
 </svelte:head>
 
-<!-- Récursif : les dossiers deviennent des titres de section, les docs des lignes Item. -->
+<!-- Recursive: folders become section titles, docs become Item rows. -->
 {#snippet section(items: DocTreeNode[], depth: number)}
   {@const docs = items.filter((n) => n.type === 'doc')}
   {@const folders = items.filter((n) => n.type === 'folder')}
@@ -60,11 +60,11 @@
 
 <div class="max-w-3xl px-4 py-12 mx-auto">
     <h1 class="mb-2 text-3xl font-bold">Documentation</h1>
-    <p class="mb-10 text-muted-foreground">Tout ce qu'il faut savoir pour configurer et personnaliser votre SpinPad.</p>
+    <p class="mb-10 text-muted-foreground">Everything you need to know to configure and customize your SpinPad.</p>
 
     {#if tree.length > 0}
         {@render section(tree, 0)}
     {:else}
-        <p class="text-muted-foreground">Aucune page de documentation pour le moment.</p>
+        <p class="text-muted-foreground">No documentation pages yet.</p>
     {/if}
 </div>

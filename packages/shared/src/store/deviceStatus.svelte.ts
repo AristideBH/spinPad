@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/deviceStatus.svelte.ts — Polling du statut device live
+//  store/deviceStatus.svelte.ts — Live device status polling
 //
-//  Source des données via store/transport.ts :
+//  Data source via store/transport.ts:
 //    VITE_DEV_MODE=true      → transport/mock.ts
 //    VITE_TRANSPORT='http'   → transport/http.ts  (Studio Mode)
-//    (défaut)                → store/serial.svelte.ts (WebSerial)
+//    (default)               → store/serial.svelte.ts (WebSerial)
 //
-//  Erreur de transport (ex. serial non connecté) → data=null, error=message.
+//  Transport error (e.g. serial not connected) → data=null, error=message.
 // ═══════════════════════════════════════════════════════════════
 
 import { browser } from '$app/environment';
@@ -38,7 +38,7 @@ async function _poll(): Promise<void> {
     const status = await activeStatusTransport().getDeviceStatus();
     deviceStatus.data  = status;
     deviceStatus.error = null;
-    // Synchro profil actif : le device est la source de vérité du profil live.
+    // Active profile sync: the device is the source of truth of the live profile.
     if (typeof status.active_profile === 'number') {
       reconcileActiveProfile(status.active_profile);
     }
@@ -56,8 +56,8 @@ export function startPolling(intervalMs = 5000): void {
   deviceStatus.loading = deviceStatus.data === null;
   _poll();
   _timer = setInterval(_poll, intervalMs);
-  // Synchro basse latence : sur transport serial, écouter aussi les événements
-  // « profile » poussés sur le stream moniteur (en plus du polling 5 s).
+  // Low-latency sync: on the serial transport, also listen to the "profile"
+  // events pushed on the monitor stream (in addition to the 5 s polling).
   if (!_unsubProfile && transportMode() === 'serial') {
     _unsubProfile = onProfileEvent(reconcileActiveProfile);
   }

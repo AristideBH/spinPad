@@ -1,10 +1,10 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  ScreenAddMenu.svelte — Menu « Ajouter » des widgets OLED
+  //  ScreenAddMenu.svelte — OLED widgets "Add" menu
   //
-  //  Vit dans l'en-tête de la tuile. Lit/écrit le store config et place le
-  //  widget dans le premier espace libre de la grille 4×4 (singletons grisés
-  //  une fois posés). Métadonnées par widget : registre ./widgets.
+  //  Lives in the tile header. Reads/writes the config store and places the
+  //  widget in the first free space of the 4×4 grid (singletons grayed out
+  //  once placed). Per-widget metadata: ./widgets registry.
   // ───────────────────────────────────────────────────────────────
   import { configState, updateConfig } from '$shared/store/config.svelte.js';
   import {
@@ -39,7 +39,7 @@
     return WIDGET_DEFS[t].singleton && usedTypes.has(t);
   }
 
-  // Premier espace libre pour une boîte w×h sur la grille 4×4.
+  // First free space for a w×h box on the 4×4 grid.
   function findFreeSpace(w: number, h: number): { x: number; y: number } | null {
     const g = Array.from({ length: ROWS }, () => Array<boolean>(COLS).fill(false));
     for (const wd of widgets)
@@ -59,7 +59,7 @@
     const size = widgetDefaultSize(type);
     const pos = findFreeSpace(size.w, size.h);
     if (!pos) {
-      toast("Plus d'espace sur l'écran. Faîtes de la place !");
+      toast('No more space on the screen. Make some room!');
       return;
     }
     updateConfig('display.widgets', [...widgets, createWidget(type, pos.x, pos.y, size.w, size.h)]);
@@ -69,10 +69,10 @@
 <DropdownMenu.Root>
   <DropdownMenu.Trigger
     disabled={full}
-    title="Ajouter un widget"
+    title="Add a widget"
     class={cn(buttonVariants({ variant: 'outline', size: 'xs' }), 'gap-1.5 w-fit')}
   >
-    Ajouter
+    Add
     <Plus class="size-3" />
   </DropdownMenu.Trigger>
   <DropdownMenu.Content align="start" class="w-45">

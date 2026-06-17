@@ -1,17 +1,17 @@
 // ═══════════════════════════════════════════════════════════════
-//  config-migrations.ts — Migrations du format .spinpad
+//  config-migrations.ts — .spinpad format migrations
 //
-//  Chaque version de format a une fonction de migration qui
-//  transforme la config vers la version suivante.
+//  Each format version has a migration function that
+//  transforms the config to the next version.
 //
-//  Format du fichier .spinpad :
+//  .spinpad file format:
 //  {
 //    "_type": "spinpad-config",
 //    "_format_version": 1,
 //    "_created_at": "...",
 //    "_firmware_version": "...",
 //    "_studio_version": "...",
-//    "config": { ...config complète... }
+//    "config": { ...complete config... }
 //  }
 // ═══════════════════════════════════════════════════════════════
 
@@ -46,11 +46,11 @@ export interface FileMeta {
 }
 
 // ── Migrations v → v+1 ──────────────────────────────────────────
-// Chaque clé est la version SOURCE (avant migration).
+// Each key is the SOURCE version (before migration).
 
 export const migrations: Record<number, MigrationFn> = {
-  // v1 → v2 : macros passées du niveau profil au niveau global (clean slate).
-  // On supprime les anciennes macros par profil et on initialise 16 slots vides.
+  // v1 → v2: macros moved from the profile level to the global level (clean slate).
+  // We drop the old per-profile macros and initialize 16 empty slots.
   1: (cfg) => {
     const profiles = Array.isArray(cfg.profiles)
       ? cfg.profiles.map((p) => {
@@ -66,29 +66,29 @@ export const migrations: Record<number, MigrationFn> = {
 // ── Helpers ────────────────────────────────────────────────────
 
 /**
- * Valider et migrer un fichier .spinpad chargé depuis le disque.
- * @throws {Error} Si le fichier n'est pas reconnu
+ * Validate and migrate a .spinpad file loaded from disk.
+ * @throws {Error} If the file is not recognized
  */
 export function parseSpinpadFile(raw: unknown): ParseResult {
   if (!raw || typeof raw !== 'object') {
-    throw new Error('Fichier invalide : pas un objet JSON.');
+    throw new Error('Invalid file: not a JSON object.');
   }
   const r = raw as Record<string, unknown>;
   if (r._type !== SPINPAD_FILE_TYPE) {
     throw new Error(
-      `Fichier non reconnu (type: "${r._type}"). Attendu : "${SPINPAD_FILE_TYPE}".`
+      `Unrecognized file (type: "${r._type}"). Expected: "${SPINPAD_FILE_TYPE}".`
     );
   }
   const fileVersion = Number(r._format_version) || 1;
   if (fileVersion > CURRENT_FORMAT_VERSION) {
     throw new Error(
-      `Format v${fileVersion} trop récent — mettre à jour Studio pour ouvrir ce fichier.`
+      `Format v${fileVersion} too recent — update Studio to open this file.`
     );
   }
 
   let cfg = r.config as FullConfig;
   for (let v = fileVersion; v < CURRENT_FORMAT_VERSION; v++) {
-    if (!migrations[v]) throw new Error(`Migration manquante : v${v} → v${v + 1}`);
+    if (!migrations[v]) throw new Error(`Missing migration: v${v} → v${v + 1}`);
     cfg = migrations[v](cfg);
   }
 
@@ -96,7 +96,7 @@ export function parseSpinpadFile(raw: unknown): ParseResult {
 }
 
 /**
- * Créer l'enveloppe d'un fichier .spinpad pour l'export.
+ * Create the wrapper of a .spinpad file for export.
  */
 export function createSpinpadFile(config: FullConfig, meta: FileMeta = {}): SpinpadFileWrapper {
   return {
@@ -141,22 +141,22 @@ export function createProfilesFile(
 
 export function parseProfilesFile(raw: unknown): ProfilesParseResult {
   if (!raw || typeof raw !== 'object') {
-    throw new Error('Fichier invalide : pas un objet JSON.');
+    throw new Error('Invalid file: not a JSON object.');
   }
   const r = raw as Record<string, unknown>;
   if (r._type !== SPINPAD_PROFILES_FILE_TYPE) {
     throw new Error(
-      `Fichier non reconnu (type: "${r._type}"). Attendu : "${SPINPAD_PROFILES_FILE_TYPE}".`,
+      `Unrecognized file (type: "${r._type}"). Expected: "${SPINPAD_PROFILES_FILE_TYPE}".`,
     );
   }
   const fileVersion = Number(r._format_version) || 1;
   if (fileVersion > CURRENT_PROFILES_FORMAT_VERSION) {
     throw new Error(
-      `Format profiles v${fileVersion} trop récent — mettre à jour Studio pour ouvrir ce fichier.`,
+      `Profiles format v${fileVersion} too recent — update Studio to open this file.`,
     );
   }
   if (!Array.isArray(r.profiles) || r.profiles.length === 0) {
-    throw new Error('Fichier profiles vide ou invalide.');
+    throw new Error('Empty or invalid profiles file.');
   }
   return { profiles: r.profiles as ProfileConfig[], fromVersion: fileVersion };
 }

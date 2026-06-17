@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-//  types/index.ts — Réexports centralisés de tous les types SpinPad
+//  types/index.ts — Centralized re-exports of all SpinPad types
 //
-//  Usage depuis n'importe où dans le monorepo :
+//  Usage from anywhere in the monorepo:
 //    import type { FullConfig, DeviceStatus, SerialStateSnapshot } from '@spinpad/shared/types';
 //
-//  Les types source restent dans leurs modules (config-schema.ts,
-//  device-status-schema.ts, etc.) pour éviter les dépendances
-//  circulaires. Ce fichier est uniquement un barrel de réexport.
+//  The source types stay in their modules (config-schema.ts,
+//  device-status-schema.ts, etc.) to avoid circular dependencies.
+//  This file is only a re-export barrel.
 // ═══════════════════════════════════════════════════════════════
 
 // ── Config ───────────────────────────────────────────────────────

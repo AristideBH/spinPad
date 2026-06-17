@@ -1,14 +1,14 @@
 ---
 title: Profiles
-description: Profils, layers et actions de couche (MO, TG, TO).
+description: Profiles, layers and layer actions (MO, TG, TO).
 order: 2
 group: Keymap
 ---
 
 # Profiles
 
-## Concept de profiles
+## Profile concept
 
-Un **profile** est une configuration complète de clavier qui peut être activée temporairement ou en permanence. Chaque profil peut avoir plusieurs layers.
+A **profile** is a complete keyboard configuration that can be activated temporarily or permanently. Each profile can have multiple layers.
 
-Un **profile** est une configuration complète de clavier qui peut être activée temporairement ou en permanence. Chaque profil peut avoir plusieurs layers.
+A **profile** is a complete keyboard configuration that can be activated temporarily or permanently. Each profile can have multiple layers.

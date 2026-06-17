@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-//  mock/keyboard-config.ts — Configuration mock complète
+//  mock/keyboard-config.ts — Full mock configuration
 //
-//  4 profils riches pour tester le frontend en devMode (VITE_DEV_MODE).
-//  Chaque layer est entièrement keymappé (pas de KC_NONE) et chaque
-//  layer porte un binding encodeur distinct pour exercer l'UI.
+//  4 rich profiles to test the frontend in devMode (VITE_DEV_MODE).
+//  Each layer is fully keymapped (no KC_NONE) and each layer carries
+//  a distinct encoder binding to exercise the UI.
 // ═══════════════════════════════════════════════════════════════
 
 import { action, ACTION_TYPES, MEDIA_CODES } from '$shared/constants/action-types.js';
@@ -136,7 +136,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Productivity',
       layer_count: 3,
-      led: { r: 0, g: 120, b: 255, effect: 'breathe' }, // bleu
+      led: { r: 0, g: 120, b: 255, effect: 'breathe' }, // blue
       layers: [
         {
           name: 'Base',
@@ -144,7 +144,7 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
-          // SW1 (MO layer) = blanc → indicateur de layer shift
+          // SW1 (MO layer) = white → layer shift indicator
           key_leds: [
             { r: 255, g: 255, b: 255, effect: 'static' },
             null,
@@ -171,7 +171,7 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: SCRL_DN, ccw: SCRL_UP, press: ENTER },
           encoder_cw: SCRL_DN,
           encoder_ccw: SCRL_UP,
-          // touches de navigation = cyan
+          // navigation keys = cyan
           key_leds: [
             null,
             { r: 0, g: 220, b: 200 },
@@ -186,7 +186,7 @@ export const MOCK_CONFIG: FullConfig = {
           ],
         },
       ],
-      // SW4 + SW5 → macro "Salut"
+      // SW4 + SW5 → macro "Hello"
       combo_count: 1,
       combos: [{ keys: [8, 9], action: MACRO(0), window_ms: 50 }],
     },
@@ -213,7 +213,7 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: SCRL_UP, ccw: SCRL_DN, press: 0 },
           encoder_cw: SCRL_UP,
           encoder_ccw: SCRL_DN,
-          // DEL = rouge alerte
+          // DEL = alert red
           key_leds: [null, null, null, null, null, null, null, null, null, { r: 255, g: 30, b: 30, effect: 'alert' }],
         },
       ],
@@ -229,7 +229,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Media',
       layer_count: 2,
-      led: { r: 180, g: 0, b: 220, effect: 'pulse' }, // violet
+      led: { r: 180, g: 0, b: 220, effect: 'pulse' }, // purple
       layers: [
         {
           name: 'Base',
@@ -237,7 +237,7 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: PLAY },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
-          // PLAY = vert, STOP = rouge, MUTE = orange
+          // PLAY = green, STOP = red, MUTE = orange
           key_leds: [
             { r: 0, g: 200, b: 60 },
             null,
@@ -271,7 +271,7 @@ export const MOCK_CONFIG: FullConfig = {
     {
       name: 'Gaming',
       layer_count: 2,
-      led: { r: 255, g: 20, b: 20, effect: 'breathe' }, // rouge
+      led: { r: 255, g: 20, b: 20, effect: 'breathe' }, // red
       layers: [
         {
           name: 'WASD',
@@ -279,7 +279,7 @@ export const MOCK_CONFIG: FullConfig = {
           encoder: { cw: VOL_UP, ccw: VOL_DN, press: MUTE },
           encoder_cw: VOL_UP,
           encoder_ccw: VOL_DN,
-          // WASD en jaune vif
+          // WASD in bright yellow
           key_leds: [
             null,
             { r: 255, g: 220, b: 0 },
@@ -307,11 +307,11 @@ export const MOCK_CONFIG: FullConfig = {
     },
   ],
 
-  // ── Macros globales (partagées par tous les profils) ──────────
-  // 16 slots fixes ; les premiers sont remplis pour la démo.
+  // ── Global macros (shared by all profiles) ────────────────────
+  // 16 fixed slots; the first ones are filled for the demo.
   macros: [
     {
-      name: 'Salut',
+      name: 'Hello',
       steps: [
         { type: 0, keycode: 0x0b },
         { type: 1, keycode: 0x0b }, // H
@@ -326,7 +326,7 @@ export const MOCK_CONFIG: FullConfig = {
       ],
     },
     {
-      name: 'Entrée x2',
+      name: 'Enter x2',
       steps: [
         { type: 0, keycode: 0x28 },
         { type: 1, keycode: 0x28 },
@@ -350,9 +350,9 @@ export const MOCK_CONFIG: FullConfig = {
     brightness: 180,
     timeout_s: 30,
     widgets: [
-      { type: 4, x: 0, y: 0, w: 2, h: 1 }, // Batterie (haut-gauche)
-      { type: 6, x: 2, y: 0, w: 2, h: 1 }, // Horloge (haut-droite, 2×1)
-      { type: 3, x: 0, y: 1, w: 4, h: 3 }, // Profil (4×3, à partir de la 2ᵉ rangée)
+      { type: 4, x: 0, y: 0, w: 2, h: 1 }, // Battery (top-left)
+      { type: 6, x: 2, y: 0, w: 2, h: 1 }, // Clock (top-right, 2×1)
+      { type: 3, x: 0, y: 1, w: 4, h: 3 }, // Profile (4×3, starting from the 2nd row)
     ],
   },
 
