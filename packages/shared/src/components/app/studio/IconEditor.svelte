@@ -40,28 +40,28 @@
   import * as Select from '$shared/components/ui/select/index.js';
 
   interface Props {
-    value?: string; // base64 courante (prop externe)
+    value?: string; // current base64 (external prop)
     onchange?: (b64: string) => void;
-    cell?: number; // px par cellule dans l'éditeur
+    cell?: number; // px per cell in the editor
   }
   let { value = '', onchange, cell = 12 }: Props = $props();
 
-  // ── Outils ───────────────────────────────────────────────────
+  // ── Tools ────────────────────────────────────────────────────
   type Tool = 'pen' | 'line' | 'rect' | 'rectFill' | 'ellipse' | 'ellipseFill';
   const TOOLS: { id: Tool; label: string; icon: any; fill?: boolean }[] = [
-    { id: 'pen', label: 'Crayon', icon: Pencil },
-    { id: 'line', label: 'Ligne', icon: Minus },
-    { id: 'rectFill', label: 'Rect. plein', icon: Square, fill: true },
+    { id: 'pen', label: 'Pen', icon: Pencil },
+    { id: 'line', label: 'Line', icon: Minus },
+    { id: 'rectFill', label: 'Filled rect.', icon: Square, fill: true },
     { id: 'rect', label: 'Rectangle', icon: Square },
-    { id: 'ellipseFill', label: 'Ellipse pleine', icon: Circle, fill: true },
+    { id: 'ellipseFill', label: 'Filled ellipse', icon: Circle, fill: true },
     { id: 'ellipse', label: 'Ellipse', icon: Circle },
   ];
 
-  // ── État ─────────────────────────────────────────────────────
+  // ── State ────────────────────────────────────────────────────
   let grid = $state<BoolGrid>(emptyGrid());
-  let saved = $state<BoolGrid>(emptyGrid()); // snapshot au dernier Save
+  let saved = $state<BoolGrid>(emptyGrid()); // snapshot at last Save
   let synced = $state<string | undefined>(undefined);
-  let dirty = $state(false); // modifié depuis dernier Save
+  let dirty = $state(false); // modified since last Save
   let tool = $state<Tool>('pen');
   let fileInput = $state<HTMLInputElement | null>(null);
 
@@ -76,10 +76,10 @@
   const px = $derived(W * cell);
   const py = $derived(H * cell);
 
-  // base64 du dessin courant (mis à jour à chaque trait)
+  // base64 of the current drawing (updated on every stroke)
   const currentBase64 = $derived(gridToBase64(grid));
 
-  // ── Sync prop externe → grille ───────────────────────────────
+  // ── Sync external prop → grid ────────────────────────────────
   $effect(() => {
     if (value !== synced) {
       grid = base64ToGrid(value);
@@ -89,7 +89,7 @@
     }
   });
 
-  // ── Rendu éditeur (attachment : re-run sur grid/cell/px/py) ──
+  // ── Editor rendering (attachment: re-runs on grid/cell/px/py) ──
   const renderEditor = (el: HTMLCanvasElement) => {
     const ctx = el.getContext('2d');
     if (!ctx) return;
@@ -129,7 +129,7 @@
     ctx.setLineDash([]);
   };
 
-  // ── Rendu preview taille réelle (attachment : re-run sur grid) ──
+  // ── Full-size preview rendering (attachment: re-runs on grid) ──
   const renderPreview = (el: HTMLCanvasElement) => {
     const ctx = el.getContext('2d');
     if (!ctx) return;
@@ -212,7 +212,7 @@
     if (!drawing) return;
     drawing = false;
     start = null;
-    // Pas d'emit ici — l'utilisateur doit cliquer Save
+    // No emit here — the user must click Save
   }
 
   // ── Save / Reset ─────────────────────────────────────────────
@@ -327,17 +327,17 @@
       </Button>
 
       <!-- Reset -->
-      <Button title="Annuler les modifications" variant="secondary" disabled={!dirty} onclick={reset}>
+      <Button title="Discard changes" variant="secondary" disabled={!dirty} onclick={reset}>
         <RotateCcw size={14} />
       </Button>
     </ButtonGroup.Root>
 
     <!-- Save -->
-    <Button title="Enregistrer" disabled={!dirty} onclick={save}>
+    <Button title="Save" disabled={!dirty} onclick={save}>
       <Save size={14} />
     </Button>
 
-    <span class="ml-2 text-[10px] text-muted-foreground"> clic gauche : peindre · clic droit : effacer </span>
+    <span class="ml-2 text-[10px] text-muted-foreground"> left click: paint · right click: erase </span>
   </div>
 
   <!-- ── Zone de dessin + preview ── -->
@@ -356,7 +356,7 @@
       oncontextmenu={(e) => e.preventDefault()}
     ></canvas>
 
-    <!-- Preview taille réelle 24×24 -->
+    <!-- Full-size 24×24 preview -->
     <div class="flex flex-col items-center gap-1">
       <span class="text-[9px] text-muted-foreground">24×24</span>
       <canvas
@@ -371,10 +371,10 @@
 
   <!-- ── Presets ── -->
   <div class="flex flex-wrap items-center gap-2">
-    <span class="text-xs text-muted-foreground">Presets :</span>
+    <span class="text-xs text-muted-foreground">Presets:</span>
     <Select.Root type="single" name="icon-presets" value={selectedPreset} onValueChange={onPresetChange}>
       <Select.Trigger class="w-[180px]">
-        {matchedPreset ? matchedPreset.label : 'Personnalisé'}
+        {matchedPreset ? matchedPreset.label : 'Custom'}
       </Select.Trigger>
       <Select.Content>
         <Select.Group>
@@ -383,7 +383,7 @@
             <Select.Item value={entry.id} label={entry.label}>{entry.label}</Select.Item>
           {/each}
           {#if !matchedPreset}
-            <Select.Item value={CUSTOM_ICON} label="Personnalisé" disabled>Personnalisé</Select.Item>
+            <Select.Item value={CUSTOM_ICON} label="Custom" disabled>Custom</Select.Item>
           {/if}
         </Select.Group>
       </Select.Content>
@@ -392,29 +392,29 @@
 
   <!-- ── Export / Import ── -->
   <div class="flex flex-wrap items-center gap-2">
-    <Button title="Exporter PNG" onclick={exportPng}>
+    <Button title="Export PNG" onclick={exportPng}>
       <Download size={12} /> PNG
     </Button>
-    <Button title="Importer une image" onclick={() => fileInput?.click()}>
+    <Button title="Import an image" onclick={() => fileInput?.click()}>
       <Upload size={12} /> Image
     </Button>
     <input bind:this={fileInput} type="file" accept="image/*" class="hidden" onchange={importFile} />
 
     <!-- Threshold import -->
     <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-      <span>Seuil import</span>
+      <span>Import threshold</span>
       <Slider type="single" min={0} max={255} step={1} bind:value={threshold} class="w-20" />
       <span class="w-6 text-right tabular-nums">{threshold}</span>
     </div>
   </div>
 
-  <!-- ── Panneau Dev (collapsible) ── -->
+  <!-- ── Dev panel (collapsible) ── -->
   <details class="text-[10px] border border-dashed border-border rounded">
     <summary class="px-2 py-1 cursor-pointer select-none text-muted-foreground hover:text-foreground">
-      Dev — mise à jour profile-icon-library.ts
+      Dev — update profile-icon-library.ts
     </summary>
     <div class="flex flex-col gap-2 p-2">
-      <!-- ── Champ base64 ── -->
+      <!-- ── base64 field ── -->
       <div class="flex items-center gap-2">
         <Input
           type="text"
@@ -423,7 +423,7 @@
           class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
           onclick={(e: Event) => (e.target as HTMLInputElement).select()}
         />
-        <Button variant="outline" title="Copier le base64" onclick={copyBase64}>
+        <Button variant="outline" title="Copy the base64" onclick={copyBase64}>
           {#if copied}
             <Check size={14} class="text-green-500" />
           {:else}
@@ -432,12 +432,12 @@
         </Button>
       </div>
       <p class="text-muted-foreground">
-        Copiez la ligne ci-dessous pour remplacer une entrée dans
+        Copy the line below to replace an entry in
         <code>profile-icon-library.ts</code>.
       </p>
       <pre
         class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">entry('id', 'Label', '{currentBase64}'),</pre>
-      <p class="text-muted-foreground">Base64 brut :</p>
+      <p class="text-muted-foreground">Raw base64:</p>
       <pre
         class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">{currentBase64}</pre>
     </div>

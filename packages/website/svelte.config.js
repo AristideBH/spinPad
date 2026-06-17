@@ -10,8 +10,8 @@ export default {
     // rehype-slug adds `id` to every heading so the docs TOC can anchor to them.
     mdsvex({ extensions: ['.md'], rehypePlugins: [rehypeSlug] }),
   ],
-  // `await` dans les composants + <svelte:boundary pending> (expérimental,
-  // requiert Svelte ≥5.36 ; le flag disparaît en Svelte 6).
+  // `await` in components + <svelte:boundary pending> (experimental,
+  // requires Svelte ≥5.36; the flag disappears in Svelte 6).
   compilerOptions: {
     experimental: { async: true },
   },

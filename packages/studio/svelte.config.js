@@ -6,26 +6,26 @@ const BUILD_DIR = process.env.VITE_BUILD_DIR || 'build';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-    // `await` dans les composants + <svelte:boundary pending> (expérimental,
-    // requiert Svelte ≥5.36 ; le flag disparaît en Svelte 6).
+    // `await` in components + <svelte:boundary pending> (experimental,
+    // requires Svelte >=5.36; the flag disappears in Svelte 6).
     compilerOptions: {
         experimental: { async: true },
     },
 
     kit: {
-        // adapter-static : génère des fichiers HTML/JS/CSS statiques
+        // adapter-static: generates static HTML/JS/CSS files
         adapter: adapter({
             pages: BUILD_DIR,
             assets: BUILD_DIR,
             fallback: 'index.html',
-            // Précompression pour le build embarqué uniquement. adapter-static
-            // génère .gz ET .br ; le firmware ne sert que les .gz, donc le script
-            // post-build (package.json build:embedded) supprime les originaux non
-            // compressés et les .br pour ne flasher que les .gz.
+            // Precompression for the embedded build only. adapter-static
+            // generates .gz AND .br; the firmware only serves the .gz, so the
+            // post-build script (package.json build:embedded) removes the
+            // uncompressed originals and the .br to flash only the .gz.
             precompress: process.env.VITE_TRANSPORT === 'http',
         }),
 
-        // Studio n'a pas de src/lib propre — tout vit dans @spinpad/shared.
+        // Studio has no src/lib of its own — everything lives in @spinpad/shared.
         alias: {
             $shared: path.resolve('../shared/src'),
         },

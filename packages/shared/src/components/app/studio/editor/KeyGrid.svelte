@@ -17,15 +17,15 @@
   const layout = new KeyboardLayout();
 
   /**
-   * Vrai si le label US affiché diverge du glyphe réel de la disposition hôte
-   * (AZERTY, QWERTZ…) pour cette touche. Le keycode reste positionnel (correct
-   * au runtime) ; on signale juste que l'étiquette ne correspond pas au clavier.
-   * Limité aux keycodes simples à un caractère (lettres, chiffres, symboles).
+   * True if the displayed US label diverges from the real glyph of the host
+   * layout (AZERTY, QWERTZ…) for this key. The keycode stays positional (correct
+   * at runtime); we just flag that the label doesn't match the keyboard.
+   * Limited to simple single-character keycodes (letters, digits, symbols).
    */
   function layoutMismatch(value: number): boolean {
-    if (!layout.map) return false; // disposition inconnue → ne rien signaler
-    if (((value >> 12) & 0xf) !== 0) return false; // type ACTION_TYPE_KC uniquement
-    if ((value & 0x0f00) !== 0) return false; // ignorer les keycodes « modifiés » (shift…)
+    if (!layout.map) return false; // unknown layout → flag nothing
+    if (((value >> 12) & 0xf) !== 0) return false; // ACTION_TYPE_KC type only
+    if ((value & 0x0f00) !== 0) return false; // ignore "modified" keycodes (shift…)
     const code = hidUsageToCode(value & 0xff);
     if (!code) return false;
     const host = layout.map.get(code);
@@ -90,7 +90,7 @@
         translate: -50% -50%;
       "
       >
-        <!-- Pass 1 : pulses (peintes avant tous les keycaps ; ne chevauchent jamais les voisines). -->
+        <!-- Pass 1: pulses (painted before all keycaps; never overlap the neighbors). -->
         {#if visualsActive}
           {@const led = ctx.profile?.led}
           {@const pulseColor = led ? `rgb(${led.r},${led.g},${led.b})` : undefined}
@@ -265,7 +265,7 @@
     color: var(--foreground);
   }
 
-  /* Label US ≠ glyphe de la disposition hôte → souligné pointillé. */
+  /* US label ≠ host layout glyph → dashed underline. */
   .keycap-label--mismatch {
     text-decoration: underline dashed;
     text-decoration-thickness: 1px;
@@ -283,7 +283,7 @@
     color: color-mix(in oklch, var(--muted-foreground) 50%, transparent);
   }
 
-  /* Mimique l'état :active sans interaction souris (mode test). */
+  /* Mimics the :active state without mouse interaction (test mode). */
   .keycap--press-sim {
     transform: translate(var(--depth-x), var(--depth-y));
     box-shadow:
@@ -292,8 +292,8 @@
       inset calc(-1 * var(--top-x)) calc(-1 * var(--top-y)) 0 rgba(0, 0, 0, 0.12);
   }
 
-  /* Halo qui pulse sous la touche. Placé dans la grid comme item dédié et rendu
-     AVANT les .keycap → les keycaps voisines le couvrent toujours (paint order). */
+  /* Halo that pulses under the key. Placed in the grid as a dedicated item and rendered
+     BEFORE the .keycap → neighboring keycaps always cover it (paint order). */
   .keycap-pulse {
     border-radius: var(--keycap-radius);
     pointer-events: none;

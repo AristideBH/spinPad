@@ -1,18 +1,18 @@
 /**
- * Expose la disposition physique du clavier hôte (AZERTY, QWERTZ…) via
- * l'API `navigator.keyboard.getLayoutMap()` (Chromium — mêmes navigateurs
- * que WebSerial). Sert à AFFICHER le bon glyphe lors du live-record :
- * la valeur HID enregistrée reste positionnelle (correcte), seul le label
- * suit la disposition de l'utilisateur.
+ * Exposes the physical layout of the host keyboard (AZERTY, QWERTZ…) via
+ * the `navigator.keyboard.getLayoutMap()` API (Chromium — same browsers
+ * as WebSerial). Used to DISPLAY the correct glyph during live-record:
+ * the recorded HID value stays positional (correct), only the label
+ * follows the user's layout.
  *
- * Hors Chromium / non supporté → `.label()` retombe sur le fallback fourni.
+ * Outside Chromium / not supported → `.label()` falls back to the provided fallback.
  */
 export class KeyboardLayout {
   map = $state<Map<string, string> | null>(null);
 
   constructor() {
     this.#load();
-    // La disposition peut changer (ex. bascule OS) → re-lire.
+    // The layout can change (e.g. OS switch) → re-read.
     if (typeof navigator !== 'undefined') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).keyboard?.addEventListener?.('layoutchange', () => this.#load());
@@ -25,11 +25,11 @@ export class KeyboardLayout {
       const kb = (navigator as any).keyboard;
       if (kb?.getLayoutMap) this.map = await kb.getLayoutMap();
     } catch {
-      /* non supporté → fallback */
+      /* not supported → fallback */
     }
   }
 
-  /** Glyphe (majuscule) pour un `KeyboardEvent.code`, sinon `fallback`. */
+  /** Glyph (uppercase) for a `KeyboardEvent.code`, otherwise `fallback`. */
   label(code: string, fallback = ''): string {
     const g = this.map?.get(code);
     return g ? g.toUpperCase() : fallback;

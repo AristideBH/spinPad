@@ -3,16 +3,16 @@
 #include <stdbool.h>
 #include "esp_err.h"
 
-// Initialise l'ADC, la LED RGB, et fait une auto-détection batterie
-// si power.battery_present == "auto". Ne crash jamais si HW absent :
-// les erreurs ADC ⇒ batterie marquée absente.
+// Initializes the ADC, the RGB LED, and does a battery auto-detection
+// if power.battery_present == "auto". Never crashes if HW absent:
+// ADC errors ⇒ battery marked absent.
 esp_err_t battery_init(void);
 
-uint8_t   battery_get_percent(void);   // 0-100 (0 si absente)
-uint16_t  battery_get_voltage_mv(void); // 0 si absente
-void      battery_update(void);        // No-op si absente
+uint8_t   battery_get_percent(void);   // 0-100 (0 if absent)
+uint16_t  battery_get_voltage_mv(void); // 0 if absent
+void      battery_update(void);        // No-op if absent
 
-// Présence résolue (après auto-détection ou override config)
+// Resolved presence (after auto-detection or config override)
 bool        battery_is_present(void);
-// "auto" | "forced_yes" | "forced_no" — tel qu'exposé dans device_status
+// "auto" | "forced_yes" | "forced_no" — as exposed in device_status
 const char *battery_source_str(void);

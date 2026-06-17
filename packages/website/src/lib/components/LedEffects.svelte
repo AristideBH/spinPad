@@ -1,14 +1,14 @@
 <script lang="ts">
-  // Aperçu des effets LED WS2812 du SpinPad. Chaque carte rend une bande de 10
-  // LEDs animée selon l'effet. Le cyan de marque sert de base ; Hyperion affiche
-  // le spectre RGB réel (c'est l'effet arc-en-ciel — couleurs justifiées par le
-  // contenu, pas une entorse au verrou d'accent). Figé sous prefers-reduced-motion.
+  // Preview of the SpinPad's WS2812 LED effects. Each card renders a 10-LED
+  // strip animated according to the effect. The brand cyan is the base; Hyperion
+  // shows the real RGB spectrum (it's the rainbow effect — colors justified by
+  // the content, not a break from the accent lock). Frozen under prefers-reduced-motion.
   const effects = [
-    { id: 'solid', name: 'Solid', desc: 'Couleur fixe par touche.' },
-    { id: 'breathe', name: 'Breathe', desc: 'Respiration douce de toute la chaîne.' },
-    { id: 'reactive', name: 'Reactive', desc: "S'allume à la frappe, puis s'estompe." },
-    { id: 'mirror', name: 'Mirror', desc: 'Onde symétrique depuis le centre.' },
-    { id: 'hyperion', name: 'Hyperion', desc: 'Cycle arc-en-ciel sur la chaîne.' },
+    { id: 'solid', name: 'Solid', desc: 'Fixed color per key.' },
+    { id: 'breathe', name: 'Breathe', desc: 'Gentle breathing of the whole chain.' },
+    { id: 'reactive', name: 'Reactive', desc: 'Lights up on keypress, then fades.' },
+    { id: 'mirror', name: 'Mirror', desc: 'Symmetric wave from the center.' },
+    { id: 'hyperion', name: 'Hyperion', desc: 'Rainbow cycle across the chain.' },
   ];
   const leds = Array.from({ length: 10 }, (_, i) => i);
 </script>
@@ -42,18 +42,18 @@
     flex: 1;
     aspect-ratio: 1;
     border-radius: 9999px;
-    /* État de base (statique / reduced-motion) : faible lueur cyan */
+    /* Base state (static / reduced-motion): faint cyan glow */
     background: color-mix(in oklch, var(--color-spinpad) 35%, transparent);
     box-shadow: 0 0 4px color-mix(in oklch, var(--color-spinpad) 30%, transparent);
   }
 
-  /* Solid : chaîne pleinement allumée */
+  /* Solid: chain fully lit */
   .strip--solid .led {
     background: var(--color-spinpad);
     box-shadow: 0 0 8px color-mix(in oklch, var(--color-spinpad) 70%, transparent);
   }
 
-  /* Hyperion : teinte par LED, base statique déjà colorée */
+  /* Hyperion: hue per LED, static base already colored */
   .strip--hyperion .led {
     background: hsl(calc(var(--n) * 36) 90% 60%);
     box-shadow: 0 0 8px hsl(calc(var(--n) * 36) 90% 60% / 0.6);
@@ -68,11 +68,11 @@
       animation-delay: calc(var(--n) * 0.18s);
     }
     .strip--mirror .led {
-      /* délai = distance au centre (4.5) → onde symétrique */
+      /* delay = distance to center (4.5) → symmetric wave */
       animation: led-on 1.8s ease-in-out infinite;
       animation-delay: calc((4.5 - var(--n)) * 0.12s * var(--dir, 1));
     }
-    /* abs() approximée via deux moitiés */
+    /* abs() approximated via two halves */
     .strip--mirror .led:nth-child(-n + 5) {
       animation-delay: calc((5 - var(--n)) * 0.12s);
     }

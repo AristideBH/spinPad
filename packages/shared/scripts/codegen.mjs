@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // ═══════════════════════════════════════════════════════════════
-//  codegen.mjs — Génère action_types.gen.h depuis action-types.js
+//  codegen.mjs — Generates action_types.gen.h from action-types.js
 //
-//  Utilisation :
-//    pnpm codegen              (depuis la racine du monorepo)
+//  Usage:
+//    pnpm codegen              (from the monorepo root)
 //    pnpm --filter @spinpad/shared codegen
 //    node packages/shared/scripts/codegen.mjs
 //
-//  Sortie : packages/firmware/components/keymap/include/action_types.gen.h
+//  Output: packages/firmware/components/keymap/include/action_types.gen.h
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES } from '../src/constants/action-types.ts';
@@ -84,28 +84,28 @@ writeFileSync(OUT, lines.join('\n') + '\n', 'utf8');
 console.log(`✅  Generated: ${OUT}`);
 
 // ── config_limits.gen.h ─────────────────────────────────────────
-// Constantes structurelles partagées entre le schéma TS (source de vérité)
-// et les structs firmware (config_store.h).
+// Structural constants shared between the TS schema (source of truth)
+// and the firmware structs (config_store.h).
 const limitsLines = [
   '// AUTO-GENERATED — do not edit manually',
   '// Source: packages/shared/src/constants/config-schema.ts',
   '// Run:   pnpm codegen',
   '//',
-  '// Limites structurelles de la config, source de vérité unique côté TS.',
+  '// Structural config limits, single source of truth on the TS side.',
   '#pragma once',
   '',
   `#define CONFIG_MAX_PROFILES   ${CONFIG_MAX_PROFILES}`,
   `#define CONFIG_MAX_LAYERS     ${CONFIG_MAX_LAYERS}`,
   `#define CONFIG_NAME_MAX_LEN   ${CONFIG_NAME_MAX_LEN}`,
-  `#define CONFIG_NUM_KEYS       ${CONFIG_NUM_KEYS}  // Doit correspondre à KB_NUM_KEYS dans kb_config.h`,
+  `#define CONFIG_NUM_KEYS       ${CONFIG_NUM_KEYS}  // Must match KB_NUM_KEYS in kb_config.h`,
   `#define CONFIG_FORMAT_VERSION ${CONFIG_FORMAT_VERSION}`,
   '',
-  '// Macros globales (partagées par tous les profils)',
+  '// Global macros (shared by all profiles)',
   `#define MACRO_COUNT           ${MACRO_COUNT}`,
   `#define MACRO_MAX_STEPS       ${MACRO_MAX_STEPS}`,
   `#define MACRO_NAME_MAX_LEN    ${MACRO_NAME_MAX_LEN}`,
   '',
-  '// Icône de profil : bitmap 24×24 monochrome 1bpp',
+  '// Profile icon: 24×24 monochrome 1bpp bitmap',
   `#define PROFILE_ICON_W        ${PROFILE_ICON_W}`,
   `#define PROFILE_ICON_H        ${PROFILE_ICON_H}`,
   `#define PROFILE_ICON_BYTES    ${PROFILE_ICON_BYTES}`,
@@ -116,8 +116,8 @@ writeFileSync(OUT_LIMITS, limitsLines.join('\n') + '\n', 'utf8');
 console.log(`✅  Generated: ${OUT_LIMITS}`);
 
 // ── widget_types.gen.h ──────────────────────────────────────────
-// Enum des types de widgets OLED, miroir de WIDGET_TYPE (config-schema.ts).
-// Nom C = WIDGET_<CLE>. Inclus par config_store.h.
+// Enum of OLED widget types, mirror of WIDGET_TYPE (config-schema.ts).
+// C name = WIDGET_<KEY>. Included by config_store.h.
 const widgetMaxLen = Math.max(...Object.keys(WIDGET_TYPE).map((k) => k.length));
 const widgetLines = [
   '// AUTO-GENERATED — do not edit manually',

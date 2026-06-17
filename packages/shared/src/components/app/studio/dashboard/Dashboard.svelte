@@ -7,16 +7,16 @@
   import MainTile from './tile-main.svelte';
   import ScreenTile from './screen/tile-screen.svelte';
 
-  // Breakpoints mosaic = sémantique max-width : `containerWidth <= seuil`,
-  // premier match en ordre croissant. Donc le seuil mobile porte 2 colonnes,
-  // et un seuil sentinelle élevé porte les 5 colonnes desktop (défaut au-delà).
+  // Mosaic breakpoints = max-width semantics: `containerWidth <= threshold`,
+  // first match in ascending order. So the mobile threshold carries 2 columns,
+  // and a high sentinel threshold carries the 5 desktop columns (default beyond).
   const cols: ColsDefinition = [
-    [896, 2], // <= 896px : mobile, 2 colonnes
-    [100000, 5], // au-delà : desktop, 5 colonnes
+    [896, 2], // <= 896px: mobile, 2 columns
+    [100000, 5], // beyond: desktop, 5 columns
   ];
 
-  // Layout statique (pas de drag/resize) : chaque tuile porte sa position
-  // pour les deux breakpoints. Clés 5 / 2 = nombre de colonnes du breakpoint.
+  // Static layout (no drag/resize): each tile carries its position for both
+  // breakpoints. Keys 5 / 2 = number of columns of the breakpoint.
   let items = $state<GridItem[]>([
     {
       id: 'main',

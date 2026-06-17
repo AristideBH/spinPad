@@ -392,50 +392,10 @@
       "norm_label": "$schema"
     },
     {
-      "label": "hooks",
-      "file_type": "code",
-      "source_file": ".claude/settings.json",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "claude_settings_hooks",
-      "community": 112,
-      "norm_label": "hooks"
-    },
-    {
-      "label": "PreToolUse",
-      "file_type": "code",
-      "source_file": ".claude/settings.json",
-      "source_location": "L4",
-      "_origin": "ast",
-      "id": "claude_settings_hooks_pretooluse",
-      "community": 112,
-      "norm_label": "pretooluse"
-    },
-    {
-      "label": "worktree",
-      "file_type": "code",
-      "source_file": ".claude/settings.json",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "claude_settings_worktree",
-      "community": 112,
-      "norm_label": "worktree"
-    },
-    {
-      "label": "bgIsolation",
-      "file_type": "code",
-      "source_file": ".claude/settings.json",
-      "source_location": "L30",
-      "_origin": "ast",
-      "id": "claude_settings_worktree_bgisolation",
-      "community": 112,
-      "norm_label": "bgisolation"
-    },
-    {
       "label": "permissions",
       "file_type": "code",
       "source_file": ".claude/settings.json",
-      "source_location": "L32",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "claude_settings_permissions",
       "community": 112,
@@ -445,11 +405,51 @@
       "label": "allow",
       "file_type": "code",
       "source_file": ".claude/settings.json",
-      "source_location": "L33",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "claude_settings_permissions_allow",
       "community": 112,
       "norm_label": "allow"
+    },
+    {
+      "label": "hooks",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "claude_settings_hooks",
+      "community": 112,
+      "norm_label": "hooks"
+    },
+    {
+      "label": "PreToolUse",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "claude_settings_hooks_pretooluse",
+      "community": 112,
+      "norm_label": "pretooluse"
+    },
+    {
+      "label": "worktree",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "claude_settings_worktree",
+      "community": 112,
+      "norm_label": "worktree"
+    },
+    {
+      "label": "bgIsolation",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "claude_settings_worktree_bgisolation",
+      "community": 112,
+      "norm_label": "bgisolation"
     },
     {
       "label": ".fallowrc.json",
@@ -3116,7 +3116,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "shared_package_exports",
-      "community": 61,
+      "community": 131,
       "norm_label": "exports"
     },
     {
@@ -3126,7 +3126,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "shared_package_exports_studio_svelte",
-      "community": 61,
+      "community": 131,
       "norm_label": "./studio.svelte"
     },
     {
@@ -3136,7 +3136,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "shared_package_exports_styles",
-      "community": 61,
+      "community": 131,
       "norm_label": "./styles"
     },
     {
@@ -3146,7 +3146,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "shared_package_exports_action_types",
-      "community": 61,
+      "community": 131,
       "norm_label": "./action-types"
     },
     {
@@ -3156,7 +3156,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "shared_package_exports_config_schema",
-      "community": 61,
+      "community": 131,
       "norm_label": "./config-schema"
     },
     {
@@ -3166,7 +3166,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "shared_package_exports_config_migrations",
-      "community": 61,
+      "community": 131,
       "norm_label": "./config-migrations"
     },
     {
@@ -3176,7 +3176,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "shared_package_exports_keycodes",
-      "community": 61,
+      "community": 131,
       "norm_label": "./keycodes"
     },
     {
@@ -3326,7 +3326,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "shared_package_dependencies_runed",
-      "community": 97,
+      "community": 100,
       "norm_label": "runed"
     },
     {
@@ -3376,7 +3376,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "shared_package_devdependencies",
-      "community": 61,
+      "community": 107,
       "norm_label": "devdependencies"
     },
     {
@@ -3386,7 +3386,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "shared_package_devdependencies_lucide_svelte",
-      "community": 61,
+      "community": 107,
       "norm_label": "@lucide/svelte"
     },
     {
@@ -3396,7 +3396,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "shared_package_devdependencies_sveltejs_vite_plugin_svelte_inspector",
-      "community": 61,
+      "community": 107,
       "norm_label": "@sveltejs/vite-plugin-svelte-inspector"
     },
     {
@@ -3406,7 +3406,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "shared_package_devdependencies_types_w3c_web_serial",
-      "community": 61,
+      "community": 107,
       "norm_label": "@types/w3c-web-serial"
     },
     {
@@ -3416,7 +3416,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "shared_package_devdependencies_shadcn_svelte",
-      "community": 61,
+      "community": 107,
       "norm_label": "shadcn-svelte"
     },
     {
@@ -3426,7 +3426,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "shared_package_devdependencies_svelte_toolbelt",
-      "community": 61,
+      "community": 99,
       "norm_label": "svelte-toolbelt"
     },
     {
@@ -3436,7 +3436,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "shared_package_devdependencies_tailwindcss",
-      "community": 61,
+      "community": 107,
       "norm_label": "tailwindcss"
     },
     {
@@ -3446,7 +3446,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "shared_package_devdependencies_tsx",
-      "community": 61,
+      "community": 107,
       "norm_label": "tsx"
     },
     {
@@ -3456,7 +3456,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "shared_package_devdependencies_typescript",
-      "community": 61,
+      "community": 107,
       "norm_label": "typescript"
     },
     {
@@ -3466,7 +3466,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "shared_package_devdependencies_vitest",
-      "community": 61,
+      "community": 107,
       "norm_label": "vitest"
     },
     {
@@ -3476,7 +3476,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_codegen",
-      "community": 22,
+      "community": 93,
       "norm_label": "codegen.mjs"
     },
     {
@@ -3486,7 +3486,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "scripts_codegen_dirname",
-      "community": 22,
+      "community": 93,
       "norm_label": "__dirname"
     },
     {
@@ -3496,7 +3496,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "scripts_codegen_out",
-      "community": 22,
+      "community": 93,
       "norm_label": "out"
     },
     {
@@ -3506,7 +3506,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "scripts_codegen_out_limits",
-      "community": 22,
+      "community": 93,
       "norm_label": "out_limits"
     },
     {
@@ -3516,7 +3516,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "scripts_codegen_out_widgets",
-      "community": 22,
+      "community": 93,
       "norm_label": "out_widgets"
     },
     {
@@ -3526,7 +3526,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "scripts_codegen_tohex",
-      "community": 22,
+      "community": 93,
       "norm_label": "tohex()"
     },
     {
@@ -3536,7 +3536,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "scripts_codegen_defineblock",
-      "community": 22,
+      "community": 93,
       "norm_label": "defineblock()"
     },
     {
@@ -3546,7 +3546,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "scripts_codegen_lines",
-      "community": 22,
+      "community": 93,
       "norm_label": "lines"
     },
     {
@@ -3556,7 +3556,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "scripts_codegen_limitslines",
-      "community": 22,
+      "community": 93,
       "norm_label": "limitslines"
     },
     {
@@ -3566,7 +3566,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "scripts_codegen_widgetmaxlen",
-      "community": 22,
+      "community": 93,
       "norm_label": "widgetmaxlen"
     },
     {
@@ -3576,7 +3576,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "scripts_codegen_widgetlines",
-      "community": 22,
+      "community": 93,
       "norm_label": "widgetlines"
     },
     {
@@ -3686,7 +3686,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_config_schema_test",
-      "community": 28,
+      "community": 29,
       "norm_label": "config-schema.test.ts"
     },
     {
@@ -3716,7 +3716,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_config",
-      "community": 17,
+      "community": 90,
       "norm_label": "app.config.ts"
     },
     {
@@ -3726,7 +3726,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_config_app_config",
-      "community": 17,
+      "community": 90,
       "norm_label": "app_config"
     },
     {
@@ -3809,7 +3809,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_input_index_js",
-      "community": 20,
+      "community": 59,
       "norm_label": "$shared/components/ui/input/index.js"
     },
     {
@@ -3879,7 +3879,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_select_index_js",
-      "community": 12,
+      "community": 55,
       "norm_label": "$shared/components/ui/select/index.js"
     },
     {
@@ -3910,7 +3910,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_spinner",
-      "community": 79,
+      "community": 57,
       "norm_label": "$shared/components/ui/spinner"
     },
     {
@@ -4012,7 +4012,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "svelte_svelte",
-      "community": 260,
+      "community": 237,
       "norm_label": "svelte"
     },
     {
@@ -4086,7 +4086,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "editor_editor",
-      "community": 25,
+      "community": 12,
       "norm_label": "editor.svelte"
     },
     {
@@ -4127,7 +4127,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_popover_index_js",
-      "community": 70,
+      "community": 55,
       "norm_label": "$shared/components/ui/popover/index.js"
     },
     {
@@ -4334,7 +4334,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_utils_js",
-      "community": 68,
+      "community": 33,
       "norm_label": "$shared/utils.js"
     },
     {
@@ -4428,7 +4428,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "bits_optioncontrols",
-      "community": 20,
+      "community": 55,
       "norm_label": "optioncontrols.svelte"
     },
     {
@@ -4459,7 +4459,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_switch_index_js",
-      "community": 20,
+      "community": 59,
       "norm_label": "$shared/components/ui/switch/index.js"
     },
     {
@@ -4469,7 +4469,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_dialog_index_js",
-      "community": 20,
+      "community": 55,
       "norm_label": "$shared/components/ui/dialog/index.js"
     },
     {
@@ -4813,7 +4813,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "editor_editor_wrapped",
-      "community": 25,
+      "community": 12,
       "norm_label": "wrapped"
     },
     {
@@ -4835,7 +4835,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "editor_keygrid",
-      "community": 25,
+      "community": 12,
       "norm_label": "keygrid.svelte"
     },
     {
@@ -4857,7 +4857,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "profile_profileswitcher",
-      "community": 25,
+      "community": 20,
       "norm_label": "profileswitcher.svelte"
     },
     {
@@ -4879,7 +4879,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "editor_layerswitcher",
-      "community": 25,
+      "community": 55,
       "norm_label": "layerswitcher.svelte"
     },
     {
@@ -4889,7 +4889,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "editor_keygrid_if",
-      "community": 25,
+      "community": 12,
       "norm_label": "if()"
     },
     {
@@ -4899,7 +4899,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_label_index_js",
-      "community": 25,
+      "community": 92,
       "norm_label": "$shared/components/ui/label/index.js"
     },
     {
@@ -4919,7 +4919,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_constants_layer_colors_js",
-      "community": 25,
+      "community": 12,
       "norm_label": "$shared/constants/layer-colors.js"
     },
     {
@@ -4929,7 +4929,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_lib_hooks_keyboard_layout_svelte_js",
-      "community": 25,
+      "community": 12,
       "norm_label": "$shared/lib/hooks/keyboard-layout.svelte.js"
     },
     {
@@ -4939,7 +4939,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_radio_group_index_js",
-      "community": 25,
+      "community": 20,
       "norm_label": "$shared/components/ui/radio-group/index.js"
     },
     {
@@ -4949,7 +4949,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_scroll_area_index_js",
-      "community": 25,
+      "community": 70,
       "norm_label": "$shared/components/ui/scroll-area/index.js"
     },
     {
@@ -4959,7 +4959,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_kbd_index_js",
-      "community": 20,
+      "community": 59,
       "norm_label": "$shared/components/ui/kbd/index.js"
     },
     {
@@ -4979,7 +4979,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_lib_simulate_typing_js",
-      "community": 25,
+      "community": 55,
       "norm_label": "$shared/lib/simulate-typing.js"
     },
     {
@@ -5000,7 +5000,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "encoder_encoder_svelte",
-      "community": 96,
+      "community": 12,
       "norm_label": "encoder.svelte.ts"
     },
     {
@@ -5011,7 +5011,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "encoder_knob",
-      "community": 96,
+      "community": 12,
       "norm_label": "knob.svelte"
     },
     {
@@ -5033,7 +5033,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "encoder_presetselect",
-      "community": 12,
+      "community": 53,
       "norm_label": "presetselect.svelte"
     },
     {
@@ -5044,7 +5044,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "encoder_encoder_presets",
-      "community": 237,
+      "community": 53,
       "norm_label": "encoder-presets.ts"
     },
     {
@@ -5054,7 +5054,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "encoder_encoder_presets_encoderpreset",
-      "community": 237,
+      "community": 53,
       "norm_label": "encoderpreset"
     },
     {
@@ -5064,7 +5064,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "encoder_encoder_presets_encoder_presets",
-      "community": 237,
+      "community": 53,
       "norm_label": "encoder_presets"
     },
     {
@@ -5074,7 +5074,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "encoder_encoder_presets_applyencoderpreset",
-      "community": 237,
+      "community": 53,
       "norm_label": "applyencoderpreset()"
     },
     {
@@ -5084,7 +5084,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "encoder_encoder_presets_matchpreset",
-      "community": 237,
+      "community": 53,
       "norm_label": "matchpreset()"
     },
     {
@@ -5094,7 +5094,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "encoder_encoder_svelte_encoderfield",
-      "community": 96,
+      "community": 12,
       "norm_label": "encoderfield"
     },
     {
@@ -5104,7 +5104,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "encoder_encoder_svelte_encoderknoboptions",
-      "community": 96,
+      "community": 12,
       "norm_label": "encoderknoboptions"
     },
     {
@@ -5114,7 +5114,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "encoder_encoder_svelte_setactiveencoderknob",
-      "community": 96,
+      "community": 12,
       "norm_label": "setactiveencoderknob()"
     },
     {
@@ -5124,7 +5124,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "encoder_encoder_svelte_getactiveencoderknob",
-      "community": 96,
+      "community": 12,
       "norm_label": "getactiveencoderknob()"
     },
     {
@@ -5225,7 +5225,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "keycode_keyledpicker",
-      "community": 70,
+      "community": 55,
       "norm_label": "./keyledpicker.svelte"
     },
     {
@@ -5235,7 +5235,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_color_picker_index_js",
-      "community": 70,
+      "community": 55,
       "norm_label": "$shared/components/ui/color-picker/index.js"
     },
     {
@@ -5246,7 +5246,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "keycode_keycodelist",
-      "community": 12,
+      "community": 59,
       "norm_label": "./keycodelist.svelte"
     },
     {
@@ -5256,7 +5256,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_underline_tabs",
-      "community": 12,
+      "community": 59,
       "norm_label": "$shared/components/ui/underline-tabs"
     },
     {
@@ -5307,7 +5307,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "keycode_liverecordpanel",
-      "community": 55,
+      "community": 12,
       "norm_label": "liverecordpanel.svelte"
     },
     {
@@ -5317,7 +5317,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_store_macromanager_svelte_js",
-      "community": 55,
+      "community": 12,
       "norm_label": "$shared/store/macromanager.svelte.js"
     },
     {
@@ -5377,7 +5377,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "editor_keypad_context_svelte_keypadcontext_getactiveprofile",
-      "community": 115,
+      "community": 168,
       "norm_label": ".getactiveprofile()"
     },
     {
@@ -5511,7 +5511,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "profile_profileappearancesheet",
-      "community": 70,
+      "community": 55,
       "norm_label": "./profileappearancesheet.svelte"
     },
     {
@@ -5521,7 +5521,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "profile_profileappearancesheet_setprofileled",
-      "community": 70,
+      "community": 55,
       "norm_label": "setprofileled()"
     },
     {
@@ -5603,7 +5603,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_app_studio_editor_keypad_context_svelte",
-      "community": 25,
+      "community": 20,
       "norm_label": "../keypad-context.svelte"
     },
     {
@@ -5613,7 +5613,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_lib_simulate_typing",
-      "community": 25,
+      "community": 20,
       "norm_label": "$shared/lib/simulate-typing"
     },
     {
@@ -5888,7 +5888,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "elements",
-      "community": 33,
+      "community": 68,
       "norm_label": "svelte/elements"
     },
     {
@@ -6062,7 +6062,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar_badge",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar-badge.svelte"
     },
     {
@@ -6072,7 +6072,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar_fallback",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar-fallback.svelte"
     },
     {
@@ -6092,7 +6092,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar_group_count",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar-group-count.svelte"
     },
     {
@@ -6102,7 +6102,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar_group",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar-group.svelte"
     },
     {
@@ -6112,7 +6112,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar_image",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar-image.svelte"
     },
     {
@@ -6122,7 +6122,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_avatar",
-      "community": 68,
+      "community": 33,
       "norm_label": "avatar.svelte"
     },
     {
@@ -6132,7 +6132,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_index",
-      "community": 68,
+      "community": 33,
       "norm_label": "index.ts"
     },
     {
@@ -6152,7 +6152,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_ellipsis",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-ellipsis.svelte"
     },
     {
@@ -6162,7 +6162,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "more_horizontal",
-      "community": 33,
+      "community": 68,
       "norm_label": "@lucide/svelte/icons/more-horizontal"
     },
     {
@@ -6172,7 +6172,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_item",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-item.svelte"
     },
     {
@@ -6182,7 +6182,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_link",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-link.svelte"
     },
     {
@@ -6192,7 +6192,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_link_child",
-      "community": 33,
+      "community": 68,
       "norm_label": "child()"
     },
     {
@@ -6202,7 +6202,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_list",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-list.svelte"
     },
     {
@@ -6212,7 +6212,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_page",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-page.svelte"
     },
     {
@@ -6222,7 +6222,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb_separator",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb-separator.svelte"
     },
     {
@@ -6242,7 +6242,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_breadcrumb",
-      "community": 33,
+      "community": 68,
       "norm_label": "breadcrumb.svelte"
     },
     {
@@ -6252,7 +6252,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "breadcrumb_index",
-      "community": 33,
+      "community": 68,
       "norm_label": "index.ts"
     },
     {
@@ -6262,7 +6262,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_group_button_group_separator",
-      "community": 68,
+      "community": 128,
       "norm_label": "button-group-separator.svelte"
     },
     {
@@ -6272,7 +6272,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_separator_index_js",
-      "community": 68,
+      "community": 128,
       "norm_label": "$shared/components/ui/separator/index.js"
     },
     {
@@ -6282,7 +6282,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_group_button_group_text",
-      "community": 68,
+      "community": 128,
       "norm_label": "button-group-text.svelte"
     },
     {
@@ -6292,7 +6292,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "button_group_button_group_text_child",
-      "community": 68,
+      "community": 128,
       "norm_label": "child()"
     },
     {
@@ -6302,7 +6302,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_group_button_group",
-      "community": 68,
+      "community": 128,
       "norm_label": "button-group.svelte"
     },
     {
@@ -6312,7 +6312,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_group_index",
-      "community": 68,
+      "community": 128,
       "norm_label": "index.ts"
     },
     {
@@ -6322,7 +6322,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_button",
-      "community": 68,
+      "community": 6,
       "norm_label": "button.svelte"
     },
     {
@@ -6332,7 +6332,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "button_index",
-      "community": 68,
+      "community": 6,
       "norm_label": "index.ts"
     },
     {
@@ -6422,7 +6422,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "collapsible_collapsible_content",
-      "community": 39,
+      "community": 137,
       "norm_label": "collapsible-content.svelte"
     },
     {
@@ -6432,7 +6432,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "collapsible_collapsible_trigger",
-      "community": 39,
+      "community": 137,
       "norm_label": "collapsible-trigger.svelte"
     },
     {
@@ -6442,7 +6442,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "collapsible_collapsible",
-      "community": 39,
+      "community": 137,
       "norm_label": "collapsible.svelte"
     },
     {
@@ -6452,7 +6452,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "collapsible_index",
-      "community": 39,
+      "community": 137,
       "norm_label": "index.ts"
     },
     {
@@ -6482,7 +6482,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_utils",
-      "community": 79,
+      "community": 99,
       "norm_label": "$shared/utils"
     },
     {
@@ -6877,7 +6877,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "drawer_drawer_footer",
-      "community": 88,
+      "community": 68,
       "norm_label": "drawer-footer.svelte"
     },
     {
@@ -6887,7 +6887,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "drawer_drawer_header",
-      "community": 88,
+      "community": 68,
       "norm_label": "drawer-header.svelte"
     },
     {
@@ -6967,7 +6967,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "minus",
-      "community": 79,
+      "community": 99,
       "norm_label": "@lucide/svelte/icons/minus"
     },
     {
@@ -7028,7 +7028,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dropdown_menu_dropdown_menu_label",
-      "community": 39,
+      "community": 68,
       "norm_label": "dropdown-menu-label.svelte"
     },
     {
@@ -7068,7 +7068,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dropdown_menu_dropdown_menu_shortcut",
-      "community": 39,
+      "community": 68,
       "norm_label": "dropdown-menu-shortcut.svelte"
     },
     {
@@ -7138,7 +7138,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty_content",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty-content.svelte"
     },
     {
@@ -7148,7 +7148,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty_description",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty-description.svelte"
     },
     {
@@ -7158,7 +7158,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty_header",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty-header.svelte"
     },
     {
@@ -7168,7 +7168,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty_media",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty-media.svelte"
     },
     {
@@ -7178,7 +7178,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty_title",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty-title.svelte"
     },
     {
@@ -7188,7 +7188,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_empty",
-      "community": 33,
+      "community": 68,
       "norm_label": "empty.svelte"
     },
     {
@@ -7198,7 +7198,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "empty_index",
-      "community": 33,
+      "community": 68,
       "norm_label": "index.ts"
     },
     {
@@ -7248,7 +7248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "field_field_label",
-      "community": 68,
+      "community": 92,
       "norm_label": "field-label.svelte"
     },
     {
@@ -7258,7 +7258,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "field_field_label_cn",
-      "community": 68,
+      "community": 92,
       "norm_label": "cn()"
     },
     {
@@ -7328,7 +7328,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_index",
-      "community": 68,
+      "community": 129,
       "norm_label": "index.ts"
     },
     {
@@ -7338,7 +7338,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group_addon",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group-addon.svelte"
     },
     {
@@ -7348,7 +7348,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group_button",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group-button.svelte"
     },
     {
@@ -7358,7 +7358,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group_input",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group-input.svelte"
     },
     {
@@ -7368,7 +7368,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group_text",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group-text.svelte"
     },
     {
@@ -7378,7 +7378,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group_textarea",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group-textarea.svelte"
     },
     {
@@ -7388,7 +7388,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_textarea_index_js",
-      "community": 68,
+      "community": 129,
       "norm_label": "$shared/components/ui/textarea/index.js"
     },
     {
@@ -7398,7 +7398,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_group_input_group",
-      "community": 68,
+      "community": 129,
       "norm_label": "input-group.svelte"
     },
     {
@@ -7408,7 +7408,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_index",
-      "community": 33,
+      "community": 68,
       "norm_label": "index.ts"
     },
     {
@@ -7418,7 +7418,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_input",
-      "community": 33,
+      "community": 68,
       "norm_label": "input.svelte"
     },
     {
@@ -7508,7 +7508,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "item_item_separator",
-      "community": 68,
+      "community": 128,
       "norm_label": "item-separator.svelte"
     },
     {
@@ -7548,7 +7548,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "kbd_index",
-      "community": 68,
+      "community": 33,
       "norm_label": "index.ts"
     },
     {
@@ -7558,7 +7558,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "kbd_kbd_group",
-      "community": 68,
+      "community": 33,
       "norm_label": "kbd-group.svelte"
     },
     {
@@ -7568,7 +7568,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "kbd_kbd",
-      "community": 68,
+      "community": 33,
       "norm_label": "kbd.svelte"
     },
     {
@@ -7738,7 +7738,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_index",
-      "community": 79,
+      "community": 99,
       "norm_label": "index.ts"
     },
     {
@@ -7748,7 +7748,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_number_field_decrement",
-      "community": 79,
+      "community": 99,
       "norm_label": "number-field-decrement.svelte"
     },
     {
@@ -7758,7 +7758,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "number_field_number_field_decrement_children",
-      "community": 79,
+      "community": 99,
       "norm_label": "children()"
     },
     {
@@ -7769,7 +7769,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "number_field_number_field_svelte",
-      "community": 79,
+      "community": 94,
       "norm_label": "number-field.svelte.ts"
     },
     {
@@ -7780,7 +7780,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "number_field_types",
-      "community": 79,
+      "community": 162,
       "norm_label": "types.ts"
     },
     {
@@ -7790,7 +7790,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "svelte_toolbelt",
-      "community": 278,
+      "community": 99,
       "norm_label": "svelte-toolbelt"
     },
     {
@@ -7800,7 +7800,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_number_field_group",
-      "community": 79,
+      "community": 99,
       "norm_label": "number-field-group.svelte"
     },
     {
@@ -7810,7 +7810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_number_field_increment",
-      "community": 79,
+      "community": 99,
       "norm_label": "number-field-increment.svelte"
     },
     {
@@ -7820,7 +7820,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "number_field_number_field_increment_children",
-      "community": 79,
+      "community": 99,
       "norm_label": "children()"
     },
     {
@@ -7830,7 +7830,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "plus",
-      "community": 79,
+      "community": 99,
       "norm_label": "@lucide/svelte/icons/plus"
     },
     {
@@ -7840,7 +7840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_number_field_input",
-      "community": 79,
+      "community": 99,
       "norm_label": "number-field-input.svelte"
     },
     {
@@ -7850,7 +7850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "number_field_number_field",
-      "community": 79,
+      "community": 99,
       "norm_label": "number-field.svelte"
     },
     {
@@ -7860,7 +7860,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_number_field_types",
-      "community": 79,
+      "community": 99,
       "norm_label": "./types"
     },
     {
@@ -7870,7 +7870,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldrootprops",
-      "community": 79,
+      "community": 94,
       "norm_label": "numberfieldrootprops"
     },
     {
@@ -7880,7 +7880,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldrootcontext",
-      "community": 79,
+      "community": 94,
       "norm_label": "numberfieldrootcontext"
     },
     {
@@ -7890,7 +7890,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldrootcontext_constructor",
-      "community": 79,
+      "community": 94,
       "norm_label": ".constructor()"
     },
     {
@@ -7900,7 +7900,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldinputcontext",
-      "community": 79,
+      "community": 94,
       "norm_label": "numberfieldinputcontext"
     },
     {
@@ -7910,7 +7910,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldinputcontext_constructor",
-      "community": 79,
+      "community": 94,
       "norm_label": ".constructor()"
     },
     {
@@ -7920,7 +7920,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbuttonprops",
-      "community": 79,
+      "community": 94,
       "norm_label": "numberfieldbuttonprops"
     },
     {
@@ -7930,7 +7930,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton",
-      "community": 79,
+      "community": 109,
       "norm_label": "numberfieldbutton"
     },
     {
@@ -7940,7 +7940,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_constructor",
-      "community": 79,
+      "community": 109,
       "norm_label": ".constructor()"
     },
     {
@@ -7950,7 +7950,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_onpointerdown",
-      "community": 79,
+      "community": 109,
       "norm_label": ".onpointerdown()"
     },
     {
@@ -7960,7 +7960,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_onpointerup",
-      "community": 79,
+      "community": 109,
       "norm_label": ".onpointerup()"
     },
     {
@@ -7970,7 +7970,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_onpointerleave",
-      "community": 79,
+      "community": 109,
       "norm_label": ".onpointerleave()"
     },
     {
@@ -7980,7 +7980,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_onpointercancel",
-      "community": 79,
+      "community": 109,
       "norm_label": ".onpointercancel()"
     },
     {
@@ -7990,7 +7990,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_onclick",
-      "community": 79,
+      "community": 109,
       "norm_label": ".onclick()"
     },
     {
@@ -8000,7 +8000,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_increment",
-      "community": 79,
+      "community": 109,
       "norm_label": ".increment()"
     },
     {
@@ -8010,7 +8010,7 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_numberfieldbutton_destroy",
-      "community": 79,
+      "community": 109,
       "norm_label": ".destroy()"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_ctx",
-      "community": 79,
+      "community": 94,
       "norm_label": "ctx"
     },
     {
@@ -8030,7 +8030,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_usenumberfield",
-      "community": 79,
+      "community": 94,
       "norm_label": "usenumberfield()"
     },
     {
@@ -8040,7 +8040,7 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_usenumberfieldinput",
-      "community": 79,
+      "community": 94,
       "norm_label": "usenumberfieldinput()"
     },
     {
@@ -8050,7 +8050,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "number_field_number_field_svelte_usenumberfieldbutton",
-      "community": 79,
+      "community": 94,
       "norm_label": "usenumberfieldbutton()"
     },
     {
@@ -8060,7 +8060,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "number_field_types_numberfieldrootprops",
-      "community": 79,
+      "community": 162,
       "norm_label": "numberfieldrootprops"
     },
     {
@@ -8070,7 +8070,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "number_field_types_numberfieldbuttonprops",
-      "community": 79,
+      "community": 162,
       "norm_label": "numberfieldbuttonprops"
     },
     {
@@ -8080,7 +8080,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "number_field_types_numberfieldinputprops",
-      "community": 79,
+      "community": 162,
       "norm_label": "numberfieldinputprops"
     },
     {
@@ -8252,7 +8252,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "sheet_sheet_content",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-content.svelte"
     },
     {
@@ -8293,7 +8293,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scrubber_index",
-      "community": 96,
+      "community": 12,
       "norm_label": "index.ts"
     },
     {
@@ -8303,7 +8303,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scrubber_scrubber",
-      "community": 96,
+      "community": 12,
       "norm_label": "scrubber.svelte"
     },
     {
@@ -8313,7 +8313,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "scrubber_scrubber_label",
-      "community": 96,
+      "community": 12,
       "norm_label": "label()"
     },
     {
@@ -8323,7 +8323,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "motion",
-      "community": 96,
+      "community": 12,
       "norm_label": "svelte/motion"
     },
     {
@@ -8456,7 +8456,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "select_select_separator",
-      "community": 68,
+      "community": 128,
       "norm_label": "select-separator.svelte"
     },
     {
@@ -8506,7 +8506,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_index",
-      "community": 212,
+      "community": 6,
       "norm_label": "index.ts"
     },
     {
@@ -8516,7 +8516,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_close",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-close.svelte"
     },
     {
@@ -8527,7 +8527,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "sheet_sheet_portal",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-portal.svelte"
     },
     {
@@ -8538,7 +8538,7 @@
       "_origin": "ast",
       "source_location": "L1",
       "id": "sheet_sheet_overlay",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-overlay.svelte"
     },
     {
@@ -8548,7 +8548,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_description",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-description.svelte"
     },
     {
@@ -8558,7 +8558,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_footer",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-footer.svelte"
     },
     {
@@ -8568,7 +8568,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_header",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-header.svelte"
     },
     {
@@ -8578,7 +8578,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_title",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-title.svelte"
     },
     {
@@ -8588,7 +8588,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet_trigger",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet-trigger.svelte"
     },
     {
@@ -8598,7 +8598,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sheet_sheet",
-      "community": 212,
+      "community": 6,
       "norm_label": "sheet.svelte"
     },
     {
@@ -8609,7 +8609,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "sidebar_constants",
-      "community": 33,
+      "community": 70,
       "norm_label": "./constants.js"
     },
     {
@@ -8620,7 +8620,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "sidebar_context_svelte",
-      "community": 33,
+      "community": 175,
       "norm_label": "./context.svelte.js"
     },
     {
@@ -8630,7 +8630,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "sidebar_context_svelte_getter",
-      "community": 33,
+      "community": 175,
       "norm_label": "getter"
     },
     {
@@ -8640,7 +8640,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "sidebar_context_svelte_sidebarstateprops",
-      "community": 33,
+      "community": 175,
       "norm_label": "sidebarstateprops"
     },
     {
@@ -8650,7 +8650,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "sidebar_context_svelte_sidebarstate",
-      "community": 33,
+      "community": 175,
       "norm_label": "sidebarstate"
     },
     {
@@ -8660,7 +8660,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "sidebar_context_svelte_sidebarstate_constructor",
-      "community": 33,
+      "community": 175,
       "norm_label": ".constructor()"
     },
     {
@@ -8670,7 +8670,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "sidebar_context_svelte_sidebarstate_ismobile",
-      "community": 33,
+      "community": 175,
       "norm_label": ".ismobile()"
     },
     {
@@ -8680,7 +8680,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "sidebar_context_svelte_setsidebar",
-      "community": 33,
+      "community": 175,
       "norm_label": "setsidebar()"
     },
     {
@@ -8690,7 +8690,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "sidebar_context_svelte_usesidebar",
-      "community": 33,
+      "community": 175,
       "norm_label": "usesidebar()"
     },
     {
@@ -8870,7 +8870,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_skeleton_index_js",
-      "community": 20,
+      "community": 59,
       "norm_label": "$shared/components/ui/skeleton/index.js"
     },
     {
@@ -8950,7 +8950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sidebar_sidebar_separator",
-      "community": 68,
+      "community": 33,
       "norm_label": "sidebar-separator.svelte"
     },
     {
@@ -8980,7 +8980,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sidebar_sidebar",
-      "community": 33,
+      "community": 70,
       "norm_label": "sidebar.svelte"
     },
     {
@@ -9030,7 +9030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "spinner_index",
-      "community": 167,
+      "community": 187,
       "norm_label": "index.ts"
     },
     {
@@ -9040,7 +9040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "spinner_spinner",
-      "community": 167,
+      "community": 187,
       "norm_label": "spinner.svelte"
     },
     {
@@ -9050,7 +9050,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "loader_2",
-      "community": 167,
+      "community": 187,
       "norm_label": "@lucide/svelte/icons/loader-2"
     },
     {
@@ -9130,7 +9130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "textarea_index",
-      "community": 33,
+      "community": 68,
       "norm_label": "index.ts"
     },
     {
@@ -9140,7 +9140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "textarea_textarea",
-      "community": 33,
+      "community": 68,
       "norm_label": "textarea.svelte"
     },
     {
@@ -9241,7 +9241,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "underline_tabs_index",
-      "community": 278,
+      "community": 39,
       "norm_label": "index.ts"
     },
     {
@@ -9251,7 +9251,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "underline_tabs_underline_tabs_content",
-      "community": 278,
+      "community": 39,
       "norm_label": "underline-tabs-content.svelte"
     },
     {
@@ -9261,7 +9261,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "underline_tabs_underline_tabs_list",
-      "community": 278,
+      "community": 39,
       "norm_label": "underline-tabs-list.svelte"
     },
     {
@@ -9271,7 +9271,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "underline_tabs_underline_tabs_trigger",
-      "community": 278,
+      "community": 99,
       "norm_label": "underline-tabs-trigger.svelte"
     },
     {
@@ -9292,7 +9292,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "underline_tabs_underline_tabs",
-      "community": 278,
+      "community": 39,
       "norm_label": "underline-tabs.svelte"
     },
     {
@@ -9612,7 +9612,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "constants_config_migrations_spinpadprofileswrapper",
-      "community": 115,
+      "community": 17,
       "norm_label": "spinpadprofileswrapper"
     },
     {
@@ -9622,7 +9622,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "constants_config_migrations_profilesparseresult",
-      "community": 115,
+      "community": 17,
       "norm_label": "profilesparseresult"
     },
     {
@@ -9792,7 +9792,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "constants_config_ops_remaplayerref",
-      "community": 22,
+      "community": 23,
       "norm_label": "remaplayerref()"
     },
     {
@@ -9972,7 +9972,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "constants_config_schema_widgettype",
-      "community": 3,
+      "community": 25,
       "norm_label": "widgettype"
     },
     {
@@ -10072,7 +10072,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "constants_config_schema_defaultwidgets",
-      "community": 28,
+      "community": 29,
       "norm_label": "defaultwidgets()"
     },
     {
@@ -10092,7 +10092,7 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "constants_config_schema_macrosteptype",
-      "community": 115,
+      "community": 25,
       "norm_label": "macrosteptype"
     },
     {
@@ -10132,7 +10132,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "constants_config_schema_defaultmacros",
-      "community": 28,
+      "community": 29,
       "norm_label": "defaultmacros()"
     },
     {
@@ -10202,7 +10202,7 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "constants_config_schema_ledprofile",
-      "community": 58,
+      "community": 29,
       "norm_label": "ledprofile"
     },
     {
@@ -10212,7 +10212,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "constants_config_schema_keyledoverride",
-      "community": 58,
+      "community": 29,
       "norm_label": "keyledoverride"
     },
     {
@@ -10222,7 +10222,7 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "constants_config_schema_layerconfig",
-      "community": 115,
+      "community": 17,
       "norm_label": "layerconfig"
     },
     {
@@ -10232,7 +10232,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "constants_config_schema_profileconfig",
-      "community": 115,
+      "community": 17,
       "norm_label": "profileconfig"
     },
     {
@@ -10272,7 +10272,7 @@
       "source_location": "L290",
       "_origin": "ast",
       "id": "constants_config_schema_defaultledkey",
-      "community": 28,
+      "community": 29,
       "norm_label": "defaultledkey()"
     },
     {
@@ -10302,7 +10302,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "constants_config_schema_defaultconfig",
-      "community": 28,
+      "community": 29,
       "norm_label": "defaultconfig()"
     },
     {
@@ -10312,7 +10312,7 @@
       "source_location": "L355",
       "_origin": "ast",
       "id": "constants_config_schema_validateconfig",
-      "community": 28,
+      "community": 29,
       "norm_label": "validateconfig()"
     },
     {
@@ -10412,7 +10412,7 @@
       "source_location": "L508",
       "_origin": "ast",
       "id": "constants_config_schema_mergewidgets",
-      "community": 28,
+      "community": 29,
       "norm_label": "mergewidgets()"
     },
     {
@@ -10422,7 +10422,7 @@
       "source_location": "L545",
       "_origin": "ast",
       "id": "constants_config_schema_mergemacros",
-      "community": 28,
+      "community": 29,
       "norm_label": "mergemacros()"
     },
     {
@@ -10442,7 +10442,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_device_status_schema",
-      "community": 115,
+      "community": 25,
       "norm_label": "device-status-schema.ts"
     },
     {
@@ -10452,7 +10452,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "constants_device_status_schema_batterysource",
-      "community": 115,
+      "community": 25,
       "norm_label": "batterysource"
     },
     {
@@ -10462,7 +10462,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "constants_device_status_schema_batteryabsent",
-      "community": 115,
+      "community": 25,
       "norm_label": "batteryabsent"
     },
     {
@@ -10472,7 +10472,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "constants_device_status_schema_batterypresent",
-      "community": 115,
+      "community": 25,
       "norm_label": "batterypresent"
     },
     {
@@ -10482,7 +10482,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "constants_device_status_schema_batterystatus",
-      "community": 115,
+      "community": 25,
       "norm_label": "batterystatus"
     },
     {
@@ -10492,7 +10492,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "constants_device_status_schema_firmwareinfo",
-      "community": 115,
+      "community": 25,
       "norm_label": "firmwareinfo"
     },
     {
@@ -10502,7 +10502,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "constants_device_status_schema_connectionstatus",
-      "community": 115,
+      "community": 25,
       "norm_label": "connectionstatus"
     },
     {
@@ -10532,7 +10532,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "constants_device_status_schema_batterypresentconfig",
-      "community": 115,
+      "community": 25,
       "norm_label": "batterypresentconfig"
     },
     {
@@ -10772,7 +10772,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_layer_colors",
-      "community": 28,
+      "community": 29,
       "norm_label": "layer-colors.ts"
     },
     {
@@ -10782,7 +10782,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "constants_layer_colors_layer_colors",
-      "community": 28,
+      "community": 29,
       "norm_label": "layer_colors"
     },
     {
@@ -10792,7 +10792,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "constants_layer_colors_layercolor",
-      "community": 28,
+      "community": 29,
       "norm_label": "layercolor()"
     },
     {
@@ -10812,7 +10812,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "constants_layer_colors_backfilllayercolors",
-      "community": 28,
+      "community": 29,
       "norm_label": "backfilllayercolors()"
     },
     {
@@ -10862,7 +10862,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "constants_profile_icon_library_libraryicon",
-      "community": 115,
+      "community": 22,
       "norm_label": "libraryicon()"
     },
     {
@@ -11102,7 +11102,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_profile_presets",
-      "community": 115,
+      "community": 22,
       "norm_label": "profile-presets.ts"
     },
     {
@@ -11112,7 +11112,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "constants_profile_presets_profilepreset",
-      "community": 115,
+      "community": 22,
       "norm_label": "profilepreset"
     },
     {
@@ -11122,7 +11122,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "constants_profile_presets_profilepresetsource",
-      "community": 115,
+      "community": 22,
       "norm_label": "profilepresetsource"
     },
     {
@@ -11132,7 +11132,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "constants_profile_presets_emptykeys",
-      "community": 115,
+      "community": 22,
       "norm_label": "emptykeys()"
     },
     {
@@ -11142,7 +11142,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "constants_profile_presets_layer",
-      "community": 115,
+      "community": 22,
       "norm_label": "layer()"
     },
     {
@@ -11152,7 +11152,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "constants_profile_presets_vol_enc",
-      "community": 115,
+      "community": 22,
       "norm_label": "vol_enc"
     },
     {
@@ -11162,7 +11162,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "constants_profile_presets_scrl_enc",
-      "community": 115,
+      "community": 22,
       "norm_label": "scrl_enc"
     },
     {
@@ -11172,7 +11172,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "constants_profile_presets_builtin_profile_presets",
-      "community": 115,
+      "community": 52,
       "norm_label": "builtin_profile_presets"
     },
     {
@@ -11182,7 +11182,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "constants_profile_presets_builtinpresetsource",
-      "community": 115,
+      "community": 22,
       "norm_label": "builtinpresetsource"
     },
     {
@@ -11192,7 +11192,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "constants_profile_presets_remotepresetsource",
-      "community": 115,
+      "community": 22,
       "norm_label": "remotepresetsource()"
     },
     {
@@ -11202,7 +11202,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "constants_profile_presets_sources",
-      "community": 115,
+      "community": 22,
       "norm_label": "sources"
     },
     {
@@ -11212,7 +11212,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "constants_profile_presets_registerpresetsource",
-      "community": 115,
+      "community": 22,
       "norm_label": "registerpresetsource()"
     },
     {
@@ -11222,7 +11222,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "constants_profile_presets_listprofilepresets",
-      "community": 115,
+      "community": 22,
       "norm_label": "listprofilepresets()"
     },
     {
@@ -11232,7 +11232,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "constants_profile_presets_getpresetbyid",
-      "community": 115,
+      "community": 22,
       "norm_label": "getpresetbyid()"
     },
     {
@@ -11262,7 +11262,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_ramp_svelte",
-      "community": 79,
+      "community": 162,
       "norm_label": "use-ramp.svelte.ts"
     },
     {
@@ -11272,7 +11272,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_ramp_svelte_userampoptions",
-      "community": 79,
+      "community": 162,
       "norm_label": "userampoptions"
     },
     {
@@ -11282,7 +11282,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "hooks_use_ramp_svelte_useramp",
-      "community": 79,
+      "community": 109,
       "norm_label": "useramp()"
     },
     {
@@ -11382,7 +11382,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_index",
-      "community": 17,
+      "community": 90,
       "norm_label": "index.ts"
     },
     {
@@ -11392,7 +11392,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_is_mobile_svelte",
-      "community": 172,
+      "community": 175,
       "norm_label": "is-mobile.svelte.ts"
     },
     {
@@ -11402,7 +11402,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "hooks_is_mobile_svelte_ismobile",
-      "community": 172,
+      "community": 175,
       "norm_label": "ismobile"
     },
     {
@@ -11412,7 +11412,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "hooks_is_mobile_svelte_ismobile_constructor",
-      "community": 172,
+      "community": 175,
       "norm_label": ".constructor()"
     },
     {
@@ -11472,7 +11472,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_pointer_svelte",
-      "community": 174,
+      "community": 175,
       "norm_label": "pointer.svelte.ts"
     },
     {
@@ -11482,7 +11482,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "hooks_pointer_svelte_hasfinepointer",
-      "community": 174,
+      "community": 175,
       "norm_label": "hasfinepointer"
     },
     {
@@ -11492,7 +11492,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "hooks_pointer_svelte_hasfinepointer_constructor",
-      "community": 174,
+      "community": 175,
       "norm_label": ".constructor()"
     },
     {
@@ -11502,7 +11502,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_simulate_typing",
-      "community": 168,
+      "community": 30,
       "norm_label": "simulate-typing.ts"
     },
     {
@@ -11512,7 +11512,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_simulate_typing_easingpreset",
-      "community": 168,
+      "community": 30,
       "norm_label": "easingpreset"
     },
     {
@@ -11522,7 +11522,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "lib_simulate_typing_simulatetypingoptions",
-      "community": 168,
+      "community": 30,
       "norm_label": "simulatetypingoptions"
     },
     {
@@ -11532,7 +11532,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_simulate_typing_easerandom",
-      "community": 168,
+      "community": 30,
       "norm_label": "easerandom()"
     },
     {
@@ -11542,7 +11542,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "lib_simulate_typing_simulatetyping",
-      "community": 168,
+      "community": 30,
       "norm_label": "simulatetyping()"
     },
     {
@@ -12372,7 +12372,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "store_config_svelte_configstate",
-      "community": 237,
+      "community": 53,
       "norm_label": "configstate"
     },
     {
@@ -12382,7 +12382,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "store_config_svelte_configstate_activeprofile",
-      "community": 237,
+      "community": 53,
       "norm_label": ".activeprofile()"
     },
     {
@@ -12392,7 +12392,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "store_config_svelte_configstate_activelayer",
-      "community": 237,
+      "community": 53,
       "norm_label": ".activelayer()"
     },
     {
@@ -12402,7 +12402,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "store_config_svelte_configstate_transportmode",
-      "community": 237,
+      "community": 53,
       "norm_label": ".transportmode()"
     },
     {
@@ -12562,7 +12562,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "store_config_svelte_setencoderaction",
-      "community": 237,
+      "community": 53,
       "norm_label": "setencoderaction()"
     },
     {
@@ -12872,7 +12872,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "store_is_mobile_svelte",
-      "community": 33,
+      "community": 175,
       "norm_label": "is-mobile.svelte.ts"
     },
     {
@@ -12882,7 +12882,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "store_is_mobile_svelte_ismobile",
-      "community": 33,
+      "community": 175,
       "norm_label": "ismobile"
     },
     {
@@ -12892,7 +12892,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "store_is_mobile_svelte_ismobile_constructor",
-      "community": 33,
+      "community": 175,
       "norm_label": ".constructor()"
     },
     {
@@ -12962,7 +12962,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "store_keyvisuals_svelte_keyvisuals",
-      "community": 168,
+      "community": 30,
       "norm_label": "keyvisuals"
     },
     {
@@ -13092,7 +13092,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "store_serial_svelte_rpcqueue",
-      "community": 17,
+      "community": 248,
       "norm_label": "_rpcqueue"
     },
     {
@@ -13212,7 +13212,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "store_serial_svelte_getconfig",
-      "community": 17,
+      "community": 248,
       "norm_label": "getconfig()"
     },
     {
@@ -13222,7 +13222,7 @@
       "source_location": "L304",
       "_origin": "ast",
       "id": "store_serial_svelte_setconfig",
-      "community": 17,
+      "community": 248,
       "norm_label": "setconfig()"
     },
     {
@@ -13272,7 +13272,7 @@
       "source_location": "L374",
       "_origin": "ast",
       "id": "store_serial_svelte_trainingmodecmd",
-      "community": 107,
+      "community": 30,
       "norm_label": "trainingmodecmd()"
     },
     {
@@ -13322,7 +13322,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "store_testmode_svelte_testmodestate",
-      "community": 107,
+      "community": 30,
       "norm_label": "testmodestate"
     },
     {
@@ -13332,7 +13332,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "store_testmode_svelte_testmodestate_start",
-      "community": 107,
+      "community": 30,
       "norm_label": ".start()"
     },
     {
@@ -13342,7 +13342,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "store_testmode_svelte_testmodestate_stop",
-      "community": 107,
+      "community": 30,
       "norm_label": ".stop()"
     },
     {
@@ -13352,7 +13352,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "store_testmode_svelte_testmodestate_toggle",
-      "community": 107,
+      "community": 30,
       "norm_label": ".toggle()"
     },
     {
@@ -13402,7 +13402,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate",
-      "community": 107,
+      "community": 30,
       "norm_label": "trainingmodestate"
     },
     {
@@ -13412,7 +13412,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate_triggerkey",
-      "community": 107,
+      "community": 30,
       "norm_label": ".#triggerkey()"
     },
     {
@@ -13422,7 +13422,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate_triggerencoder",
-      "community": 107,
+      "community": 30,
       "norm_label": ".#triggerencoder()"
     },
     {
@@ -13432,7 +13432,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate_start",
-      "community": 107,
+      "community": 30,
       "norm_label": ".start()"
     },
     {
@@ -13442,7 +13442,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate_stop",
-      "community": 107,
+      "community": 30,
       "norm_label": ".stop()"
     },
     {
@@ -13452,7 +13452,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "store_trainingmode_svelte_trainingmodestate_toggle",
-      "community": 107,
+      "community": 30,
       "norm_label": ".toggle()"
     },
     {
@@ -13479,7 +13479,7 @@
       "label": "activeTransport()",
       "file_type": "code",
       "source_file": "packages/shared/src/store/transport.ts",
-      "source_location": "L25",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "store_transport_activetransport",
       "community": 10,
@@ -13489,7 +13489,7 @@
       "label": "activeStatusTransport()",
       "file_type": "code",
       "source_file": "packages/shared/src/store/transport.ts",
-      "source_location": "L30",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "store_transport_activestatustransport",
       "community": 10,
@@ -13499,7 +13499,7 @@
       "label": "transportMode()",
       "file_type": "code",
       "source_file": "packages/shared/src/store/transport.ts",
-      "source_location": "L35",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "store_transport_transportmode",
       "community": 10,
@@ -13682,7 +13682,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_index_d",
-      "community": 115,
+      "community": 25,
       "norm_label": "index.d.ts"
     },
     {
@@ -13732,7 +13732,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_transport_d",
-      "community": 17,
+      "community": 25,
       "norm_label": "transport.d.ts"
     },
     {
@@ -13742,7 +13742,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "types_transport_d_transport",
-      "community": 17,
+      "community": 25,
       "norm_label": "transport"
     },
     {
@@ -13752,7 +13752,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "types_transport_d_devicestatustransport",
-      "community": 17,
+      "community": 25,
       "norm_label": "devicestatustransport"
     },
     {
@@ -13762,7 +13762,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_utils",
-      "community": 212,
+      "community": 119,
       "norm_label": "utils.ts"
     },
     {
@@ -13772,7 +13772,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_utils_cn",
-      "community": 212,
+      "community": 119,
       "norm_label": "cn()"
     },
     {
@@ -13782,7 +13782,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_utils_withoutchild",
-      "community": 212,
+      "community": 119,
       "norm_label": "withoutchild"
     },
     {
@@ -13792,7 +13792,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_utils_withoutchildren",
-      "community": 212,
+      "community": 119,
       "norm_label": "withoutchildren"
     },
     {
@@ -13802,7 +13802,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_utils_withoutchildrenorchild",
-      "community": 212,
+      "community": 119,
       "norm_label": "withoutchildrenorchild"
     },
     {
@@ -13812,7 +13812,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_utils_withelementref",
-      "community": 212,
+      "community": 119,
       "norm_label": "withelementref"
     },
     {
@@ -13822,7 +13822,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_utils_safecapitalize",
-      "community": 212,
+      "community": 119,
       "norm_label": "safecapitalize()"
     },
     {
@@ -13832,7 +13832,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_utils_scrollshadow",
-      "community": 212,
+      "community": 119,
       "norm_label": "scrollshadow()"
     },
     {
@@ -14032,7 +14032,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "studio_package",
-      "community": 54,
+      "community": 28,
       "norm_label": "package.json"
     },
     {
@@ -14042,7 +14042,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "studio_package_name",
-      "community": 54,
+      "community": 28,
       "norm_label": "name"
     },
     {
@@ -14052,7 +14052,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "studio_package_version",
-      "community": 54,
+      "community": 28,
       "norm_label": "version"
     },
     {
@@ -14062,7 +14062,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "studio_package_private",
-      "community": 54,
+      "community": 28,
       "norm_label": "private"
     },
     {
@@ -14072,7 +14072,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "studio_package_license",
-      "community": 54,
+      "community": 28,
       "norm_label": "license"
     },
     {
@@ -14082,7 +14082,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "studio_package_scripts",
-      "community": 54,
+      "community": 28,
       "norm_label": "scripts"
     },
     {
@@ -14092,7 +14092,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "studio_package_scripts_dev",
-      "community": 54,
+      "community": 28,
       "norm_label": "dev"
     },
     {
@@ -14102,7 +14102,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "studio_package_scripts_build",
-      "community": 54,
+      "community": 28,
       "norm_label": "build"
     },
     {
@@ -14112,7 +14112,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "studio_package_scripts_build_embedded",
-      "community": 54,
+      "community": 28,
       "norm_label": "build:embedded"
     },
     {
@@ -14122,7 +14122,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "studio_package_scripts_preview",
-      "community": 54,
+      "community": 28,
       "norm_label": "preview"
     },
     {
@@ -14132,7 +14132,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "studio_package_scripts_check",
-      "community": 54,
+      "community": 28,
       "norm_label": "check"
     },
     {
@@ -14142,7 +14142,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "studio_package_scripts_check_watch",
-      "community": 54,
+      "community": 28,
       "norm_label": "check:watch"
     },
     {
@@ -14362,7 +14362,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "studio_package_type",
-      "community": 54,
+      "community": 28,
       "norm_label": "type"
     },
     {
@@ -14432,7 +14432,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "studio_package_dependencies_runed",
-      "community": 97,
+      "community": 100,
       "norm_label": "runed"
     },
     {
@@ -14632,7 +14632,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "website_package",
-      "community": 53,
+      "community": 56,
       "norm_label": "package.json"
     },
     {
@@ -14642,7 +14642,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "website_package_name",
-      "community": 53,
+      "community": 56,
       "norm_label": "name"
     },
     {
@@ -14652,7 +14652,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "website_package_version",
-      "community": 53,
+      "community": 56,
       "norm_label": "version"
     },
     {
@@ -14662,7 +14662,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "website_package_description",
-      "community": 53,
+      "community": 56,
       "norm_label": "description"
     },
     {
@@ -14672,7 +14672,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "website_package_license",
-      "community": 53,
+      "community": 56,
       "norm_label": "license"
     },
     {
@@ -14682,7 +14682,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "website_package_private",
-      "community": 53,
+      "community": 56,
       "norm_label": "private"
     },
     {
@@ -14692,7 +14692,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "website_package_type",
-      "community": 53,
+      "community": 56,
       "norm_label": "type"
     },
     {
@@ -14702,7 +14702,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "website_package_scripts",
-      "community": 93,
+      "community": 56,
       "norm_label": "scripts"
     },
     {
@@ -14712,7 +14712,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "website_package_scripts_dev",
-      "community": 93,
+      "community": 56,
       "norm_label": "dev"
     },
     {
@@ -14722,7 +14722,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "website_package_scripts_build",
-      "community": 93,
+      "community": 56,
       "norm_label": "build"
     },
     {
@@ -14732,7 +14732,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "website_package_scripts_preview",
-      "community": 93,
+      "community": 56,
       "norm_label": "preview"
     },
     {
@@ -14742,7 +14742,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "website_package_scripts_check",
-      "community": 93,
+      "community": 56,
       "norm_label": "check"
     },
     {
@@ -14752,7 +14752,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "website_package_scripts_check_watch",
-      "community": 93,
+      "community": 56,
       "norm_label": "check:watch"
     },
     {
@@ -15032,7 +15032,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "website_package_dependencies_runed",
-      "community": 97,
+      "community": 100,
       "norm_label": "runed"
     },
     {
@@ -15085,7 +15085,7 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "id": "components_keypad",
-      "community": 20,
+      "community": 59,
       "norm_label": "$lib/components/keypad.svelte"
     },
     {
@@ -15099,6 +15099,37 @@
       "norm_label": "ledeffects.svelte"
     },
     {
+      "label": "$lib/components/PageCurtain.svelte",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/components/PageCurtain.svelte",
+      "source_location": "L1",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "id": "components_pagecurtain",
+      "community": 69,
+      "norm_label": "$lib/components/pagecurtain.svelte"
+    },
+    {
+      "label": "$app/state",
+      "file_type": "code",
+      "source_file": "$app/state",
+      "confidence": "EXTRACTED",
+      "_origin": "ast",
+      "id": "state",
+      "community": 69,
+      "norm_label": "$app/state"
+    },
+    {
+      "label": "$lib/page-transitions",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions",
+      "confidence": "EXTRACTED",
+      "_origin": "ast",
+      "id": "c_users_arist_code_keyboard_firmware_packages_website_src_lib_page_transitions",
+      "community": 69,
+      "norm_label": "$lib/page-transitions"
+    },
+    {
       "label": "../lib/components/ui/app-sidebar.svelte",
       "file_type": "code",
       "source_file": "packages/website/src/lib/components/ui/app-sidebar.svelte",
@@ -15110,14 +15141,14 @@
       "norm_label": "../lib/components/ui/app-sidebar.svelte"
     },
     {
-      "label": "$app/state",
+      "label": "$app/navigation",
       "file_type": "code",
-      "source_file": "$app/state",
+      "source_file": "$app/navigation",
       "confidence": "EXTRACTED",
       "_origin": "ast",
-      "id": "state",
+      "id": "navigation",
       "community": 69,
-      "norm_label": "$app/state"
+      "norm_label": "$app/navigation"
     },
     {
       "label": "@lucide/svelte/icons/house",
@@ -15390,13 +15421,83 @@
       "norm_label": "getbreadcrumbs()"
     },
     {
+      "label": "page-transitions.ts",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_page_transitions",
+      "community": 171,
+      "norm_label": "page-transitions.ts"
+    },
+    {
+      "label": "CurtainDir",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "lib_page_transitions_curtaindir",
+      "community": 171,
+      "norm_label": "curtaindir"
+    },
+    {
+      "label": "AXIS",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "lib_page_transitions_axis",
+      "community": 171,
+      "norm_label": "axis"
+    },
+    {
+      "label": "scrollToTop()",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "lib_page_transitions_scrolltotop",
+      "community": 171,
+      "norm_label": "scrolltotop()"
+    },
+    {
+      "label": "reduced()",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "lib_page_transitions_reduced",
+      "community": 171,
+      "norm_label": "reduced()"
+    },
+    {
+      "label": "curtainIn()",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "lib_page_transitions_curtainin",
+      "community": 171,
+      "norm_label": "curtainin()"
+    },
+    {
+      "label": "curtainOut()",
+      "file_type": "code",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "lib_page_transitions_curtainout",
+      "community": 171,
+      "norm_label": "curtainout()"
+    },
+    {
       "label": "utils.ts",
       "file_type": "code",
       "source_file": "packages/website/src/lib/utils.ts",
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_utils",
-      "community": 212,
+      "community": 119,
       "norm_label": "utils.ts"
     },
     {
@@ -15480,6 +15581,16 @@
       "norm_label": "mode-watcher"
     },
     {
+      "label": "svelte/reactivity",
+      "file_type": "code",
+      "source_file": "svelte/reactivity",
+      "confidence": "EXTRACTED",
+      "_origin": "ast",
+      "id": "reactivity",
+      "community": 175,
+      "norm_label": "svelte/reactivity"
+    },
+    {
       "label": "$shared/components/ui/breadcrumb/index.js",
       "file_type": "code",
       "source_file": "packages/shared/src/components/ui/breadcrumb/index.js",
@@ -15506,7 +15617,7 @@
       "confidence": "EXTRACTED",
       "_origin": "ast",
       "id": "runed",
-      "community": 97,
+      "community": 100,
       "norm_label": "runed"
     },
     {
@@ -15536,7 +15647,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_website_src_routes_page_svelte_routes_page",
-      "community": 20,
+      "community": 59,
       "norm_label": "+page.svelte"
     },
     {
@@ -15546,7 +15657,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "routes_page_each",
-      "community": 20,
+      "community": 59,
       "norm_label": "#each()"
     },
     {
@@ -15626,7 +15737,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "flash_page",
-      "community": 20,
+      "community": 59,
       "norm_label": "+page.svelte"
     },
     {
@@ -15636,7 +15747,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "flash_page_clean",
-      "community": 20,
+      "community": 59,
       "norm_label": "clean()"
     },
     {
@@ -15666,7 +15777,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "studio_page",
-      "community": 57,
+      "community": 182,
       "norm_label": "+page.svelte"
     },
     {
@@ -16716,7 +16827,7 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "references_cli_reference_list_project_introspection",
-      "community": 71,
+      "community": 172,
       "norm_label": "`list`: project introspection"
     },
     {
@@ -16726,7 +16837,7 @@
       "source_location": "L255",
       "_origin": "ast",
       "id": "references_cli_reference_flags_255",
-      "community": 71,
+      "community": 172,
       "norm_label": "flags"
     },
     {
@@ -16736,7 +16847,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "references_cli_reference_examples_268",
-      "community": 71,
+      "community": 172,
       "norm_label": "examples"
     },
     {
@@ -18016,7 +18127,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "references_patterns_pr_dead_code_check",
-      "community": 181,
+      "community": 174,
       "norm_label": "pr dead code check"
     },
     {
@@ -18026,7 +18137,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "references_patterns_step_1_analyze_changed_files",
-      "community": 181,
+      "community": 174,
       "norm_label": "step 1: analyze changed files"
     },
     {
@@ -18036,7 +18147,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "references_patterns_step_2_if_issues_found_show_specifics",
-      "community": 181,
+      "community": 174,
       "norm_label": "step 2: if issues found, show specifics"
     },
     {
@@ -20360,24 +20471,24 @@
       "norm_label": "@spinpad/shared"
     },
     {
-      "label": "Contenu",
+      "label": "Contents",
       "file_type": "document",
       "source_file": "packages/shared/README.md",
       "source_location": "L5",
       "_origin": "ast",
-      "id": "shared_readme_contenu",
+      "id": "shared_readme_contents",
       "community": 9,
-      "norm_label": "contenu"
+      "norm_label": "contents"
     },
     {
-      "label": "Utilisation",
+      "label": "Usage",
       "file_type": "document",
       "source_file": "packages/shared/README.md",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "shared_readme_utilisation",
+      "id": "shared_readme_usage",
       "community": 9,
-      "norm_label": "utilisation"
+      "norm_label": "usage"
     },
     {
       "label": "Codegen \u2192 C header",
@@ -20390,14 +20501,14 @@
       "norm_label": "codegen \u2192 c header"
     },
     {
-      "label": "R\u00e8gle : source de v\u00e9rit\u00e9",
+      "label": "Rule: source of truth",
       "file_type": "document",
       "source_file": "packages/shared/README.md",
       "source_location": "L34",
       "_origin": "ast",
-      "id": "shared_readme_r\u00e8gle_source_de_v\u00e9rit\u00e9",
+      "id": "shared_readme_rule_source_of_truth",
       "community": 9,
-      "norm_label": "regle : source de verite"
+      "norm_label": "rule: source of truth"
     },
     {
       "label": "README.md",
@@ -20406,48 +20517,48 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "widgets_readme",
-      "community": 129,
+      "community": 3,
       "norm_label": "readme.md"
     },
     {
-      "label": "Widgets OLED \u2014 registre",
+      "label": "OLED widgets \u2014 registry",
       "file_type": "document",
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "widgets_readme_widgets_oled_registre",
-      "community": 129,
-      "norm_label": "widgets oled \u2014 registre"
+      "id": "widgets_readme_oled_widgets_registry",
+      "community": 3,
+      "norm_label": "oled widgets \u2014 registry"
     },
     {
-      "label": "Anatomie d'un `WidgetDef`",
+      "label": "Anatomy of a `WidgetDef`",
       "file_type": "document",
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "widgets_readme_anatomie_d_un_widgetdef",
-      "community": 129,
-      "norm_label": "anatomie d'un `widgetdef`"
+      "id": "widgets_readme_anatomy_of_a_widgetdef",
+      "community": 3,
+      "norm_label": "anatomy of a `widgetdef`"
     },
     {
-      "label": "Options disponibles",
+      "label": "Available options",
       "file_type": "document",
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L35",
       "_origin": "ast",
-      "id": "widgets_readme_options_disponibles",
-      "community": 129,
-      "norm_label": "options disponibles"
+      "id": "widgets_readme_available_options",
+      "community": 3,
+      "norm_label": "available options"
     },
     {
-      "label": "Ajouter un widget \u2014 de bout en bout",
+      "label": "Adding a widget \u2014 end to end",
       "file_type": "document",
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L43",
       "_origin": "ast",
-      "id": "widgets_readme_ajouter_un_widget_de_bout_en_bout",
-      "community": 129,
-      "norm_label": "ajouter un widget \u2014 de bout en bout"
+      "id": "widgets_readme_adding_a_widget_end_to_end",
+      "community": 3,
+      "norm_label": "adding a widget \u2014 end to end"
     },
     {
       "label": "README.md",
@@ -20620,14 +20731,14 @@
       "norm_label": "deploy"
     },
     {
-      "label": "Int\u00e9gration Studio",
+      "label": "Studio integration",
       "file_type": "document",
       "source_file": "packages/website/README.md",
       "source_location": "L48",
       "_origin": "ast",
-      "id": "website_readme_int\u00e9gration_studio",
+      "id": "website_readme_studio_integration",
       "community": 9,
-      "norm_label": "integration studio"
+      "norm_label": "studio integration"
     },
     {
       "label": "getting-started.md",
@@ -20650,34 +20761,34 @@
       "norm_label": "getting started"
     },
     {
-      "label": "Pr\u00e9requis",
+      "label": "Requirements",
       "file_type": "document",
       "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L11",
       "_origin": "ast",
-      "id": "docs_getting_started_pr\u00e9requis",
+      "id": "docs_getting_started_requirements",
       "community": 41,
-      "norm_label": "prerequis"
+      "norm_label": "requirements"
     },
     {
-      "label": "Connexion",
+      "label": "Connection",
       "file_type": "document",
       "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "docs_getting_started_connexion",
+      "id": "docs_getting_started_connection",
       "community": 41,
-      "norm_label": "connexion"
+      "norm_label": "connection"
     },
     {
-      "label": "Mode d\u00e9mo",
+      "label": "Demo mode",
       "file_type": "document",
       "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "docs_getting_started_mode_d\u00e9mo",
+      "id": "docs_getting_started_demo_mode",
       "community": 41,
-      "norm_label": "mode demo"
+      "norm_label": "demo mode"
     },
     {
       "label": "Pages",
@@ -20690,6 +20801,186 @@
       "norm_label": "pages"
     },
     {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "docs_getting_started_requirements_40",
+      "community": 41,
+      "norm_label": "requirements"
+    },
+    {
+      "label": "Connection",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "docs_getting_started_connection_46",
+      "community": 41,
+      "norm_label": "connection"
+    },
+    {
+      "label": "Demo mode",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "docs_getting_started_demo_mode_53",
+      "community": 41,
+      "norm_label": "demo mode"
+    },
+    {
+      "label": "Pages",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "docs_getting_started_pages_59",
+      "community": 41,
+      "norm_label": "pages"
+    },
+    {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "docs_getting_started_requirements_69",
+      "community": 41,
+      "norm_label": "requirements"
+    },
+    {
+      "label": "Connection",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "docs_getting_started_connection_75",
+      "community": 41,
+      "norm_label": "connection"
+    },
+    {
+      "label": "Demo mode",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L82",
+      "_origin": "ast",
+      "id": "docs_getting_started_demo_mode_82",
+      "community": 41,
+      "norm_label": "demo mode"
+    },
+    {
+      "label": "Pages",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L88",
+      "_origin": "ast",
+      "id": "docs_getting_started_pages_88",
+      "community": 41,
+      "norm_label": "pages"
+    },
+    {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "docs_getting_started_requirements_98",
+      "community": 41,
+      "norm_label": "requirements"
+    },
+    {
+      "label": "Connection",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "docs_getting_started_connection_104",
+      "community": 41,
+      "norm_label": "connection"
+    },
+    {
+      "label": "Demo mode",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "docs_getting_started_demo_mode_111",
+      "community": 41,
+      "norm_label": "demo mode"
+    },
+    {
+      "label": "Pages",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L117",
+      "_origin": "ast",
+      "id": "docs_getting_started_pages_117",
+      "community": 41,
+      "norm_label": "pages"
+    },
+    {
+      "label": "3D.md",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/3D.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "hardware_3d",
+      "community": 181,
+      "norm_label": "3d.md"
+    },
+    {
+      "label": "3D printed files",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/3D.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "hardware_3d_3d_printed_files",
+      "community": 181,
+      "norm_label": "3d printed files"
+    },
+    {
+      "label": "assemblee.md",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/assemblee.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "hardware_assemblee",
+      "community": 209,
+      "norm_label": "assemblee.md"
+    },
+    {
+      "label": "Assemble",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/assemblee.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "hardware_assemblee_assemble",
+      "community": 209,
+      "norm_label": "assemble"
+    },
+    {
+      "label": "pcb.md",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/pcb.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "hardware_pcb",
+      "community": 212,
+      "norm_label": "pcb.md"
+    },
+    {
+      "label": "Schematics & PCB",
+      "file_type": "document",
+      "source_file": "packages/website/content/docs/hardware/pcb.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "hardware_pcb_schematics_pcb",
+      "community": 212,
+      "norm_label": "schematics & pcb"
+    },
+    {
       "label": "layers.md",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/layers.md",
@@ -20700,44 +20991,44 @@
       "norm_label": "layers.md"
     },
     {
-      "label": "Layers et Keymap",
+      "label": "Layers and Keymap",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "keymap_layers_layers_et_keymap",
+      "id": "keymap_layers_layers_and_keymap",
       "community": 139,
-      "norm_label": "layers et keymap"
+      "norm_label": "layers and keymap"
     },
     {
-      "label": "Concept de layers",
+      "label": "Layer concept",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "keymap_layers_concept_de_layers",
+      "id": "keymap_layers_layer_concept",
       "community": 139,
-      "norm_label": "concept de layers"
+      "norm_label": "layer concept"
     },
     {
-      "label": "Actions de layer",
+      "label": "Layer actions",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "keymap_layers_actions_de_layer",
+      "id": "keymap_layers_layer_actions",
       "community": 139,
-      "norm_label": "actions de layer"
+      "norm_label": "layer actions"
     },
     {
-      "label": "Encodeur",
+      "label": "Encoder",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "keymap_layers_encodeur",
+      "id": "keymap_layers_encoder",
       "community": 139,
-      "norm_label": "encodeur"
+      "norm_label": "encoder"
     },
     {
       "label": "profiles.md",
@@ -20760,14 +21051,14 @@
       "norm_label": "profiles"
     },
     {
-      "label": "Concept de profiles",
+      "label": "Profile concept",
       "file_type": "document",
       "source_file": "packages/website/content/docs/keymap/profiles.md",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "keymap_profiles_concept_de_profiles",
+      "id": "keymap_profiles_profile_concept",
       "community": 166,
-      "norm_label": "concept de profiles"
+      "norm_label": "profile concept"
     },
     {
       "label": "layers.md",
@@ -20780,44 +21071,44 @@
       "norm_label": "layers.md"
     },
     {
-      "label": "Layers et Keymap",
+      "label": "Layers and Keymap",
       "file_type": "document",
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "studio_layers_layers_et_keymap",
+      "id": "studio_layers_layers_and_keymap",
       "community": 148,
-      "norm_label": "layers et keymap"
+      "norm_label": "layers and keymap"
     },
     {
-      "label": "Concept de layers",
+      "label": "Layer concept",
       "file_type": "document",
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "studio_layers_concept_de_layers",
+      "id": "studio_layers_layer_concept",
       "community": 148,
-      "norm_label": "concept de layers"
+      "norm_label": "layer concept"
     },
     {
-      "label": "Actions de layer",
+      "label": "Layer actions",
       "file_type": "document",
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "studio_layers_actions_de_layer",
+      "id": "studio_layers_layer_actions",
       "community": 148,
-      "norm_label": "actions de layer"
+      "norm_label": "layer actions"
     },
     {
-      "label": "Encodeur",
+      "label": "Encoder",
       "file_type": "document",
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "studio_layers_encodeur",
+      "id": "studio_layers_encoder",
       "community": 148,
-      "norm_label": "encodeur"
+      "norm_label": "encoder"
     },
     {
       "label": "profiles.md",
@@ -20840,14 +21131,14 @@
       "norm_label": "profiles"
     },
     {
-      "label": "Concept de profiles",
+      "label": "Profile concept",
       "file_type": "document",
       "source_file": "packages/website/content/docs/studio/profiles.md",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "studio_profiles_concept_de_profiles",
+      "id": "studio_profiles_profile_concept",
       "community": 186,
-      "norm_label": "concept de profiles"
+      "norm_label": "profile concept"
     },
     {
       "label": "README.md",
@@ -21767,7 +22058,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 129,
+      "community": 3,
       "norm_label": "widget registry pattern (no switch statements)",
       "id": "concept_widget_registry_pattern"
     },
@@ -21871,7 +22162,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 115,
+      "community": 22,
       "norm_label": "media_codes constants",
       "id": "constants_action_types_media_codes"
     },
@@ -21936,7 +22227,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 115,
+      "community": 25,
       "norm_label": "battery.h (firmware c header)",
       "id": "firmware_battery_battery_h"
     },
@@ -22937,7 +23228,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 55,
       "norm_label": "optioncontrols component",
       "id": "screen_bits_optioncontrols"
     },
@@ -22950,7 +23241,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 29,
+      "community": 55,
       "norm_label": "sizegrid component",
       "id": "screen_bits_sizegrid"
     },
@@ -22976,7 +23267,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 12,
       "norm_label": "layerswitcher component",
       "id": "editor_layer_switcher"
     },
@@ -23600,7 +23891,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 39,
+      "community": 137,
       "norm_label": "collapsible ui index",
       "id": "collapsible_index_collapsible_exports"
     },
@@ -23613,7 +23904,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 39,
+      "community": 137,
       "norm_label": "collapsible root component",
       "id": "collapsible_collapsible_root"
     },
@@ -23847,7 +24138,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 167,
       "norm_label": "dropdown menu content component",
       "id": "dropdown_menu_content_content"
     },
@@ -23912,7 +24203,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 167,
       "norm_label": "dropdown menu portal component",
       "id": "dropdown_menu_portal_portal"
     },
@@ -24263,7 +24554,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 94,
+      "community": 7,
       "norm_label": "field ui index",
       "id": "field_index_field_exports"
     },
@@ -24276,7 +24567,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 94,
+      "community": 7,
       "norm_label": "fieldset component",
       "id": "field_field_set_component"
     },
@@ -24289,7 +24580,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 94,
+      "community": 7,
       "norm_label": "fieldtitle component",
       "id": "field_field_title_component"
     },
@@ -24302,7 +24593,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 94,
+      "community": 7,
       "norm_label": "field component",
       "id": "field_field_component"
     },
@@ -24536,7 +24827,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 7,
       "norm_label": "itemseparator component",
       "id": "item_separator_component"
     },
@@ -24913,7 +25204,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "select index",
       "id": "select_index_exports"
     },
@@ -24926,7 +25217,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "select root component",
       "id": "select_select_component"
     },
@@ -24939,7 +25230,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectcontent component",
       "id": "select_select_content_component"
     },
@@ -24952,7 +25243,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectgroupheading component",
       "id": "select_select_group_heading_component"
     },
@@ -24965,7 +25256,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectgroup component",
       "id": "select_select_group_component"
     },
@@ -24978,7 +25269,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectitem component",
       "id": "select_select_item_component"
     },
@@ -24991,7 +25282,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectlabel component",
       "id": "select_select_label_component"
     },
@@ -25004,7 +25295,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectportal component",
       "id": "select_select_portal_component"
     },
@@ -25017,7 +25308,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectscrolldownbutton component",
       "id": "select_select_scroll_down_button_component"
     },
@@ -25030,7 +25321,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selectscrollupbutton component",
       "id": "select_select_scroll_up_button_component"
     },
@@ -25056,7 +25347,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 97,
       "norm_label": "selecttrigger component",
       "id": "select_select_trigger_component"
     },
@@ -25225,7 +25516,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebar_keyboard_shortcut",
       "id": "sidebar_constants_sidebar_keyboard_shortcut"
     },
@@ -25251,7 +25542,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebarstate (context class)",
       "id": "sidebar_context_svelte_sidebar_state"
     },
@@ -25264,7 +25555,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "usesidebar (context getter)",
       "id": "sidebar_context_svelte_use_sidebar"
     },
@@ -25277,7 +25568,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "setsidebar (context setter)",
       "id": "sidebar_context_svelte_set_sidebar"
     },
@@ -25433,7 +25724,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "ismobile (store)",
       "id": "store_is_mobile_svelte_is_mobile"
     },
@@ -25485,7 +25776,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebarmenubutton",
       "id": "sidebar_sidebar_menu_button_sidebar_menu_button"
     },
@@ -25576,7 +25867,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebarprovider",
       "id": "sidebar_sidebar_provider_sidebar_provider"
     },
@@ -25589,7 +25880,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebarrail",
       "id": "sidebar_sidebar_rail_sidebar_rail"
     },
@@ -25602,7 +25893,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebarseparator",
       "id": "sidebar_sidebar_separator_sidebar_separator"
     },
@@ -25615,7 +25906,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebartrigger",
       "id": "sidebar_sidebar_trigger_sidebar_trigger"
     },
@@ -25628,7 +25919,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 6,
+      "community": 175,
       "norm_label": "sidebar",
       "id": "sidebar_sidebar_sidebar"
     },
@@ -26815,6 +27106,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".claude/settings.json",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_settings_permissions",
+      "target": "claude_settings_permissions_allow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/settings.json",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26830,16 +27131,6 @@
       "confidence_score": 1.0,
       "source": "claude_settings_worktree",
       "target": "claude_settings_worktree_bgisolation"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".claude/settings.json",
-      "source_location": "L33",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_settings_permissions",
-      "target": "claude_settings_permissions_allow"
     },
     {
       "relation": "contains",
@@ -33550,9 +33841,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_store_config_svelte_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_store_config_svelte_js"
     },
     {
       "relation": "imports_from",
@@ -33782,9 +34073,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_constants_config_schema_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_constants_config_schema_js"
     },
     {
       "relation": "imports_from",
@@ -33886,9 +34177,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "studio_iconeditor",
-      "confidence_score": 1.0
+      "target": "studio_iconeditor"
     },
     {
       "relation": "imports_from",
@@ -33934,9 +34225,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/IconEditor.svelte",
+      "confidence_score": 1.0,
       "source": "studio_iconeditor",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_select_index_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_select_index_js"
     },
     {
       "relation": "imports_from",
@@ -34342,9 +34633,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_select_index_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_select_index_js"
     },
     {
       "relation": "references",
@@ -34628,9 +34919,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/dashboard/Dashboard.svelte",
+      "confidence_score": 1.0,
       "source": "dashboard_dashboard",
-      "target": "svelte_mosaic",
-      "confidence_score": 1.0
+      "target": "svelte_mosaic"
     },
     {
       "relation": "imports_from",
@@ -34644,9 +34935,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/dashboard/Dashboard.svelte",
+      "confidence_score": 1.0,
       "source": "dashboard_dashboard",
-      "target": "helper",
-      "confidence_score": 1.0
+      "target": "helper"
     },
     {
       "relation": "imports_from",
@@ -34682,10 +34973,37 @@
     },
     {
       "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "transition"
+    },
+    {
+      "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/modals/MacroManager.svelte",
       "confidence_score": 1.0,
       "source": "modals_macromanager",
+      "target": "transition"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/components/ui/app-sidebar.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_lib_components_ui_app_sidebar_svelte_ui_app_sidebar",
+      "target": "transition"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
       "target": "transition"
     },
     {
@@ -35145,9 +35463,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_popover_index_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_popover_index_js"
     },
     {
       "relation": "imports_from",
@@ -38944,6 +39262,14 @@
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/components/ui/sidebar/sidebar.svelte",
+      "confidence_score": 1.0,
+      "source": "sidebar_sidebar",
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_scroll_area_index_js"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
       "source_file": "packages/website/src/routes/flash/+page.svelte",
       "confidence_score": 1.0,
       "source": "flash_page",
@@ -39338,9 +39664,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_color_picker_index_js",
-      "confidence_score": 1.0
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_color_picker_index_js"
     },
     {
       "relation": "imports_from",
@@ -39356,6 +39682,14 @@
       "source_file": "packages/shared/src/components/ui/responsive-sheet/responsive-sheet.svelte",
       "confidence_score": 1.0,
       "source": "responsive_sheet_responsive_sheet",
+      "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_drawer_index_js"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/components/ui/sidebar/sidebar.svelte",
+      "confidence_score": 1.0,
+      "source": "sidebar_sidebar",
       "target": "c_users_arist_code_keyboard_firmware_packages_shared_src_components_ui_drawer_index_js"
     },
     {
@@ -39551,9 +39885,9 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "responsive_sheet_responsive_sheet",
-      "confidence_score": 1.0
+      "target": "responsive_sheet_responsive_sheet"
     },
     {
       "relation": "re_exports",
@@ -39598,17 +39932,17 @@
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileAppearanceSheet.svelte",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "profile_profileappearancesheet",
-      "target": "profile_profileappearancesheet_setprofileled",
-      "confidence_score": 1.0
+      "target": "profile_profileappearancesheet_setprofileled"
     },
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/components/app/studio/editor/profile/ProfileCard.svelte",
+      "confidence_score": 1.0,
       "source": "profile_profilecard",
-      "target": "profile_profileappearancesheet",
-      "confidence_score": 1.0
+      "target": "profile_profileappearancesheet"
     },
     {
       "relation": "contains",
@@ -50382,6 +50716,17 @@
       "target": "hooks_use_toc_svelte_usetoc"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/hooks/use-toc.svelte.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hooks_use_toc_svelte",
+      "target": "reactivity"
+    },
+    {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/hooks/use-toc.svelte.ts",
@@ -50443,6 +50788,17 @@
       "confidence_score": 1.0,
       "source": "hooks_is_mobile_svelte",
       "target": "hooks_is_mobile_svelte_ismobile"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/lib/hooks/is-mobile.svelte.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hooks_is_mobile_svelte",
+      "target": "reactivity"
     },
     {
       "relation": "method",
@@ -50514,6 +50870,17 @@
       "confidence_score": 1.0,
       "source": "hooks_pointer_svelte",
       "target": "hooks_pointer_svelte_hasfinepointer"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/lib/hooks/pointer.svelte.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hooks_pointer_svelte",
+      "target": "reactivity"
     },
     {
       "relation": "method",
@@ -52825,6 +53192,17 @@
       "weight": 1.0,
       "source": "store_devicestatus_svelte_startpolling",
       "target": "store_transport_transportmode"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/store/is-mobile.svelte.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "store_is_mobile_svelte",
+      "target": "reactivity"
     },
     {
       "relation": "contains",
@@ -55515,6 +55893,62 @@
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/components/PageCurtain.svelte",
+      "confidence_score": 1.0,
+      "source": "components_pagecurtain",
+      "target": "c_users_arist_code_keyboard_firmware_packages_website_src_lib_page_transitions"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/components/PageCurtain.svelte",
+      "confidence_score": 1.0,
+      "source": "components_pagecurtain",
+      "target": "state"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
+      "target": "components_pagecurtain"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/components/ui/app-sidebar.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_lib_components_ui_app_sidebar_svelte_ui_app_sidebar",
+      "target": "state"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
+      "target": "state"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/docs/[...slug]/+page.svelte",
+      "confidence_score": 1.0,
+      "source": "slug_page",
+      "target": "state"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
+      "target": "c_users_arist_code_keyboard_firmware_packages_website_src_lib_page_transitions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
       "source_file": "packages/website/src/lib/components/ui/app-sidebar.svelte",
       "confidence_score": 1.0,
       "source": "packages_website_src_lib_components_ui_app_sidebar_svelte_ui_app_sidebar",
@@ -55550,15 +55984,15 @@
       "source_file": "packages/website/src/lib/components/ui/app-sidebar.svelte",
       "confidence_score": 1.0,
       "source": "packages_website_src_lib_components_ui_app_sidebar_svelte_ui_app_sidebar",
-      "target": "state"
+      "target": "navigation"
     },
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
-      "source_file": "packages/website/src/routes/docs/[...slug]/+page.svelte",
-      "confidence_score": 1.0,
-      "source": "slug_page",
-      "target": "state"
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
+      "target": "navigation",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -55824,6 +56258,88 @@
       "target": "lib_nav_navtree"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_axis"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_curtaindir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_curtainin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L43",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_curtainout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_reduced"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "lib_page_transitions",
+      "target": "lib_page_transitions_scrolltotop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions_curtainin",
+      "target": "lib_page_transitions_reduced"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/lib/page-transitions.ts",
+      "source_location": "L47",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_page_transitions_curtainout",
+      "target": "lib_page_transitions_reduced"
+    },
+    {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "packages/website/src/routes/+error.svelte",
@@ -55902,6 +56418,14 @@
       "confidence_score": 1.0,
       "source": "packages_website_src_routes_layout_svelte_routes_layout",
       "target": "mode_watcher"
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/src/routes/+layout.svelte",
+      "confidence_score": 1.0,
+      "source": "packages_website_src_routes_layout_svelte_routes_layout",
+      "target": "reactivity"
     },
     {
       "relation": "imports_from",
@@ -60453,9 +60977,9 @@
       "source_file": "packages/shared/README.md",
       "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "shared_readme_spinpad_shared",
-      "target": "shared_readme_contenu"
+      "target": "shared_readme_contents",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60463,9 +60987,9 @@
       "source_file": "packages/shared/README.md",
       "source_location": "L34",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "shared_readme_spinpad_shared",
-      "target": "shared_readme_r\u00e8gle_source_de_v\u00e9rit\u00e9"
+      "target": "shared_readme_rule_source_of_truth",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60473,9 +60997,9 @@
       "source_file": "packages/shared/README.md",
       "source_location": "L13",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "shared_readme_spinpad_shared",
-      "target": "shared_readme_utilisation"
+      "target": "shared_readme_usage",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -60493,9 +61017,9 @@
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "widgets_readme",
-      "target": "widgets_readme_widgets_oled_registre"
+      "target": "widgets_readme_oled_widgets_registry",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60503,9 +61027,9 @@
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L43",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "widgets_readme_widgets_oled_registre",
-      "target": "widgets_readme_ajouter_un_widget_de_bout_en_bout"
+      "source": "widgets_readme_oled_widgets_registry",
+      "target": "widgets_readme_adding_a_widget_end_to_end",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60513,9 +61037,9 @@
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L9",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "widgets_readme_widgets_oled_registre",
-      "target": "widgets_readme_anatomie_d_un_widgetdef"
+      "source": "widgets_readme_oled_widgets_registry",
+      "target": "widgets_readme_anatomy_of_a_widgetdef",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60523,9 +61047,9 @@
       "source_file": "packages/shared/src/components/app/studio/dashboard/screen/widgets/README.md",
       "source_location": "L35",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "widgets_readme_widgets_oled_registre",
-      "target": "widgets_readme_options_disponibles"
+      "source": "widgets_readme_oled_widgets_registry",
+      "target": "widgets_readme_available_options",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -60671,16 +61195,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/website/README.md",
-      "source_location": "L48",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "website_readme_spinpad_website",
-      "target": "website_readme_int\u00e9gration_studio"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/website/README.md",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -60696,6 +61210,16 @@
       "confidence_score": 1.0,
       "source": "website_readme_spinpad_website",
       "target": "website_readme_structure"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/README.md",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "website_readme_spinpad_website",
+      "target": "website_readme_studio_integration",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60723,9 +61247,39 @@
       "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L17",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_getting_started_getting_started",
-      "target": "docs_getting_started_connexion"
+      "target": "docs_getting_started_connection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_connection_104",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_connection_46",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_connection_75",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60733,9 +61287,39 @@
       "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L24",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_getting_started_getting_started",
-      "target": "docs_getting_started_mode_d\u00e9mo"
+      "target": "docs_getting_started_demo_mode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_demo_mode_111",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_demo_mode_53",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_demo_mode_82",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60751,11 +61335,101 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_pages_117",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_pages_59",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_pages_88",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
       "source_location": "L11",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_getting_started_getting_started",
-      "target": "docs_getting_started_pr\u00e9requis"
+      "target": "docs_getting_started_requirements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_requirements_40",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_requirements_69",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/getting-started.md",
+      "source_location": "L98",
+      "weight": 1.0,
+      "source": "docs_getting_started_getting_started",
+      "target": "docs_getting_started_requirements_98",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/hardware/3D.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "hardware_3d",
+      "target": "hardware_3d_3d_printed_files",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/hardware/assemblee.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "hardware_assemblee",
+      "target": "hardware_assemblee_assemble",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/hardware/pcb.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "hardware_pcb",
+      "target": "hardware_pcb_schematics_pcb",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60763,29 +61437,9 @@
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "keymap_layers",
-      "target": "keymap_layers_layers_et_keymap"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/website/content/docs/keymap/layers.md",
-      "source_location": "L15",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "keymap_layers_layers_et_keymap",
-      "target": "keymap_layers_actions_de_layer"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/website/content/docs/keymap/layers.md",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "keymap_layers_layers_et_keymap",
-      "target": "keymap_layers_concept_de_layers"
+      "target": "keymap_layers_layers_and_keymap",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60793,9 +61447,29 @@
       "source_file": "packages/website/content/docs/keymap/layers.md",
       "source_location": "L23",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "keymap_layers_layers_et_keymap",
-      "target": "keymap_layers_encodeur"
+      "source": "keymap_layers_layers_and_keymap",
+      "target": "keymap_layers_encoder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/keymap/layers.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "keymap_layers_layers_and_keymap",
+      "target": "keymap_layers_layer_actions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/keymap/layers.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "keymap_layers_layers_and_keymap",
+      "target": "keymap_layers_layer_concept",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60813,9 +61487,9 @@
       "source_file": "packages/website/content/docs/keymap/profiles.md",
       "source_location": "L10",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "keymap_profiles_profiles",
-      "target": "keymap_profiles_concept_de_profiles"
+      "target": "keymap_profiles_profile_concept",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60823,29 +61497,9 @@
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "studio_layers",
-      "target": "studio_layers_layers_et_keymap"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/website/content/docs/studio/layers.md",
-      "source_location": "L15",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "studio_layers_layers_et_keymap",
-      "target": "studio_layers_actions_de_layer"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/website/content/docs/studio/layers.md",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "studio_layers_layers_et_keymap",
-      "target": "studio_layers_concept_de_layers"
+      "target": "studio_layers_layers_and_keymap",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60853,9 +61507,29 @@
       "source_file": "packages/website/content/docs/studio/layers.md",
       "source_location": "L23",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "studio_layers_layers_et_keymap",
-      "target": "studio_layers_encodeur"
+      "source": "studio_layers_layers_and_keymap",
+      "target": "studio_layers_encoder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/studio/layers.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "studio_layers_layers_and_keymap",
+      "target": "studio_layers_layer_actions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/website/content/docs/studio/layers.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "studio_layers_layers_and_keymap",
+      "target": "studio_layers_layer_concept",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -60873,9 +61547,9 @@
       "source_file": "packages/website/content/docs/studio/profiles.md",
       "source_location": "L10",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "studio_profiles_profiles",
-      "target": "studio_profiles_concept_de_profiles"
+      "target": "studio_profiles_profile_concept",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -65843,5 +66517,5 @@
       "source_file": "packages/shared/src/components/app/studio/dashboard"
     }
   ],
-  "built_at_commit": "74c4c43bed573a759e813526720566b1acc6d27e"
+  "built_at_commit": "976df1e033c089ce923cb82e667833efabb4b395"
 }

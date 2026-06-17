@@ -28,15 +28,15 @@
     ></p>
 
     {#if devMode.active}
-      Démo
+      Demo
     {:else if data?.connection?.studio_mode}
       Studio Mode
     {:else if serial.reconnecting}
-      Reconnexion {serial.reconnectAttempt}/{15}…
+      Reconnecting {serial.reconnectAttempt}/{15}…
     {:else if configState.loadError}
-      Erreur
+      Error
     {:else}
-      {serial.connected ? 'Connecté' : 'Non connecté'}
+      {serial.connected ? 'Connected' : 'Not connected'}
     {/if}
   {/if}
 </Badge>

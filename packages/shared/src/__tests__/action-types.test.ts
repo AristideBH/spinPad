@@ -27,7 +27,7 @@ describe('action encoding round-trip', () => {
       expect(getActionType(a)).toBe(ACTION_TYPES.ACTION_TYPE_SPECIAL);
       expect(getActionValue(a)).toBe(code);
     }
-    // Sous-codes distincts, dans la plage 12 bits.
+    // Distinct subcodes, within the 12-bit range.
     expect(SPECIAL_CODES.SPECIAL_PROFILE_NEXT).not.toBe(SPECIAL_CODES.SPECIAL_PROFILE_PREV);
   });
 

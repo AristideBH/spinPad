@@ -8,14 +8,14 @@
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
 
-  // ── Uptime humain ────────────────────────────────────────────
+  // ── Human-readable uptime ────────────────────────────────────
   function formatUptime(s: number): string {
     if (!s || s < 0) return '—';
     const d = Math.floor(s / 86400);
     const h = Math.floor((s % 86400) / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
-    if (d > 0) return `${d}j ${h}h`;
+    if (d > 0) return `${d}d ${h}h`;
     if (h > 0) return `${h}h ${m}m`;
     if (m > 0) return `${m}m ${sec}s`;
     return `${sec}s`;
@@ -28,7 +28,7 @@
   const fwDirty = $derived(data?.fw?.dirty === true);
 
   async function handleFactoryReset() {
-    if (!confirm('Remettre la config à zéro ? Toutes les modifications seront perdues.')) return;
+    if (!confirm('Reset the config to defaults? All changes will be lost.')) return;
     await factoryReset();
     await loadConfig();
   }
@@ -45,7 +45,7 @@
       <span class="text-base font-semibold tabular-nums">v{fwVersion}</span>
       <span
         class="font-mono text-xs text-muted-foreground"
-        title={fwDirty ? 'Build sur un working tree modifié' : 'Build propre'}
+        title={fwDirty ? 'Build on a modified working tree' : 'Clean build'}
       >
         {fwBuild}{fwDirty ? '+' : ''}
       </span>

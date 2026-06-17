@@ -1,38 +1,125 @@
 ---
-title: Démarrage
-description: Premiers pas, connexion USB et mode démo.
+title: Getting Started
+description: First steps, USB connection and demo mode.
 order: 1
 ---
 
 # Getting Started
 
-Bienvenue dans **SpinPad Editor**, l'outil de configuration pour ton clavier custom.
+Welcome to **SpinPad Editor**, the configuration tool for your custom keyboard.
 
-## Prérequis
+## Requirements
 
-- Navigateur **Chrome** ou **Edge** (WebSerial API requis)
-- Clavier SpinPad connecté en USB
-- Ou activer le **mode démo** pour tester sans clavier
+- **Chrome** or **Edge** browser (WebSerial API required)
+- SpinPad keyboard connected over USB
+- Or enable **demo mode** to test without a keyboard
 
-## Connexion
+## Connection
 
-1. Branche le clavier en USB
-2. Ouvre SpinPad Editor
-3. Clique sur **Connecter le clavier**
-4. Sélectionne le port série dans la fenêtre du navigateur
+1. Plug the keyboard in over USB
+2. Open SpinPad Editor
+3. Click **Connect the keyboard**
+4. Select the serial port in the browser window
 
-## Mode démo
+## Demo mode
 
-Tu peux explorer l'interface sans clavier physique en activant le mode démo
-depuis la page Dashboard. Les données sont simulées et aucune modification
-n'est envoyée au clavier.
+You can explore the interface without a physical keyboard by enabling demo mode
+from the Dashboard page. The data is simulated and no changes
+are sent to the keyboard.
 
 ## Pages
 
-| Page | Description |
-|------|-------------|
-| Dashboard | Vue d'ensemble de la config et connexion |
-| Keymap | Édition des keycodes par profil / layer |
-| Profils | Liste des profils disponibles |
-| BLE | Configuration Bluetooth (nom, slots) |
-| Écran | Luminosité, timeout, power management |
+| Page      | Description                              |
+| --------- | ---------------------------------------- |
+| Dashboard | Overview of the config and connection    |
+| Keymap    | Editing keycodes per profile / layer     |
+| Profiles  | List of available profiles               |
+| BLE       | Bluetooth configuration (name, slots)    |
+| Screen    | Brightness, timeout, power management    |
+
+## Requirements
+
+- **Chrome** or **Edge** browser (WebSerial API required)
+- SpinPad keyboard connected over USB
+- Or enable **demo mode** to test without a keyboard
+
+## Connection
+
+1. Plug the keyboard in over USB
+2. Open SpinPad Editor
+3. Click **Connect the keyboard**
+4. Select the serial port in the browser window
+
+## Demo mode
+
+You can explore the interface without a physical keyboard by enabling demo mode
+from the Dashboard page. The data is simulated and no changes
+are sent to the keyboard.
+
+## Pages
+
+| Page      | Description                              |
+| --------- | ---------------------------------------- |
+| Dashboard | Overview of the config and connection    |
+| Keymap    | Editing keycodes per profile / layer     |
+| Profiles  | List of available profiles               |
+| BLE       | Bluetooth configuration (name, slots)    |
+| Screen    | Brightness, timeout, power management    |
+
+## Requirements
+
+- **Chrome** or **Edge** browser (WebSerial API required)
+- SpinPad keyboard connected over USB
+- Or enable **demo mode** to test without a keyboard
+
+## Connection
+
+1. Plug the keyboard in over USB
+2. Open SpinPad Editor
+3. Click **Connect the keyboard**
+4. Select the serial port in the browser window
+
+## Demo mode
+
+You can explore the interface without a physical keyboard by enabling demo mode
+from the Dashboard page. The data is simulated and no changes
+are sent to the keyboard.
+
+## Pages
+
+| Page      | Description                              |
+| --------- | ---------------------------------------- |
+| Dashboard | Overview of the config and connection    |
+| Keymap    | Editing keycodes per profile / layer     |
+| Profiles  | List of available profiles               |
+| BLE       | Bluetooth configuration (name, slots)    |
+| Screen    | Brightness, timeout, power management    |
+
+## Requirements
+
+- **Chrome** or **Edge** browser (WebSerial API required)
+- SpinPad keyboard connected over USB
+- Or enable **demo mode** to test without a keyboard
+
+## Connection
+
+1. Plug the keyboard in over USB
+2. Open SpinPad Editor
+3. Click **Connect the keyboard**
+4. Select the serial port in the browser window
+
+## Demo mode
+
+You can explore the interface without a physical keyboard by enabling demo mode
+from the Dashboard page. The data is simulated and no changes
+are sent to the keyboard.
+
+## Pages
+
+| Page      | Description                              |
+| --------- | ---------------------------------------- |
+| Dashboard | Overview of the config and connection    |
+| Keymap    | Editing keycodes per profile / layer     |
+| Profiles  | List of available profiles               |
+| BLE       | Bluetooth configuration (name, slots)    |
+| Screen    | Brightness, timeout, power management    |

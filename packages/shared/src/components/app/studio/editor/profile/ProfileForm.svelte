@@ -1,12 +1,12 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  ProfileForm — édition d'un brouillon de profil (création / tweak)
+  //  ProfileForm — editing a profile draft (creation / tweak)
   //
-  //  Édite une copie LOCALE d'un ProfileConfig (nom, icône, liste de
-  //  layers par leur nom) puis émet le profil complet via `onsubmit`.
-  //  Aucune mutation du store tant que l'utilisateur ne confirme pas :
-  //  l'appelant commit via addProfile(draft). Les touches restent à 0,
-  //  assignées plus tard dans l'éditeur principal.
+  //  Edits a LOCAL copy of a ProfileConfig (name, icon, list of
+  //  layers by their name) then emits the full profile via `onsubmit`.
+  //  No store mutation until the user confirms:
+  //  the caller commits via addProfile(draft). The keys stay at 0,
+  //  assigned later in the main editor.
   // ───────────────────────────────────────────────────────────────
   import { Input } from '$shared/components/ui/input/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
@@ -29,9 +29,9 @@
     onsubmit: (profile: ProfileConfig) => void;
     oncancel?: () => void;
   }
-  let { initial, submitLabel = 'Ajouter', onsubmit, oncancel }: Props = $props();
+  let { initial, submitLabel = 'Add', onsubmit, oncancel }: Props = $props();
 
-  // Copie locale isolée (snapshot → structuredClone : ni proxy, ni ref partagée).
+  // Isolated local copy (snapshot → structuredClone: no proxy, no shared ref).
   let draft = $state<ProfileConfig>(
     structuredClone($state.snapshot(untrack(() => initial) ?? defaultProfile()) as ProfileConfig),
   );
@@ -54,19 +54,19 @@
   }
 
   function submit() {
-    if (!draft.name.trim()) draft.name = 'Profil';
+    if (!draft.name.trim()) draft.name = 'Profile';
     onsubmit($state.snapshot(draft) as ProfileConfig);
   }
 </script>
 
 <div class="flex flex-col gap-4 px-4 py-2 overflow-y-auto">
   <div class="flex flex-col gap-1.5">
-    <Label for="pf-name">Nom</Label>
-    <Input id="pf-name" bind:value={draft.name} placeholder="Nom du profil" maxlength={31} />
+    <Label for="pf-name">Name</Label>
+    <Input id="pf-name" bind:value={draft.name} placeholder="Profile name" maxlength={31} />
   </div>
 
   <div class="flex flex-col gap-1.5">
-    <Label>Icône</Label>
+    <Label>Icon</Label>
     <IconEditor value={draft.icon ?? ''} onchange={(b64) => (draft.icon = b64)} />
   </div>
 
@@ -86,7 +86,7 @@
               variant="ghost"
               size="icon"
               class="size-6"
-              title="Monter"
+              title="Move up"
               disabled={i === 0}
               onclick={() => moveLayer(i, i - 1)}
             >
@@ -96,7 +96,7 @@
               variant="ghost"
               size="icon"
               class="size-6"
-              title="Descendre"
+              title="Move down"
               disabled={i === draft.layers.length - 1}
               onclick={() => moveLayer(i, i + 1)}
             >
@@ -106,7 +106,7 @@
               variant="ghost"
               size="icon"
               class="size-6 text-destructive"
-              title="Supprimer le layer"
+              title="Delete the layer"
               disabled={!canRemoveLayer}
               onclick={() => removeLayerRow(i)}
             >
@@ -116,12 +116,12 @@
         </InputGroup.Root>
       {/each}
     </div>
-    <p class="text-xs text-muted-foreground">Les touches sont assignées ensuite dans l'éditeur.</p>
+    <p class="text-xs text-muted-foreground">The keys are assigned afterwards in the editor.</p>
   </div>
 
   <div class="flex justify-end gap-2 pt-2">
     {#if oncancel}
-      <Button variant="secondary" onclick={oncancel}>Annuler</Button>
+      <Button variant="secondary" onclick={oncancel}>Cancel</Button>
     {/if}
     <Button onclick={submit}>{submitLabel}</Button>
   </div>

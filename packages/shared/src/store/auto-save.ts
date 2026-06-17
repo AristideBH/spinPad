@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/auto-save.ts — Politique de sauvegarde différée
+//  store/auto-save.ts — Deferred save policy
 //
-//  Classe pure (sans Svelte runes) pour isoler la logique debounce
-//  du store de config. Testable via vi.useFakeTimers() sans runtime
-//  Svelte.
+//  Pure class (without Svelte runes) to isolate the debounce logic
+//  from the config store. Testable via vi.useFakeTimers() without the
+//  Svelte runtime.
 // ═══════════════════════════════════════════════════════════════
 
 export class AutoSave {
@@ -16,12 +16,12 @@ export class AutoSave {
     this.#delay  = delayMs;
   }
 
-  /** `true` si une sauvegarde différée est en attente (timer armé). */
+  /** `true` if a deferred save is pending (timer armed). */
   get pending(): boolean {
     return this.#timer !== null;
   }
 
-  /** Planifie une sauvegarde différée (debounce). */
+  /** Schedules a deferred save (debounce). */
   schedule(): void {
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = setTimeout(() => {
@@ -30,7 +30,7 @@ export class AutoSave {
     }, this.#delay);
   }
 
-  /** Annule la sauvegarde différée en attente. */
+  /** Cancels the pending deferred save. */
   cancel(): void {
     if (this.#timer) {
       clearTimeout(this.#timer);
@@ -39,8 +39,8 @@ export class AutoSave {
   }
 
   /**
-   * Annule le timer et sauvegarde immédiatement.
-   * À utiliser pour la sauvegarde manuelle et le beforeunload.
+   * Cancels the timer and saves immediately.
+   * Use for manual save and beforeunload.
    */
   async flush(): Promise<void> {
     this.cancel();

@@ -21,8 +21,8 @@ const DEV_KEY_MAP: Record<string, number> = {
 class KeyVisualsState {
   pressNonce = $state<number[]>(Array(10).fill(0));
   pressed = $state<boolean[]>(Array(10).fill(false));
-  // Encodeur : position cumulée signée (CW +1 / CCW -1) et compteur d'appuis.
-  // Réactifs -> consommables par les visualisations (ex. LedMatrix).
+  // Encoder: signed cumulative position (CW +1 / CCW -1) and press counter.
+  // Reactive -> consumable by the visualizations (e.g. LedMatrix).
   encoderTurn = $state(0);
   encoderPress = $state(0);
 

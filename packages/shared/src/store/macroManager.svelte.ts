@@ -1,17 +1,17 @@
 /**
- * État partagé du tiroir « Macros globales » (MacroManager).
+ * Shared state of the "Global macros" drawer (MacroManager).
  *
- * Permet d'ouvrir le gestionnaire de macros sur un slot précis depuis n'importe
- * où (ex : action d'un toast après création d'une macro en live-record).
+ * Allows opening the macro manager on a specific slot from anywhere
+ * (e.g. a toast action after creating a macro in live-record).
  */
 class MacroManagerStore {
-  /** Le tiroir est-il ouvert ? Lié via `bind:open` dans MacroManager.svelte. */
+  /** Is the drawer open? Bound via `bind:open` in MacroManager.svelte. */
   open = $state(false);
 
-  /** Slot à charger à la prochaine ouverture (null = garder la sélection courante). */
+  /** Slot to load on next opening (null = keep the current selection). */
   requestedIndex = $state<number | null>(null);
 
-  /** Ouvre le tiroir et demande le chargement du slot `idx`. */
+  /** Opens the drawer and requests loading of slot `idx`. */
   openAt(idx: number): void {
     this.requestedIndex = idx;
     this.open = true;

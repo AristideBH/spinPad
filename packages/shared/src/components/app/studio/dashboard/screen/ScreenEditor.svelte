@@ -1,17 +1,17 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  ScreenEditor.svelte — Éditeur de widgets OLED (grille mosaïque 4×4)
+  //  ScreenEditor.svelte — OLED widget editor (4×4 mosaic grid)
   //
-  //  Modèle span-based : chaque widget occupe (x, y, w, h) sur une grille
-  //  logique 4×4. Drag pour repositionner (poignée), taille + options via le
-  //  menu (DropdownMenu) — pas de redimensionnement à la souris, pas de
-  //  chevauchement (collision="none" + bounds). La prop `editable` masque
-  //  poignée/menu (aperçu seul). Métadonnées par widget : registre ./widgets.
-  //  Source de vérité unique : le store config.
+  //  Span-based model: each widget occupies (x, y, w, h) on a logical
+  //  4×4 grid. Drag to reposition (handle), size + options via the
+  //  menu (DropdownMenu) — no mouse resizing, no
+  //  overlap (collision="none" + bounds). The `editable` prop hides the
+  //  handle/menu (preview only). Per-widget metadata: ./widgets registry.
+  //  Single source of truth: the config store.
   //
-  //  Note : la grille remplit le conteneur sur les deux axes (pas de ratio
-  //  d'aspect imposé) ; mosaic utilise des pistes uniformes, donc l'anneau
-  //  extérieur 10px réel de l'OLED n'est pas reproduit ici.
+  //  Note: the grid fills the container on both axes (no forced aspect
+  //  ratio); mosaic uses uniform tracks, so the OLED's real 10px outer
+  //  ring is not reproduced here.
   // ───────────────────────────────────────────────────────────────
   import { Grid, type GridItem, type SnippetArgs, type ColsDefinition } from '@arisbh/svelte-mosaic';
   import { gridHelp } from '@arisbh/svelte-mosaic/helper';
@@ -34,7 +34,7 @@
   import { toast } from 'svelte-sonner';
 
   interface Props {
-    /** Mode édition : affiche la poignée de drag et le menu d'options. */
+    /** Edit mode: shows the drag handle and the options menu. */
     editable?: boolean;
   }
   let { editable = true }: Props = $props();
@@ -45,11 +45,11 @@
   const COLS = WIDGET_GRID_COLS;
   const ROWS = WIDGET_GRID_ROWS;
 
-  // ── Données (store = source de vérité) ──────────────────────────
+  // ── Data (store = source of truth) ──────────────────────────────
   const widgets = $derived<WidgetConfig[]>((configState.data?.display?.widgets ?? defaultWidgets()) as WidgetConfig[]);
 
-  // L'ajout de widgets vit dans ScreenAddMenu (en-tête de la tuile). Ici on ne
-  // fait qu'éditer/déplacer/supprimer les widgets existants.
+  // Adding widgets lives in ScreenAddMenu (tile header). Here we only
+  // edit/move/delete the existing widgets.
   function writeWidgets(next: WidgetConfig[]) {
     updateConfig('display.widgets', next);
   }
@@ -60,12 +60,12 @@
     writeWidgets(widgets.filter((_, i) => i !== idx));
   }
 
-  // Position d'ancrage (clampée à la grille) qu'aurait le widget en taille w×h.
+  // Anchor position (clamped to the grid) the widget would have at size w×h.
   function anchorFor(cur: WidgetConfig, w: number, h: number) {
     return { x: Math.min(cur.x, COLS - w), y: Math.min(cur.y, ROWS - h) };
   }
 
-  // Occupation de la grille par tous les widgets sauf `skip`.
+  // Grid occupancy by all widgets except `skip`.
   function occupancyExcept(skip: number): boolean[][] {
     const g = Array.from({ length: ROWS }, () => Array<boolean>(COLS).fill(false));
     widgets.forEach((wd, i) => {
@@ -76,8 +76,8 @@
     return g;
   }
 
-  // Une taille est disponible si le widget tient (sans chevauchement) à sa
-  // position d'ancrage. Les tailles plus grandes sans place sont grisées.
+  // A size is available if the widget fits (without overlap) at its
+  // anchor position. Larger sizes with no room are grayed out.
   function canResize(idx: number, w: number, h: number): boolean {
     const { x, y } = anchorFor(widgets[idx], w, h);
     const g = occupancyExcept(idx);
@@ -85,19 +85,19 @@
     return true;
   }
 
-  // Changer la taille : refuse si pas de place, sinon clampe la position.
+  // Change the size: refuses if no room, otherwise clamps the position.
   function setSize(idx: number, w: number, h: number) {
     if (!canResize(idx, w, h)) return;
     const { x, y } = anchorFor(widgets[idx], w, h);
     patchWidget(idx, { w, h, x, y } as Partial<WidgetConfig>);
   }
 
-  // ── Pont mosaic ↔ store (cf. Sortable.svelte) ───────────────────
+  // ── mosaic ↔ store bridge (cf. Sortable.svelte) ─────────────────
   const cols: ColsDefinition = [[0, COLS]];
 
   let gridItems = $state<GridItem[]>([]);
-  // Reconstruit depuis le store ; ne dépend pas de gridItems → les mutations
-  // internes de mosaic pendant le drag ne relancent pas l'effet.
+  // Rebuilds from the store; does not depend on gridItems → mosaic's internal
+  // mutations during the drag don't re-run the effect.
   $effect(() => {
     gridItems = widgets.map((w, i) => {
       const gi: GridItem = { id: `w-${i}`, data: { index: i } };
@@ -115,7 +115,7 @@
 
   let draggingIdx = $state<number | null>(null);
 
-  // À la fin d'un drag : persiste les positions si elles ont changé.
+  // At the end of a drag: persists the positions if they changed.
   function onPointerUp() {
     let changed = false;
     const next = widgets.map((w, i) => {
@@ -129,20 +129,20 @@
     if (changed) {
       writeWidgets(next);
     } else if (draggingIdx !== null) {
-      toast.error('Déplacement impossible');
+      toast.error('Move not possible');
     }
     draggingIdx = null;
   }
 
-  // La grille remplit le conteneur sur les deux axes : largeur via les 4
-  // colonnes mosaic, hauteur via rowHeight dérivée de la hauteur mesurée du
-  // conteneur. mosaic creuse les gaps À L'INTÉRIEUR des items (pas d'espace
-  // externe), donc la hauteur totale = ROWS × rowHeight → rowHeight = h / ROWS.
+  // The grid fills the container on both axes: width via the 4 mosaic
+  // columns, height via rowHeight derived from the container's measured
+  // height. mosaic carves the gaps INSIDE the items (no external space),
+  // so the total height = ROWS × rowHeight → rowHeight = h / ROWS.
   const GAP = 4;
   let gridH = $state(0);
   const rowHeight = $derived(gridH > 0 ? gridH / ROWS : 40);
 
-  // Horloge live (widget Clock) — re-render chaque seconde.
+  // Live clock (Clock widget) — re-renders every second.
   let now = $state(new Date());
   $effect(() => {
     const id = setInterval(() => (now = new Date()), 1000);
@@ -153,10 +153,10 @@
 <div class="flex flex-col h-full gap-3">
   {#if widgets.length === 0}
     <p class="grid flex-1 px-3 pb-3 text-xs text-center text-balance text-muted-foreground/30 place-items-center">
-      {editable ? 'Aucun widget. Utilisez le menu « Ajouter ».' : '(-■_■)'}
+      {editable ? 'No widgets. Use the "Add" menu.' : '(-■_■)'}
     </p>
   {:else}
-    <!-- ── Grille d'édition (remplit le conteneur sur les deux axes) ─ -->
+    <!-- ── Edit grid (fills the container on both axes) ─ -->
     <div class="flex-1 w-full px-1 pt-1 pb-0.5 border-t rounded-t-xl bg-background/50">
       <div class="w-full h-full screen-grid" bind:clientHeight={gridH} bind:this={gridRef}>
         <Grid
@@ -194,7 +194,7 @@
                       type="button"
                       data-grip
                       class="flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground cursor-grab touch-none"
-                      title="Déplacer"
+                      title="Move"
                       onpointerdown={(e) => {
                         draggingIdx = idx;
                         movePointerDown(e);
@@ -210,12 +210,12 @@
                   </p>
                 </Item.Content>
 
-                <!-- options + suppression (menu, design aligné sur LayerSwitcher) -->
+                <!-- options + delete (menu, design aligned with LayerSwitcher) -->
                 {#if editable}
                   <Item.Actions>
                     <DropdownMenu.Root open={openIdx === idx} onOpenChange={(v) => (openIdx = v ? idx : null)}>
                       <DropdownMenu.Trigger
-                        title="Options du widget"
+                        title="Widget options"
                         class={cn(
                           buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
                           'absolute top-0.5 right-0.5 size-4 p-0.5 z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground  data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
@@ -226,7 +226,7 @@
                       <DropdownMenu.Content align="end" class="w-38">
                         {#if sizes.length > 1}
                           <div class="flex flex-col gap-1.5 px-1.5 py-1.5">
-                            <span class="text-xs text-muted-foreground">Taille</span>
+                            <span class="text-xs text-muted-foreground">Size</span>
                             <SizeGrid
                               range={def.size}
                               current={{ w: w.w, h: w.h }}
@@ -252,7 +252,7 @@
                         {#if hasOpts}<DropdownMenu.Separator />{/if}
                         <DropdownMenu.Item variant="destructive" onSelect={() => removeWidget(idx)}>
                           <Trash2 />
-                          Supprimer
+                          Delete
                         </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Root>

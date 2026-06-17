@@ -4,14 +4,14 @@
 
   interface Props {
     value?: string; // base64
-    size?: number; // px côté rendu
+    size?: number; // px on the rendered side
     class?: string;
   }
   let { value = "", size = 48, class: klass = "" }: Props = $props();
 
   const grid = $derived(base64ToGrid(value));
 
-  // Rendu canvas — re-run quand grid/size changent (lectures réactives dans le corps).
+  // Canvas rendering — re-runs when grid/size change (reactive reads in the body).
   const render = (el: HTMLCanvasElement) => {
     const ctx = el.getContext("2d");
     if (!ctx) return;

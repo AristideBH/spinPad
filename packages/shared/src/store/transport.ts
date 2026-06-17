@@ -1,15 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/transport.ts — Seam de transport unique
+//  store/transport.ts — Single transport seam
 //
-//  Retourne le transport actif selon le mode de build :
-//    VITE_DEV_MODE=true      → mock (dev sans device)
-//    VITE_TRANSPORT=http     → HTTP (studio embarqué sur ESP32)
-//    (défaut)                → WebSerial USB
+//  Returns the active transport according to the build mode:
+//    VITE_DEV_MODE=true      → mock (dev without device)
+//    VITE_TRANSPORT=http     → HTTP (studio embedded on ESP32)
+//    (default)               → WebSerial USB
 //
-//  IMPORTANT : La constante USE_HTTP doit rester une comparaison
-//  littérale de import.meta.env.* pour que Vite DCE puisse éliminer
-//  le transport inutilisé dans chaque build. Ne pas remplacer par
-//  une variable dynamique.
+//  IMPORTANT: The USE_HTTP constant must stay a literal comparison
+//  of import.meta.env.* so that Vite DCE can eliminate the unused
+//  transport in each build. Do not replace with a dynamic variable.
 // ═══════════════════════════════════════════════════════════════
 
 import { devMode }          from './devMode.svelte.js';
@@ -18,7 +17,7 @@ import * as httpTransport   from '$shared/transport/http.js';
 import * as serialTransport from './serial.svelte.js';
 import type { Transport, DeviceStatusTransport } from '$shared/types/transport.js';
 
-// Littéral de chaîne intentionnel — nécessaire pour le tree-shaking Vite.
+// Intentional string literal — required for Vite tree-shaking.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const USE_HTTP = import.meta.env.VITE_TRANSPORT === 'http';
 

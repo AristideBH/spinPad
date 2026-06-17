@@ -2,6 +2,8 @@
   import * as Collapsible from '$shared/components/ui/collapsible/index.js';
   import * as Sidebar from '$shared/components/ui/sidebar/index.js';
   import { page } from '$app/state';
+  import { afterNavigate } from '$app/navigation';
+  import { slide } from 'svelte/transition';
   import HomeIcon from '@lucide/svelte/icons/house';
   import BookOpenIcon from '@lucide/svelte/icons/book-open';
   import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
@@ -13,6 +15,11 @@
   import { WrenchIcon, ShoppingCart } from '@lucide/svelte';
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+  // Close the mobile drawer after navigating (collapsible toggles don't navigate,
+  // so expanding/collapsing the nav sections leaves the drawer open).
+  const sidebar = Sidebar.useSidebar();
+  afterNavigate(() => sidebar.setOpenMobile(false));
 
   const docsTree = getDocsTree();
   const toolsItem =
@@ -83,16 +90,16 @@
       <Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
       <Sidebar.Menu>
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isHome} tooltipContent="Accueil">
+          <Sidebar.MenuButton isActive={isHome} tooltipContent="Home">
             {#snippet child({ props })}
-              <a href="/" {...props}><HomeIcon /><span>Accueil</span></a>
+              <a href="/" {...props}><HomeIcon /><span>Home</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isShop} tooltipContent="Boutique">
+          <Sidebar.MenuButton isActive={isShop} tooltipContent="Store">
             {#snippet child({ props })}
-              <a href="/shop/" {...props}><ShoppingCart /><span>Boutique</span></a>
+              <a href="/shop/" {...props}><ShoppingCart /><span>Store</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
@@ -117,32 +124,38 @@
         <Collapsible.Root open={toolsOpen}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
-              <Sidebar.MenuButton tooltipContent="Outils">
+              <Sidebar.MenuButton tooltipContent="Tools">
                 {#snippet child({ props: btnProps })}
-                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Outils</span></a>
+                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Tools</span></a>
                 {/snippet}
               </Sidebar.MenuButton>
               <Collapsible.Trigger>
                 {#snippet child({ props: trigProps })}
                   <Sidebar.MenuAction {...trigProps} class="data-[state=open]:rotate-90">
                     <ChevronRightIcon />
-                    <span class="sr-only">Ouvrir/Fermer</span>
+                    <span class="sr-only">Open/Close</span>
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>
-              <Collapsible.Content>
-                <Sidebar.MenuSub>
-                  {#each toolsChildren as item (item.title)}
-                    <Sidebar.MenuSubItem>
-                      <Sidebar.MenuSubButton
-                        href={item.url}
-                        isActive={page.url.pathname === item.url}
-                      >
-                        {item.title}
-                      </Sidebar.MenuSubButton>
-                    </Sidebar.MenuSubItem>
-                  {/each}
-                </Sidebar.MenuSub>
+              <Collapsible.Content forceMount>
+                {#snippet child({ props, open })}
+                  {#if open}
+                    <div {...props} transition:slide={{ duration: 200 }}>
+                      <Sidebar.MenuSub>
+                        {#each toolsChildren as item (item.title)}
+                          <Sidebar.MenuSubItem>
+                            <Sidebar.MenuSubButton
+                              href={item.url}
+                              isActive={page.url.pathname === item.url}
+                            >
+                              {item.title}
+                            </Sidebar.MenuSubButton>
+                          </Sidebar.MenuSubItem>
+                        {/each}
+                      </Sidebar.MenuSub>
+                    </div>
+                  {/if}
+                {/snippet}
               </Collapsible.Content>
             </Sidebar.MenuItem>
           {/snippet}
@@ -160,14 +173,20 @@
                 {#snippet child({ props: trigProps })}
                   <Sidebar.MenuAction {...trigProps} class="data-[state=open]:rotate-90">
                     <ChevronRightIcon />
-                    <span class="sr-only">Ouvrir/Fermer</span>
+                    <span class="sr-only">Open/Close</span>
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>
-              <Collapsible.Content>
-                <Sidebar.MenuSub>
-                  {@render docNodes(docsTree, 0)}
-                </Sidebar.MenuSub>
+              <Collapsible.Content forceMount>
+                {#snippet child({ props, open })}
+                  {#if open}
+                    <div {...props} transition:slide={{ duration: 200 }}>
+                      <Sidebar.MenuSub>
+                        {@render docNodes(docsTree, 0)}
+                      </Sidebar.MenuSub>
+                    </div>
+                  {/if}
+                {/snippet}
               </Collapsible.Content>
             </Sidebar.MenuItem>
           {/snippet}

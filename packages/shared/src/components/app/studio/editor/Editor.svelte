@@ -11,21 +11,21 @@
 
   const ctx = createKeypadContext();
 
-  // Détection de retour à la ligne : on bascule le LayerSwitcher en onglets
-  // horizontaux quand la colonne layer + le clavier ne tiennent plus côte à côte.
+  // Line-wrap detection: switch the LayerSwitcher to horizontal tabs when the
+  // layer column + keyboard no longer fit side by side.
   //
-  // On NE PRÉDIT PAS le wrap via les tailles intrinsèques (min/max-content) :
-  // min-content sous-estime (clavier replié), max-content surestime (l'Encodeur
-  // s'étire à des largeurs jamais rendues) et les deux divergent entre Chrome et
-  // Firefox. À la place : PROBE synchrone. On impose la géométrie « côte à côte »
-  // (colonne à sa largeur verticale, clavier au naturel) puis on demande au
-  // navigateur si le clavier reste sur la même rangée -> on lit le wrap RÉEL du
-  // moteur de rendu, identique dans tous les navigateurs.
-  const LAYER_COL = 180; // largeur fixe de la colonne layer (vertical)
-  // Hystérésis, exprimée comme un élargissement de la colonne sondée quand on
-  // est déjà wrappé : pour dé-wrapper, le côte-à-côte doit tenir AVEC cette
-  // marge. Absorbe le va-et-vient de scrollbar (~17px Chrome/Windows : wrap ->
-  // plus haut -> scrollbar -> largeur chute). Firefox (overlay) n'a pas ce souci.
+  // We do NOT PREDICT the wrap via intrinsic sizes (min/max-content):
+  // min-content underestimates (collapsed keyboard), max-content overestimates
+  // (the encoder stretches to widths never rendered) and the two diverge between
+  // Chrome and Firefox. Instead: synchronous PROBE. We impose the "side by side"
+  // geometry (column at its vertical width, keyboard at natural size) then ask the
+  // browser whether the keyboard stays on the same row -> we read the REAL wrap of
+  // the rendering engine, identical across all browsers.
+  const LAYER_COL = 180; // fixed width of the layer column (vertical)
+  // Hysteresis, expressed as a widening of the probed column when already
+  // wrapped: to un-wrap, the side-by-side layout must fit WITH this margin.
+  // Absorbs the scrollbar back-and-forth (~17px Chrome/Windows: wrap -> taller
+  // -> scrollbar -> width drops). Firefox (overlay) does not have this issue.
   const HYST = 32;
 
   let contentEl = $state<HTMLElement | null>(null);
@@ -33,8 +33,8 @@
   let keypadEl = $state<HTMLElement | null>(null);
   let wrapped = $state(false);
 
-  // Observe le conteneur, coalesce les rafales de resize sur un rAF. La fermeture
-  // `measure` n'est pas réactive : lire `wrapped` dedans ne re-déclenche pas l'effet.
+  // Observe the container, coalesce resize bursts onto one rAF. The `measure`
+  // closure is not reactive: reading `wrapped` inside does not re-trigger the effect.
   $effect(() => {
     const content = contentEl;
     const layer = layerEl;
@@ -44,12 +44,12 @@
     let raf = 0;
     const measure = () => {
       raf = 0;
-      // Largeur de colonne sondée : +HYST quand déjà wrappé (marge anti-rebond).
+      // Probed column width: +HYST when already wrapped (anti-bounce margin).
       const probeW = `${wrapped ? LAYER_COL + HYST : LAYER_COL}px`;
-      // Force la colonne à sa forme verticale (les classes Tailwind w-full /
-      // max-w sont écrasées par le style inline le temps de la mesure), puis
-      // lis si le clavier a basculé sous la colonne. Écriture/lecture/restau
-      // synchrones -> aucune frame peinte entre -> pas de flash.
+      // Force the column to its vertical form (the Tailwind w-full / max-w
+      // classes are overridden by the inline style during the measure), then
+      // read whether the keyboard dropped below the column. Synchronous
+      // write/read/restore -> no frame painted in between -> no flash.
       const lw = layer.style.width;
       const lmw = layer.style.maxWidth;
       const lf = layer.style.flex;
@@ -60,7 +60,7 @@
       layer.style.width = lw;
       layer.style.maxWidth = lmw;
       layer.style.flex = lf;
-      if (stacked !== wrapped) wrapped = stacked; // n'écrit qu'au changement réel
+      if (stacked !== wrapped) wrapped = stacked; // only writes on real change
     };
     const schedule = () => {
       raf ||= requestAnimationFrame(measure);
@@ -75,7 +75,7 @@
     };
   });
 
-  // Bridge training : SWn pressé sur device → ouvre le picker correspondant.
+  // Training bridge: SWn pressed on device → opens the matching picker.
   $effect(() => {
     const target = trainingMode.requestedTarget;
     if (!target) return;

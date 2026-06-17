@@ -9,13 +9,13 @@
   const nf = new Intl.NumberFormat('fr-FR');
   const fmt = (n: number | undefined) => (n == null ? '—' : nf.format(n));
 
-  // Répartition par profil (avec noms si dispo).
+  // Breakdown per profile (with names if available).
   const perProfile = $derived.by(() => {
     if (!stats) return [];
     const names = configState.data?.profiles ?? [];
     const max = Math.max(1, ...stats.per_profile_keypresses);
     return stats.per_profile_keypresses.map((count, i) => ({
-      name: names[i]?.name ?? `Profil ${i + 1}`,
+      name: names[i]?.name ?? `Profile ${i + 1}`,
       count,
       pct: Math.round((count / max) * 100),
     }));
@@ -28,7 +28,7 @@
   </Card.Header>
   <Card.Content class="flex flex-col gap-3">
     {#if !stats}
-      <p class="text-sm text-muted-foreground">Statistiques indisponibles sur ce firmware.</p>
+      <p class="text-sm text-muted-foreground">Statistics unavailable on this firmware.</p>
     {:else}
       <div class="grid grid-cols-2 gap-3 @md/card:grid-cols-3">
         <div class="flex flex-col gap-0.5">

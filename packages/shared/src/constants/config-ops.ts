@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
-//  config-ops.ts — Mutations CRUD profils & layers (logique pure)
+//  config-ops.ts — Profile & layer CRUD mutations (pure logic)
 //
-//  Module sans runtime Svelte : opère sur un FullConfig cloné et
-//  renvoie le nouvel objet + la nouvelle sélection (profil/layer actifs).
-//  Testable au vitest, réutilisé par config.svelte.js.
+//  Module without Svelte runtime: operates on a cloned FullConfig and
+//  returns the new object + the new selection (active profile/layer).
+//  Testable with vitest, reused by config.svelte.js.
 //
-//  Invariants maintenus :
+//  Maintained invariants:
 //    - 1 ≤ profiles.length ≤ CONFIG_MAX_PROFILES
-//    - 1 ≤ layers.length   ≤ CONFIG_MAX_LAYERS (par profil)
-//    - cfg.active_profile reste un index valide après delete/move
-//    - les noms restent ≤ CONFIG_NAME_MAX_LEN-1 et uniques par scope
+//    - 1 ≤ layers.length   ≤ CONFIG_MAX_LAYERS (per profile)
+//    - cfg.active_profile stays a valid index after delete/move
+//    - names stay ≤ CONFIG_NAME_MAX_LEN-1 and unique per scope
 // ═══════════════════════════════════════════════════════════════
 
 import {
@@ -26,8 +26,8 @@ import {
 import { allocColorSlot } from './layer-colors.js';
 import { action, getActionType, getActionValue, ACTION_TYPES } from './action-types.js';
 
-// Types d'action dont la valeur est un index de layer (à remapper si on
-// réordonne les layers d'un profil).
+// Action types whose value is a layer index (to remap when
+// reordering a profile's layers).
 const LAYER_REF_TYPES: ReadonlySet<number> = new Set([
   ACTION_TYPES.ACTION_TYPE_LAYER_MO,
   ACTION_TYPES.ACTION_TYPE_LAYER_TG,
@@ -44,7 +44,7 @@ export interface OpResult {
   selection: Selection;
 }
 
-// ── Types publics pour les patches ──────────────────────────────
+// ── Public types for the patches ────────────────────────────────
 export type ProfileTemplate = ProfileConfig;
 
 export interface ProfilePatch {
@@ -58,7 +58,7 @@ export interface LayerPatch {
   moveTo?: number;
 }
 
-// ── Utilitaires ─────────────────────────────────────────────────
+// ── Utilities ───────────────────────────────────────────────────
 
 function clone<T>(v: T): T {
   return structuredClone(v);
@@ -72,7 +72,7 @@ function trimName(name: string): string {
   return name.slice(0, CONFIG_NAME_MAX_LEN - 1);
 }
 
-/** Rend un nom unique dans `existing` en suffixant " (n)" si nécessaire. */
+/** Makes a name unique within `existing` by suffixing " (n)" if needed. */
 function uniqueName(base: string, existing: string[]): string {
   const trimmed = trimName(base) || 'Profile';
   if (!existing.includes(trimmed)) return trimmed;
@@ -83,13 +83,13 @@ function uniqueName(base: string, existing: string[]): string {
   return trimmed;
 }
 
-/** Nouvel index d'un élément suivi après suppression de `removed`. */
+/** New index of a tracked element after removal of `removed`. */
 function indexAfterRemove(tracked: number, removed: number): number {
-  if (tracked === removed) return -1;        // l'élément suivi a été supprimé
+  if (tracked === removed) return -1;        // the tracked element was removed
   return tracked > removed ? tracked - 1 : tracked;
 }
 
-/** Nouvel index d'un élément suivi après déplacement from→to. */
+/** New index of a tracked element after move from→to. */
 function indexAfterMove(tracked: number, from: number, to: number): number {
   if (tracked === from) return to;
   if (from < tracked && to >= tracked) return tracked - 1;
@@ -102,7 +102,7 @@ function moveInArray<T>(arr: T[], from: number, to: number): void {
   arr.splice(to, 0, item);
 }
 
-/** Remappe une action si elle référence un layer déplacé from→to. */
+/** Remaps an action if it references a layer moved from→to. */
 function remapLayerRef(act: number, from: number, to: number): number {
   if (!LAYER_REF_TYPES.has(getActionType(act))) return act;
   const target = getActionValue(act);
@@ -111,8 +111,8 @@ function remapLayerRef(act: number, from: number, to: number): number {
 }
 
 /**
- * Réécrit toutes les actions MO/TG/TO du profil pour suivre un déplacement
- * de layer from→to (touches + encodeur, plat et imbriqué). Mute le profil.
+ * Rewrites all the profile's MO/TG/TO actions to follow a layer move
+ * from→to (keys + encoder, flat and nested). Mutates the profile.
  */
 function remapProfileLayerRefs(profile: ProfileConfig, from: number, to: number): void {
   for (const layer of profile.layers) {
@@ -129,11 +129,11 @@ function remapProfileLayerRefs(profile: ProfileConfig, from: number, to: number)
   }
 }
 
-// ── Profils ─────────────────────────────────────────────────────
+// ── Profiles ────────────────────────────────────────────────────
 
 /**
- * Ajoute un profil à partir d'un gabarit (preset) ou d'un profil vierge.
- * Sélectionne le nouveau profil. No-op si déjà au max.
+ * Adds a profile from a template (preset) or from a blank profile.
+ * Selects the new profile. No-op if already at max.
  */
 export function addProfile(
   config: FullConfig,
@@ -153,7 +153,7 @@ export function addProfile(
   return { config: cfg, selection: { profile: newIdx, layer: 0 } };
 }
 
-/** Supprime un profil (garde au moins MIN_PROFILES). */
+/** Deletes a profile (keeps at least MIN_PROFILES). */
 export function deleteProfile(
   config: FullConfig,
   selection: Selection,
@@ -172,7 +172,7 @@ export function deleteProfile(
 }
 
 /**
- * Édite un profil de façon fédérée : renommage, icône et/ou déplacement.
+ * Edits a profile in a unified way: rename, icon and/or move.
  * patch = { name?, icon?, moveTo? }
  */
 export function editProfile(
@@ -203,9 +203,9 @@ export function editProfile(
 }
 
 /**
- * Réinitialise un profil : remet à 0 toutes les touches de tous ses layers.
- * Conserve la structure (nombre de layers, noms), les encodeurs, l'icône et le
- * nom du profil — même sémantique que le « reset » d'un layer, appliqué à tous.
+ * Resets a profile: sets all keys of all its layers back to 0.
+ * Keeps the structure (layer count, names), the encoders, the icon and the
+ * profile name — same semantics as a layer "reset", applied to all.
  */
 export function clearProfile(
   config: FullConfig,
@@ -224,7 +224,7 @@ export function clearProfile(
 
 // ── Layers ──────────────────────────────────────────────────────
 
-/** Ajoute un layer au profil pIdx (garde ≤ CONFIG_MAX_LAYERS) et le sélectionne. */
+/** Adds a layer to profile pIdx (keeps ≤ CONFIG_MAX_LAYERS) and selects it. */
 export function addLayer(
   config: FullConfig,
   selection: Selection,
@@ -244,8 +244,8 @@ export function addLayer(
   return { config: cfg, selection: { profile: pIdx, layer: newLayer } };
 }
 
-/** Duplique le layer lIdx du profil pIdx (clone + nom unique), l'insère juste
- *  après et le sélectionne. No-op si déjà au max. */
+/** Duplicates layer lIdx of profile pIdx (clone + unique name), inserts it just
+ *  after and selects it. No-op if already at max. */
 export function duplicateLayer(
   config: FullConfig,
   selection: Selection,
@@ -260,13 +260,13 @@ export function duplicateLayer(
   const src = clone(profile.layers[lIdx]);
   const names = profile.layers.map((l) => l.name ?? '');
   src.name = uniqueName(src.name ?? `Layer ${profile.layers.length + 1}`, names);
-  src.color = allocColorSlot(profile.layers); // nouveau slot : layer distinct du source
+  src.color = allocColorSlot(profile.layers); // new slot: layer distinct from the source
   profile.layers.splice(lIdx + 1, 0, src);
 
   return { config: cfg, selection: { profile: pIdx, layer: lIdx + 1 } };
 }
 
-/** Supprime un layer (garde au moins MIN_LAYERS). */
+/** Deletes a layer (keeps at least MIN_LAYERS). */
 export function deleteLayer(
   config: FullConfig,
   selection: Selection,
@@ -289,7 +289,7 @@ export function deleteLayer(
 }
 
 /**
- * Édite un layer de façon fédérée : renommage et/ou déplacement.
+ * Edits a layer in a unified way: rename and/or move.
  * patch = { name?, moveTo? }
  */
 export function editLayer(
@@ -312,7 +312,7 @@ export function editLayer(
   if (patch.moveTo !== undefined && patch.moveTo !== lIdx) {
     const to = clamp(patch.moveTo, 0, profile.layers.length - 1);
     moveInArray(profile.layers, lIdx, to);
-    // Suivre les références de layer (MO/TG/TO) après le déplacement.
+    // Follow the layer references (MO/TG/TO) after the move.
     remapProfileLayerRefs(profile, lIdx, to);
     if (selection.profile === pIdx) {
       sel = { ...selection, layer: indexAfterMove(selection.layer, lIdx, to) };
@@ -321,7 +321,7 @@ export function editLayer(
   return { config: cfg, selection: sel };
 }
 
-// ── Helpers granulaires exposés (composables) ───────────────────
+// ── Exposed granular helpers (composables) ──────────────────────
 
 export function renameProfile(config: FullConfig, selection: Selection, idx: number, name: string): OpResult {
   return editProfile(config, selection, idx, { name });
@@ -339,11 +339,11 @@ export function moveLayer(config: FullConfig, selection: Selection, pIdx: number
   return editLayer(config, selection, pIdx, from, { moveTo: to });
 }
 
-// ── interne ─────────────────────────────────────────────────────
+// ── internal ────────────────────────────────────────────────────
 
-/** Remappe un index suivi après suppression, en restant dans [0, newLen-1]. */
+/** Remaps a tracked index after removal, staying within [0, newLen-1]. */
 function remapTracked(tracked: number, removed: number, newLen: number): number {
   const next = indexAfterRemove(tracked, removed);
-  if (next < 0) return clamp(removed, 0, newLen - 1); // l'élément suivi a disparu
+  if (next < 0) return clamp(removed, 0, newLen - 1); // the tracked element disappeared
   return clamp(next, 0, newLen - 1);
 }

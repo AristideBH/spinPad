@@ -1,9 +1,9 @@
 {
-  "_comment": "Schéma de config du clavier custom — édité via l'app SvelteKit",
+  "_comment": "Custom keyboard config schema - edited via the SvelteKit app",
   "_doc": {
-    "keys": "Valeurs uint16 encodées : type(4bits) + valeur(12bits). Utiliser les constantes de keymap.h ou l'app SvelteKit.",
-    "layers": "Index 0 = layer de base (toujours actif). Layers suivants activés via MO/TG/TO.",
-    "combos": "keys = index des SW# (0-based). window_ms = fenêtre de détection."
+    "keys": "Encoded uint16 values: type(4bits) + value(12bits). Use the constants from keymap.h or the SvelteKit app.",
+    "layers": "Index 0 = base layer (always active). Following layers activated via MO/TG/TO.",
+    "combos": "keys = SW# indices (0-based). window_ms = detection window."
   },
 
   "version": 1,
@@ -43,8 +43,8 @@
           ],
           "_key_comments": {
             "_format": "ACTION(type, value) = (type << 12) | value",
-            "4369": "KC_A = ACTION(0, 0x11) — type KC (0), HID keycode A (0x04 = 4, mais 4369 = 0x1111 = type 1 (MOD)?",
-            "_note": "Les valeurs ci-dessus sont des placeholders. L'app SvelteKit génère les valeurs correctes via la liste des keycodes."
+            "4369": "KC_A = ACTION(0, 0x11) - type KC (0), HID keycode A (0x04 = 4, but 4369 = 0x1111 = type 1 (MOD)?",
+            "_note": "The values above are placeholders. The SvelteKit app generates the correct values via the keycode list."
           },
           "encoder": {
             "cw": 20481,
@@ -65,7 +65,7 @@
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0
           ],
-          "_note": "0 = KC_NONE = transparent (passe au layer en dessous)",
+          "_note": "0 = KC_NONE = transparent (falls through to the layer below)",
           "encoder": {
             "cw": 20496,
             "ccw": 20497,
@@ -79,7 +79,7 @@
       ],
       "combos": [
         {
-          "_comment": "Exemple de combo : SW1 + SW2 simultanés → Escape",
+          "_comment": "Example combo: SW1 + SW2 simultaneously -> Escape",
           "keys": [0, 1],
           "action": 41,
           "window_ms": 50,
@@ -102,7 +102,7 @@
             "cw": 20497,
             "ccw": 20496,
             "press": 0,
-            "_comment": "Scroll inversé pour gaming"
+            "_comment": "Scroll inverted for gaming"
           }
         }
       ],

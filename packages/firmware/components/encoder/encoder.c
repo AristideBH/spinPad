@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-//  encoder.c — Encodeur rotatif quadrature
+//  encoder.c — Quadrature rotary encoder
 //
-//  Un encodeur quadrature génère deux signaux déphasés (A et B).
-//  En lisant l'ordre d'apparition des fronts, on détermine
-//  le sens de rotation (CW = horaire, CCW = anti-horaire).
+//  A quadrature encoder generates two phase-shifted signals (A and B).
+//  By reading the order in which the edges appear, we determine
+//  the rotation direction (CW = clockwise, CCW = counter-clockwise).
 //
-//  Table de transition quadrature :
-//    AB: 00→01→11→10→00 = sens horaire (CW)
-//    AB: 00→10→11→01→00 = sens anti-horaire (CCW)
+//  Quadrature transition table:
+//    AB: 00→01→11→10→00 = clockwise (CW)
+//    AB: 00→10→11→01→00 = counter-clockwise (CCW)
 // ═══════════════════════════════════════════════════════════════
 
 #include "encoder.h"
@@ -26,9 +26,9 @@
 static const char *TAG = "ENCODER";
 
 // ─────────────────────────────────────────────────────────────
-//  Table de décodage quadrature
+//  Quadrature decoding table
 //  Index = (prev_AB << 2) | curr_AB
-//  Valeur = +1 (CW), -1 (CCW), 0 (invalide/pas de mouvement)
+//  Value = +1 (CW), -1 (CCW), 0 (invalid/no movement)
 // ─────────────────────────────────────────────────────────────
 static const int8_t QUADRATURE_TABLE[16] = {
 //  AB: 00→00  00→01  00→10  00→11
@@ -41,46 +41,46 @@ static const int8_t QUADRATURE_TABLE[16] = {
         0,     -1,    +1,     0,
 };
 
-// État précédent des pins A et B
+// Previous state of pins A and B
 static uint8_t g_encoder_prev_ab = 0;
-// Accumulateur de pas (pour éviter d'envoyer un event par micromovement)
+// Step accumulator (to avoid sending one event per micro-movement)
 static int8_t  g_encoder_accumulator = 0;
-// Queue pour passer les événements de l'ISR à la tâche principale
+// Queue to pass events from the ISR to the main task
 static QueueHandle_t g_encoder_queue = NULL;
 
 // ─────────────────────────────────────────────────────────────
 //  ISR (Interrupt Service Routine)
-//  Appelée automatiquement sur chaque front (montant ou descendant)
-//  des pins A ou B.
-//  IMPORTANT : les ISR doivent être rapides et ne pas bloquer.
-//  On met juste un delta dans la queue, le traitement se fait ailleurs.
+//  Called automatically on each edge (rising or falling)
+//  of pins A or B.
+//  IMPORTANT: ISRs must be fast and must not block.
+//  We just put a delta in the queue, the processing happens elsewhere.
 // ─────────────────────────────────────────────────────────────
 static void IRAM_ATTR encoder_isr_handler(void *arg)
 {
-    // Lire l'état actuel des deux pins
+    // Read the current state of both pins
     uint8_t a = gpio_get_level(ENCODER_PIN_A);
     uint8_t b = gpio_get_level(ENCODER_PIN_B);
     uint8_t curr_ab = (a << 1) | b;
 
-    // Calculer le delta via la table quadrature
+    // Compute the delta via the quadrature table
     int8_t delta = QUADRATURE_TABLE[(g_encoder_prev_ab << 2) | curr_ab];
     g_encoder_prev_ab = curr_ab;
 
     if (delta != 0) {
-        // Envoyer le delta vers la queue (depuis une ISR → utiliser xQueueSendFromISR)
+        // Send the delta to the queue (from an ISR → use xQueueSendFromISR)
         BaseType_t woken = pdFALSE;
         xQueueSendFromISR(g_encoder_queue, &delta, &woken);
-        // Donner la main à une tâche plus prioritaire si elle attend sur cette queue
+        // Yield to a higher-priority task if it is waiting on this queue
         if (woken) portYIELD_FROM_ISR();
     }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ENVOI DE L'ACTION ENCODER
+//  SENDING THE ENCODER ACTION
 // ─────────────────────────────────────────────────────────────
 static void send_encoder_action(bool clockwise)
 {
-    // Récupérer l'action de l'encoder depuis le layer actif
+    // Get the encoder action from the active layer
     uint8_t active_layer = keymap_get_active_layer();
     uint8_t active_profile = config_store_get()->active_profile;
     const kb_layer_t *layer = &config_store_get()->profiles[active_profile].layers[active_layer];
@@ -88,7 +88,7 @@ static void send_encoder_action(bool clockwise)
     uint16_t action = clockwise ? layer->encoder_cw : layer->encoder_ccw;
     if (action == KC_NONE) return;
 
-    // Envoyer l'action (press + release immédiat pour les encodeurs)
+    // Send the action (press + immediate release for encoders)
     uint8_t type  = (action >> 12) & 0xF;
     uint16_t value = action & 0x0FFF;
 
@@ -108,35 +108,35 @@ static void send_encoder_action(bool clockwise)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
+//  PUBLIC FUNCTIONS
 // ─────────────────────────────────────────────────────────────
 
 esp_err_t encoder_init(void)
 {
-    // Créer la queue (capacité 32 deltas)
+    // Create the queue (capacity 32 deltas)
     g_encoder_queue = xQueueCreate(32, sizeof(int8_t));
 
-    // Configurer les GPIO encodeur en entrée avec pull-up
+    // Configure the encoder GPIOs as input with pull-up
     gpio_config_t cfg = {
         .pin_bit_mask = (1ULL << ENCODER_PIN_A) | (1ULL << ENCODER_PIN_B),
         .mode         = GPIO_MODE_INPUT,
         .pull_up_en   = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type    = GPIO_INTR_ANYEDGE,  // Interruption sur tout changement
+        .intr_type    = GPIO_INTR_ANYEDGE,  // Interrupt on any change
     };
     gpio_config(&cfg);
 
-    // Lire l'état initial
+    // Read the initial state
     uint8_t a = gpio_get_level(ENCODER_PIN_A);
     uint8_t b = gpio_get_level(ENCODER_PIN_B);
     g_encoder_prev_ab = (a << 1) | b;
 
-    // Installer le service d'interruption GPIO
+    // Install the GPIO interrupt service
     gpio_install_isr_service(0);
     gpio_isr_handler_add(ENCODER_PIN_A, encoder_isr_handler, NULL);
     gpio_isr_handler_add(ENCODER_PIN_B, encoder_isr_handler, NULL);
 
-    // Bouton de l'encodeur (optionnel)
+    // Encoder button (optional)
     if (ENCODER_PIN_BTN >= 0) {
         gpio_config_t btn_cfg = {
             .pin_bit_mask = (1ULL << ENCODER_PIN_BTN),
@@ -148,23 +148,23 @@ esp_err_t encoder_init(void)
         gpio_config(&btn_cfg);
     }
 
-    ESP_LOGI(TAG, "Encodeur initialisé (A=%d, B=%d)", ENCODER_PIN_A, ENCODER_PIN_B);
+    ESP_LOGI(TAG, "Encoder initialized (A=%d, B=%d)", ENCODER_PIN_A, ENCODER_PIN_B);
     return ESP_OK;
 }
 
 void encoder_process(void)
 {
-    // Drainer tous les deltas accumulés dans la queue
+    // Drain all deltas accumulated in the queue
     int8_t delta;
     while (xQueueReceive(g_encoder_queue, &delta, 0) == pdTRUE) {
         g_encoder_accumulator += delta;
     }
 
-    // Seuil adapté à la sensibilité config (1–4) :
-    //   sensitivity=1 → seuil 4 (1 événement par détent, comportement standard)
-    //   sensitivity=2 → seuil 2 (2× plus réactif)
-    //   sensitivity=4 → seuil 1 (1 événement par impulsion quadrature)
-    // Override par layer (0 = hérite du global).
+    // Threshold adapted to the config sensitivity (1-4):
+    //   sensitivity=1 → threshold 4 (1 event per detent, standard behavior)
+    //   sensitivity=2 → threshold 2 (2× more reactive)
+    //   sensitivity=4 → threshold 1 (1 event per quadrature pulse)
+    // Override per layer (0 = inherits from global).
     uint8_t active_layer_idx = keymap_get_active_layer();
     uint8_t active_profile_idx = config_store_get()->active_profile;
     const kb_layer_t *active_layer = &config_store_get()->profiles[active_profile_idx].layers[active_layer_idx];

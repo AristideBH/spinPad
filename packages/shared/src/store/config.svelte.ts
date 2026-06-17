@@ -1,22 +1,22 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/config.svelte.ts — State global de la configuration SpinPad
+//  store/config.svelte.ts — Global state of the SpinPad configuration
 //
-//  Transport sélectionné au build via store/transport.ts :
-//    VITE_TRANSPORT=http  → transport/http.ts   (Studio Mode embarqué)
-//    (défaut)             → store/serial.svelte.ts (WebSerial USB)
-//    VITE_DEV_MODE=true   → transport/mock.ts (développement sans device)
+//  Transport selected at build via store/transport.ts:
+//    VITE_TRANSPORT=http  → transport/http.ts   (embedded Studio Mode)
+//    (default)            → store/serial.svelte.ts (WebSerial USB)
+//    VITE_DEV_MODE=true   → transport/mock.ts (development without device)
 //
-//  Features :
+//  Features:
 //    - Auto-save debounced (800ms) → transport.setConfig()
 //    - Undo / Redo via Runed StateHistory (Ctrl+Z / Ctrl+Y)
-//    - Import / Export au format .spinpad (JSON avec header)
+//    - Import / Export in .spinpad format (JSON with header)
 //
-//  Note : les raccourcis clavier Ctrl+Z/Y sont gérés dans Studio.svelte
-//  via <svelte:window onkeydown=...> pour isoler l'effet de bord UI.
+//  Note: the Ctrl+Z/Y keyboard shortcuts are handled in Studio.svelte
+//  via <svelte:window onkeydown=...> to isolate the UI side effect.
 // ═══════════════════════════════════════════════════════════════
 
-// @ts-ignore - shared workspace n'est pas un dossier Svelte ; résolu au runtime par
-// l'alias Vite des workspaces studio/website (résolution variable selon le check).
+// @ts-ignore - shared workspace is not a Svelte folder; resolved at runtime by
+// the Vite alias of the studio/website workspaces (resolution varies by check).
 import { browser } from '$app/environment';
 import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
@@ -63,8 +63,8 @@ async function _flushSave(): Promise<void> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     configState.loadError = msg;
-    console.error('[config] Erreur auto-save :', err);
-    toast.error('Erreur de sauvegarde', { description: msg });
+    console.error('[config] Auto-save error:', err);
+    toast.error('Save error', { description: msg });
   } finally {
     configState.isSaving = false;
   }
@@ -101,7 +101,7 @@ class ConfigState {
 export const configState = new ConfigState();
 
 // ─────────────────────────────────────────────────────────────
-//  HISTORIQUE UNDO/REDO (Runed StateHistory)
+//  UNDO/REDO HISTORY (Runed StateHistory)
 // ─────────────────────────────────────────────────────────────
 
 let _history: StateHistory<FullConfig | null> | null = null;
@@ -134,15 +134,15 @@ export function canRedo(): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  CHARGEMENT
+//  LOADING
 // ─────────────────────────────────────────────────────────────
 
 export async function loadConfig(): Promise<void> {
   configState.isLoading = true;
   configState.loadError = null;
   try {
-    // Pas de device branché (hors mode démo / HTTP) → prévisualiser la config
-    // par défaut au lieu d'échouer sur "Non connecté".
+    // No device plugged in (outside demo mode / HTTP) → preview the default
+    // config instead of failing on "Not connected".
     if (_transportMode() === 'serial' && !serial.connected) {
       const cfg = structuredClone(MOCK_CONFIG) as unknown as FullConfig;
       backfillLayerColors(cfg.profiles);
@@ -159,22 +159,22 @@ export async function loadConfig(): Promise<void> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     configState.loadError = msg;
-    console.error('[config] Erreur chargement :', err);
-    toast.error('Impossible de charger la config', { description: msg });
+    console.error('[config] Loading error:', err);
+    toast.error('Unable to load config', { description: msg });
   } finally {
     configState.isLoading = false;
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SAUVEGARDE MANUELLE
+//  MANUAL SAVE
 // ─────────────────────────────────────────────────────────────
 
 export async function saveConfig(): Promise<void> {
   await _autoSave.flush();
 }
 
-/** `true` si une sauvegarde auto est encore en attente (fenêtre debounce). */
+/** `true` if an auto-save is still pending (debounce window). */
 export function hasPendingSave(): boolean {
   return _autoSave.pending;
 }
@@ -184,12 +184,12 @@ export async function factoryReset(): Promise<void> {
   try {
     await activeTransport().factoryReset();
     await loadConfig();
-    toast.success('Reset usine effectué');
+    toast.success('Factory reset done');
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     configState.loadError = msg;
-    console.error('[config] Erreur factory reset :', err);
-    toast.error('Erreur lors du reset usine', { description: msg });
+    console.error('[config] Factory reset error:', err);
+    toast.error('Error during factory reset', { description: msg });
   } finally {
     configState.isLoading = false;
   }
@@ -211,7 +211,7 @@ export function exportConfig(): void {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  toast.success('Config exportée');
+  toast.success('Config exported');
 }
 
 export async function importConfig(file: File): Promise<void> {
@@ -220,23 +220,23 @@ export async function importConfig(file: File): Promise<void> {
   try {
     const raw = JSON.parse(text) as Record<string, unknown>;
     if (raw['_type'] === SPINPAD_PROFILES_FILE_TYPE) {
-      throw new Error('Ce fichier contient des profils — utilise « Importer profils ».');
+      throw new Error('This file contains profiles — use "Import profiles".');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parsed = (raw['_type'] ? parseSpinpadFile(raw) : raw) as any as FullConfig;
   } catch (err) {
-    throw new Error(`Fichier invalide : ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`Invalid file: ${err instanceof Error ? err.message : String(err)}`);
   }
   backfillLayerColors(parsed.profiles);
   configState.data = parsed;
   configState.activeProfileIndex = parsed.active_profile ?? 0;
   configState.isDirty = true;
   _autoSave.schedule();
-  toast.success('Config importée', { description: file.name });
+  toast.success('Config imported', { description: file.name });
 }
 
 // ─────────────────────────────────────────────────────────────
-//  IMPORT / EXPORT profils (.spinpad-profiles)
+//  IMPORT / EXPORT profiles (.spinpad-profiles)
 // ─────────────────────────────────────────────────────────────
 
 function _filenameSafe(s: string): string {
@@ -264,7 +264,7 @@ export function exportProfiles(indices: number[]): void {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  toast.success(`${selected.length} profil(s) exporté(s)`);
+  toast.success(`${selected.length} profile(s) exported`);
 }
 
 export async function importProfiles(file: File): Promise<void> {
@@ -273,13 +273,13 @@ export async function importProfiles(file: File): Promise<void> {
   try {
     const raw = JSON.parse(text) as Record<string, unknown>;
     if (raw['_type'] === SPINPAD_FILE_TYPE) {
-      throw new Error('Ce fichier contient une config complète — utilise « Importer config ».');
+      throw new Error('This file contains a full config — use "Import config".');
     }
     profiles = parseProfilesFile(raw).profiles;
   } catch (err) {
-    throw new Error(`Fichier invalide : ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(`Invalid file: ${err instanceof Error ? err.message : String(err)}`);
   }
-  if (!configState.data) throw new Error('Aucune config chargée.');
+  if (!configState.data) throw new Error('No config loaded.');
   const cfg = $state.snapshot(configState.data) as FullConfig;
   cfg.profiles = profiles;
   if (cfg.active_profile >= profiles.length) cfg.active_profile = 0;
@@ -288,7 +288,7 @@ export async function importProfiles(file: File): Promise<void> {
   configState.activeLayerIndex = 0;
   configState.isDirty = true;
   _autoSave.schedule();
-  toast.success(`${profiles.length} profil(s) importé(s)`, { description: file.name });
+  toast.success(`${profiles.length} profile(s) imported`, { description: file.name });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -327,9 +327,9 @@ export function setEncoderAction(
 ): void {
   const cfg = $state.snapshot(configState.data) as FullConfig;
   const layer = cfg.profiles[profileIdx].layers[layerIdx];
-  // L'objet `encoder` (nested) est le format canonique lu par le firmware et
-  // l'UI. Les layers créés via defaultLayer peuvent ne pas l'avoir → on le crée
-  // à la volée, sinon l'assignation serait silencieusement ignorée.
+  // The (nested) `encoder` object is the canonical format read by the firmware
+  // and the UI. Layers created via defaultLayer may not have it → we create it
+  // on the fly, otherwise the assignment would be silently ignored.
   const enc = layer.encoder ?? (layer.encoder = { cw: 0, ccw: 0, press: 0 });
   enc[direction] = actionValue;
   configState.data = cfg;
@@ -338,23 +338,23 @@ export function setEncoderAction(
 }
 
 // ─────────────────────────────────────────────────────────────
-//  PROFIL ACTIF (couplé device ↔ studio)
+//  ACTIVE PROFILE (coupled device ↔ studio)
 // ─────────────────────────────────────────────────────────────
 
-// Dernier index poussé au device — garde anti-écho pour le réconciliateur
-// (évite de renvoyer au device une valeur qu'il vient de nous signaler).
+// Last index pushed to the device — anti-echo guard for the reconciler
+// (avoids resending the device a value it just reported to us).
 let _lastSentActiveProfile = -1;
 
 /**
- * Définit le profil actif côté studio ET device (couplage edit ↔ active).
+ * Sets the active profile on the studio AND device side (edit ↔ active coupling).
  *
- * - Mutation EN PLACE de `data.active_profile` : pas d'entrée d'undo ni de
- *   full-save (un switch de profil n'est pas une édition annulable), mais la
- *   config reste cohérente pour le prochain `setConfig` (évite le clobber du
- *   profil actif persisté sur le device).
- * - `push: true` (défaut) → pousse la bascule légère au device.
- *   `push: false` → utilisé par le réconciliateur quand le device est déjà la
- *   source de vérité (on ne lui renvoie pas la valeur).
+ * - IN-PLACE mutation of `data.active_profile`: no undo entry nor full-save
+ *   (a profile switch is not an undoable edit), but the config stays consistent
+ *   for the next `setConfig` (avoids clobbering the active profile persisted on
+ *   the device).
+ * - `push: true` (default) → pushes the lightweight switch to the device.
+ *   `push: false` → used by the reconciler when the device is already the
+ *   source of truth (we do not send the value back to it).
  */
 export function setActiveProfileLocal(idx: number, opts: { push?: boolean } = {}): void {
   const data = configState.data;
@@ -362,7 +362,7 @@ export function setActiveProfileLocal(idx: number, opts: { push?: boolean } = {}
   const max = Math.max(0, data.profiles.length - 1);
   const clamped = Math.min(Math.max(idx, 0), max);
 
-  data.active_profile = clamped; // mutation en place → pas d'history/full-save
+  data.active_profile = clamped; // in-place mutation → no history/full-save
   configState.activeProfileIndex = clamped;
   configState.activeLayerIndex = 0;
 
@@ -372,24 +372,24 @@ export function setActiveProfileLocal(idx: number, opts: { push?: boolean } = {}
       .setActiveProfile(clamped)
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
-        // « Non connecté » est normal en mode preview (serial sans device).
-        if (msg !== 'Non connecté') console.error('[config] setActiveProfile échec :', msg);
+        // "Not connected" is normal in preview mode (serial without device).
+        if (msg !== 'Not connected') console.error('[config] setActiveProfile failed:', msg);
       });
   }
 }
 
 /**
- * Réconcilie le profil actif rapporté par le device avec l'état studio.
- * Appelé depuis le polling device_status et l'événement « profile » du
- * moniteur. Le device est la source de vérité du « profil live » : si l'index
- * diverge, on aligne le studio SANS renvoyer au device (pas d'écho/boucle).
+ * Reconciles the active profile reported by the device with the studio state.
+ * Called from the device_status polling and the monitor "profile" event. The
+ * device is the source of truth of the "live profile": if the index diverges,
+ * we align the studio WITHOUT sending back to the device (no echo/loop).
  */
 export function reconcileActiveProfile(deviceIdx: number): void {
   const data = configState.data;
   if (!data || typeof deviceIdx !== 'number' || deviceIdx < 0) return;
-  if (deviceIdx === data.active_profile) return; // déjà synchro → no-op
+  if (deviceIdx === data.active_profile) return; // already synced → no-op
   if (deviceIdx === _lastSentActiveProfile) {
-    // C'est l'écho de notre propre push : on est déjà aligné localement.
+    // This is the echo of our own push: we are already aligned locally.
     _lastSentActiveProfile = -1;
     return;
   }
@@ -418,7 +418,7 @@ export function reconcileActiveProfile(deviceIdx: number): void {
 // }
 
 // ─────────────────────────────────────────────────────────────
-//  MUTATIONS MACROS (globales — index 0..MACRO_COUNT-1)
+//  MACRO MUTATIONS (global — index 0..MACRO_COUNT-1)
 // ─────────────────────────────────────────────────────────────
 
 function _ensureMacros(cfg: FullConfig): MacroDef[] {
@@ -447,9 +447,9 @@ export function setMacroSteps(idx: number, steps: MacroStep[]): void {
 }
 
 /**
- * Crée une macro dans le premier slot libre à partir d'étapes fournies.
- * Retourne l'index du slot, ou `null` si tous les slots sont occupés.
- * Utilisé par le live-record quand un combo (modificateur + touche) est capturé.
+ * Creates a macro in the first free slot from the provided steps.
+ * Returns the slot index, or `null` if all slots are occupied.
+ * Used by live-record when a combo (modifier + key) is captured.
  */
 export function createMacroFromSteps(name: string, steps: MacroStep[]): number | null {
   const cfg = $state.snapshot(configState.data) as FullConfig;
@@ -462,7 +462,7 @@ export function createMacroFromSteps(name: string, steps: MacroStep[]): number |
     }
   }
   if (slot < 0) {
-    toast.error('Tous les slots de macro sont utilisés');
+    toast.error('All macro slots are used');
     return null;
   }
   macros[slot] = {
@@ -486,14 +486,14 @@ export function clearMacro(idx: number): void {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  MUTATIONS PROFILS & LAYERS (CRUD)
+//  PROFILE & LAYER MUTATIONS (CRUD)
 // ─────────────────────────────────────────────────────────────
 
 function _applyOp(result: ops.OpResult): void {
-  // Couplage edit ↔ active : le profil sélectionné après une op CRUD (add /
-  // duplicate auto-select, delete remap) est aussi le profil actif du device.
-  // L'op a déjà recalé active_profile pour l'intégrité ; on l'aligne sur la
-  // sélection finale. Le full-save qui suit le propage au device.
+  // Edit ↔ active coupling: the profile selected after a CRUD op (add /
+  // duplicate auto-select, delete remap) is also the device's active profile.
+  // The op has already realigned active_profile for integrity; we align it on
+  // the final selection. The following full-save propagates it to the device.
   result.config.active_profile = result.selection.profile;
   configState.data = result.config;
   configState.activeProfileIndex = result.selection.profile;
@@ -566,7 +566,7 @@ export function setKeyLedOverride(
   if (!layer) return;
   if (!layer.key_leds) layer.key_leds = Array(10).fill(null);
   layer.key_leds[keyIdx] = override;
-  // Nettoyage : si tous null, supprimer le tableau
+  // Cleanup: if all null, remove the array
   if (layer.key_leds.every((v) => v === null)) delete layer.key_leds;
   configState.data = cfg;
   configState.isDirty = true;

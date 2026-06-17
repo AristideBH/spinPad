@@ -1,12 +1,12 @@
 <script lang="ts" generics="T">
   // ───────────────────────────────────────────────────────────────
-  //  Sortable.svelte — Liste réordonnable (drag) sur svelte-mosaic
+  //  Sortable.svelte — Reorderable list (drag) on svelte-mosaic
   //
-  //  Enveloppe le Grid de svelte-mosaic pour un usage liste 1-D :
-  //  une seule rangée (horizontal) ou une seule colonne (vertical),
-  //  poignée de drag personnalisée, et émission d'un (from, to) unique
-  //  via onReorder. Le composant ne mute jamais `items` : le parent
-  //  applique le déplacement dans le store (source de vérité unique).
+  //  Wraps svelte-mosaic's Grid for 1-D list usage:
+  //  a single row (horizontal) or a single column (vertical),
+  //  custom drag handle, and emission of a single (from, to)
+  //  via onReorder. The component never mutates `items`: the parent
+  //  applies the move in the store (single source of truth).
   // ───────────────────────────────────────────────────────────────
   import { Grid, type GridItem, type ColsDefinition, type SnippetArgs } from '@arisbh/svelte-mosaic';
   import { gridHelp } from '@arisbh/svelte-mosaic/helper';
@@ -17,12 +17,12 @@
   interface Props {
     items: T[];
     orientation?: 'horizontal' | 'vertical';
-    /** Hauteur de ligne en px, ou "auto" : hauteur pilotée par le contenu (liste 1-D verticale). */
+    /** Row height in px, or "auto": content-driven height (1-D vertical list). */
     rowHeight?: number | 'auto';
     /**
-     * Largeur de colonne en px (shrink-to-fit, déborde dans une zone scrollable),
-     * ou "auto" : largeur pilotée par le contenu (liste 1-D horizontale, le conteneur
-     * se réduit au contenu → items condensés à gauche). Ignoré en vertical.
+     * Column width in px (shrink-to-fit, overflows into a scrollable area),
+     * or "auto": content-driven width (1-D horizontal list, the container
+     * shrinks to the content → items condensed on the left). Ignored in vertical.
      */
     colWidth?: number | 'auto';
     gap?: [number, number];
@@ -41,7 +41,7 @@
     onReorder,
     children,
   }: Props = $props();
-  // Alias pour éviter l'ombrage par le snippet `children` du Grid ci-dessous.
+  // Alias to avoid shadowing by the Grid's `children` snippet below.
   const renderItem = $derived(children);
 
   const horizontal = $derived(orientation === 'horizontal');
@@ -49,16 +49,16 @@
   const cols = $derived<ColsDefinition>([[0, colCount]]);
   const dataOrder = $derived(items.map((it, i) => getKey(it, i)));
 
-  // Largeur fixe horizontale : on garde le chemin éprouvé (grille fluide +
-  // largeur de conteneur forcée), au lieu du chemin "colWidth fixe" du module.
-  // Seul le mode "auto" passe colWidth au Grid.
+  // Horizontal fixed width: we keep the proven path (fluid grid +
+  // forced container width), instead of the module's "fixed colWidth" path.
+  // Only the "auto" mode passes colWidth to the Grid.
   const fixedColWidth = $derived(horizontal && typeof colWidth === 'number' ? colWidth : undefined);
   const forcedWidth = $derived(fixedColWidth ? colCount * fixedColWidth + (colCount - 1) * gap[0] : undefined);
   const gridColWidth = $derived<number | 'auto' | undefined>(colWidth === 'auto' ? 'auto' : undefined);
 
-  // Reconstruit les éléments de grille depuis les données canoniques.
-  // Ne dépend pas de `gridItems` → les mutations internes de mosaic
-  // pendant le drag ne relancent pas cet effet.
+  // Rebuilds the grid elements from the canonical data.
+  // Does not depend on `gridItems` → mosaic's internal mutations
+  // during the drag don't re-run this effect.
   let gridItems = $state<GridItem[]>([]);
   $effect(() => {
     gridItems = items.map((it, i) => {
@@ -69,7 +69,7 @@
         w: 1,
         h: 1,
         customDragger: true,
-        resizable: false, // items toujours 1 unité — pas de redimensionnement
+        resizable: false, // items always 1 unit — no resizing
       });
       return gi;
     });
@@ -91,9 +91,9 @@
     if (move) onReorder(move.from, move.to);
   }
 
-  // Verrouille le déplacement sur l'axe de la liste : mosaic suit le pointeur
-  // sur X et Y (drag libre 2-D), ce qui fait dériver l'aperçu hors de la liste.
-  // On remet à 0 la composante hors-axe du transform de l'item actif.
+  // Locks the move to the list's axis: mosaic follows the pointer
+  // on X and Y (free 2-D drag), which makes the preview drift outside the list.
+  // We reset the off-axis component of the active item's transform to 0.
   let wrapEl = $state<HTMLDivElement | null>(null);
   $effect(() => {
     if (!wrapEl) return;
@@ -151,8 +151,8 @@
 </div>
 
 <style>
-  /* Le conteneur interne de mosaic doit remplir l'enveloppe, sinon il
-     se réduit à 0 (width:auto) et les cellules sont calculées à 0px. */
+  /* mosaic's inner container must fill the wrapper, otherwise it
+     shrinks to 0 (width:auto) and the cells are computed at 0px. */
   .sortable-wrap {
     width: 100%;
     position: relative;

@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-//  store/trainingMode.svelte.ts — Mode training (config rapide)
+//  store/trainingMode.svelte.ts — Training mode (quick config)
 //
-//  L'appui sur SWn du device ouvre le KeycodePicker de cette touche
-//  dans le studio. Le firmware supprime l'exécution de l'action
-//  pendant ce mode (cf. cmd "training_mode").
+//  Pressing SWn on the device opens the KeycodePicker for that key
+//  in the studio. The firmware suppresses execution of the action
+//  during this mode (cf. cmd "training_mode").
 //
 //  Visual feedback (pulses, press-sim) is handled by keyVisuals which
 //  is always-on when connected. trainingMode only manages:
@@ -43,7 +43,7 @@ type TrainingTarget = { kind: 'key'; idx: number } | { kind: 'encoder'; field: '
 
 class TrainingModeState {
   active = $state(false);
-  /** Cible demandée — lu et nullé par Editor.svelte qui ouvre le picker. */
+  /** Requested target — read and nulled by Editor.svelte which opens the picker. */
   requestedTarget = $state<TrainingTarget | null>(null);
 
   #cleanup: (() => void) | null = null;

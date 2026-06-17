@@ -56,7 +56,7 @@
     return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  // Spectre complet pour l'effet global `rainbow` (pas de couleur unique représentative).
+  // Full spectrum for the global `rainbow` effect (no single representative color).
   const RAINBOW_GRADIENT =
     'linear-gradient(90deg,#ff0000,#ff8000,#ffe000,#00c853,#00b0ff,#3d5afe,#aa00ff)';
 
@@ -65,10 +65,10 @@
     | { kind: 'gradient'; css: string };
 
   /**
-   * Pastille LED résolue du profil.
-   * - LED propre allumée → couleur unie ; éteinte explicitement → null (pastille noire).
-   * - Absente → hérite du global (`led_key`). Effets animés (rainbow/flow/sweep) → dégradé,
-   *   car aucune couleur unique ne les représente ; sinon couleur unie héritée. Global éteint → null.
+   * Resolved LED dot of the profile.
+   * - Own LED lit → solid color; explicitly off → null (black dot).
+   * - Absent → inherits from global (`led_key`). Animated effects (rainbow/flow/sweep) → gradient,
+   *   since no single color represents them; otherwise inherited solid color. Global off → null.
    */
   function ledDot(p: ProfileConfig): LedDot | null {
     if (p.led) {
@@ -98,15 +98,15 @@
   }
 
   function onDelete() {
-    const name = prof.name ?? `Profil ${index + 1}`;
+    const name = prof.name ?? `Profile ${index + 1}`;
     deleteProfile(index);
-    toast(`Profil « ${name} » supprimé`, { action: { label: 'Annuler', onClick: () => undo() } });
+    toast(`Profile "${name}" deleted`, { action: { label: 'Undo', onClick: () => undo() } });
   }
 
   function onClear() {
-    const name = prof.name ?? `Profil ${index + 1}`;
+    const name = prof.name ?? `Profile ${index + 1}`;
     clearProfile(index);
-    toast(`Profil « ${name} » réinitialisé`, { action: { label: 'Annuler', onClick: () => undo() } });
+    toast(`Profile "${name}" reset`, { action: { label: 'Undo', onClick: () => undo() } });
   }
 </script>
 
@@ -124,7 +124,7 @@
       type="button"
       data-grip
       class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
-      title="Réordonner"
+      title="Reorder"
       onpointerdown={handlePointerDown}
       onclick={(e) => e.preventDefault()}
     >
@@ -144,21 +144,21 @@
   </Item.Media>
 
   {#if dot === null}
-    <span class="keycap-led-dot" style="background:rgb(0,0,0)" title="LED éteinte"></span>
+    <span class="keycap-led-dot" style="background:rgb(0,0,0)" title="LED off"></span>
   {:else if dot.kind === 'gradient'}
-    <span class="keycap-led-dot" style="background:{dot.css}" title="Effet LED animé hérité du global"></span>
+    <span class="keycap-led-dot" style="background:{dot.css}" title="Animated LED effect inherited from global"></span>
   {:else}
     <span
       class="keycap-led-dot"
       style="background:{dot.color};box-shadow:0 0 5px 0px {dot.color}"
-      title={dot.inherited ? 'Couleur LED héritée du global' : 'Couleur LED du profil'}
+      title={dot.inherited ? 'LED color inherited from global' : 'Profile LED color'}
     ></span>
   {/if}
 
   <Item.Content>
     <Item.Title class="flex items-center gap-1.5 line-clamp-1">{prof.name}</Item.Title>
     <Item.Description class="text-xs line-clamp-2 flex items-center gap-1.5">
-      {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} touches
+      {prof.layers?.length ?? 0} layer(s) · {fill.mapped}/{fill.total} keys
     </Item.Description>
   </Item.Content>
 
@@ -166,7 +166,7 @@
     <DropdownMenu.Root>
       <div in:fade={{ duration: 150, delay: 200 }} out:fade={{ duration: 150 }}>
         <DropdownMenu.Trigger
-          title="Options du profil"
+          title="Profile options"
           class={cn(
             buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
             'absolute top-0.5 right-0.5 size-6 z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
@@ -180,7 +180,7 @@
         <div class="px-1.5 py-1">
           <InputGroup.Root class="h-7">
             <InputGroup.Input
-              placeholder="Nom du profil"
+              placeholder="Profile name"
               value={prof.name ?? ''}
               onkeydown={(e: KeyboardEvent) => {
                 e.stopPropagation();
@@ -196,15 +196,15 @@
         <DropdownMenu.Separator />
         <DropdownMenu.Item onSelect={() => (appearanceOpen = true)}>
           <Palette />
-          Icône & LED
+          Icon & LED
         </DropdownMenu.Item>
         <DropdownMenu.Item disabled={profileCount >= CONFIG_MAX_PROFILES} onSelect={duplicateProfile}>
           <CopyPlus />
-          Dupliquer
+          Duplicate
         </DropdownMenu.Item>
         <DropdownMenu.Item onSelect={onClear}>
           <BrushCleaning />
-          Réinitialiser
+          Reset
         </DropdownMenu.Item>
         <DropdownMenu.Item
           variant="destructive"
@@ -212,7 +212,7 @@
           onSelect={onDelete}
         >
           <Trash2 />
-          Supprimer
+          Delete
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

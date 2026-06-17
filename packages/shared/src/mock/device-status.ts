@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-//  mock/device-status.ts — Mock device_status pour dev mode
+//  mock/device-status.ts — Mock device_status for dev mode
 //
-//  Permet de tester l'UI de la DeviceStatusCard sans clavier
-//  physique. Le store deviceStatus route vers ce mock dès que
+//  Allows testing the DeviceStatusCard UI without a physical
+//  keyboard. The deviceStatus store routes to this mock as soon as
 //  devMode.active === true.
 // ═══════════════════════════════════════════════════════════════
 
@@ -14,7 +14,7 @@ const FW_VERSION = '0.1.0';
 const FW_BUILD = 'devmock';
 
 /**
- * Construit un device_status mock.
+ * Builds a mock device_status.
  */
 export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
   const battery = opts.battery ?? 'present';
@@ -40,7 +40,7 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
       dirty: true,
     },
     uptime_s: Math.floor((Date.now() - START_TS) / 1000),
-    // Le mock joue le rôle du device : son profil actif suit la config chargée.
+    // The mock plays the role of the device: its active profile follows the loaded config.
     active_profile: configState.data?.active_profile ?? 0,
     connection: {
       usb: connection === 'usb' || connection === 'both',
@@ -54,15 +54,15 @@ export function makeMockDeviceStatus(opts: MockOptions = {}): DeviceStatus {
 }
 
 /**
- * Stats mock — snapshot figé. On régénère uniquement quand le nombre de
- * profils dans la config change, pour que la répartition par profil reste
- * cohérente avec ce qui est chargé dans l'UI.
+ * Mock stats — frozen snapshot. We regenerate only when the number of
+ * profiles in the config changes, so that the per-profile distribution stays
+ * consistent with what is loaded in the UI.
  */
 function makeMockStats(): DeviceStats {
   const profCount = Math.max(1, configState.data?.profiles?.length ?? 4);
   if (!_cachedStats || _cachedProfCount !== profCount) {
     _cachedProfCount = profCount;
-    // Distribution décroissante plausible (le profil 1 reste le plus utilisé).
+    // Plausible decreasing distribution (profile 1 stays the most used).
     const weights = Array.from({ length: profCount }, (_, i) => Math.round(14210 / (i + 1)));
     const total = weights.reduce((a, b) => a + b, 0);
     _cachedStats = {
@@ -86,7 +86,7 @@ let _cachedProfCount = 0;
 const START_TS = Date.now();
 
 // ─────────────────────────────────────────────────────────────
-//  Simulation de décharge lente
+//  Slow discharge simulation
 // ─────────────────────────────────────────────────────────────
 
 let _pct = 85;

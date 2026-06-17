@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-//  profile-presets.ts — Gabarits de profils prêts à l'emploi
+//  profile-presets.ts — Ready-to-use profile templates
 //
-//  Un nouveau profil se crée à partir d'un preset OU de zéro (blank).
-//  Architecture pensée extensible : aujourd'hui une seule source
-//  intégrée (builtin), demain un store / repo communautaire distant.
+//  A new profile is created from a preset OR from scratch (blank).
+//  Architecture designed to be extensible: today a single built-in
+//  source (builtin), tomorrow a remote store / community repo.
 // ═══════════════════════════════════════════════════════════════
 
 import {
@@ -23,18 +23,18 @@ export interface ProfilePreset {
   description?: string;
   author?:      string;
   source:       'builtin' | 'remote';
-  icon?:        string;          // base64 (aperçu / icône appliquée au profil)
-  profile:      ProfileConfig;   // gabarit complet
+  icon?:        string;          // base64 (preview / icon applied to the profile)
+  profile:      ProfileConfig;   // complete template
 }
 
-/** Source de presets — permet d'agréger builtin + futures sources distantes. */
+/** Preset source — allows aggregating builtin + future remote sources. */
 export interface ProfilePresetSource {
   id:    string;
   label: string;
   list(): Promise<ProfilePreset[]>;
 }
 
-// ── Helpers de construction ─────────────────────────────────────
+// ── Construction helpers ────────────────────────────────────────
 
 function emptyKeys(): number[] {
   return new Array(CONFIG_NUM_KEYS).fill(0);
@@ -51,7 +51,7 @@ function layer(name: string, encoder?: { cw: number; ccw: number; press?: number
   return l;
 }
 
-// ── Presets intégrés ────────────────────────────────────────────
+// ── Built-in presets ────────────────────────────────────────────
 
 const VOL_ENC = { cw: action(ACTION_TYPE_MEDIA, MEDIA_VOL_UP), ccw: action(ACTION_TYPE_MEDIA, MEDIA_VOL_DN), press: action(ACTION_TYPE_MEDIA, MEDIA_MUTE) };
 const SCRL_ENC = { cw: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_UP), ccw: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_DN) };
@@ -59,12 +59,12 @@ const SCRL_ENC = { cw: action(ACTION_TYPE_MEDIA, MEDIA_SCRL_UP), ccw: action(ACT
 export const BUILTIN_PROFILE_PRESETS: ProfilePreset[] = [
   {
     id: 'blank',
-    label: 'Vierge',
-    description: 'Partir de zéro : un seul layer, aucune touche assignée.',
+    label: 'Blank',
+    description: 'Start from scratch: a single layer, no keys assigned.',
     source: 'builtin',
     icon: libraryIcon('home'),
     profile: {
-      name: 'Profil',
+      name: 'Profile',
       icon: libraryIcon('home'),
       layers: [layer('Base')],
     },
@@ -72,7 +72,7 @@ export const BUILTIN_PROFILE_PRESETS: ProfilePreset[] = [
   {
     id: 'base',
     label: 'Base + Fn',
-    description: 'Deux layers (Base / Fn), encodeur volume puis défilement.',
+    description: 'Two layers (Base / Fn), encoder volume then scroll.',
     source: 'builtin',
     icon: libraryIcon('home'),
     profile: {
@@ -83,26 +83,26 @@ export const BUILTIN_PROFILE_PRESETS: ProfilePreset[] = [
   },
   {
     id: 'media',
-    label: 'Média',
-    description: 'Layer unique orienté contrôle média, encodeur volume.',
+    label: 'Media',
+    description: 'Single layer focused on media control, volume encoder.',
     source: 'builtin',
     icon: libraryIcon('music'),
     profile: {
-      name: 'Média',
+      name: 'Media',
       icon: libraryIcon('music'),
-      layers: [layer('Média', VOL_ENC)],
+      layers: [layer('Media', VOL_ENC)],
     },
   },
   {
     id: 'gaming',
     label: 'Gaming',
-    description: 'Layer de jeu, encodeur volume.',
+    description: 'Gaming layer, volume encoder.',
     source: 'builtin',
     icon: libraryIcon('controller'),
     profile: {
       name: 'Gaming',
       icon: libraryIcon('controller'),
-      layers: [layer('Jeu', VOL_ENC)],
+      layers: [layer('Game', VOL_ENC)],
     },
   },
 ];
@@ -111,33 +111,33 @@ export const BUILTIN_PROFILE_PRESETS: ProfilePreset[] = [
 
 export const builtinPresetSource: ProfilePresetSource = {
   id: 'builtin',
-  label: 'Intégrés',
+  label: 'Built-in',
   list: () => Promise.resolve(BUILTIN_PROFILE_PRESETS),
 };
 
 /**
- * STUB — source distante (futur store / repo communautaire).
- * Non câblée : l'interface est posée pour brancher un fetch plus tard.
+ * STUB — remote source (future store / community repo).
+ * Not wired up: the interface is in place to hook a fetch in later.
  */
 export function remotePresetSource(url: string): ProfilePresetSource {
   return {
     id: `remote:${url}`,
-    label: 'Communauté',
+    label: 'Community',
     list: async () => {
-      // TODO: récupérer et valider des presets distants (validateConfig sur chaque profile).
+      // TODO: fetch and validate remote presets (validateConfig on each profile).
       return [];
     },
   };
 }
 
-// Registre des sources actives (builtin seule pour l'instant).
+// Registry of active sources (builtin only for now).
 const sources: ProfilePresetSource[] = [builtinPresetSource];
 
 export function registerPresetSource(source: ProfilePresetSource): void {
   if (!sources.some((s) => s.id === source.id)) sources.push(source);
 }
 
-/** Agrège les presets de toutes les sources enregistrées. */
+/** Aggregates the presets from all registered sources. */
 export async function listProfilePresets(): Promise<ProfilePreset[]> {
   const all = await Promise.all(sources.map((s) => s.list().catch(() => [])));
   return all.flat();

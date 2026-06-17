@@ -1,8 +1,8 @@
 // ───────────────────────────────────────────────────────────────
-//  index.ts — Registre des widgets OLED (assemble les définitions)
+//  index.ts — OLED widget registry (assembles the definitions)
 //
-//  Pour AJOUTER un widget, voir README.md. En bref : créer un fichier
-//  `monwidget.ts` exportant un WidgetDef, puis l'enregistrer ci-dessous.
+//  To ADD a widget, see README.md. In short: create a file
+//  `mywidget.ts` exporting a WidgetDef, then register it below.
 // ───────────────────────────────────────────────────────────────
 import { WIDGET_TYPE, type WidgetType, type WidgetConfig } from '$shared/constants/config-schema.js';
 import type { WidgetDef } from './types.js';
@@ -16,10 +16,10 @@ import { icon } from './icon.js';
 
 export type { WidgetDef, WidgetOption, WidgetSizeRange } from './types.js';
 
-/** Types réellement placeables (NONE exclu). */
+/** Types that are actually placeable (NONE excluded). */
 export type PlaceableWidgetType = Exclude<WidgetType, typeof WIDGET_TYPE.NONE>;
 
-/** Registre clé→définition. Une entrée par widget placeable. */
+/** Registry key→definition. One entry per placeable widget. */
 export const WIDGET_DEFS: Record<PlaceableWidgetType, WidgetDef> = {
   [WIDGET_TYPE.BLE_STATUS]: ble,
   [WIDGET_TYPE.BATTERY]: battery,
@@ -30,7 +30,7 @@ export const WIDGET_DEFS: Record<PlaceableWidgetType, WidgetDef> = {
   [WIDGET_TYPE.ICON]: icon,
 };
 
-/** Ordre d'affichage dans la palette « Ajouter ». */
+/** Display order in the "Add" palette. */
 export const PLACEABLE_WIDGET_TYPES: PlaceableWidgetType[] = [
   WIDGET_TYPE.BLE_STATUS,
   WIDGET_TYPE.BATTERY,
@@ -46,7 +46,7 @@ export interface WidgetSize {
   h: number;
 }
 
-/** Toutes les tailles autorisées (générées depuis la contrainte min/max). */
+/** All allowed sizes (generated from the min/max constraint). */
 export function widgetSizes(type: PlaceableWidgetType): WidgetSize[] {
   const s = WIDGET_DEFS[type].size;
   const out: WidgetSize[] = [];
@@ -55,13 +55,13 @@ export function widgetSizes(type: PlaceableWidgetType): WidgetSize[] {
   return out;
 }
 
-/** Taille à l'ajout : `size.default` sinon la plus petite ({minW, minH}). */
+/** Size on add: `size.default` otherwise the smallest ({minW, minH}). */
 export function widgetDefaultSize(type: PlaceableWidgetType): WidgetSize {
   const s = WIDGET_DEFS[type].size;
   return s.default ?? { w: s.minW, h: s.minH };
 }
 
-/** Construit un nouveau widget en seedant les valeurs d'options par défaut. */
+/** Builds a new widget, seeding the default option values. */
 export function createWidget(
   type: PlaceableWidgetType,
   x: number,

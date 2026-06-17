@@ -24,8 +24,8 @@
   const TABS = [
     { value: 'stats', label: 'Stats' },
     { value: 'bluetooth', label: 'Bluetooth' },
-    { value: 'ecran', label: 'Écran & Power' },
-    { value: 'sauvegarde', label: 'Sauvegarde' },
+    { value: 'ecran', label: 'Screen & Power' },
+    { value: 'sauvegarde', label: 'Backup' },
   ];
 
   let tabValue = $state('stats');
@@ -97,15 +97,15 @@
     { value: 3, label: '270°', icon: '←' },
   ];
 
-  // ── Sliders locaux (bits-ui Slider nécessite bind:value) ──────
-  // La sync STORE → LOCAL se fait via $effect (ex: undo/redo, rechargement).
-  // La sync LOCAL → STORE se fait via onValueChange sur le Slider (jamais via $effect,
-  // pour éviter une boucle qui écraserait le résultat d'un undo/redo).
+  // ── Local sliders (bits-ui Slider requires bind:value) ────────
+  // STORE → LOCAL sync is done via $effect (e.g. undo/redo, reload).
+  // LOCAL → STORE sync is done via onValueChange on the Slider (never via $effect,
+  // to avoid a loop that would overwrite the result of an undo/redo).
   let brightness = $state(0);
   let encoderSens = $state(1);
   let ledExtBright = $state(200);
 
-  // Sync store → local (déclenché par undo/redo, chargement config, etc.)
+  // Sync store → local (triggered by undo/redo, config load, etc.)
   $effect(() => {
     brightness = configState.data?.display?.brightness ?? 180;
   });
@@ -116,7 +116,7 @@
     ledExtBright = configState.data?.led_extension?.brightness ?? 200;
   });
 
-  const SENS_LABELS = ['', '1× (standard)', '2× (réactif)', '3×', '4× (max)'] as const;
+  const SENS_LABELS = ['', '1× (standard)', '2× (reactive)', '3×', '4× (max)'] as const;
 
   // ── NumberField state ─────────────────────────────────────────
   let displayTimeout = $state(configState.data?.display?.timeout_s ?? 60);
@@ -186,7 +186,7 @@
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[backup-import]', msg);
-      toast.error('Import échoué', { description: msg });
+      toast.error('Import failed', { description: msg });
     }
     if (backupFileInput) backupFileInput.value = '';
   }
@@ -196,7 +196,7 @@
   }
 
   // ── Widget system ─────────────────────────────────────────────
-  // L'édition des widgets OLED (grille mosaïque 4×4) vit dans ScreenEditor.
+  // Editing the OLED widgets (4×4 mosaic grid) lives in ScreenEditor.
   function syncClock() {
     setTime(Math.floor(Date.now() / 1000));
   }
@@ -233,12 +233,12 @@
             <Card>
               <CardHeader>
                 <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
-                  Appareil
+                  Device
                 </CardTitle>
               </CardHeader>
               <CardContent class="pt-0">
                 <Field>
-                  <FieldLabel>Nom diffusé en Bluetooth</FieldLabel>
+                  <FieldLabel>Name broadcast over Bluetooth</FieldLabel>
                   <Input
                     value={data.ble?.device_name}
                     oninput={(e: Event) => updateConfig('ble.device_name', (e.target as HTMLInputElement).value)}
@@ -251,7 +251,7 @@
             <Card>
               <CardHeader>
                 <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
-                  >Slots de connexion</CardTitle
+                  >Connection slots</CardTitle
                 >
               </CardHeader>
               <CardContent class="flex flex-col gap-4 pt-0">
@@ -260,7 +260,7 @@
                     <FieldLabel class="flex items-center gap-2">
                       <Badge variant={slotIdx === 0 ? 'default' : 'secondary'}>Slot {slotIdx}</Badge>
                       <span class="text-xs font-normal text-muted-foreground">
-                        {slotIdx === 0 ? 'Premier appareil' : 'Second appareil'}
+                        {slotIdx === 0 ? 'First device' : 'Second device'}
                       </span>
                     </FieldLabel>
                     <Input
@@ -272,29 +272,29 @@
                 {/each}
 
                 <p class="p-3 text-xs leading-relaxed rounded-md text-muted-foreground bg-muted/50">
-                  <strong>Comment switcher ?</strong><br />
-                  • <strong>SW11</strong> (court appui) = changer d'appareil actif<br />
-                  • <strong>SW16 + SW17 maintenus 2s</strong> = mode pairing pour le slot actif
+                  <strong>How to switch?</strong><br />
+                  • <strong>SW11</strong> (short press) = change active device<br />
+                  • <strong>SW16 + SW17 held 2s</strong> = pairing mode for the active slot
                 </p>
               </CardContent>
             </Card>
           </div>
         </section>
 
-        <!-- ══ Écran & Power ════════════════════════════════════════ -->
+        <!-- ══ Screen & Power ═══════════════════════════════════════ -->
         <section bind:this={sectionEls['ecran']} data-cat="ecran" class="">
-          <h3 class="mb-4 text-base font-semibold">Écran & Power</h3>
+          <h3 class="mb-4 text-base font-semibold">Screen & Power</h3>
           <div class="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-1">
-            <!-- Écran SSD1315 -->
+            <!-- SSD1315 screen -->
             <Card class="">
               <CardHeader>
                 <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
-                  Écran SSD1315
+                  SSD1315 screen
                 </CardTitle>
               </CardHeader>
               <CardContent class="pt-0">
                 <div class="flex flex-col gap-1.5">
-                  <Label class="block mb-1.5 text-sm">Luminosité</Label>
+                  <Label class="block mb-1.5 text-sm">Brightness</Label>
                   <Scrubber
                     bind:value={brightness}
                     min={10}
@@ -308,8 +308,8 @@
                 </div>
 
                 <SettingsField
-                  label="Extinction après (s)"
-                  description="Durée d'inactivité avant extinction de l'écran"
+                  label="Turn off after (s)"
+                  description="Inactivity duration before the screen turns off"
                 >
                   {#snippet children()}
                     <NumberField.Root min={5} max={600} bind:value={displayTimeout}>
@@ -332,7 +332,7 @@
                 >
               </CardHeader>
               <CardContent class="pt-0">
-                <SettingsField label="Deep sleep après" description="Secondes d'inactivité avant veille profonde">
+                <SettingsField label="Deep sleep after" description="Seconds of inactivity before deep sleep">
                   {#snippet children()}
                     <NumberField.Root min={30} max={3600} bind:value={sleepTimeout}>
                       <NumberField.Group>
@@ -344,7 +344,7 @@
                   {/snippet}
                 </SettingsField>
 
-                <SettingsField label="Batterie critique" description="Pourcentage déclenchant l'alerte">
+                <SettingsField label="Critical battery" description="Percentage that triggers the alert">
                   {#snippet children()}
                     <NumberField.Root min={3} max={30} bind:value={batteryCritical}>
                       <NumberField.Group>
@@ -357,18 +357,18 @@
                 </SettingsField>
 
                 <div class="mt-4">
-                  <Label class="block mb-2 text-sm">Présence de la batterie</Label>
+                  <Label class="block mb-2 text-sm">Battery presence</Label>
                   <p class="mb-2 text-xs leading-relaxed text-muted-foreground">
-                    Le SpinPad existe en variantes avec et sans batterie. <strong>Auto</strong>
-                    laisse le firmware détecter via l'ADC.
-                    <strong>Forcer présente / absente</strong>
-                    désactive la détection.
+                    The SpinPad comes in variants with and without a battery. <strong>Auto</strong>
+                    lets the firmware detect via the ADC.
+                    <strong>Force present / absent</strong>
+                    disables detection.
                   </p>
                   <OptionGrid
                     options={[
                       { value: 'auto', label: 'Auto' },
-                      { value: 'yes', label: 'Forcer présente' },
-                      { value: 'no', label: 'Forcer absente' },
+                      { value: 'yes', label: 'Force present' },
+                      { value: 'no', label: 'Force absent' },
                     ]}
                     value={data.power?.battery_present ?? 'auto'}
                     onSelect={(v) => updateConfig('power.battery_present', v)}
@@ -389,7 +389,7 @@
               </CardHeader>
               <CardContent class="pt-0">
                 <p class="mb-4 text-sm text-muted-foreground">
-                  Orientation physique du SpinPad. L'écran OLED et l'éditeur keymap se réajustent automatiquement.
+                  Physical orientation of the SpinPad. The OLED screen and the keymap editor readjust automatically.
                 </p>
                 <OptionGrid
                   options={ORIENTATIONS}
@@ -405,8 +405,8 @@
                   {/snippet}
                 </OptionGrid>
                 <p class="mt-3 text-xs text-muted-foreground">
-                  Astuce : la touche <Kbd>Rotate CW/CCW</Kbd>
-                  dans le keymap change l'orientation directement depuis le SpinPad.
+                  Tip: the <Kbd>Rotate CW/CCW</Kbd>
+                  key in the keymap changes the orientation directly from the SpinPad.
                 </p>
               </CardContent>
             </Card>
@@ -415,21 +415,21 @@
             <Card>
               <CardHeader>
                 <CardTitle class="text-sm font-semibold tracking-widest uppercase text-muted-foreground"
-                  >Encodeur rotatif</CardTitle
+                  >Rotary encoder</CardTitle
                 >
               </CardHeader>
               <CardContent class="pt-0">
                 <div class="mb-2">
                   <SliderField
-                    label="Sensibilité"
+                    label="Sensitivity"
                     min={1}
                     max={4}
                     step={1}
                     bind:value={encoderSens}
                     valueText={SENS_LABELS[encoderSens] ?? '—'}
                     valueClass="font-mono text-muted-foreground"
-                    minLabel="1 clic / détent"
-                    maxLabel="4 clics / détent"
+                    minLabel="1 click / detent"
+                    maxLabel="4 clicks / detent"
                     onCommit={() => updateConfig('encoder.sensitivity', encoderSens)}
                   />
                 </div>
@@ -437,25 +437,25 @@
             </Card>
           </div>
         </section>
-        <!-- ══ Extension LED ════════════════════════════════════════ -->
+        <!-- ══ LED Extension ════════════════════════════════════════ -->
 
-        <!-- ══ Sauvegarde globale ════════════════════════════════ -->
+        <!-- ══ Global backup ═════════════════════════════════════ -->
         <section bind:this={sectionEls['sauvegarde']} data-cat="sauvegarde" class="flex flex-col gap-3">
-          <h2 class="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Sauvegarde</h2>
+          <h2 class="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Backup</h2>
           <Card>
             <CardHeader>
-              <CardTitle>Config complète</CardTitle>
+              <CardTitle>Full config</CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col gap-3">
               <p class="text-xs text-muted-foreground">
-                Exporte ou importe la configuration entière (.spinpad). L'import écrase la config actuelle.
+                Export or import the entire configuration (.spinpad). Importing overwrites the current config.
               </p>
               <div class="flex gap-2">
                 <Button variant="outline" onclick={onBackupImportClick} disabled={!configState.data} class="gap-1.5">
-                  <Upload class="size-4" /> Importer
+                  <Upload class="size-4" /> Import
                 </Button>
                 <Button variant="outline" onclick={exportConfig} disabled={!configState.data} class="gap-1.5">
-                  <Download class="size-4" /> Exporter
+                  <Download class="size-4" /> Export
                 </Button>
                 <input
                   bind:this={backupFileInput}

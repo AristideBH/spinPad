@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  types/dev-mode.ts — Types pour le mode développement (mock)
+//  types/dev-mode.ts — Types for the development mode (mock)
 // ═══════════════════════════════════════════════════════════════
 
 export type BatteryScenario    = 'present' | 'absent' | 'low';

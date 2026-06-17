@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
-//  strip-uncompressed.mjs — post-build embarqué
+//  strip-uncompressed.mjs — embedded post-build
 //
-//  adapter-static (precompress: true) génère un `.gz` ET un `.br` à côté
-//  de chaque fichier compressible (html/js/css/json/svg). Le firmware ne
-//  sert QUE les `.gz` (Content-Encoding: gzip), donc on supprime ici :
-//    - les originaux non compressés (jumeau d'un `.gz`)
-//    - tous les `.br` (jamais servis)
-//  pour ne flasher en SPIFFS que la version gzip.
+//  adapter-static (precompress: true) generates a `.gz` AND a `.br` next to
+//  each compressible file (html/js/css/json/svg). The firmware serves ONLY
+//  the `.gz` (Content-Encoding: gzip), so here we remove:
+//    - the uncompressed originals (twin of a `.gz`)
+//    - all the `.br` (never served)
+//  to flash only the gzip version into SPIFFS.
 //
-//  On ne touche pas aux fichiers déjà compressés (woff2/png/ico) : ils
-//  n'ont pas de jumeau `.gz` et sont conservés tels quels.
+//  We do not touch the already-compressed files (woff2/png/ico): they
+//  have no `.gz` twin and are kept as-is.
 // ═══════════════════════════════════════════════════════════════
 
 import { readdir, stat, unlink } from 'node:fs/promises';
@@ -27,20 +27,20 @@ async function walk(current) {
 		if (entry.isDirectory()) {
 			await walk(full);
 		} else if (entry.name.endsWith('.br')) {
-			// Brotli jamais servi par le firmware → suppression
+			// Brotli never served by the firmware → removed
 			const info = await stat(full);
 			await unlink(full);
 			removed += 1;
 			savedBytes += info.size;
 		} else if (entry.name.endsWith('.gz')) {
-			const original = full.slice(0, -3); // retire ".gz"
+			const original = full.slice(0, -3); // strips ".gz"
 			try {
 				const info = await stat(original);
 				await unlink(original);
 				removed += 1;
 				savedBytes += info.size;
 			} catch {
-				// pas d'original (ex: .gz isolé) → rien à faire
+				// no original (e.g. standalone .gz) → nothing to do
 			}
 		}
 	}
@@ -49,6 +49,6 @@ async function walk(current) {
 await walk(dir);
 
 console.log(
-	`strip-uncompressed: ${removed} originaux supprimés ` +
-		`(${(savedBytes / 1024).toFixed(0)} KB), seuls les .gz restent dans ${dir}/`
+	`strip-uncompressed: ${removed} originals removed ` +
+		`(${(savedBytes / 1024).toFixed(0)} KB), only the .gz remain in ${dir}/`
 );

@@ -1,16 +1,16 @@
 # @spinpad/shared
 
-Constantes et utilitaires partagés entre le firmware et Studio.
+Shared constants and utilities between the firmware and Studio.
 
-## Contenu
+## Contents
 
 | Module | Description |
 |--------|-------------|
-| `action-types.js` | Types d'actions (`ACTION_TYPE_*`), codes media/special |
-| `keycodes.js` | Table complète des keycodes avec labels |
-| `config-migrations.js` | Format `.spinpad`, validation, migrations de version |
+| `action-types.js` | Action types (`ACTION_TYPE_*`), media/special codes |
+| `keycodes.js` | Full keycode table with labels |
+| `config-migrations.js` | `.spinpad` format, validation, version migrations |
 
-## Utilisation
+## Usage
 
 ```js
 import { KEYCODES, getKeycodeLabel, action, ACTION_TYPES } from '@spinpad/shared';
@@ -19,20 +19,20 @@ import { createSpinpadFile, parseSpinpadFile } from '@spinpad/shared/config-migr
 
 ## Codegen → C header
 
-Après modification de `src/action-types.js`, regénérer le header firmware :
+After modifying `src/action-types.js`, regenerate the firmware header:
 
 ```bash
 pnpm codegen
-# ou depuis la racine du monorepo :
+# or from the monorepo root:
 pnpm --filter @spinpad/shared codegen
 ```
 
-Sortie : `packages/firmware/components/keymap/include/action_types.gen.h`
+Output: `packages/firmware/components/keymap/include/action_types.gen.h`
 
-Le fichier `.gen.h` est **versionné** — il doit être commité avec les changements.
+The `.gen.h` file is **versioned** — it must be committed with the changes.
 
-## Règle : source de vérité
+## Rule: source of truth
 
-`action-types.js` est **la** source de vérité. Ne pas modifier `action_types.gen.h` manuellement.
+`action-types.js` is **the** source of truth. Do not edit `action_types.gen.h` manually.
 
-Pour ajouter une action, voir [CONTRIBUTING.md](../../CONTRIBUTING.md#ajouter-une-nouvelle-action-firmware).
+To add an action, see [CONTRIBUTING.md](../../CONTRIBUTING.md#ajouter-une-nouvelle-action-firmware).

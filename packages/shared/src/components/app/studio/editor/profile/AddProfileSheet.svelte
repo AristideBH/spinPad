@@ -1,14 +1,14 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  AddProfileSheet — création de profil (responsive sheet)
+  //  AddProfileSheet — profile creation (responsive sheet)
   //
-  //  Sheet (desktop) / Drawer (mobile) à trois vues :
-  //   - chooser : choisir « depuis la librairie » ou « créer de zéro »
-  //   - library : liste des presets → Ajouter (tel quel) ou Personnaliser
-  //   - form    : ProfileForm (brouillon) pour création / tweak
+  //  Sheet (desktop) / Drawer (mobile) with three views:
+  //   - chooser : choose "from the library" or "create from scratch"
+  //   - library : list of presets → Add (as is) or Customize
+  //   - form    : ProfileForm (draft) for creation / tweak
   //
-  //  Tout ajout passe par addProfile(), qui auto-sélectionne le nouveau
-  //  profil (layer 0) via _applyOp, puis ferme la sheet.
+  //  Every add goes through addProfile(), which auto-selects the new
+  //  profile (layer 0) via _applyOp, then closes the sheet.
   // ───────────────────────────────────────────────────────────────
   import ResponsiveSheet from '$shared/components/ui/responsive-sheet/responsive-sheet.svelte';
   import { Button } from '$shared/components/ui/button/index.js';
@@ -32,7 +32,7 @@
     listProfilePresets().then((p) => (presets = p));
   });
 
-  // Repart du sélecteur à chaque fermeture.
+  // Returns to the chooser on every close.
   $effect(() => {
     if (!open) {
       view = 'chooser';
@@ -41,7 +41,7 @@
   });
 
   function commit(profile: ProfileConfig) {
-    addProfile(profile); // auto-sélection du nouveau profil
+    addProfile(profile); // auto-selects the new profile
     open = false;
   }
   function openCreate() {
@@ -54,20 +54,20 @@
   }
 
   const heading = $derived(
-    view === 'library' ? 'Depuis la librairie' : view === 'form' ? 'Configurer le profil' : 'Ajouter un profil',
+    view === 'library' ? 'From the library' : view === 'form' ? 'Configure the profile' : 'Add a profile',
   );
 </script>
 
 <ResponsiveSheet
   bind:open
-  title="Ajouter un profil"
+  title="Add a profile"
   desktop="dialog"
   desktopClass="sm:max-w-lg max-h-[85dvh] flex flex-col p-0 gap-0"
 >
   {#snippet header()}
     <div class="flex items-center gap-2 px-4 py-3 border-b">
       {#if view !== 'chooser'}
-        <Button variant="ghost" size="icon" class="size-7" title="Retour" onclick={() => (view = 'chooser')}>
+        <Button variant="ghost" size="icon" class="size-7" title="Back" onclick={() => (view = 'chooser')}>
           <ArrowLeft class="size-4" />
         </Button>
       {/if}
@@ -89,8 +89,8 @@
                 >
                   <Item.Media variant="icon"><Library class="size-5" /></Item.Media>
                   <Item.Content>
-                    <Item.Title>Depuis la librairie</Item.Title>
-                    <Item.Description>Partir d'un preset, tel quel ou personnalisé.</Item.Description>
+                    <Item.Title>From the library</Item.Title>
+                    <Item.Description>Start from a preset, as is or customized.</Item.Description>
                   </Item.Content>
                 </button>
               {/snippet}
@@ -105,8 +105,8 @@
                 >
                   <Item.Media variant="icon"><PencilRuler class="size-5" /></Item.Media>
                   <Item.Content>
-                    <Item.Title>Créer de zéro</Item.Title>
-                    <Item.Description>Nom, icône et layers à partir d'un profil vierge.</Item.Description>
+                    <Item.Title>Create from scratch</Item.Title>
+                    <Item.Description>Name, icon and layers from a blank profile.</Item.Description>
                   </Item.Content>
                 </button>
               {/snippet}
@@ -124,14 +124,14 @@
                   {/if}
                 </div>
                 <div class="flex gap-1.5 shrink-0">
-                  <Button variant="outline" size="sm" onclick={() => openTweak(preset)}>Personnaliser</Button>
-                  <Button size="sm" onclick={() => commit(preset.profile)}>Ajouter</Button>
+                  <Button variant="outline" size="sm" onclick={() => openTweak(preset)}>Customize</Button>
+                  <Button size="sm" onclick={() => commit(preset.profile)}>Add</Button>
                 </div>
               </div>
             {/each}
           </div>
         {:else}
-          <ProfileForm initial={formInitial} submitLabel="Ajouter" onsubmit={commit} oncancel={() => (view = 'chooser')} />
+          <ProfileForm initial={formInitial} submitLabel="Add" onsubmit={commit} oncancel={() => (view = 'chooser')} />
         {/if}
       </div>
     {/key}

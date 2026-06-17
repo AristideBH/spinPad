@@ -1,8 +1,8 @@
 #pragma once
 #include <stdint.h>
 
-// Police bitmap 5x7 — ASCII 32 (' ') à 126 ('~')
-// Chaque caractère = 5 colonnes de 8 bits (bit 0 = ligne du haut)
+// Bitmap font 5x7 — ASCII 32 (' ') to 126 ('~')
+// Each character = 5 columns of 8 bits (bit 0 = top line)
 static const uint8_t FONT5X7[][5] = {
     {0x00,0x00,0x00,0x00,0x00}, // ' '
     {0x00,0x00,0x5F,0x00,0x00}, // '!'

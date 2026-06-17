@@ -1,10 +1,10 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  SizeGrid.svelte — Sélecteur de taille type « tableau Excel »
+  //  SizeGrid.svelte — "Excel table"-style size picker
   //
-  //  Grille couvrant [minW..maxW] × [minH..maxH]. Survol → surligne le
-  //  rectangle haut-gauche → la cellule. Clic → choisit w×h. Cellules hors
-  //  contrainte (carré, pas de place) grisées.
+  //  Grid spanning [minW..maxW] × [minH..maxH]. Hover → highlights the
+  //  top-left rectangle → the cell. Click → picks w×h. Cells outside the
+  //  constraint (square, no room) grayed out.
   // ───────────────────────────────────────────────────────────────
   import { cn } from '$shared/utils.js';
   import { WIDGET_GRID_COLS, WIDGET_GRID_ROWS } from '$shared/constants/config-schema.js';

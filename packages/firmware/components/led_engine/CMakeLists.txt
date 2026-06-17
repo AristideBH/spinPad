@@ -8,5 +8,5 @@ idf_component_register(
         esp_timer
 )
 
-# Lier libm pour sinf()
+# Link libm for sinf()
 target_link_libraries(${COMPONENT_LIB} PUBLIC m)

@@ -1,21 +1,21 @@
 # @spinpad/website
 
-Site public du projet SpinPad — landing page, documentation et Studio embarqué.
+Public site of the SpinPad project — landing page, documentation and embedded Studio.
 
 ## Stack
 
-- **SvelteKit** avec `adapter-static` (site 100% statique)
-- **mdsvex** — support des fichiers `.md` comme routes/composants
+- **SvelteKit** with `adapter-static` (100% static site)
+- **mdsvex** — support for `.md` files as routes/components
 - **Tailwind CSS**
-- Dépend de `@spinpad/shared` (workspace)
+- Depends on `@spinpad/shared` (workspace)
 
 ## Dev
 
 ```bash
-# Depuis la racine du monorepo
+# From the monorepo root
 pnpm --filter @spinpad/website dev      # → http://localhost:5174
 
-# Ou depuis ce dossier
+# Or from this folder
 pnpm dev
 ```
 
@@ -31,20 +31,20 @@ pnpm --filter @spinpad/website build
 ```
 src/
 ├── routes/
-│   ├── +layout.svelte        # Layout global (nav, footer)
+│   ├── +layout.svelte        # Global layout (nav, footer)
 │   ├── +page.svelte          # Landing page
-│   ├── docs/                 # Documentation (fichiers .md via mdsvex)
-│   └── studio/               # Studio embarqué (lien vers packages/studio)
+│   ├── docs/                 # Documentation (.md files via mdsvex)
+│   └── studio/               # Embedded Studio (link to packages/studio)
 └── lib/
-    └── components/           # Composants partagés
+    └── components/           # Shared components
 ```
 
 ## Deploy
 
-Le site est déployé automatiquement via GitHub Actions (`studio-deploy.yml`) sur push vers `main` avec des changements dans `packages/website/` ou `packages/shared/`.
+The site is deployed automatically via GitHub Actions (`studio-deploy.yml`) on push to `main` with changes in `packages/website/` or `packages/shared/`.
 
-Plateforme cible : Vercel (ou équivalent — adapter le workflow CI si nécessaire).
+Target platform: Vercel (or equivalent — adapt the CI workflow if needed).
 
-## Intégration Studio
+## Studio integration
 
-Le Studio embarqué (configurateur WiFi servi directement depuis le SpinPad) est buildé séparément via `@spinpad/studio build:embedded`. Le site public peut héberger un lien vers le Studio en mode WebSerial (pour les utilisateurs connectés en USB).
+The embedded Studio (WiFi configurator served directly from the SpinPad) is built separately via `@spinpad/studio build:embedded`. The public site can host a link to the Studio in WebSerial mode (for users connected over USB).

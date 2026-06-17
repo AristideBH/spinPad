@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { message = 'Connecte le clavier pour accéder à cette section.' }: { message?: string } = $props();
+  let { message = 'Connect the keyboard to access this section.' }: { message?: string } = $props();
 </script>
 
 <div class="flex flex-col items-center justify-center gap-3 py-16 text-center">

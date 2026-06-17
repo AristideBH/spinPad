@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-//  device-status-schema.ts — Schéma de télémétrie device
+//  device-status-schema.ts — Device telemetry schema
 //
-//  Endpoint firmware : { "cmd": "device_status" }  (USB serial)
-//                   ou GET /api/status              (HTTP Studio Mode)
+//  Firmware endpoint: { "cmd": "device_status" }  (USB serial)
+//                  or GET /api/status              (HTTP Studio Mode)
 //
-//  Conçu pour être extensible : nouvelles sections (sensors, thermal…)
-//  peuvent être ajoutées sans casser les anciens clients.
+//  Designed to be extensible: new sections (sensors, thermal…)
+//  can be added without breaking older clients.
 // ═══════════════════════════════════════════════════════════════
 
 export type BatterySource = 'auto' | 'forced_yes' | 'forced_no';
@@ -25,44 +25,44 @@ export type BatteryStatus = BatteryAbsent | BatteryPresent;
 export interface FirmwareInfo {
   version: string;   // ex: "1.0.0"
   build:   string;   // ex: "a1b2c3d" (git short hash, "+" suffix if dirty)
-  dirty:   boolean;  // true si build sur un working tree modifié
+  dirty:   boolean;  // true if built on a modified working tree
 }
 
 export interface ConnectionStatus {
   usb:          boolean;
   ble:          boolean;
-  ble_slot:     number;   // 0 ou 1
-  studio_mode:  boolean;  // mode Studio Mode (AP WiFi) actif
+  ble_slot:     number;   // 0 or 1
+  studio_mode:  boolean;  // Studio Mode (AP WiFi) active
 }
 
-// ── Statistiques d'usage (compteurs persistants en NVS) ───────
-// Granularité : global + par profil (pas de compteur par touche,
-// pour limiter l'usure flash). Les deux sens d'encodeur s'ajoutent
-// (ne s'annulent pas). Section optionnelle : un firmware ancien
-// peut l'omettre sans casser les clients.
+// ── Usage statistics (persistent counters in NVS) ─────────────
+// Granularity: global + per profile (no per-key counter,
+// to limit flash wear). Both encoder directions add up
+// (they do not cancel out). Optional section: an older firmware
+// can omit it without breaking clients.
 export interface DeviceStats {
-  total_keypresses:        number;    // total cumulé (toutes touches/profils)
-  per_profile_keypresses:  number[];  // index = profil
-  encoder_steps_total:     number;    // CW + CCW (somme, non signée)
+  total_keypresses:        number;    // cumulative total (all keys/profiles)
+  per_profile_keypresses:  number[];  // index = profile
+  encoder_steps_total:     number;    // CW + CCW (sum, unsigned)
   encoder_steps_cw:        number;
   encoder_steps_ccw:       number;
-  deep_sleep_s:            number;    // temps cumulé en veille profonde
-  awake_s:                 number;    // temps cumulé éveillé
-  macros_played?:          number;    // nombre de macros jouées
-  since_unix_ts?:          number;    // début de la période de comptage
+  deep_sleep_s:            number;    // cumulative time in deep sleep
+  awake_s:                 number;    // cumulative time awake
+  macros_played?:          number;    // number of macros played
+  since_unix_ts?:          number;    // start of the counting period
 }
 
 export interface DeviceStatus {
   fw:              FirmwareInfo;
   uptime_s:        number;
-  active_profile?: number;       // index du profil actif sur le device (synchro studio ↔ device)
+  active_profile?: number;       // index of the active profile on the device (studio ↔ device sync)
   connection:      ConnectionStatus;
   battery:         BatteryStatus;
-  stats?:          DeviceStats;   // optionnel — voir DeviceStats
+  stats?:          DeviceStats;   // optional — see DeviceStats
 }
 
-// ── Override config (sérialisé dans power.battery_present) ─────
-// "auto"   → firmware détecte via ADC (défaut)
-// "yes"    → forcer présente (skip détection)
-// "no"     → forcer absente (skip ADC, BAS service non annoncé)
+// ── Config override (serialized in power.battery_present) ─────
+// "auto"   → firmware detects via ADC (default)
+// "yes"    → force present (skip detection)
+// "no"     → force absent (skip ADC, BAS service not advertised)
 export type BatteryPresentConfig = 'auto' | 'yes' | 'no';
