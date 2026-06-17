@@ -50,3 +50,4 @@ config-app/.env
 packages/firmware/.hintrc
 .claude/worktrees/*
 packages/website/graphify-out/manifest.json
+packages/firmware/sdkconfig.old
