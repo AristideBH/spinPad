@@ -1,49 +1,49 @@
 #pragma once
-// ═══════════════════════════════════════════════════════════════
-//  keymap.h — Interface publique du moteur de touches
+// ===============================================================
+//  keymap.h - Public interface of the key engine
 //
-//  Ce header expose uniquement ce que les autres composants
-//  ont besoin de savoir. L'implémentation est dans keymap.c.
-// ═══════════════════════════════════════════════════════════════
+//  This header exposes only what the other components need to
+//  know. The implementation is in keymap.c.
+// ===============================================================
 
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp_err.h"
 
-// ─────────────────────────────────────────────────────────────
-//  ENCODAGE DES ACTIONS (16 bits)
+// -------------------------------------------------------------
+//  ACTION ENCODING (16 bits)
 //
-//  Chaque touche est associée à une "action" — un uint16_t
-//  qui encode à la fois le TYPE d'action et sa VALEUR.
+//  Each key is associated with an "action" - a uint16_t
+//  that encodes both the action TYPE and its VALUE.
 //
-//  Structure des 16 bits :
-//    [15..12] = type (4 bits)  → quel genre d'action
-//    [11..0]  = valeur (12 bits) → quoi exactement
+//  Structure of the 16 bits:
+//    [15..12] = type (4 bits)  -> which kind of action
+//    [11..0]  = value (12 bits) -> what exactly
 //
-//  Exemples :
-//    0x0004  → KC (keycode normal), valeur 4 = KC_A
-//    0x1000  → LAYER_MO, valeur 0 = activer layer 0 tant que pressé
-//    0x2001  → LAYER_TG, valeur 1 = toggle layer 1
-//    0xF000  → ACTION_SPECIAL, valeur 0 = BLE switch
-// ─────────────────────────────────────────────────────────────
+//  Examples:
+//    0x0004  -> KC (normal keycode), value 4 = KC_A
+//    0x1000  -> LAYER_MO, value 0 = activate layer 0 while pressed
+//    0x2001  -> LAYER_TG, value 1 = toggle layer 1
+//    0xF000  -> ACTION_SPECIAL, value 0 = BLE switch
+// -------------------------------------------------------------
 
-// Types d'action (4 bits hauts)
-#define ACTION_TYPE_KC          0x0   // Keycode HID standard
-#define ACTION_TYPE_MOD         0x1   // Modificateur (Ctrl, Shift, Alt, GUI)
-#define ACTION_TYPE_LAYER_MO    0x2   // Momentary layer (actif tant que pressé)
-#define ACTION_TYPE_LAYER_TG    0x3   // Toggle layer (appui = on/off)
-#define ACTION_TYPE_LAYER_TO    0x4   // To layer (aller sur ce layer définitivement)
-#define ACTION_TYPE_MEDIA       0x5   // Touche média (volume, play, etc.)
-#define ACTION_TYPE_MACRO       0x6   // Séquence macro (bits 11–0 = index 0–15)
-#define ACTION_TYPE_SPECIAL     0xF   // Actions spéciales du firmware
+// Action types (high 4 bits)
+#define ACTION_TYPE_KC          0x0   // Standard HID keycode
+#define ACTION_TYPE_MOD         0x1   // Modifier (Ctrl, Shift, Alt, GUI)
+#define ACTION_TYPE_LAYER_MO    0x2   // Momentary layer (active while pressed)
+#define ACTION_TYPE_LAYER_TG    0x3   // Toggle layer (press = on/off)
+#define ACTION_TYPE_LAYER_TO    0x4   // To layer (go to this layer permanently)
+#define ACTION_TYPE_MEDIA       0x5   // Media key (volume, play, etc.)
+#define ACTION_TYPE_MACRO       0x6   // Macro sequence (bits 11-0 = index 0-15)
+#define ACTION_TYPE_SPECIAL     0xF   // Special firmware actions
 
-// Macro pour construire une action — combine type et valeur
-// Exemple : ACTION(ACTION_TYPE_KC, 0x04) = touche 'A'
+// Macro to build an action - combines type and value
+// Example: ACTION(ACTION_TYPE_KC, 0x04) = key 'A'
 #define ACTION(type, val)   ((uint16_t)(((type) << 12) | ((val) & 0x0FFF)))
 
-// ── Keycodes HID standard (valeurs USB HID Usage ID) ─────────
-// Source : USB HID Usage Tables 1.12, section Keyboard/Keypad
-#define KC_NONE     ACTION(ACTION_TYPE_KC, 0x00)   // Aucune action
+// -- Standard HID keycodes (USB HID Usage ID values) --
+// Source: USB HID Usage Tables 1.12, Keyboard/Keypad section
+#define KC_NONE     ACTION(ACTION_TYPE_KC, 0x00)   // No action
 #define KC_A        ACTION(ACTION_TYPE_KC, 0x04)
 #define KC_B        ACTION(ACTION_TYPE_KC, 0x05)
 #define KC_C        ACTION(ACTION_TYPE_KC, 0x06)
@@ -87,82 +87,82 @@
 #define KC_F4       ACTION(ACTION_TYPE_KC, 0x3D)
 #define KC_F5       ACTION(ACTION_TYPE_KC, 0x3E)
 
-// ── Modificateurs ─────────────────────────────────────────────
-// Correspondent aux bits du byte "modifier" du rapport HID
+// -- Modifiers --
+// Match the bits of the "modifier" byte of the HID report
 #define MOD_LCTRL   ACTION(ACTION_TYPE_MOD, 0x01)
 #define MOD_LSHIFT  ACTION(ACTION_TYPE_MOD, 0x02)
 #define MOD_LALT    ACTION(ACTION_TYPE_MOD, 0x04)
-#define MOD_LGUI    ACTION(ACTION_TYPE_MOD, 0x08)   // Touche Windows/Cmd
+#define MOD_LGUI    ACTION(ACTION_TYPE_MOD, 0x08)   // Windows/Cmd key
 #define MOD_RCTRL   ACTION(ACTION_TYPE_MOD, 0x10)
 #define MOD_RSHIFT  ACTION(ACTION_TYPE_MOD, 0x20)
 #define MOD_RALT    ACTION(ACTION_TYPE_MOD, 0x40)
 #define MOD_RGUI    ACTION(ACTION_TYPE_MOD, 0x80)
 
-// ── Touches média (HID Consumer Control) ─────────────────────
+// -- Media keys (HID Consumer Control) --
 #define KC_VOLU     ACTION(ACTION_TYPE_MEDIA, 0x01)   // Volume +
 #define KC_VOLD     ACTION(ACTION_TYPE_MEDIA, 0x02)   // Volume -
 #define KC_MUTE     ACTION(ACTION_TYPE_MEDIA, 0x03)   // Mute
 #define KC_PLAY     ACTION(ACTION_TYPE_MEDIA, 0x04)   // Play/Pause
-#define KC_NEXT     ACTION(ACTION_TYPE_MEDIA, 0x05)   // Piste suivante
-#define KC_PREV     ACTION(ACTION_TYPE_MEDIA, 0x06)   // Piste précédente
-#define KC_SCRL_U   ACTION(ACTION_TYPE_MEDIA, 0x10)   // Scroll haut
-#define KC_SCRL_D   ACTION(ACTION_TYPE_MEDIA, 0x11)   // Scroll bas
+#define KC_NEXT     ACTION(ACTION_TYPE_MEDIA, 0x05)   // Next track
+#define KC_PREV     ACTION(ACTION_TYPE_MEDIA, 0x06)   // Previous track
+#define KC_SCRL_U   ACTION(ACTION_TYPE_MEDIA, 0x10)   // Scroll up
+#define KC_SCRL_D   ACTION(ACTION_TYPE_MEDIA, 0x11)   // Scroll down
 #define KC_ZOOM_IN  ACTION(ACTION_TYPE_MEDIA, 0x20)   // Zoom +
 #define KC_ZOOM_OUT ACTION(ACTION_TYPE_MEDIA, 0x21)   // Zoom -
 
-// ── Actions layers ────────────────────────────────────────────
+// -- Layer actions --
 #define MO(n)   ACTION(ACTION_TYPE_LAYER_MO, n)   // Momentary layer n
 #define TG(n)   ACTION(ACTION_TYPE_LAYER_TG, n)   // Toggle layer n
 #define TO(n)   ACTION(ACTION_TYPE_LAYER_TO, n)   // Go to layer n
 
-// ── Actions spéciales firmware ────────────────────────────────
-#define BLE_SWITCH  ACTION(ACTION_TYPE_SPECIAL, 0x01)  // SW11 : changer appareil BLE
-#define BLE_PAIR    ACTION(ACTION_TYPE_SPECIAL, 0x02)  // SW16+SW17 : mode pairing
+// -- Special firmware actions --
+#define BLE_SWITCH  ACTION(ACTION_TYPE_SPECIAL, 0x01)  // SW11: switch BLE device
+#define BLE_PAIR    ACTION(ACTION_TYPE_SPECIAL, 0x02)  // SW16+SW17: pairing mode
 
-// ─────────────────────────────────────────────────────────────
-//  STRUCTURES DE DONNÉES
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+//  DATA STRUCTURES
+// -------------------------------------------------------------
 
-#define KEYMAP_MAX_LAYERS    8    // Nombre maximum de layers simultanés
-#define KEYMAP_MAX_COMBOS   16    // Nombre maximum de combos définis
+#define KEYMAP_MAX_LAYERS    8    // Maximum number of simultaneous layers
+#define KEYMAP_MAX_COMBOS   16    // Maximum number of defined combos
 
-// ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+//  PUBLIC FUNCTIONS
+// -------------------------------------------------------------
 
-// Initialise la matrice GPIO et charge le keymap depuis la config
+// Initialize the GPIO matrix and load the keymap from the config
 esp_err_t keymap_init(void);
 
-// Scanner la matrice physique (à appeler toutes les KB_SCAN_INTERVAL_MS)
+// Scan the physical matrix (to call every KB_SCAN_INTERVAL_MS)
 void keymap_scan_matrix(void);
 
-// Traiter les événements: combos, tap-hold, envoyer les rapports HID
+// Process the events: combos, tap-hold, send the HID reports
 void keymap_process_events(void);
 
-// Retourne true si une touche a été pressée depuis le dernier appel
+// Returns true if a key was pressed since the last call
 bool keymap_has_activity(void);
 
-// Recharger le keymap depuis la config (après mise à jour via app SvelteKit)
+// Reload the keymap from the config (after an update via the SvelteKit app)
 void keymap_reload_from_config(void);
 
-// Obtenir le layer actif actuellement (pour affichage sur l'écran)
+// Get the currently active layer (for display on the screen)
 uint8_t keymap_get_active_layer(void);
 
-// Basculer le profil actif (couche données + runtime) : persiste en NVS,
-// recharge le keymap/combos, remet la stack de layers sur la base, et émet un
-// événement "profile" sur le stream moniteur si l'index a réellement changé.
-// idx est clampé à profile_count.
+// Switch the active profile (data + runtime layer): persists to NVS,
+// reloads the keymap/combos, resets the layer stack to the base, and emits a
+// "profile" event on the monitor stream if the index actually changed.
+// idx is clamped to profile_count.
 void keymap_set_active_profile(uint8_t idx);
 
-// Activer/désactiver le streaming d'événements clavier (mode entraînement)
-// Quand activé, chaque changement d'état est émis via usb_hid_cdc_send().
+// Enable/disable keyboard event streaming (training mode)
+// When enabled, each state change is emitted via usb_hid_cdc_send().
 void keymap_set_monitor(bool enable);
 bool keymap_get_monitor(void);
 
-// Activer/désactiver le mode training : aucune action HID exécutée tant
-// qu'il est ON. Le monitor reste indépendant (events toujours streamés).
+// Enable/disable training mode: no HID action executed while
+// it is ON. The monitor stays independent (events always streamed).
 void keymap_set_training_mode(bool enable);
 bool keymap_get_training_mode(void);
 
-// Lancer la macro macro_idx du profil actif dans une tâche FreeRTOS éphémère.
+// Launch the active profile's macro macro_idx in an ephemeral FreeRTOS task.
 void keymap_play_macro(uint8_t macro_idx);

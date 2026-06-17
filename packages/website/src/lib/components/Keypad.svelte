@@ -1,16 +1,16 @@
 <script lang="ts">
-  // Rendu présentationnel du keypad SpinPad — reprend le langage des keycaps du
-  // Studio (KeyGrid.svelte) : surface --card, relief 4px lumière du haut, gloss,
-  // touches 2u (SW1 large, SW10 haute), puces de layer. Statique, non éditable.
-  // Animation : un balayage LED cyan parcourt les touches en séquence + le dial
-  // de l'encodeur tourne lentement. Le tout neutralisé sous prefers-reduced-motion.
+  // Presentational rendering of the SpinPad keypad — reuses the Studio keycap
+  // language (KeyGrid.svelte): --card surface, 4px top-light relief, gloss,
+  // 2u keys (SW1 wide, SW10 tall), layer chips. Static, not editable.
+  // Animation: a cyan LED sweep runs across the keys in sequence + the encoder
+  // dial turns slowly. All neutralized under prefers-reduced-motion.
   interface Key {
     sw: string;
     label: string;
-    cls: string; // placement grille
-    order: number; // rang dans le balayage LED
-    alt?: boolean; // touche 2u (surface --muted)
-    dots?: string[]; // puces couleur layer (top-right)
+    cls: string; // grid placement
+    order: number; // rank in the LED sweep
+    alt?: boolean; // 2u key (--muted surface)
+    dots?: string[]; // layer color chips (top-right)
   }
 
   const keys: Key[] = [
@@ -30,7 +30,7 @@
 <div
   class="keypad-wrap"
   role="img"
-  aria-label="Disposition du SpinPad : 10 touches programmables et un encodeur rotatif"
+  aria-label="SpinPad layout: 10 programmable keys and a rotary encoder"
 >
   <div class="keypad">
     {#each keys as k (k.sw)}
@@ -49,12 +49,12 @@
     {/each}
   </div>
 
-  <!-- Encodeur : knob glossy facon Studio, dial qui tourne -->
+  <!-- Encoder: Studio-style glossy knob, rotating dial -->
   <div class="knob-col">
     <div class="knob" aria-hidden="true">
       <div class="knob-dial"><span class="knob-tick"></span></div>
     </div>
-    <span class="knob-label">Encodeur</span>
+    <span class="knob-label">Encoder</span>
   </div>
 </div>
 
@@ -93,7 +93,7 @@
     overflow: hidden;
     transition: transform 120ms ease-out;
   }
-  /* Gloss du capuchon */
+  /* Keycap gloss */
   .keycap::after {
     content: '';
     position: absolute;
@@ -102,7 +102,7 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(0, 0, 0, 0.17) 100%);
     pointer-events: none;
   }
-  /* Halo LED cyan — opacité animée en séquence (cf. .keycap-pulse du Studio) */
+  /* Cyan LED halo — opacity animated in sequence (cf. Studio's .keycap-pulse) */
   .keycap::before {
     content: '';
     position: absolute;
@@ -175,7 +175,7 @@
       0 0 28px color-mix(in oklch, var(--color-spinpad) 22%, transparent);
     position: relative;
   }
-  /* Dial rotatif : porte un repère qui matérialise la rotation de l'encodeur */
+  /* Rotating dial: carries a marker that materializes the encoder's rotation */
   .knob-dial {
     position: absolute;
     inset: 0;
@@ -192,7 +192,7 @@
     transform: translateX(-50%);
     opacity: 0.55;
   }
-  /* Pastille centrale glossy */
+  /* Glossy central cap */
   .knob::after {
     content: '';
     position: absolute;
@@ -208,10 +208,10 @@
     color: var(--muted-foreground);
   }
 
-  /* ── Mouvement (neutralisé sous prefers-reduced-motion) ── */
+  /* ── Motion (neutralized under prefers-reduced-motion) ── */
   @media (prefers-reduced-motion: no-preference) {
     .keycap::before {
-      /* 10 touches × 0.32s = balayage, puis pause → cycle de 5s */
+      /* 10 keys × 0.32s = sweep, then pause → 5s cycle */
       animation: led-scan 5s ease-in-out infinite;
       animation-delay: calc(var(--order) * 0.32s);
     }

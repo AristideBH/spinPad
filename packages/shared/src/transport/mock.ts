@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-//  transport/mock.ts — Transport mock pour dev mode
+//  transport/mock.ts — Mock transport for dev mode
 //
-//  Implémente les interfaces Transport et DeviceStatusTransport
-//  complètes sans device physique.
-//    getConfig()     → MOCK_CONFIG après 300ms de délai simulé
-//    setConfig()     → no-op silencieux
-//    factoryReset()  → no-op silencieux
-//    getDeviceStatus() → statut simulé selon devMode.battery/connection
+//  Implements the full Transport and DeviceStatusTransport
+//  interfaces without a physical device.
+//    getConfig()     → MOCK_CONFIG after 300ms simulated delay
+//    setConfig()     → silent no-op
+//    factoryReset()  → silent no-op
+//    getDeviceStatus() → simulated status based on devMode.battery/connection
 // ═══════════════════════════════════════════════════════════════
 
 import { devMode } from '$shared/store/devMode.svelte.js';
@@ -41,8 +41,8 @@ export async function factoryReset(): Promise<{ status: string; msg: string }> {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function setActiveProfile(_idx: number): Promise<{ status: string }> {
-  // No-op : en dev mode, le profil actif du « device » suit configState.data
-  // (voir makeMockDeviceStatus), donc la mutation locale suffit.
+  // No-op: in dev mode, the active profile of the "device" follows
+  // configState.data (see makeMockDeviceStatus), so the local mutation suffices.
   return { status: 'ok' };
 }
 

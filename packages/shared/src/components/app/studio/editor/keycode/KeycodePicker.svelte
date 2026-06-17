@@ -55,11 +55,11 @@
         >
           <Item.Media variant="icon"><Activity class="size-5" /></Item.Media>
           <Item.Content>
-            <Item.Title>Enregistrer en direct</Item.Title>
+            <Item.Title>Live recording</Item.Title>
             <Item.Description>
               {finePointer.current
-                ? 'Appuie sur une touche de ton clavier physique.'
-                : 'Nécessite un clavier physique.'}
+                ? 'Press a key on your physical keyboard.'
+                : 'Requires a physical keyboard.'}
             </Item.Description>
           </Item.Content>
         </button>
@@ -75,14 +75,14 @@
         >
           <Item.Media variant="icon"><List class="size-5" /></Item.Media>
           <Item.Content>
-            <Item.Title>Parcourir la liste</Item.Title>
-            <Item.Description>Recherche et catégories de keycodes.</Item.Description>
+            <Item.Title>Browse the list</Item.Title>
+            <Item.Description>Search and keycode categories.</Item.Description>
           </Item.Content>
         </button>
       {/snippet}
     </Item.Root>
 
-    <!-- Option LED : seulement pour les touches (pas l'encodeur) -->
+    <!-- LED option: only for keys (not the encoder) -->
     {#if ctx.editingField === 'key'}
       {@const ki = ctx.editingKey}
       {@const kled = ki !== null ? (ctx.layer?.key_leds?.[ki] ?? null) : null}
@@ -106,12 +106,12 @@
               {/if}
             </Item.Media>
             <Item.Content>
-              <Item.Title>Couleur LED</Item.Title>
+              <Item.Title>LED Color</Item.Title>
               <Item.Description>
                 {#if hasLed}
                   {kled!.effect} · #{[kled!.r, kled!.g, kled!.b].map((v) => v.toString(16).padStart(2, '0')).join('')}
                 {:else}
-                  Override la couleur de cette touche.
+                  Override the color of this key.
                 {/if}
               </Item.Description>
             </Item.Content>

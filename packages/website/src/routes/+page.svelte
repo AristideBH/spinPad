@@ -12,81 +12,81 @@
     ArrowRight,
   } from '@lucide/svelte';
 
-  // Faits matériels affichés en bandeau — tous tirés des specs réelles ci-dessous,
-  // aucun chiffre inventé.
+  // Hardware facts shown in the banner — all taken from the real specs below,
+  // no made-up numbers.
   const stats = [
-    { value: '10', label: 'touches + encodeur' },
-    { value: '4×4', label: 'profils × layers' },
-    { value: 'BLE 5', label: '+ USB-C natif' },
-    { value: 'WS2812', label: '10 LEDs / touche' },
+    { value: '10', label: 'keys + encoder' },
+    { value: '4×4', label: 'profiles × layers' },
+    { value: 'BLE 5', label: '+ native USB-C' },
+    { value: 'WS2812', label: '10 LEDs / key' },
   ];
 
-  // Bento 2 colonnes : ligne pleine (image) / split / ligne pleine (accent) / split.
-  // 6 features → 6 cellules, remplissage exact, aucune cellule vide.
+  // 2-column bento: full row (image) / split / full row (accent) / split.
+  // 6 features → 6 cells, exact fill, no empty cell.
   const features = [
     {
       icon: Keyboard,
-      title: '10 touches + encodeur',
-      text: 'Layout 3×4 avec SW1 et SW10 en format 2u. Encodeur rotatif quadrature avec clic.',
+      title: '10 keys + encoder',
+      text: '3×4 layout with SW1 and SW10 in 2u format. Quadrature rotary encoder with click.',
       img: '/img/spinpad.png',
     },
     {
       icon: Bluetooth,
       title: 'USB & Bluetooth',
-      text: "HID natif sur USB-C et BLE 5. Passez d'un appareil à l'autre sans rebrancher.",
+      text: 'Native HID over USB-C and BLE 5. Switch from one device to another without replugging.',
     },
     {
       icon: Palette,
-      title: 'Studio Mode embarqué',
-      text: 'Maintenez SW8+SW9 → hotspot WiFi + interface de config servie depuis le macropad.',
+      title: 'Embedded Studio Mode',
+      text: 'Hold SW8+SW9 → WiFi hotspot + config interface served from the macropad.',
     },
     {
       icon: Lightbulb,
-      title: 'LEDs WS2812',
-      text: 'Effets Solid, Breathe, Reactive, Mirror, Hyperion. Chaîne extensible.',
+      title: 'WS2812 LEDs',
+      text: 'Solid, Breathe, Reactive, Mirror, Hyperion effects. Extensible chain.',
       accent: true,
     },
     {
       icon: Layers,
-      title: '4 profils × 4 layers',
-      text: "Jusqu'à 16 configurations. Combos, momentary/toggle layers, encoder par layer.",
+      title: '4 profiles × 4 layers',
+      text: 'Up to 16 configurations. Combos, momentary/toggle layers, per-layer encoder.',
     },
     {
       icon: Wrench,
       title: 'Open source',
-      text: 'Firmware ESP-IDF + Studio SvelteKit. Modifiez, compilez, flashez. MIT License.',
+      text: 'ESP-IDF firmware + SvelteKit Studio. Modify, compile, flash. MIT License.',
     },
   ];
 
   const steps = [
     {
-      title: 'Flasher le firmware',
-      text: "Dans le navigateur (Chrome/Edge + WebSerial) ou via esptool.py.",
+      title: 'Flash the firmware',
+      text: 'In the browser (Chrome/Edge + WebSerial) or via esptool.py.',
     },
     {
-      title: 'Brancher le SpinPad',
-      text: 'En USB-C : reconnu immédiatement comme clavier HID, sans pilote.',
+      title: 'Plug in the SpinPad',
+      text: 'Over USB-C: instantly recognized as an HID keyboard, driver-free.',
     },
     {
-      title: 'Configurer avec Studio',
-      text: "Par USB (WebSerial) ou en Studio Mode WiFi, depuis n'importe quel appareil.",
+      title: 'Configure with Studio',
+      text: 'Over USB (WebSerial) or in WiFi Studio Mode, from any device.',
     },
     {
-      title: 'Utiliser',
-      text: 'Configs persistées en NVS. Débranchez, rebranchez, tout est là.',
+      title: 'Use it',
+      text: 'Configs persisted in NVS. Unplug, replug, everything is there.',
     },
   ];
 </script>
 
 <svelte:head>
-  <title>SpinPad : Macropad ESP32-S3</title>
+  <title>SpinPad: ESP32-S3 Macropad</title>
   <meta
     name="description"
-    content="SpinPad : macropad 10 touches + encodeur rotatif sur ESP32-S3. Open source, configurable depuis le navigateur."
+    content="SpinPad: 10-key macropad + rotary encoder on ESP32-S3. Open source, configurable from the browser."
   />
 </svelte:head>
 
-<!-- ░░ Hero : split asymétrique ░░ -->
+<!-- ░░ Hero: asymmetric split ░░ -->
 <section class="relative w-full px-4 pt-12 pb-16 overflow-hidden md:pt-20 md:pb-24">
   <div aria-hidden="true" class="absolute inset-0 -z-10 tech-grid"></div>
   <div class="reveal-hero grid items-center max-w-6xl gap-12 mx-auto lg:grid-cols-[1.05fr_1fr]">
@@ -99,18 +99,18 @@
       <h1
         class="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl lg:text-7xl"
       >
-        Le macropad qui s'adapte à vous
+        The macropad that adapts to you
       </h1>
       <p class="mt-6 text-lg leading-relaxed text-muted-foreground max-w-[48ch]">
-        10 touches programmables + encodeur rotatif sur ESP32-S3. USB & Bluetooth. Configurez
-        depuis le navigateur, sans pilote.
+        10 programmable keys + rotary encoder on ESP32-S3. USB & Bluetooth. Configure
+        from the browser, driver-free.
       </p>
       <div class="flex flex-wrap gap-3 mt-9">
         <Button
           href="/studio/"
           class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
         >
-          Ouvrir Studio
+          Open Studio
           <ArrowRight class="size-4" />
         </Button>
         <Button
@@ -118,24 +118,24 @@
           href="/docs/"
           class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
         >
-          Lire la doc
+          Read the docs
         </Button>
       </div>
     </div>
 
     <div class="relative flex justify-center lg:justify-end">
-      <!-- Lueur cyan de marque (pas de dégradé IA générique) -->
+      <!-- Brand cyan glow (no generic AI gradient) -->
       <div
         aria-hidden="true"
         class="absolute -inset-10 -z-10 blur-3xl bg-[radial-gradient(circle_at_55%_45%,color-mix(in_oklch,var(--color-spinpad)_32%,transparent),transparent_68%)]"
       ></div>
-      <!-- Le vrai keypad SpinPad, rendu en CSS (cohérent avec le Studio) -->
+      <!-- The real SpinPad keypad, rendered in CSS (consistent with Studio) -->
       <Keypad />
     </div>
   </div>
 </section>
 
-<!-- ░░ Bandeau specs ░░ -->
+<!-- ░░ Specs banner ░░ -->
 <section class="w-full px-4">
   <div
     class="reveal grid max-w-6xl grid-cols-2 mx-auto overflow-hidden border divide-x divide-y rounded-2xl border-border/60 divide-border/60 md:grid-cols-4 md:divide-y-0 bg-card/40"
@@ -151,17 +151,17 @@
   </div>
 </section>
 
-<!-- ░░ Features (bento à rythme) ░░ -->
+<!-- ░░ Features (rhythmic bento) ░░ -->
 <section class="w-full px-4 py-20 md:py-28">
   <div class="max-w-6xl mx-auto">
     <h2 class="font-display mb-10 text-3xl font-semibold tracking-tight md:text-4xl">
-      Pensé pour être bidouillé
+      Built to be tinkered with
     </h2>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       {#each features as f (f.title)}
         {@const Icon = f.icon}
         {#if f.img}
-          <!-- Ligne pleine : visuel produit réel + texte (composition horizontale) -->
+          <!-- Full row: real product visual + text (horizontal composition) -->
           <div
             class="reveal group relative grid overflow-hidden border md:col-span-2 sm:grid-cols-2 rounded-2xl border-border/60 bg-card"
           >
@@ -203,17 +203,17 @@
   </div>
 </section>
 
-<!-- ░░ Studio Mode (moment centré, vraies touches) ░░ -->
+<!-- ░░ Studio Mode (centered moment, real keys) ░░ -->
 <section class="w-full px-4 py-20 md:py-28">
   <div
     class="reveal relative max-w-4xl px-6 py-16 mx-auto overflow-hidden text-center border md:px-12 rounded-3xl border-spinpad/25 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklch,var(--color-spinpad)_12%,var(--color-card)),var(--color-card))]"
   >
     <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">
-      Configuration sans fil
+      Wireless configuration
     </h2>
     <p class="mx-auto mt-4 leading-relaxed text-muted-foreground max-w-[52ch]">
-      Maintenez la combinaison ci-dessous pendant 3 secondes. Le SpinPad crée un hotspot WiFi et
-      sert Studio depuis le macropad lui-même, sans installation.
+      Hold the combination below for 3 seconds. The SpinPad creates a WiFi hotspot and
+      serves Studio from the macropad itself, no installation required.
     </p>
 
     <div class="flex flex-wrap items-center justify-center gap-3 mt-8 text-base">
@@ -228,11 +228,11 @@
   </div>
 </section>
 
-<!-- ░░ Démarrage rapide (flux séquentiel) ░░ -->
+<!-- ░░ Quick start (sequential flow) ░░ -->
 <section class="w-full px-4 py-20 md:py-28">
   <div class="max-w-6xl mx-auto">
     <h2 class="font-display mb-12 text-3xl font-semibold tracking-tight md:text-4xl">
-      Démarrage rapide
+      Quick start
     </h2>
     <ol class="grid gap-8 md:grid-cols-4 md:gap-6">
       {#each steps as step, i (step.title)}
@@ -259,7 +259,7 @@
         size="lg"
         class="transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
       >
-        Flasher le firmware
+        Flash the firmware
         <ArrowRight class="size-4" />
       </Button>
     </div>

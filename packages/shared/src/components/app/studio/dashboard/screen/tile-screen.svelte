@@ -13,13 +13,13 @@
     {#if editable}
       <ScreenAddMenu />
     {:else}
-      <Card.Description class="row-span-2">Écran</Card.Description>
+      <Card.Description class="row-span-2">Screen</Card.Description>
     {/if}
     <Card.Action>
       <Button
         variant={editable ? 'default' : 'ghost'}
         size="icon-xs"
-        title={editable ? "Terminer l'édition" : 'Éditer les widgets'}
+        title={editable ? 'Finish editing' : 'Edit widgets'}
         onclick={() => (editable = !editable)}
       >
         {#if editable}

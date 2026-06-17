@@ -22,7 +22,7 @@
       <Icon class="size-4 text-muted-foreground" />
       {selectedPreset.label}
     {:else}
-      Personnalisé
+      Custom
     {/if}
   </Select.Trigger>
   <Select.Content>
@@ -36,7 +36,7 @@
         </Select.Item>
       {/each}
       {#if selected === CUSTOM}
-        <Select.Item value={CUSTOM} label="Personnalisé" disabled>Personnalisé</Select.Item>
+        <Select.Item value={CUSTOM} label="Custom" disabled>Custom</Select.Item>
       {/if}
     </Select.Group>
   </Select.Content>

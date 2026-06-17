@@ -1,10 +1,10 @@
 /*
- * @spinpad/shared — Feuille de style partagée
+ * @spinpad/shared — Shared stylesheet
  *
- * NE PAS mettre @import "tailwindcss" ici.
- * Chaque app consommatrice (studio, website) l'importe elle-même.
+ * Do NOT put @import "tailwindcss" here.
+ * Each consuming app (studio, website) imports it itself.
  *
- * Usage dans une app :
+ * Usage in an app:
  *   @import "tailwindcss";
  *   @import "tw-animate-css";
  *   @import "shadcn-svelte/tailwind.css";

@@ -93,9 +93,9 @@ static const char *string_desc_arr[] = {
 
 static bool              g_mounted    = false;
 static uint8_t           g_keyboard_report[8] = {0};
-// Modificateur apporté par la touche de chaque slot (index 2–7), pour pouvoir
-// recomposer report[0] quand une touche « modifiée » est relâchée alors qu'une
-// autre reste tenue.
+// Modifier contributed by the key of each slot (index 2–7), so we can
+// recompose report[0] when a "modified" key is released while another
+// one is still held.
 static uint8_t           g_report_mod[8] = {0};
 static uint8_t           g_cdc_rx_buf[CONFIG_JSON_MAX_SIZE];
 static size_t            g_cdc_rx_len = 0;
@@ -135,11 +135,11 @@ esp_err_t usb_hid_init(void)
 
     xTaskCreate(usb_device_task, "usb_task", 4096, NULL, 5, NULL);
 
-    ESP_LOGI(TAG, "USB HID + CDC initialisés");
+    ESP_LOGI(TAG, "USB HID + CDC initialized");
     return ESP_OK;
 }
 
-// report[0] = union des modificateurs apportés par les touches encore tenues.
+// report[0] = union of the modifiers contributed by the keys still held.
 static void usb_hid_refresh_modifier(void)
 {
     uint8_t mod = 0;
@@ -234,8 +234,8 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
     } else if (strstr(str, "\"set_active_profile\"")) {
-        // {"cmd":"set_active_profile","idx":N} — bascule légère du profil actif
-        // sans renvoyer toute la config. keymap_set_active_profile clamp l'index.
+        // {"cmd":"set_active_profile","idx":N} — lightweight switch of the active profile
+        // without resending the whole config. keymap_set_active_profile clamps the index.
         cJSON *root = cJSON_Parse(str);
         if (root) {
             cJSON *idx = cJSON_GetObjectItem(root, "idx");
@@ -261,7 +261,7 @@ void usb_hid_process_config_packet(const uint8_t *data, size_t len)
         tud_cdc_n_write(0, ok, strlen(ok));
         tud_cdc_n_write_flush(0);
     } else if (strstr(str, "\"device_status\"")) {
-        // Buffer dédié — 512 octets suffisent largement pour le payload actuel.
+        // Dedicated buffer — 512 bytes are largely enough for the current payload.
         char buf[512];
         size_t n = 0;
         if (device_status_to_json(buf, sizeof(buf), &n, true) == ESP_OK) {
@@ -332,13 +332,13 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
 void tud_mount_cb(void)
 {
     g_mounted = true;
-    ESP_LOGI(TAG, "USB monté");
+    ESP_LOGI(TAG, "USB mounted");
 }
 
 void tud_umount_cb(void)
 {
     g_mounted = false;
-    ESP_LOGI(TAG, "USB démonté");
+    ESP_LOGI(TAG, "USB unmounted");
 }
 
 // Called by TinyUSB when CDC data arrives

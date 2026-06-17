@@ -10,10 +10,10 @@
   const ctx = getKeypadContext();
 
   const KEY_EFFECTS: { value: LedModeKey; label: string; desc: string }[] = [
-    { value: 'off',     label: 'Éteint',     desc: 'Éteindre cette touche' },
-    { value: 'static',  label: 'Statique',   desc: 'Couleur fixe' },
-    { value: 'breathe', label: 'Respiration',desc: 'Pulsation lente' },
-    { value: 'alert',   label: 'Alerte',     desc: 'Stroboscopique' },
+    { value: 'off',     label: 'Off',        desc: 'Turn off this key' },
+    { value: 'static',  label: 'Static',     desc: 'Fixed color' },
+    { value: 'breathe', label: 'Breathe',    desc: 'Slow pulse' },
+    { value: 'alert',   label: 'Alert',      desc: 'Strobe' },
   ];
 
   const pi = $derived(configState.activeProfileIndex);
@@ -73,7 +73,7 @@
 
 <div class="flex flex-col gap-5 py-2">
 
-  <!-- Indicateur de couleur actuelle -->
+  <!-- Current color indicator -->
   <div class="flex items-center gap-3">
     <div
       class="size-8 rounded-full ring-1 ring-border shrink-0"
@@ -81,20 +81,20 @@
     ></div>
     <div class="min-w-0">
       <p class="text-sm font-medium">
-        {currentOverride ? 'Override actif' : 'Hérite du profil / global'}
+        {currentOverride ? 'Override active' : 'Inherits from profile / global'}
       </p>
       {#if currentOverride}
         <p class="text-xs text-muted-foreground">{effectVal} · {hexColor.toUpperCase()}</p>
       {/if}
     </div>
     {#if currentOverride}
-      <Button variant="ghost" size="icon-sm" onclick={clearOverride} title="Supprimer l'override" class="ms-auto">
+      <Button variant="ghost" size="icon-sm" onclick={clearOverride} title="Remove the override" class="ms-auto">
         <X class="size-4" />
       </Button>
     {/if}
   </div>
 
-  <!-- Effets disponibles -->
+  <!-- Available effects -->
   <div class="grid grid-cols-2 gap-2">
     {#each KEY_EFFECTS as opt (opt.value)}
       <button
@@ -113,11 +113,11 @@
     {/each}
   </div>
 
-  <!-- Color picker (masqué si off ou pas d'override) -->
+  <!-- Color picker (hidden if off or no override) -->
   {#if currentOverride && currentOverride.effect !== 'off'}
     <div class="flex items-center gap-3">
       <Lightbulb class="size-4 text-muted-foreground shrink-0" />
-      <span class="text-sm">Couleur</span>
+      <span class="text-sm">Color</span>
       <Popover.Root>
         <Popover.Trigger>
           {#snippet child({ props })}

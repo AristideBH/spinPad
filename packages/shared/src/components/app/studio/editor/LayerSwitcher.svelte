@@ -30,10 +30,10 @@
 
   const horizontal = $derived(orientation === 'horizontal');
 
-  // Largeur fixe d'un onglet en mode horizontal. Indispensable au scroll : le
-  // Sortable n'impose une largeur explicite (donc un overflow scrollable) que
-  // pour un colWidth NUMÉRIQUE ; en 'auto' la piste reste à 100% et les onglets
-  // débordent sans pouvoir défiler. Voir le pattern de ProfileSwitcher.
+  // Fixed width of a tab in horizontal mode. Essential for scrolling: the
+  // Sortable only imposes an explicit width (and thus a scrollable overflow)
+  // for a NUMERIC colWidth; in 'auto' the track stays at 100% and the tabs
+  // overflow without being able to scroll. See the ProfileSwitcher pattern.
   const H_COL_W = 120;
 
   const sortableGap = $derived<[number, number]>(horizontal ? [6, 0] : [0, 4]);
@@ -42,7 +42,7 @@
 
   const layerCount = $derived(ctx.profile?.layers?.length ?? 0);
 
-  // Refs de la zone scrollable horizontale (ombres de bord + drag tactile).
+  // Refs of the horizontal scrollable area (edge shadows + touch drag).
   let viewport = $state<HTMLElement | null>(null);
   let rootEl = $state<HTMLElement | null>(null);
 
@@ -52,17 +52,17 @@
     layerValue = String(configState.activeLayerIndex);
   });
 
-  // Ombres de bord (ancrées au Root non défilant, position lue sur le viewport).
-  // Uniquement en horizontal — refs nulles autrement.
+  // Edge shadows (anchored to the non-scrolling Root, position read from the viewport).
+  // Horizontal only — refs null otherwise.
   $effect(() => {
     if (!horizontal || !viewport || !rootEl) return;
     return scrollShadow(viewport, rootEl);
   });
 
-  // bits-ui masque les scrollbars natives et la chaîne touch-action via mosaic
-  // n'engage pas le scroll-doigt natif : on pilote le défilement horizontal
-  // depuis les drags tactiles. Un drag démarré sur la poignée (data-grip) est
-  // laissé à mosaic pour le réordonnancement.
+  // bits-ui hides the native scrollbars and the touch-action chain via mosaic
+  // doesn't engage the native finger-scroll: we drive the horizontal scrolling
+  // from the touch drags. A drag started on the handle (data-grip) is
+  // left to mosaic for reordering.
   $effect(() => {
     if (!horizontal) return;
     const vp = viewport;
@@ -134,21 +134,21 @@
     editLayer(configState.activeProfileIndex, i, { name });
   }
 
-  // Suppression / réinitialisation immédiates : pas de dialogue. L'op entre dans
-  // l'historique (Ctrl+Z) et le toast offre un « Annuler » direct via undo().
+  // Immediate delete / reset: no dialog. The op enters the history (Ctrl+Z)
+  // and the toast offers a direct "Undo" via undo().
   function onDelete(i: number) {
     const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
     deleteLayer(configState.activeProfileIndex, i);
-    toast(`Layer « ${name} » supprimé`, {
-      action: { label: 'Annuler', onClick: () => undo() },
+    toast(`Layer "${name}" deleted`, {
+      action: { label: 'Undo', onClick: () => undo() },
     });
   }
 
   function onReset(i: number) {
     const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
     ctx.resetLayer(i);
-    toast(`Layer « ${name} » réinitialisé`, {
-      action: { label: 'Annuler', onClick: () => undo() },
+    toast(`Layer "${name}" reset`, {
+      action: { label: 'Undo', onClick: () => undo() },
     });
   }
 
@@ -158,8 +158,8 @@
   };
 </script>
 
-<!-- Piste réordonnable d'onglets layer : identique dans les deux modes (le
-     Sortable s'adapte via `orientation`/`colWidth`). -->
+<!-- Reorderable track of layer tabs: identical in both modes (the
+     Sortable adapts via `orientation`/`colWidth`). -->
 {#snippet tabs()}
   <Sortable
     items={(ctx.profile?.layers ?? []) as LayerConfig[]}
@@ -189,7 +189,7 @@
               type="button"
               data-grip
               class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground cursor-grab touch-none"
-              title="Réordonner"
+              title="Reorder"
               onpointerdown={handlePointerDown}
               onclick={(e) => e.preventDefault()}
             >
@@ -210,7 +210,7 @@
                       buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
                       'absolute top-0 bottom-0 right-0 w-6 h-full z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground  data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
                     )}
-                    title="Éditer le layer"
+                    title="Edit layer"
                   >
                     <EllipsisVertical />
                   </DropdownMenu.Trigger>
@@ -220,7 +220,7 @@
                   <div class="px-1.5 py-1">
                     <InputGroup.Root class="h-7">
                       <InputGroup.Input
-                        placeholder="Nom du layer"
+                        placeholder="Layer name"
                         value={l.name ?? ''}
                         onkeydown={(e: KeyboardEvent) => {
                           e.stopPropagation();
@@ -239,15 +239,15 @@
                     onSelect={() => duplicateLayer(configState.activeProfileIndex, i)}
                   >
                     <CopyPlus />
-                    Dupliquer
+                    Duplicate
                   </DropdownMenu.Item>
                   <DropdownMenu.Item onSelect={() => onReset(i)}>
                     <BrushCleaning />
-                    Réinitialiser
+                    Reset
                   </DropdownMenu.Item>
                   <DropdownMenu.Item variant="destructive" disabled={layerCount <= 1} onSelect={() => onDelete(i)}>
                     <Trash2 />
-                    Supprimer
+                    Delete
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
@@ -265,11 +265,11 @@
     size="sm"
     class={cn('shrink-0', horizontal ? '' : 'w-full justify-start! gap-2!')}
     disabled={layerCount >= CONFIG_MAX_LAYERS}
-    title="Ajouter un layer vierge"
+    title="Add a blank layer"
     onclick={() => addLayer(configState.activeProfileIndex)}
   >
     <Plus class="size-3.5" />
-    {#if !horizontal}Ajouter un layer{/if}
+    {#if !horizontal}Add a layer{/if}
   </Button>
 {/snippet}
 
@@ -289,7 +289,7 @@
           class="flex flex-row items-start w-full gap-2 "
         >
           {@render tabs()}
-          <!-- Bouton « + » épinglé à droite : reste visible quand la piste défile. -->
+          <!-- "+" button pinned to the right: stays visible when the track scrolls. -->
           <div data-add-btn class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
             {@render addBtn()}
           </div>

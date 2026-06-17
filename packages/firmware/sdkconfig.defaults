@@ -1,23 +1,23 @@
 # ─────────────────────────────────────────────────
-#  sdkconfig.defaults — SpinPad (valeurs communes à toutes les boards)
-#  Ces valeurs sont appliquées lors du premier build.
+#  sdkconfig.defaults — SpinPad (values common to all boards)
+#  These values are applied on the first build.
 #
-#  NOTE : CONFIG_IDF_TARGET n'est PAS défini ici.
-#  Il doit être spécifié par le fichier sdkconfig propre à chaque board :
+#  NOTE : CONFIG_IDF_TARGET is NOT defined here.
+#  It must be specified by the sdkconfig file specific to each board :
 #    hardware/boards/<board>/sdkconfig.board
-#  Exemple d'utilisation :
+#  Usage example :
 #    idf.py -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;../../hardware/boards/spinpad-v1/sdkconfig.board" build
 #
-#  Cela permet de supporter spinpad-v2 (ou un autre ESP) sans modifier ce fichier.
+#  This allows supporting spinpad-v2 (or another ESP) without modifying this file.
 # ─────────────────────────────────────────────────
 
 # ── USB ──────────────────────────────────────────
-# Active le mode USB OTG (nécessaire pour USB HID via TinyUSB)
+# Enable USB OTG mode (required for USB HID via TinyUSB)
 CONFIG_USB_OTG_SUPPORTED=y
-# TinyUSB comme stack USB
+# TinyUSB as the USB stack
 # CONFIG_BOARD_TINYUSB=y
 # CONFIG_BOARD_TINYUSB_HID_ENABLED=y
-# Buffer de descripteur HID
+# HID descriptor buffer
 # CONFIG_BOARD_TINYUSB_HID_BUFSIZE=64
 
 # ── Bluetooth ────────────────────────────────────
@@ -25,49 +25,49 @@ CONFIG_BT_ENABLED=y
 CONFIG_BT_NIMBLE_ENABLED=y
 # HID over GATT Profile (HOG)
 CONFIG_BT_NIMBLE_HID_SERVICE=y
-# 2 connexions simultanées max (on en utilise 1 à la fois mais NimBLE a besoin de la config)
+# 2 simultaneous connections max (we use 1 at a time but NimBLE needs the config)
 CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
-# Stocker les bonds en NVS (persistance après reboot)
+# Store the bonds in NVS (persistence after reboot)
 CONFIG_BT_NIMBLE_NVS_PERSIST=y
-# Nombre de bonds stockés (un par slot BLE)
+# Number of stored bonds (one per BLE slot)
 CONFIG_BT_NIMBLE_MAX_BONDS=2
 
-# ── NVS (stockage config en flash) ───────────────
+# ── NVS (config storage in flash) ───────────────
 CONFIG_NVS_ENCRYPTION=n
 
 # ── Logs ─────────────────────────────────────────
-# En développement : INFO. En production : WARNING
+# In development : INFO. In production : WARNING
 CONFIG_LOG_DEFAULT_LEVEL_INFO=y
 
 # ── Deep sleep ───────────────────────────────────
-# Active le wakeup par GPIO (touches du clavier)
+# Enable wakeup via GPIO (keyboard keys)
 CONFIG_ESP_SLEEP_GPIO_ENABLE_INTERNAL_RESISTORS=y
 
-# ── Taille de la partition NVS ───────────────────
-# 20KB suffisent largement pour les configs
+# ── NVS partition size ───────────────────
+# 20KB are largely enough for the configs
 CONFIG_NVS_PAGE_SIZE=4096
 
 # ── FreeRTOS ─────────────────────────────────────
-# Tick rate à 1000Hz pour une meilleure précision des timers (combos, tap-hold)
+# Tick rate at 1000Hz for better timer precision (combos, tap-hold)
 CONFIG_FREERTOS_HZ=1000
 
-# ── Taille du flash (ESP32-S3, 8MB) ──────────────────────────
-# Doit être défini explicitement : sinon ESP-IDF retombe sur 2MB par défaut,
-# ce qui est incohérent avec la table de partitions (app 3MB + SPIFFS au-delà
-# de 0x400000) et empêche le boot.
+# ── Flash size (ESP32-S3, 8MB) ──────────────────────────
+# Must be defined explicitly : otherwise ESP-IDF falls back to 2MB by default,
+# which is inconsistent with the partition table (app 3MB + SPIFFS beyond
+# 0x400000) and prevents booting.
 CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
 CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
 
-# ── Table de partitions ──────────────────────────────────────
-# Partition custom : NVS + app 3MB + SPIFFS 1.5MB pour Studio Mode
-# (~3.4MB de flash réservés en fin pour un futur slot OTA)
+# ── Partition table ──────────────────────────────────────
+# Custom partition : NVS + app 3MB + SPIFFS 1.5MB for Studio Mode
+# (~3.4MB of flash reserved at the end for a future OTA slot)
 CONFIG_PARTITION_TABLE_CUSTOM=y
 CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="../../hardware/boards/spinpad-v1/partitions.csv"
 
 # ── WiFi (Studio Mode) ───────────────────────────────────────
 CONFIG_ESP_WIFI_ENABLED=y
 CONFIG_ESP_WIFI_SOFTAP_SUPPORT=y
-# Puissance TX max limitée : WiFi TX ≤ 10dBm quand VSYS > 4.5V (contrainte PCB)
+# Max TX power limited : WiFi TX ≤ 10dBm when VSYS > 4.5V (PCB constraint)
 CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=40
 
 # ── HTTP Server ──────────────────────────────────────────────

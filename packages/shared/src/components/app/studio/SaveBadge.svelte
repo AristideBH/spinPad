@@ -19,9 +19,9 @@
 {#if isOnline}
   <Badge variant="ghost" class={cn('gap-1.5 bg-muted/50! text-muted-foreground/80!', className)}>
     {#if configState.isDirty}
-      <Spinner /> Sauvegarde
+      <Spinner /> Saving
     {:else}
-      <Check /> Sauvegardé
+      <Check /> Saved
     {/if}
   </Badge>
 {/if}

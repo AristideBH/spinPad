@@ -134,14 +134,14 @@
           variant="secondary"
           size="icon"
           disabled={profileList.length >= CONFIG_MAX_PROFILES}
-          title="Ajouter un profil"
+          title="Add a profile"
           onclick={() => (addOpen = true)}
         >
           <Plus />
         </Button>
         <button
           class={cn('', buttonVariants({ variant: 'secondary', size: 'icon' }))}
-          title="Importer / Exporter profils"
+          title="Import / Export profiles"
           onclick={() => (importExportOpen = true)}
         >
           <Share />

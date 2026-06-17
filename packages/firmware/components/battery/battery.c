@@ -1,19 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-//  battery.c — Lecture ADC batterie + LED RGB WS2812 (LED11)
+//  battery.c — Battery ADC reading + RGB LED WS2812 (LED11)
 //
-//  ADC : lit la tension sur BATTERY_ADC_CHANNEL,
-//        convertit en % via une courbe de décharge LiPo.
+//  ADC: reads the voltage on BATTERY_ADC_CHANNEL,
+//        converts to % via a LiPo discharge curve.
 //
-//  Batterie optionnelle :
-//    power.battery_present = "auto"  → auto-détection via ADC
-//                          = "yes"   → forcer présente
-//                          = "no"    → désactiver totalement
+//  Optional battery:
+//    power.battery_present = "auto"  → auto-detect via ADC
+//                          = "yes"   → force present
+//                          = "no"    → disable entirely
 //
-//  LED WS2812 (LED11) via RMT, allumée seulement si batterie présente :
-//    > 60% → vert
-//    25-60% → jaune
-//    < 25% → rouge
-//    < 10% → rouge clignotant
+//  WS2812 LED (LED11) via RMT, lit only if battery present:
+//    > 60% → green
+//    25-60% → yellow
+//    < 25% → red
+//    < 10% → blinking red
 // ═══════════════════════════════════════════════════════════════
 
 #include "battery.h"
@@ -33,14 +33,14 @@
 
 static const char *TAG = "BATTERY";
 
-// Plage de tension "plausible" pour l'auto-détection. En dehors
-// (typiquement ~0 mV si le diviseur n'est pas câblé, ou USB seul)
-// → batterie marquée absente.
+// "Plausible" voltage range for auto-detection. Outside it
+// (typically ~0 mV if the divider is not wired, or USB only)
+// → battery marked absent.
 #define BATTERY_DETECT_MIN_MV  2800
 #define BATTERY_DETECT_MAX_MV  4500
 
 // ─────────────────────────────────────────────────────────────
-//  ÉTAT INTERNE
+//  INTERNAL STATE
 // ─────────────────────────────────────────────────────────────
 static adc_oneshot_unit_handle_t g_adc_handle = NULL;
 static adc_cali_handle_t         g_adc_cali   = NULL;
@@ -53,7 +53,7 @@ static bool     g_present     = false;
 static char     g_source[16]  = "forced_no";
 
 // ─────────────────────────────────────────────────────────────
-//  COURBE DE DÉCHARGE LIPO
+//  LIPO DISCHARGE CURVE
 // ─────────────────────────────────────────────────────────────
 typedef struct { uint16_t mv; uint8_t pct; } batt_point_t;
 
@@ -82,7 +82,7 @@ static uint8_t voltage_to_percent(uint16_t mv)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  LED RGB
+//  RGB LED
 // ─────────────────────────────────────────────────────────────
 
 static void led_set_color(uint8_t r, uint8_t g, uint8_t b)
@@ -119,8 +119,8 @@ static void update_led(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ADC — lecture brute (utilisée par init pour la détection
-//  et par battery_update() pour le monitoring continu)
+//  ADC — raw reading (used by init for detection
+//  and by battery_update() for continuous monitoring)
 // ─────────────────────────────────────────────────────────────
 
 static esp_err_t adc_setup(void)
@@ -162,12 +162,12 @@ static uint16_t adc_read_voltage_mv(void)
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FONCTIONS PUBLIQUES
+//  PUBLIC FUNCTIONS
 // ─────────────────────────────────────────────────────────────
 
 esp_err_t battery_init(void)
 {
-    // Résoudre la config (auto / yes / no)
+    // Resolve the config (auto / yes / no)
     const kb_config_t *cfg = config_store_get();
     const char *mode = cfg->power.battery_present;
     if (!mode || !mode[0]) mode = "auto";
@@ -175,19 +175,19 @@ esp_err_t battery_init(void)
     if (strcmp(mode, "no") == 0) {
         g_present = false;
         strncpy(g_source, "forced_no", sizeof(g_source) - 1);
-        ESP_LOGI(TAG, "Batterie désactivée par config (forced_no)");
+        ESP_LOGI(TAG, "Battery disabled by config (forced_no)");
         return ESP_OK;
     }
 
-    // Pour "yes" et "auto" : on tente d'initialiser l'ADC
+    // For "yes" and "auto": we try to initialize the ADC
     if (adc_setup() != ESP_OK) {
-        ESP_LOGW(TAG, "Init ADC échouée — batterie marquée absente");
+        ESP_LOGW(TAG, "ADC init failed — battery marked absent");
         g_present = false;
         strncpy(g_source, "auto", sizeof(g_source) - 1);
         return ESP_OK;
     }
 
-    // LED RGB (toujours init, même si batterie absente — peut servir ailleurs)
+    // RGB LED (always init, even if battery absent — may be used elsewhere)
     led_strip_config_t strip_cfg = {
         .strip_gpio_num   = LED_RGB_GPIO,
         .max_leds         = LED_RGB_COUNT,
@@ -206,7 +206,7 @@ esp_err_t battery_init(void)
         g_present = true;
         strncpy(g_source, "forced_yes", sizeof(g_source) - 1);
     } else {
-        // auto-détection : moyenne de 3 lectures
+        // auto-detection: average of 3 readings
         uint32_t acc = 0;
         for (int i = 0; i < 3; i++) {
             acc += adc_read_voltage_mv();
@@ -215,16 +215,16 @@ esp_err_t battery_init(void)
         uint16_t mv = (uint16_t)(acc / 3);
         g_present = (mv >= BATTERY_DETECT_MIN_MV && mv <= BATTERY_DETECT_MAX_MV);
         strncpy(g_source, "auto", sizeof(g_source) - 1);
-        ESP_LOGI(TAG, "Auto-détection : %dmV → %s", mv,
-                 g_present ? "présente" : "absente");
+        ESP_LOGI(TAG, "Auto-detection: %dmV → %s", mv,
+                 g_present ? "present" : "absent");
     }
 
     if (g_present) {
         battery_update();
-        ESP_LOGI(TAG, "Batterie init : %dmV → %d%% (%s)",
+        ESP_LOGI(TAG, "Battery init: %dmV → %d%% (%s)",
                  g_voltage_mv, g_percent, g_source);
     } else {
-        ESP_LOGI(TAG, "Batterie absente (%s)", g_source);
+        ESP_LOGI(TAG, "Battery absent (%s)", g_source);
     }
     return ESP_OK;
 }

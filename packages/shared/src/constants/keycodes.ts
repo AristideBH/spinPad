@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-//  keycodes.ts — Table des keycodes disponibles (source de vérité)
+//  keycodes.ts — Table of available keycodes (source of truth)
 //
-//  Chaque keycode = { label, value, category }
-//  value = uint16 encodé : (type << 12) | valeur
+//  Each keycode = { label, value, category }
+//  value = encoded uint16: (type << 12) | value
 //
-//  Utilisé par Studio pour l'éditeur visuel.
-//  Les valeurs correspondent aux définitions firmware HID.
+//  Used by Studio for the visual editor.
+//  The values match the HID firmware definitions.
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types.js';
@@ -86,21 +86,21 @@ export interface Keycode {
   category: KeycodeCategory;
 }
 
-// ── Keycodes avec modificateur (ex : Shift+1 = '!') ─────────────
+// ── Keycodes with modifier (ex: Shift+1 = '!') ──────────────────
 //
-//  Convention d'encodage (type = ACTION_TYPE_KC) :
-//    bits 7–0  = usage HID
-//    bits 11–8 = nibble modificateur (Ctrl=1, Shift=2, Alt=4, GUI=8)
+//  Encoding convention (type = ACTION_TYPE_KC):
+//    bits 7–0  = HID usage
+//    bits 11–8 = modifier nibble (Ctrl=1, Shift=2, Alt=4, GUI=8)
 //
-//  ⚠️  Support firmware DIFFÉRÉ : le handler ACTION_TYPE_KC de keymap.c
-//  ignore encore les bits 11–8 (cast `(uint8_t)value`). Tant que la PR
-//  firmware « modded-keycode » n'est pas livrée, ces entrées s'enverront
-//  comme la touche de base (sans Shift) sur le matériel.
+//  ⚠️  Firmware support DEFERRED: the ACTION_TYPE_KC handler in keymap.c
+//  still ignores bits 11–8 (cast `(uint8_t)value`). Until the
+//  "modded-keycode" firmware PR ships, these entries will be sent
+//  as the base key (without Shift) on the hardware.
 
-/** Nibble modificateur Shift gauche (aligné sur ACTION_TYPE_MOD). */
+/** Left Shift modifier nibble (aligned with ACTION_TYPE_MOD). */
 const KC_MOD_SHIFT = 0x02;
 
-/** Encode un keycode HID avec un nibble modificateur dans les bits 11–8. */
+/** Encodes a HID keycode with a modifier nibble in bits 11–8. */
 function modKc(usage: number, mod: number): number {
   return action(ACTION_TYPE_KC, ((mod & 0x0f) << 8) | (usage & 0xff));
 }
@@ -108,7 +108,7 @@ function modKc(usage: number, mod: number): number {
 // ── Table principale ────────────────────────────────────────────
 
 export const KEYCODES: Record<string, Keycode[]> = {
-  // ── Lettres ──────────────────────────────────────────────────
+  // ── Letters ──────────────────────────────────────────────────
   letters: [
     { label: 'A', value: action(ACTION_TYPE_KC, 0x04), category: 'letter' },
     { label: 'B', value: action(ACTION_TYPE_KC, 0x05), category: 'letter' },
@@ -138,7 +138,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Z', value: action(ACTION_TYPE_KC, 0x1d), category: 'letter' },
   ],
 
-  // ── Nombres ──────────────────────────────────────────────────
+  // ── Numbers ──────────────────────────────────────────────────
   number: [
     { label: '1', value: action(ACTION_TYPE_KC, 0x1e), category: 'number' },
     { label: '2', value: action(ACTION_TYPE_KC, 0x1f), category: 'number' },
@@ -152,7 +152,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: '0', value: action(ACTION_TYPE_KC, 0x27), category: 'number' },
   ],
 
-  // ── Touches spéciales / édition ──────────────────────────────
+  // ── Special / editing keys ───────────────────────────────────
   special: [
     { label: 'None', value: 0, category: 'special' },
     { label: 'Esc', value: action(ACTION_TYPE_KC, 0x29), category: 'special' },
@@ -167,7 +167,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Menu', value: action(ACTION_TYPE_KC, 0x65), category: 'special' },
   ],
 
-  // ── Touches de fonction ──────────────────────────────────────
+  // ── Function keys ────────────────────────────────────────────
   function: Array.from({ length: 24 }, (_, i) => ({
     label: `F${i + 1}`,
     // F1–F12 = 0x3a–0x45 ; F13–F24 = 0x68–0x73
@@ -189,7 +189,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Del', value: action(ACTION_TYPE_KC, 0x4c), category: 'nav' },
   ],
 
-  // ── Symboles / ponctuation (positions US) ────────────────────
+  // ── Symbols / punctuation (US positions) ─────────────────────
   symbols: [
     { label: '-', value: action(ACTION_TYPE_KC, 0x2d), category: 'symbol' },
     { label: '=', value: action(ACTION_TYPE_KC, 0x2e), category: 'symbol' },
@@ -202,7 +202,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: ',', value: action(ACTION_TYPE_KC, 0x36), category: 'symbol' },
     { label: '.', value: action(ACTION_TYPE_KC, 0x37), category: 'symbol' },
     { label: '/', value: action(ACTION_TYPE_KC, 0x38), category: 'symbol' },
-    // ── Symboles « shiftés » (Shift + touche de base) ──────────
+    // ── "Shifted" symbols (Shift + base key) ───────────────────
     { label: '!', value: modKc(0x1e, KC_MOD_SHIFT), category: 'symbol' },
     { label: '@', value: modKc(0x1f, KC_MOD_SHIFT), category: 'symbol' },
     { label: '#', value: modKc(0x20, KC_MOD_SHIFT), category: 'symbol' },
@@ -226,7 +226,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: '?', value: modKc(0x38, KC_MOD_SHIFT), category: 'symbol' },
   ],
 
-  // ── Pavé numérique ───────────────────────────────────────────
+  // ── Numeric keypad ───────────────────────────────────────────
   keypad: [
     { label: 'Num', value: action(ACTION_TYPE_KC, 0x53), category: 'keypad' },
     { label: 'KP/', value: action(ACTION_TYPE_KC, 0x54), category: 'keypad' },
@@ -247,7 +247,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'KP.', value: action(ACTION_TYPE_KC, 0x63), category: 'keypad' },
   ],
 
-  // ── Modificateurs ────────────────────────────────────────────
+  // ── Modifiers ────────────────────────────────────────────────
   modifiers: [
     { label: 'L-Ctrl', value: action(ACTION_TYPE_MOD, 0x01), category: 'modifier' },
     { label: 'L-Shift', value: action(ACTION_TYPE_MOD, 0x02), category: 'modifier' },
@@ -273,7 +273,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'TO(2)', value: action(ACTION_TYPE_LAYER_TO, 2), category: 'layer' },
   ],
 
-  // ── Médias ───────────────────────────────────────────────────
+  // ── Media ────────────────────────────────────────────────────
   media: [
     { label: 'Vol+', value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_UP), category: 'media' },
     { label: 'Vol-', value: action(ACTION_TYPE_MEDIA, MEDIA_VOL_DN), category: 'media' },
@@ -288,24 +288,24 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'Stop', value: action(ACTION_TYPE_MEDIA, MEDIA_STOP), category: 'media' },
     { label: 'Zoom+', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_IN), category: 'media' },
     { label: 'Zoom-', value: action(ACTION_TYPE_MEDIA, MEDIA_ZOOM_OUT), category: 'media' },
-    { label: 'Lum+', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_UP), category: 'media' },
-    { label: 'Lum-', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_DN), category: 'media' },
+    { label: 'Bright+', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_UP), category: 'media' },
+    { label: 'Bright-', value: action(ACTION_TYPE_MEDIA, MEDIA_BRIGHT_DN), category: 'media' },
   ],
 
-  // ── Lancement d'applications (Consumer Control) ──────────────
+  // ── Application launch (Consumer Control) ────────────────────
   apps: [
     { label: 'Calc', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_CALC), category: 'app' },
     { label: 'Mail', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_MAIL), category: 'app' },
-    { label: 'Navigateur', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_BROWSER), category: 'app' },
-    { label: 'Recherche', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_SEARCH), category: 'app' },
-    { label: 'Fichiers', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_FILES), category: 'app' },
-    { label: 'Agenda', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_CALENDAR), category: 'app' },
-    { label: 'Lecteur', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_PLAYER), category: 'app' },
-    { label: 'Verrouiller', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_LOCK), category: 'app' },
+    { label: 'Browser', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_BROWSER), category: 'app' },
+    { label: 'Search', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_SEARCH), category: 'app' },
+    { label: 'Files', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_FILES), category: 'app' },
+    { label: 'Calendar', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_CALENDAR), category: 'app' },
+    { label: 'Player', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_PLAYER), category: 'app' },
+    { label: 'Lock', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_LOCK), category: 'app' },
     { label: 'Capture', value: action(ACTION_TYPE_MEDIA, MEDIA_APP_SCRSHOT), category: 'app' },
   ],
 
-  // ── Spéciaux firmware ────────────────────────────────────────
+  // ── Firmware specials ────────────────────────────────────────
   firmware: [
     { label: 'BLE Switch', value: action(ACTION_TYPE_SPECIAL, SPECIAL_BLE_SWITCH), category: 'firmware' },
     { label: 'Studio Mode', value: action(ACTION_TYPE_SPECIAL, SPECIAL_STUDIO_MODE), category: 'firmware' },
@@ -315,27 +315,27 @@ export const KEYCODES: Record<string, Keycode[]> = {
     { label: 'LED -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_LED_BRIGHT_DN), category: 'firmware' },
     { label: 'Sens +', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_UP), category: 'firmware' },
     { label: 'Sens -', value: action(ACTION_TYPE_SPECIAL, SPECIAL_ENC_SENS_DN), category: 'firmware' },
-    { label: 'Veille', value: action(ACTION_TYPE_SPECIAL, SPECIAL_SLEEP), category: 'firmware' },
-    { label: 'Profil ▸', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_NEXT), category: 'firmware' },
-    { label: 'Profil ◂', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_PREV), category: 'firmware' },
+    { label: 'Sleep', value: action(ACTION_TYPE_SPECIAL, SPECIAL_SLEEP), category: 'firmware' },
+    { label: 'Profile ▸', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_NEXT), category: 'firmware' },
+    { label: 'Profile ◂', value: action(ACTION_TYPE_SPECIAL, SPECIAL_PROFILE_PREV), category: 'firmware' },
   ],
 
 };
 
-/** Table à plat pour la recherche par valeur ou label (hors macros, qui sont dynamiques) */
+/** Flat table for lookup by value or label (excluding macros, which are dynamic) */
 export const KEYCODES_FLAT: Keycode[] = Object.values(KEYCODES).flat();
 
-// ── Macros (dynamiques, dépendent de la config) ────────────────
+// ── Macros (dynamic, depend on the config) ─────────────────────
 
-/** Nom d'affichage d'un slot macro (son `name`, sinon "Macro N"). */
+/** Display name of a macro slot (its `name`, otherwise "Macro N"). */
 export function macroLabel(idx: number, macros?: MacroDef[]): string {
   const name = macros?.[idx]?.name?.trim();
   return name && name.length > 0 ? name : `Macro ${idx}`;
 }
 
 /**
- * Keycodes des macros à proposer dans le picker : uniquement les slots
- * utilisés (≥ 1 étape), libellés par leur nom.
+ * Macro keycodes to offer in the picker: only the used slots
+ * (≥ 1 step), labeled by their name.
  */
 export function macroKeycodes(macros?: MacroDef[]): Keycode[] {
   const out: Keycode[] = [];
@@ -346,41 +346,41 @@ export function macroKeycodes(macros?: MacroDef[]): Keycode[] {
   return out;
 }
 
-/** Groupes de keycodes pour le picker, macros résolues depuis la config. */
+/** Keycode groups for the picker, macros resolved from the config. */
 export function keycodeGroups(macros?: MacroDef[]): Record<string, Keycode[]> {
   const used = macroKeycodes(macros);
   return used.length > 0 ? { ...KEYCODES, macros: used } : { ...KEYCODES };
 }
 
-/** Table à plat incluant les macros utilisées (pour la recherche). */
+/** Flat table including the used macros (for lookup). */
 export function keycodesFlat(macros?: MacroDef[]): Keycode[] {
   return [...KEYCODES_FLAT, ...macroKeycodes(macros)];
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  LIVE-RECORD — KeyboardEvent (clavier hôte) → keycode firmware
+//  LIVE-RECORD — KeyboardEvent (host keyboard) → firmware keycode
 //
-//  Mappe `KeyboardEvent.code` vers un usage HID, puis retrouve le
-//  Keycode correspondant dans la table. Utilisé par le picker en
-//  mode "enregistrement direct".
+//  Maps `KeyboardEvent.code` to a HID usage, then finds the
+//  matching Keycode in the table. Used by the picker in
+//  "direct recording" mode.
 // ═══════════════════════════════════════════════════════════════
 
-/** `KeyboardEvent.code` → usage HID (sous-code 12 bits, type KC). */
+/** `KeyboardEvent.code` → HID usage (12-bit subcode, type KC). */
 const CODE_TO_HID: Record<string, number> = (() => {
   const m: Record<string, number> = {};
-  // Lettres A–Z → 0x04–0x1d
+  // Letters A–Z → 0x04–0x1d
   for (let i = 0; i < 26; i++) m[`Key${String.fromCharCode(65 + i)}`] = 0x04 + i;
-  // Chiffres 1–9,0 → 0x1e–0x27
+  // Digits 1–9,0 → 0x1e–0x27
   for (let i = 1; i <= 9; i++) m[`Digit${i}`] = 0x1e + (i - 1);
   m['Digit0'] = 0x27;
   // F1–F12 → 0x3a–0x45 ; F13–F24 → 0x68–0x73
   for (let i = 1; i <= 12; i++) m[`F${i}`] = 0x3a + (i - 1);
   for (let i = 13; i <= 24; i++) m[`F${i}`] = 0x68 + (i - 13);
-  // Pavé numérique 1–9,0
+  // Numeric keypad 1–9,0
   for (let i = 1; i <= 9; i++) m[`Numpad${i}`] = 0x59 + (i - 1);
   m['Numpad0'] = 0x62;
   Object.assign(m, {
-    // Édition / spéciales
+    // Editing / special
     Escape: 0x29,
     Enter: 0x28,
     Space: 0x2c,
@@ -402,7 +402,7 @@ const CODE_TO_HID: Record<string, number> = (() => {
     ArrowLeft: 0x50,
     ArrowDown: 0x51,
     ArrowUp: 0x52,
-    // Symboles / ponctuation
+    // Symbols / punctuation
     Minus: 0x2d,
     Equal: 0x2e,
     BracketLeft: 0x2f,
@@ -414,7 +414,7 @@ const CODE_TO_HID: Record<string, number> = (() => {
     Comma: 0x36,
     Period: 0x37,
     Slash: 0x38,
-    // Pavé numérique (opérateurs)
+    // Numeric keypad (operators)
     NumLock: 0x53,
     NumpadDivide: 0x54,
     NumpadMultiply: 0x55,
@@ -426,7 +426,7 @@ const CODE_TO_HID: Record<string, number> = (() => {
   return m;
 })();
 
-/** Inverse de CODE_TO_HID : usage HID → `KeyboardEvent.code` (1er code gagnant). */
+/** Inverse of CODE_TO_HID: HID usage → `KeyboardEvent.code` (first code wins). */
 const HID_TO_CODE: Record<number, string> = (() => {
   const m: Record<number, string> = {};
   for (const [code, hid] of Object.entries(CODE_TO_HID)) {
@@ -435,12 +435,12 @@ const HID_TO_CODE: Record<number, string> = (() => {
   return m;
 })();
 
-/** `KeyboardEvent.code` physique correspondant à un usage HID, sinon null. */
+/** Physical `KeyboardEvent.code` matching a HID usage, otherwise null. */
 export function hidUsageToCode(usage: number): string | null {
   return HID_TO_CODE[usage] ?? null;
 }
 
-/** `KeyboardEvent.code` d'un modificateur → bit MOD (sous-code, type MOD). */
+/** `KeyboardEvent.code` of a modifier → MOD bit (subcode, type MOD). */
 const MOD_CODE_TO_BIT: Record<string, number> = {
   ControlLeft: 0x01,
   ShiftLeft: 0x02,
@@ -449,24 +449,24 @@ const MOD_CODE_TO_BIT: Record<string, number> = {
   ControlRight: 0x10,
   ShiftRight: 0x20,
   AltRight: 0x40,
-  MetaRight: 0x08, // pas de R-GUI dans la table → fallback L-GUI
+  MetaRight: 0x08, // no R-GUI in the table → fallback L-GUI
 };
 
-/** True si `code` est une touche modificatrice (Ctrl/Shift/Alt/Meta). */
+/** True if `code` is a modifier key (Ctrl/Shift/Alt/Meta). */
 export function isModifierCode(code: string): boolean {
   return code in MOD_CODE_TO_BIT;
 }
 
-/** Retrouver un Keycode par sa valeur d'action encodée. */
+/** Find a Keycode by its encoded action value. */
 function findByValue(value: number): Keycode | null {
   return KEYCODES_FLAT.find((k) => k.value === value) ?? null;
 }
 
 /**
- * Mappe un KeyboardEvent vers le Keycode (non-modificateur) à assigner.
- * - touche modificatrice seule → le Keycode MOD correspondant
- * - touche supportée → le Keycode KC correspondant
- * - sinon → null (touche non supportée)
+ * Maps a KeyboardEvent to the (non-modifier) Keycode to assign.
+ * - modifier key alone → the matching MOD Keycode
+ * - supported key → the matching KC Keycode
+ * - otherwise → null (unsupported key)
  */
 export function keyEventToKeycode(e: KeyboardEvent): Keycode | null {
   if (isModifierCode(e.code)) {
@@ -477,7 +477,7 @@ export function keyEventToKeycode(e: KeyboardEvent): Keycode | null {
   return findByValue(action(ACTION_TYPE_KC, hid));
 }
 
-/** Keycodes des modificateurs maintenus pendant l'événement (côté gauche). */
+/** Keycodes of the modifiers held during the event (left side). */
 export function eventModifierKeycodes(e: KeyboardEvent): Keycode[] {
   const out: Keycode[] = [];
   if (e.ctrlKey) out.push(findByValue(action(ACTION_TYPE_MOD, 0x01))!);
@@ -488,8 +488,8 @@ export function eventModifierKeycodes(e: KeyboardEvent): Keycode[] {
 }
 
 /**
- * Construit les étapes d'une macro pour un combo (modificateurs + touche).
- * Convention identique à MacroManager : `step.keycode = value & 0x0fff`.
+ * Builds the steps of a macro for a combo (modifiers + key).
+ * Same convention as MacroManager: `step.keycode = value & 0x0fff`.
  *   [MOD_DOWN…, KEY_DOWN, KEY_UP, …MOD_UP]
  */
 export function buildComboMacroSteps(mods: Keycode[], key: Keycode): MacroStep[] {
@@ -502,7 +502,7 @@ export function buildComboMacroSteps(mods: Keycode[], key: Keycode): MacroStep[]
   ];
 }
 
-/** Obtenir le label d'un keycode par valeur (macros résolues par nom si fournies). */
+/** Get the label of a keycode by value (macros resolved by name if provided). */
 export function getKeycodeLabel(value: number, macros?: MacroDef[]): string {
   if (value === 0) return '—';
   const type = (value >> 12) & 0xf;

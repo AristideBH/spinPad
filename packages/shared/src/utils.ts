@@ -20,20 +20,20 @@ export function safeCapitalize(str: string) {
 }
 
 /**
- * Ombres de bord (gauche/droite) pour une zone à défilement horizontal.
+ * Edge shadows (left/right) for a horizontally scrolling area.
  *
- * Les ombres sont ancrées au `container` (élément NON défilant, position
- * relative) et restent fixes à ses bords — seule leur opacité varie. La
- * position de défilement est lue sur `scroller` (le vrai conteneur scrollable,
- * qui peut différer du container, ex. viewport bits-ui imbriqué). Aucun
- * `transform` lié au scroll → pas de saccade.
+ * The shadows are anchored to the `container` (NON-scrolling element, relative
+ * position) and stay fixed at its edges — only their opacity varies. The scroll
+ * position is read from `scroller` (the real scrollable container, which may
+ * differ from the container, e.g. nested bits-ui viewport). No scroll-linked
+ * `transform` → no jank.
  */
 export function scrollShadow(scroller: HTMLElement, container: HTMLElement = scroller) {
   container.style.position ||= 'relative';
 
   const shadowLeft = document.createElement('div');
   const shadowRight = document.createElement('div');
-  container.style.overflow = 'clip'; // masque les ombres quand elles dépassent du container (ex. au redimensionnement)
+  container.style.overflow = 'clip'; // hides the shadows when they overflow the container (e.g. on resize)
 
   const color = `var(--scroll-shadow-color, rgba(0,0,0,0.5))`;
   const baseShadowStyle =
@@ -53,7 +53,7 @@ export function scrollShadow(scroller: HTMLElement, container: HTMLElement = scr
       return;
     }
     const left = scroller.scrollLeft;
-    // Pleine opacité dès qu'on est à >8px d'un bord, fondu doux au ras du bord.
+    // Full opacity as soon as we are >8px from an edge, soft fade right at the edge.
     shadowLeft.style.opacity = `${Math.min(1, left / 8)}`;
     shadowRight.style.opacity = `${Math.min(1, (maxScroll - left) / 8)}`;
   }

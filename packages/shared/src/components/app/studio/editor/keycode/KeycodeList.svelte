@@ -31,16 +31,16 @@
   }
 
   const GROUP_LABELS: Record<string, string> = {
-    letters: 'Lettres',
-    number: 'Chiffres',
-    function: 'Fonction',
-    special: 'Spéciales',
+    letters: 'Letters',
+    number: 'Digits',
+    function: 'Function',
+    special: 'Special',
     navigation: 'Navigation',
-    symbols: 'Symboles',
-    keypad: 'Pavé num.',
-    modifiers: 'Modificateurs',
+    symbols: 'Symbols',
+    keypad: 'Keypad',
+    modifiers: 'Modifiers',
     layers: 'Layers',
-    media: 'Média',
+    media: 'Media',
     apps: 'Applications',
     firmware: 'Firmware',
     macros: 'Macros',
@@ -145,7 +145,7 @@
   <div bind:this={listEl} class="flex-1 min-h-0 pr-1 overflow-y-auto">
     {#if filteredKeycodes}
       {#if filteredKeycodes.length === 0}
-        <p class="py-6 text-sm text-center text-muted-foreground">Aucun résultat</p>
+        <p class="py-6 text-sm text-center text-muted-foreground">No results</p>
       {:else}
         <div class="flex flex-wrap gap-1.5">
           {#each filteredKeycodes as kc (kc.value)}

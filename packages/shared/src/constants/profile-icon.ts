@@ -1,20 +1,20 @@
 // ═══════════════════════════════════════════════════════════════
-//  profile-icon.ts — Codec d'icône de profil (24×24 monochrome 1bpp)
+//  profile-icon.ts — Profile icon codec (24×24 monochrome 1bpp)
 //
-//  Module pur (pas de runtime Svelte) → testable au vitest.
+//  Pure module (no Svelte runtime) → testable with vitest.
 //
-//  Représentations :
-//    BoolGrid    : boolean[576], indexé row-major  → grid[y * W + x]
-//                  (pratique pour <canvas> et l'éditeur)
-//    Uint8Array  : 72 octets, packing COLONNE-MAJEUR identique au firmware
-//    base64      : transport JSON (champ profile.icon)
+//  Representations:
+//    BoolGrid    : boolean[576], row-major indexed  → grid[y * W + x]
+//                  (handy for <canvas> and the editor)
+//    Uint8Array  : 72 bytes, COLUMN-MAJOR packing identical to the firmware
+//    base64      : JSON transport (profile.icon field)
 //
-//  ── Packing (doit rester aligné avec le futur fb_draw_bitmap firmware) ──
-//  Le SSD1306 et fb_draw_icon (8×8) utilisent un layout vertical par
-//  "pages" de 8px. On généralise : pour le pixel (x, y),
-//      byteIndex = x * (H / 8) + (y >> 3)      // (H/8) = 3 octets par colonne
+//  ── Packing (must stay aligned with the future fb_draw_bitmap firmware) ──
+//  The SSD1306 and fb_draw_icon (8×8) use a vertical layout in
+//  "pages" of 8px. We generalize: for the pixel (x, y),
+//      byteIndex = x * (H / 8) + (y >> 3)      // (H/8) = 3 bytes per column
 //      bit       = y & 7
-//  donc octet b de la colonne x couvre les lignes b*8 … b*8+7, LSB = ligne du haut.
+//  so byte b of column x covers rows b*8 … b*8+7, LSB = top row.
 // ═══════════════════════════════════════════════════════════════
 
 import { PROFILE_ICON_W, PROFILE_ICON_H, PROFILE_ICON_BYTES } from './config-schema.js';
@@ -81,15 +81,15 @@ export function base64ToBytes(b64: string): Uint8Array {
   return bytes;
 }
 
-// ── BoolGrid ↔ base64 (helpers de haut niveau) ──────────────────
+// ── BoolGrid ↔ base64 (high-level helpers) ──────────────────────
 
 export function gridToBase64(grid: BoolGrid): string {
   return bytesToBase64(gridToBytes(grid));
 }
 
 /**
- * Décode une icône base64 en BoolGrid. Tolère une chaîne vide / invalide
- * en renvoyant une grille vide (jamais d'exception côté UI).
+ * Decodes a base64 icon into a BoolGrid. Tolerates an empty / invalid
+ * string by returning an empty grid (never an exception on the UI side).
  */
 export function base64ToGrid(b64: string | undefined | null): BoolGrid {
   if (!b64) return emptyGrid();
@@ -115,8 +115,8 @@ export function isEmptyIcon(b64: string | undefined | null): boolean {
   }
 }
 
-// ── Primitives de dessin (mutent la grille passée) ──────────────
-// Réutilisées par l'éditeur (outils interactifs) et la bibliothèque.
+// ── Drawing primitives (mutate the passed grid) ─────────────────
+// Reused by the editor (interactive tools) and the library.
 
 export function drawLine(g: BoolGrid, x0: number, y0: number, x1: number, y1: number, on = true): void {
   // Bresenham
@@ -203,8 +203,8 @@ export function drawEllipseFill(g: BoolGrid, x0: number, y0: number, x1: number,
 }
 
 /**
- * Peint le fond plein puis les pixels allumés d'une grille sur un contexte 2D.
- * Partagé par l'éditeur d'icône et la preview (cell = taille d'un pixel en px).
+ * Paints the solid background then the lit pixels of a grid on a 2D context.
+ * Shared by the icon editor and the preview (cell = size of a pixel in px).
  */
 export function fillIconPixels(
   ctx: CanvasRenderingContext2D,
@@ -223,7 +223,7 @@ export function fillIconPixels(
       if (getPixel(grid, x, y)) ctx.fillRect(x * cell, y * cell, cell, cell);
 }
 
-/** Bitmap PNG-agnostique : convertit une grille en ImageData (NxN, blanc sur transparent). */
+/** PNG-agnostic bitmap: converts a grid into ImageData (NxN, white on transparent). */
 export function gridToImageData(grid: BoolGrid, scale = 1): ImageData {
   const w = PROFILE_ICON_W * scale;
   const h = PROFILE_ICON_H * scale;
@@ -240,14 +240,14 @@ export function gridToImageData(grid: BoolGrid, scale = 1): ImageData {
 }
 
 /**
- * Seuille des pixels RGBA (luminance) en grille booléenne 24×24.
- * @param threshold Luminance seuil (0–255), défaut 128.
+ * Thresholds RGBA pixels (luminance) into a 24×24 boolean grid.
+ * @param threshold Luminance threshold (0–255), default 128.
  */
 export function imageDataToGrid(img: ImageData, threshold = 128): BoolGrid {
   const g = emptyGrid();
   for (let y = 0; y < PROFILE_ICON_H; y++) {
     for (let x = 0; x < PROFILE_ICON_W; x++) {
-      // échantillonne en mappant la source vers 24×24
+      // sample by mapping the source to 24×24
       const sx = Math.floor((x / PROFILE_ICON_W) * img.width);
       const sy = Math.floor((y / PROFILE_ICON_H) * img.height);
       const i = (sy * img.width + sx) * 4;

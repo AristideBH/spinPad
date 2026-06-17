@@ -27,14 +27,14 @@
   type DS = NonNullable<typeof deviceStatus.data>;
   const data = $derived(deviceStatus.data as DS | null);
 
-  // ── Connexion ────────────────────────────────────────────────
+  // ── Connection ───────────────────────────────────────────────
   const usbOn = $derived(data?.connection?.usb === true);
   const bleOn = $derived(data?.connection?.ble === true);
   const bleSlot = $derived(data?.connection?.ble_slot ?? 0);
 
   async function handleReload() {
     await loadConfig();
-    // Recharge depuis le device puis re-sélectionne le premier profil (et son premier layer).
+    // Reload from the device then re-select the first profile (and its first layer).
     configState.activeProfileIndex = 0;
     configState.activeLayerIndex = 0;
   }
@@ -43,7 +43,7 @@
 
   let settingsOpen = $state(false);
 
-  // ── LED matrix sync (global + profil actif) ──────────────────
+  // ── LED matrix sync (global + active profile) ────────────────
   const activeProfile = $derived(configState.data?.profiles?.[configState.activeProfileIndex]);
 
   const matrixMode = $derived<LedMode>(
@@ -92,9 +92,9 @@
       eqGain={0.25}
       class="absolute inset-0 pointer-events-none -z-10"
     />
-    <!-- Vitrine LED en fond d'en-tête : éteinte si rien n'est connecté. -->
+    <!-- LED showcase as header background: off if nothing is connected. -->
     <Card.Description>
-      <!-- ══ Connexion ═════════════════════════════════ -->
+      <!-- ══ Connection ════════════════════════════════ -->
       <div class="flex flex-wrap gap-2">
         <Badge variant={usbOn ? 'default' : 'outline'} class="gap-1">
           <Usb class="size-3" />
@@ -132,8 +132,8 @@
     </Button>
     <ResponsiveSheet
       bind:open={settingsOpen}
-      title="Paramètres"
-      description="Toutes les options sont sauvegardées automatiquement."
+      title="Settings"
+      description="All options are saved automatically."
       srOnlyTitle={false}
       desktopClass="w-full max-w-md!"
     >
@@ -145,7 +145,7 @@
       </div>
     </ResponsiveSheet>
 
-    <ButtonGroup.Root>
+    <!-- <ButtonGroup.Root>
       <Button variant="outline" size="icon" onclick={handleReload}>
         <RefreshCw />
       </Button>
@@ -154,6 +154,6 @@
           <LogOut class="size-4" />
         </Button>
       {/if}
-    </ButtonGroup.Root>
+    </ButtonGroup.Root> -->
   </Card.Footer>
 </Card.Root>

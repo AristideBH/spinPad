@@ -9,13 +9,13 @@ const CTX_KEY = Symbol('keypad');
 
 export type KeycodeOption = { value: number; label: string; category: string };
 
-/** Étapes de navigation du picker. */
+/** Picker navigation steps. */
 export type PickerStage = 'menu' | 'record' | 'list' | 'led';
 
 const ENCODER_FIELD_LABEL: Record<string, string> = {
-  encoder_cw: 'Encodeur → Rotation ↻',
-  encoder_ccw: 'Encodeur → Rotation ↺',
-  encoder_press: 'Encodeur → Appui',
+  encoder_cw: 'Encoder → Rotation ↻',
+  encoder_ccw: 'Encoder → Rotation ↺',
+  encoder_press: 'Encoder → Press',
 };
 
 export class KeypadContext {
@@ -68,16 +68,16 @@ export class KeypadContext {
     this.pickerStage = stage;
   }
 
-  /** Cible en cours d'édition : nom de la touche SWx, champ encodeur, ou invite par défaut. */
+  /** Target being edited: SWx key name, encoder field, or default prompt. */
   readonly editTargetSw = $derived.by(() => {
     if (this.editingField === 'key' && this.editingKey !== null) {
-      return SW_BY_IDX[this.editingKey] ?? `Touche ${this.editingKey}`;
+      return SW_BY_IDX[this.editingKey] ?? `Key ${this.editingKey}`;
     }
     if (this.editingField) return ENCODER_FIELD_LABEL[this.editingField] ?? this.editingField;
-    return 'Choisir une action';
+    return 'Choose an action';
   });
 
-  /** Action actuellement assignée à la cible (uniquement en édition de touche), sinon null. */
+  /** Action currently assigned to the target (only when editing a key), otherwise null. */
   readonly editTargetCurrent = $derived.by(() => {
     if (this.editingField === 'key' && this.editingKey !== null) {
       return getKeycodeLabel(this.layer?.keys?.[this.editingKey] ?? 0, configState.data?.macros);
@@ -85,7 +85,7 @@ export class KeypadContext {
     return null;
   });
 
-  /** Libellé texte complet (pour les titres accessibles sr-only). */
+  /** Full text label (for accessible sr-only titles). */
   readonly editTargetLabel = $derived(
     this.editTargetCurrent ? `${this.editTargetSw} · ${this.editTargetCurrent}` : this.editTargetSw,
   );
@@ -105,7 +105,7 @@ export class KeypadContext {
     this.pickerOpen = false;
   }
 
-  /** Assigne une macro (par index) au champ en cours, puis ferme le picker. */
+  /** Assigns a macro (by index) to the current field, then closes the picker. */
   assignMacro(idx: number): void {
     this.selectKeycode({ value: action(ACTION_TYPES.ACTION_TYPE_MACRO, idx), label: '', category: 'macro' });
   }

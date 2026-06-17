@@ -12,8 +12,8 @@
   import { cn } from '$shared';
   import SaveBadge from './SaveBadge.svelte';
 
-  // Démarrer le polling du statut device quand connecté ou en mode démo.
-  // Le store route automatiquement vers le bon transport (serial / http / mock).
+  // Start polling the device status when connected or in demo mode.
+  // The store automatically routes to the right transport (serial / http / mock).
   $effect(() => {
     const shouldPoll = serial.connected || devMode.active || import.meta.env.VITE_TRANSPORT === 'http';
     if (shouldPoll) {
@@ -35,10 +35,10 @@
 {#if isOnline}
   <!-- Undo / Redo -->
   <ButtonGroup.Root>
-    <Button size="icon" variant="secondary" onclick={undo} disabled={!canUndo()} title="Annuler (Ctrl+Z)">
+    <Button size="icon" variant="secondary" onclick={undo} disabled={!canUndo()} title="Undo (Ctrl+Z)">
       <Undo2 class="size-4" />
     </Button>
-    <Button size="icon" variant="secondary" onclick={redo} disabled={!canRedo()} title="Rétablir (Ctrl+Y)">
+    <Button size="icon" variant="secondary" onclick={redo} disabled={!canRedo()} title="Redo (Ctrl+Y)">
       <Redo2 class="size-4" />
     </Button>
   </ButtonGroup.Root>
@@ -47,7 +47,7 @@
   <!-- Auto-save indicator -->
   <SaveBadge />
 
-  <!-- Dev mode toggle (visible dès que le mode démo est actif) -->
+  <!-- Dev mode toggle (visible as soon as demo mode is active) -->
   {#if devMode.active}
     <Popover.Root>
       <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
@@ -59,7 +59,7 @@
     </Popover.Root>
   {/if}
 
-  <Button size="icon" variant="outline" title="Aide & documentation" href="/docs/studio/layers/">
+  <Button size="icon" variant="outline" title="Help & documentation" href="/docs/studio/layers/">
     <Info class="size-4" />
   </Button>
 {/if}

@@ -1,7 +1,7 @@
-// Shared est toujours consommé dans une app Vite (website / studio).
-// Vite n'étant pas une dépendance directe du package, on déclare ici
-// la forme de `import.meta.env` utilisée afin que le typecheck standalone
-// (IDE / `tsc`) résolve `import.meta.env.VITE_*`.
+// Shared is always consumed within a Vite app (website / studio).
+// Since Vite is not a direct dependency of the package, we declare here
+// the shape of `import.meta.env` used so that the standalone typecheck
+// (IDE / `tsc`) resolves `import.meta.env.VITE_*`.
 interface ImportMetaEnv {
   readonly VITE_TRANSPORT?: string;
   readonly MODE: string;

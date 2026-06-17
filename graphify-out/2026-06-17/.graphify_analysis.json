@@ -1,0 +1,1894 @@
+{
+  "communities": {
+    "0": [
+      "app_devmodebanner_devmodebanner",
+      "app_infocard_infocard",
+      "app_statuscard_statuscard",
+      "app_themetoggle_themetoggle",
+      "constants_actiontypes_actiontypes",
+      "constants_configschema_configschema",
+      "constants_keycodes_keycodes",
+      "constants_layercolors_layercolors",
+      "constants_profileicon_profileicon",
+      "constants_profileiconlibrary_profileiconlibrary",
+      "constants_profilepresets_profilepresets",
+      "constants_reorder_reorder",
+      "dashboard_dashboard_dashboard",
+      "dashboard_tilebattery_tilebattery",
+      "dashboard_tilefirmware_tilefirmware",
+      "dashboard_tilemain_tilemain",
+      "dashboard_tilescreen_tilescreen",
+      "editor_addprofilesheet_addprofilesheet",
+      "editor_encoder_presets_encoderpresets",
+      "editor_encoder_svelte_encoderknob",
+      "editor_encoderbuttons_encoderbuttons",
+      "editor_keycodelist_keycodelist",
+      "editor_keycodepicker_keycodepicker",
+      "editor_keygrid_keygrid",
+      "editor_keypad_context_keypadcontext",
+      "editor_knob_knob",
+      "editor_layerswitcher_layerswitcher",
+      "editor_liverecordpanel_liverecordpanel",
+      "editor_presetselect_presetselect",
+      "editor_profileform_profileform",
+      "editor_profileswitcher_profileswitcher",
+      "hooks_pointer_pointer",
+      "lib_hooks_keyboardlayout_keyboardlayout",
+      "lib_hooks_pointer_hasfinepointer",
+      "lib_simulatetyping_simulatetyping",
+      "profiles_iconeditor_iconeditor",
+      "profiles_iconpreview_iconpreview",
+      "profiles_profilesdemo_profilesdemo",
+      "shared_appconfig_appconfig",
+      "sortable_sortable_sortable",
+      "store_config_config",
+      "store_config_configstate",
+      "store_devicestatus_devicestatus",
+      "store_devmode_devmode",
+      "store_ismobile_ismobile",
+      "store_keyvisuals_keyvisuals",
+      "store_macromanager_macromanager",
+      "store_serial_serial",
+      "studio_connectbanner_connectbanner",
+      "studio_demosettings_demosettings",
+      "studio_editor_editor",
+      "studio_macromanager_macromanager",
+      "studio_savebadge_savebadge",
+      "studio_sortable_sortable",
+      "studio_studio_studio",
+      "studio_studiotoolbar_studiotoolbar",
+      "ui_badge_badge",
+      "ui_button_button",
+      "ui_buttongroup_buttongroup",
+      "ui_card_card",
+      "ui_dropdownmenu_dropdownmenu",
+      "ui_empty_empty",
+      "ui_input_input",
+      "ui_item_item",
+      "ui_label_label",
+      "ui_popover_popover",
+      "ui_responsivesheet_responsivesheet",
+      "ui_spinner_spinner"
+    ],
+    "1": [
+      "avatar_avatar_component",
+      "avatar_avatar_group_component",
+      "avatar_avatar_group_count_component",
+      "avatar_avatar_image_component",
+      "avatar_index_exports",
+      "badge_badge_component",
+      "badge_index_exports",
+      "breadcrumb_breadcrumb_component",
+      "breadcrumb_breadcrumb_ellipsis_component",
+      "breadcrumb_breadcrumb_item_component",
+      "breadcrumb_breadcrumb_link_component",
+      "breadcrumb_breadcrumb_list_component",
+      "breadcrumb_breadcrumb_page_component",
+      "breadcrumb_breadcrumb_separator_component",
+      "breadcrumb_index_exports",
+      "button_group_button_group_component",
+      "button_group_button_group_separator_component",
+      "button_group_button_group_text_component",
+      "button_group_index_exports",
+      "card_card_action_component",
+      "dropdown_menu_index_exports",
+      "dropdown_menu_root_component",
+      "dropdown_menu_separator_component",
+      "dropdown_menu_shortcut_component",
+      "dropdown_menu_sub_component",
+      "dropdown_menu_sub_content_component",
+      "dropdown_menu_sub_trigger_component",
+      "dropdown_menu_trigger_component",
+      "empty_content_component",
+      "empty_description_component",
+      "empty_header_component",
+      "empty_index_exports",
+      "empty_media_component",
+      "empty_root_component",
+      "empty_title_component",
+      "field_content_component",
+      "field_description_component",
+      "field_error_component",
+      "field_group_component",
+      "field_index_exports",
+      "field_label_component",
+      "field_legend_component",
+      "field_separator_component",
+      "item_separator_component",
+      "label_index_exports",
+      "radio_group_radio_group_component",
+      "scroll_area_index_exports",
+      "scroll_area_scroll_area_component",
+      "scroll_area_scrollbar_component",
+      "select_index_exports",
+      "select_select_component",
+      "select_select_content_component",
+      "select_select_group_component",
+      "select_select_group_heading_component",
+      "select_select_item_component",
+      "select_select_label_component",
+      "select_select_portal_component",
+      "select_select_scroll_down_button_component",
+      "select_select_scroll_up_button_component",
+      "select_select_separator_component",
+      "select_select_trigger_component",
+      "separator_index_exports",
+      "separator_separator_component",
+      "shared_utils"
+    ],
+    "2": [
+      "battery_battery_c_battery_get_percent",
+      "battery_battery_c_battery_get_voltage_mv",
+      "battery_battery_c_battery_init",
+      "battery_battery_c_battery_is_present",
+      "battery_battery_c_battery_source_str",
+      "battery_battery_c_battery_update",
+      "ble_hid_ble_hid_c_ble_hid_consumer_press",
+      "ble_hid_ble_hid_c_ble_hid_consumer_release",
+      "ble_hid_ble_hid_c_ble_hid_enter_pairing_mode",
+      "ble_hid_ble_hid_c_ble_hid_get_active_slot",
+      "ble_hid_ble_hid_c_ble_hid_init",
+      "ble_hid_ble_hid_c_ble_hid_is_connected",
+      "ble_hid_ble_hid_c_ble_hid_key_press",
+      "ble_hid_ble_hid_c_ble_hid_key_release",
+      "ble_hid_ble_hid_c_ble_hid_publish_battery",
+      "ble_hid_ble_hid_c_ble_hid_set_idle_conn_interval",
+      "ble_hid_ble_hid_c_ble_hid_switch_device",
+      "config_store_config_limits_gen_h",
+      "config_store_config_store_c_config_store_factory_reset",
+      "config_store_config_store_c_config_store_get",
+      "config_store_config_store_c_config_store_save",
+      "config_store_config_store_c_config_store_set_active_profile",
+      "config_store_config_store_c_config_store_to_json",
+      "config_store_config_store_c_config_store_update_from_json",
+      "config_store_config_store_h",
+      "config_store_config_store_h_kb_config_t",
+      "config_store_widget_types_gen_h",
+      "device_status_device_status_c_device_status_build",
+      "device_status_device_status_c_device_status_to_json",
+      "display_display_c_display_apply_orientation",
+      "display_display_c_display_init",
+      "display_display_c_display_set_clock",
+      "display_display_c_display_set_sleep",
+      "display_display_c_display_show_status",
+      "display_display_c_display_show_studio_mode",
+      "display_display_c_display_update",
+      "encoder_encoder_c_encoder_process",
+      "keymap_action_types_gen_h",
+      "keymap_keymap_c_keymap_get_active_layer",
+      "keymap_keymap_c_keymap_init",
+      "keymap_keymap_c_keymap_play_macro",
+      "keymap_keymap_c_keymap_process_events",
+      "keymap_keymap_c_keymap_reload_from_config",
+      "keymap_keymap_c_keymap_scan_matrix",
+      "keymap_keymap_c_keymap_set_active_profile",
+      "keymap_keymap_c_keymap_set_monitor",
+      "keymap_keymap_c_keymap_set_training_mode",
+      "keymap_keymap_c_send_action",
+      "led_engine_led_engine_c_led_engine_apply_config",
+      "led_engine_led_engine_c_led_engine_init",
+      "led_engine_led_engine_c_led_engine_notify_activity",
+      "led_engine_led_engine_c_led_engine_set_brightness_global",
+      "power_mgmt_power_mgmt_c_power_mgmt_init",
+      "power_mgmt_power_mgmt_c_power_mgmt_reset_idle_timer",
+      "usb_hid_usb_hid_c_process_config_packet",
+      "usb_hid_usb_hid_c_usb_hid_cdc_send",
+      "usb_hid_usb_hid_c_usb_hid_consumer_press",
+      "usb_hid_usb_hid_c_usb_hid_consumer_release",
+      "usb_hid_usb_hid_c_usb_hid_is_mounted",
+      "usb_hid_usb_hid_c_usb_hid_key_press",
+      "usb_hid_usb_hid_c_usb_hid_key_release",
+      "web_config_web_config_c_web_config_is_running",
+      "web_config_web_config_c_web_config_start",
+      "web_config_web_config_c_web_config_stop"
+    ],
+    "3": [
+      "concept_widget_registry_pattern",
+      "constants_action_types",
+      "constants_config_schema",
+      "constants_profile_presets",
+      "dashboard_led_matrix",
+      "dashboard_tile_firmware",
+      "dashboard_tile_main",
+      "dashboard_tile_stats",
+      "editor_addprofilesheet",
+      "editor_encoder_presets",
+      "editor_profileform",
+      "lib_is_mobile",
+      "profiles_iconeditor",
+      "profiles_iconpreview",
+      "screen_bits_optioncontrols",
+      "screen_bits_sizegrid",
+      "screen_screenaddmenu",
+      "screen_screeneditor",
+      "screen_tile_screen",
+      "store_config",
+      "store_devicestatus",
+      "store_devmode",
+      "store_keyvisuals",
+      "store_serial",
+      "studio_macromanager",
+      "studio_savebadge",
+      "studio_settingstab",
+      "studio_statuscard",
+      "ui_badge",
+      "ui_button",
+      "ui_button_group",
+      "ui_card",
+      "ui_dialog",
+      "ui_dropdown_menu",
+      "ui_input",
+      "ui_item",
+      "ui_responsive_sheet",
+      "ui_switch",
+      "widgets_battery",
+      "widgets_ble",
+      "widgets_clock",
+      "widgets_custom_text",
+      "widgets_icon",
+      "widgets_index",
+      "widgets_layer",
+      "widgets_profile",
+      "widgets_readme",
+      "widgets_types"
+    ],
+    "4": [
+      "app_breadcrumbs_breadcrumbs",
+      "app_notconnected_notconnected",
+      "app_optiongrid_optiongrid",
+      "app_settingsfield_settingsfield",
+      "app_sliderfield_sliderfield",
+      "dashboard_ledmatrix_ledmatrix",
+      "dashboard_screeneditor_screeneditor",
+      "dashboard_statstile_statstile",
+      "item_item_item",
+      "item_item_title_item_title",
+      "kbd_index_kbd_index",
+      "kbd_kbd_group_kbd_group",
+      "kbd_kbd_kbd",
+      "popover_index_popover_index",
+      "popover_popover_close_popover_close",
+      "popover_popover_content_popover_content",
+      "popover_popover_description_popover_description",
+      "popover_popover_header_popover_header",
+      "popover_popover_popover",
+      "popover_popover_portal_popover_portal",
+      "popover_popover_title_popover_title",
+      "popover_popover_trigger_popover_trigger",
+      "radio_group_index_radio_group_index",
+      "radio_group_radio_group_item_radio_group_item",
+      "settings_settingstab_settingstab",
+      "shared_utils_utils",
+      "ui_alert_alert",
+      "ui_alert_alertaction",
+      "ui_alert_alertdescription",
+      "ui_alert_alerttitle",
+      "ui_alert_index",
+      "ui_avatar_avatarbadge",
+      "ui_avatar_avatarfallback",
+      "ui_breadcrumb_breadcrumb",
+      "ui_field_field",
+      "ui_slider_slider"
+    ],
+    "5": [
+      "agents_domain_adr",
+      "agents_domain_context_md",
+      "agents_domain_md",
+      "agents_issue_tracker_gh_cli",
+      "agents_issue_tracker_md",
+      "agents_triage_labels_md",
+      "agents_triage_labels_roles",
+      "claude_md_dco_rule",
+      "claude_md_shadcn_ref",
+      "claude_md_spinpad",
+      "claude_md_svelte_mcp",
+      "contributing_add_firmware_action",
+      "contributing_changeset_workflow",
+      "contributing_codegen_flow",
+      "contributing_commit_conventions",
+      "contributing_dco",
+      "contributing_md",
+      "contributing_monorepo_structure",
+      "contributing_polyform_license",
+      "readme_changeset",
+      "readme_dual_license",
+      "readme_hardware_spec",
+      "readme_home_assistant",
+      "readme_md",
+      "readme_spinpad_project",
+      "readme_studio_mode",
+      "shadcn_llms_txt",
+      "shadcn_spinpad_conventions",
+      "shadcn_tailwind_v4_theme",
+      "skills_finish_task",
+      "skills_finish_task_pr_flow",
+      "skills_session_start",
+      "skills_session_start_board_flow"
+    ],
+    "6": [
+      "avatar_index_avatar_index",
+      "collapsible_index_collapsible_index",
+      "dropdown_menu_index_dropdown_menu_index",
+      "nav_nav_main_nav_main",
+      "nav_nav_projects_nav_projects",
+      "nav_nav_secondary_nav_secondary",
+      "nav_nav_user_nav_user",
+      "sidebar_constants_sidebar_keyboard_shortcut",
+      "sidebar_context_svelte_set_sidebar",
+      "sidebar_context_svelte_sidebar_state",
+      "sidebar_context_svelte_use_sidebar",
+      "sidebar_index_sidebar_index",
+      "sidebar_sidebar_menu_badge_sidebar_menu_badge",
+      "sidebar_sidebar_menu_button_sidebar_menu_button",
+      "sidebar_sidebar_menu_item_sidebar_menu_item",
+      "sidebar_sidebar_menu_sidebar_menu",
+      "sidebar_sidebar_menu_skeleton_sidebar_menu_skeleton",
+      "sidebar_sidebar_menu_sub_button_sidebar_menu_sub_button",
+      "sidebar_sidebar_menu_sub_item_sidebar_menu_sub_item",
+      "sidebar_sidebar_menu_sub_sidebar_menu_sub",
+      "sidebar_sidebar_provider_sidebar_provider",
+      "sidebar_sidebar_rail_sidebar_rail",
+      "sidebar_sidebar_separator_sidebar_separator",
+      "sidebar_sidebar_sidebar",
+      "sidebar_sidebar_trigger_sidebar_trigger",
+      "skeleton_index_skeleton_index",
+      "skeleton_skeleton_skeleton",
+      "store_is_mobile_svelte_is_mobile"
+    ],
+    "7": [
+      "dropdown_menu_checkbox_item_checkbox_item",
+      "dropdown_menu_group_heading_group_heading",
+      "dropdown_menu_item_item",
+      "dropdown_menu_label_label",
+      "dropdown_menu_radio_item_radio_item",
+      "item_actions_component",
+      "item_content_component",
+      "item_description_component",
+      "item_footer_component",
+      "item_group_component",
+      "item_header_component",
+      "item_index_exports",
+      "item_media_component",
+      "shared_utils_cn",
+      "sheet_sheet_description_component",
+      "sheet_sheet_footer_component",
+      "sheet_sheet_header_component",
+      "sheet_sheet_title_component",
+      "tabs_tabs_component",
+      "tabs_tabs_content_component",
+      "tabs_tabs_list_component",
+      "tabs_tabs_trigger_component"
+    ],
+    "8": [
+      "battery_cmakelists",
+      "ble_hid_cmakelists",
+      "boards_spinpadv1_led_ext",
+      "boards_spinpadv1_matrix",
+      "boards_spinpadv1_oled",
+      "boards_spinpadv1_pinmap",
+      "boards_spinpadv1_readme",
+      "boards_spinpadv1_rf_compliance",
+      "config_store_cmakelists",
+      "device_status_cmakelists",
+      "display_cmakelists",
+      "firmware_board_variant",
+      "firmware_cmakelists",
+      "firmware_components_list",
+      "firmware_fw_version",
+      "firmware_partition_table",
+      "firmware_readme",
+      "firmware_spiffs_build"
+    ],
+    "9": [
+      "concept_action_types_js_source_of_truth",
+      "concept_dual_transport",
+      "concept_hyperion_serial_protocol",
+      "encoder_cmakelists",
+      "hyperion_bridge_readme",
+      "keymap_cmakelists",
+      "led_engine_cmakelists",
+      "main_cmakelists",
+      "power_mgmt_cmakelists",
+      "shared_readme",
+      "studio_readme",
+      "usb_hid_cmakelists",
+      "web_config_cmakelists",
+      "website_readme"
+    ],
+    "10": [
+      "constants_device_status_schema_devicestatus",
+      "store_devicestatus_svelte_devicestatusstate",
+      "store_devmode_svelte_devmodestate",
+      "store_ismobile_svelte_ismobile",
+      "store_keyvisuals_svelte_keyvisualsstate",
+      "store_serial_svelte_connect",
+      "store_serial_svelte_keymonitor",
+      "store_serial_svelte_serialstate",
+      "store_serial_svelte_trainingmodecmd",
+      "store_testmode_svelte_testmodestate",
+      "store_trainingmode_svelte_trainingmodestate",
+      "store_transport_activetransport",
+      "transport_http_httptransport",
+      "transport_mock_mocktransport"
+    ],
+    "11": [
+      "button_button_component",
+      "button_index_exports",
+      "input_group_addon_component",
+      "input_group_button_component",
+      "input_group_index_exports",
+      "input_group_input_component",
+      "input_group_root_component",
+      "input_group_text_component",
+      "input_group_textarea_component",
+      "input_index_input_exports",
+      "input_input_component",
+      "textarea_index_exports",
+      "textarea_textarea_component"
+    ],
+    "12": [
+      "editor_editor",
+      "editor_encoder",
+      "editor_encoder_buttons",
+      "editor_encoder_svelte",
+      "editor_keycode_picker",
+      "editor_keygrid",
+      "editor_keypad_context",
+      "editor_knob",
+      "editor_layer_switcher",
+      "editor_preset_select",
+      "editor_profile_switcher",
+      "store_trainingmode",
+      "ui_label"
+    ],
+    "13": [
+      "drawer_drawer_close_close",
+      "drawer_drawer_content_content",
+      "drawer_drawer_description_description",
+      "drawer_drawer_footer_footer",
+      "drawer_drawer_header_header",
+      "drawer_drawer_nested_nestedroot",
+      "drawer_drawer_overlay_overlay",
+      "drawer_drawer_portal_portal",
+      "drawer_drawer_root",
+      "drawer_drawer_title_title",
+      "drawer_drawer_trigger_trigger",
+      "drawer_index_drawer_exports"
+    ],
+    "14": [
+      "sidebar_index_ts_module",
+      "sidebar_sidebar_content_component",
+      "sidebar_sidebar_footer_component",
+      "sidebar_sidebar_group_action_component",
+      "sidebar_sidebar_group_component",
+      "sidebar_sidebar_group_content_component",
+      "sidebar_sidebar_group_label_component",
+      "sidebar_sidebar_header_component",
+      "sidebar_sidebar_input_component",
+      "sidebar_sidebar_inset_component",
+      "sidebar_sidebar_menu_action_component",
+      "ui_input_index_input"
+    ],
+    "15": [
+      "dialog_dialog_close",
+      "dialog_dialog_content",
+      "dialog_dialog_description",
+      "dialog_dialog_footer",
+      "dialog_dialog_header",
+      "dialog_dialog_overlay",
+      "dialog_dialog_portal",
+      "dialog_dialog_root",
+      "dialog_dialog_title",
+      "dialog_dialog_trigger",
+      "dialog_index_dialog_exports"
+    ],
+    "16": [
+      "dialog_index_exports",
+      "drawer_index_exports",
+      "responsive_sheet_index_exports",
+      "responsive_sheet_responsive_sheet_component",
+      "shared_store_is_mobile",
+      "sheet_index_exports",
+      "sheet_sheet_close_component",
+      "sheet_sheet_content_component",
+      "sheet_sheet_overlay_component",
+      "sheet_sheet_portal_component",
+      "ui_button_index_button"
+    ],
+    "17": [
+      "constants_config_migrations_parseresult",
+      "constants_config_migrations_spinpadfilewrapper",
+      "constants_config_ops_opresult",
+      "constants_config_schema_fullconfig",
+      "constants_config_schema_widgetconfig",
+      "store_serial_svelte_getconfig",
+      "store_serial_svelte_rpcqueue",
+      "store_serial_svelte_setconfig",
+      "widgets_types_widgetdef",
+      "widgets_types_widgetoption"
+    ],
+    "18": [
+      "lib_components_ui_app_sidebar_component",
+      "lib_docs_index_get_doc_title",
+      "lib_docs_index_get_docs_manifest",
+      "lib_docs_index_get_docs_tree",
+      "lib_header_right_svelte_create_header_right",
+      "lib_nav_get_breadcrumbs",
+      "lib_nav_nav_tree",
+      "routes_docs_page_svelte",
+      "routes_layout_svelte"
+    ],
+    "19": [
+      "shared_constants_config_schema",
+      "shared_constants_device_status_schema",
+      "shared_constants_profile_icon",
+      "shared_constants_profile_icon_library",
+      "shared_constants_profile_presets",
+      "shared_types_dev_mode",
+      "shared_types_index",
+      "shared_types_serial",
+      "shared_types_transport"
+    ],
+    "20": [
+      "constants_action_types_media_codes",
+      "constants_config_migrations_profilesparseresult",
+      "constants_config_migrations_spinpadprofileswrapper",
+      "constants_config_schema_layerconfig",
+      "constants_config_schema_profileconfig",
+      "constants_profile_icon_boolgrid",
+      "constants_profile_icon_library_iconlibraryentry",
+      "constants_profile_presets_profilepreset"
+    ],
+    "21": [
+      "card_card_content",
+      "card_card_description",
+      "card_card_footer",
+      "card_card_header",
+      "card_card_root",
+      "card_card_title",
+      "card_index_card_exports"
+    ],
+    "22": [
+      "constants_action_types_action_fn",
+      "constants_action_types_special_codes",
+      "constants_config_migrations_migrations",
+      "constants_config_migrations_parsespinpadfile",
+      "constants_config_schema_macrodef",
+      "constants_keycodes_keycode",
+      "store_config_svelte_importconfig"
+    ],
+    "23": [
+      "constants_action_types_action_types",
+      "constants_config_ops_addprofile",
+      "constants_config_ops_editlayer",
+      "constants_layer_colors_alloccolorslot",
+      "store_auto_save_autosave",
+      "store_config_svelte_configstate",
+      "store_config_svelte_undoredo"
+    ],
+    "24": [
+      "concept_layer_actions",
+      "concept_profile",
+      "docs_keymap_layers",
+      "docs_keymap_profiles",
+      "docs_studio_layers",
+      "docs_studio_profiles"
+    ],
+    "25": [
+      "dropdown_menu_content_content",
+      "dropdown_menu_portal_portal",
+      "field_field_component",
+      "field_field_set_component",
+      "field_field_title_component",
+      "field_index_field_exports"
+    ],
+    "26": [
+      "tooltip_index_exports",
+      "tooltip_tooltip_component",
+      "tooltip_tooltip_content_component",
+      "tooltip_tooltip_portal_component",
+      "tooltip_tooltip_provider_component",
+      "tooltip_tooltip_trigger_component"
+    ],
+    "27": [
+      "underline_tabs_content_component",
+      "underline_tabs_index_exports",
+      "underline_tabs_list_component",
+      "underline_tabs_trigger_component",
+      "underline_tabs_underline_tabs_component",
+      "underline_tabs_underline_tabs_svelte_state"
+    ],
+    "28": [
+      "collapsible_collapsible_content",
+      "collapsible_collapsible_root",
+      "collapsible_collapsible_trigger",
+      "collapsible_index_collapsible_exports"
+    ],
+    "29": [
+      "constants_config_schema_defaultconfig",
+      "constants_layer_colors_backfilllayercolors",
+      "constants_layer_colors_layer_colors",
+      "store_config_svelte_loadconfig"
+    ],
+    "30": [
+      "store_config_svelte_reconcileactiveprofile",
+      "store_config_svelte_setactiveprofilelocal",
+      "store_devicestatus_svelte_startpolling",
+      "store_serial_svelte_onprofileevent"
+    ],
+    "31": [
+      "ui_app_sidebar_appsidebar",
+      "ui_nav_navmain",
+      "ui_nav_navsecondary",
+      "ui_nav_navuser"
+    ],
+    "32": [
+      "hooks_use_toc_hook",
+      "toc_index_exports",
+      "toc_toc_component"
+    ],
+    "33": [
+      "lib_components_ui_button_button_component",
+      "lib_components_ui_button_index",
+      "lib_utils_cn_reexport"
+    ],
+    "34": [
+      "lib_header_right_svelte_use_header_right",
+      "lib_set_header_right_component",
+      "routes_studio_page_svelte"
+    ],
+    "35": [
+      "shared_components_app_studio_studio_svelte",
+      "studio_routes_page_svelte",
+      "website_studio_app_page_svelte"
+    ],
+    "36": [
+      "shared_components_studio_editor_keypad_context",
+      "shared_lib_simulate_typing",
+      "shared_store_keyvisuals"
+    ],
+    "37": [
+      "shared_styles_index_css",
+      "studio_app_css",
+      "studio_routes_layout_svelte"
+    ],
+    "38": [
+      "config_store_config_store_c_config_store_init",
+      "keymap_keymap_h"
+    ],
+    "39": [
+      "constants_config_migrations_createspinpadfile",
+      "store_config_svelte_exportconfig"
+    ],
+    "40": [
+      "constants_device_status_schema_batterystatus",
+      "firmware_battery_battery_h"
+    ],
+    "41": [
+      "docs_getting_started",
+      "spinpad_png"
+    ],
+    "42": [
+      "label_index_label_index",
+      "label_label_label"
+    ],
+    "43": [
+      "lib_components_keypad_component",
+      "routes_page_svelte"
+    ],
+    "44": [
+      "lib_docs_index_components",
+      "routes_docs_slug_page_svelte"
+    ],
+    "45": [
+      "shared_components_app_profiles_profilesdemo_svelte",
+      "studio_routes_demo_page_svelte"
+    ],
+    "46": [
+      "shared_styles_index",
+      "website_app_css"
+    ],
+    "47": [
+      "slider_index_slider_index",
+      "slider_slider_slider"
+    ],
+    "48": [
+      "spinner_index_spinner_index",
+      "spinner_spinner_spinner"
+    ],
+    "49": [
+      "switch_index_switch_index",
+      "switch_switch_switch"
+    ],
+    "50": [
+      "app_addbutton_addbutton"
+    ],
+    "51": [
+      "ble_hid_ble_hid_h"
+    ],
+    "52": [
+      "constants_action_types_action"
+    ],
+    "53": [
+      "constants_action_types_actiontype"
+    ],
+    "54": [
+      "constants_action_types_getactiontype"
+    ],
+    "55": [
+      "constants_action_types_getactionvalue"
+    ],
+    "56": [
+      "constants_action_types_mediacode"
+    ],
+    "57": [
+      "constants_action_types_specialcode"
+    ],
+    "58": [
+      "constants_config_migrations_createprofilesfile"
+    ],
+    "59": [
+      "constants_config_migrations_filemeta"
+    ],
+    "60": [
+      "constants_config_migrations_migrationfn"
+    ],
+    "61": [
+      "constants_config_migrations_parseprofilesfile"
+    ],
+    "62": [
+      "constants_config_ops_addlayer"
+    ],
+    "63": [
+      "constants_config_ops_clearprofile"
+    ],
+    "64": [
+      "constants_config_ops_deletelayer"
+    ],
+    "65": [
+      "constants_config_ops_deleteprofile"
+    ],
+    "66": [
+      "constants_config_ops_duplicatelayer"
+    ],
+    "67": [
+      "constants_config_ops_editprofile"
+    ],
+    "68": [
+      "constants_config_ops_layerpatch"
+    ],
+    "69": [
+      "constants_config_ops_movelayer"
+    ],
+    "70": [
+      "constants_config_ops_moveprofile"
+    ],
+    "71": [
+      "constants_config_ops_profilepatch"
+    ],
+    "72": [
+      "constants_config_ops_profiletemplate"
+    ],
+    "73": [
+      "constants_config_ops_renamelayer"
+    ],
+    "74": [
+      "constants_config_ops_renameprofile"
+    ],
+    "75": [
+      "constants_config_ops_selection"
+    ],
+    "76": [
+      "constants_config_ops_setprofileicon"
+    ],
+    "77": [
+      "constants_config_schema_batterywidget"
+    ],
+    "78": [
+      "constants_config_schema_blewidget"
+    ],
+    "79": [
+      "constants_config_schema_clockwidget"
+    ],
+    "80": [
+      "constants_config_schema_customtextwidget"
+    ],
+    "81": [
+      "constants_config_schema_defaultkeyaction"
+    ],
+    "82": [
+      "constants_config_schema_defaultlayer"
+    ],
+    "83": [
+      "constants_config_schema_defaultmacro"
+    ],
+    "84": [
+      "constants_config_schema_defaultmacros"
+    ],
+    "85": [
+      "constants_config_schema_defaultprofile"
+    ],
+    "86": [
+      "constants_config_schema_defaultwidgets"
+    ],
+    "87": [
+      "constants_config_schema_iconwidget"
+    ],
+    "88": [
+      "constants_config_schema_ismacroused"
+    ],
+    "89": [
+      "constants_config_schema_layerwidget"
+    ],
+    "90": [
+      "constants_config_schema_macrostep"
+    ],
+    "91": [
+      "constants_config_schema_macrosteptype"
+    ],
+    "92": [
+      "constants_config_schema_profilewidget"
+    ],
+    "93": [
+      "constants_config_schema_validateconfig"
+    ],
+    "94": [
+      "constants_config_schema_validationresult"
+    ],
+    "95": [
+      "constants_config_schema_widgettype"
+    ],
+    "96": [
+      "constants_device_status_schema_batteryabsent"
+    ],
+    "97": [
+      "constants_device_status_schema_batterypresent"
+    ],
+    "98": [
+      "constants_device_status_schema_batterypresentconfig"
+    ],
+    "99": [
+      "constants_device_status_schema_batterysource"
+    ],
+    "100": [
+      "constants_device_status_schema_connectionstatus"
+    ],
+    "101": [
+      "constants_device_status_schema_devicestats"
+    ],
+    "102": [
+      "constants_device_status_schema_firmwareinfo"
+    ],
+    "103": [
+      "constants_keycodes_buildcombomacrosteps"
+    ],
+    "104": [
+      "constants_keycodes_eventmodifierkeycodes"
+    ],
+    "105": [
+      "constants_keycodes_getkeycodelabel"
+    ],
+    "106": [
+      "constants_keycodes_hidusagetocode"
+    ],
+    "107": [
+      "constants_keycodes_ismodifiercode"
+    ],
+    "108": [
+      "constants_keycodes_keycodecategory"
+    ],
+    "109": [
+      "constants_keycodes_keycodegroups"
+    ],
+    "110": [
+      "constants_keycodes_keycodesflat"
+    ],
+    "111": [
+      "constants_keycodes_keyeventtokeycode"
+    ],
+    "112": [
+      "constants_keycodes_macrokeycodes"
+    ],
+    "113": [
+      "constants_keycodes_macrolabel"
+    ],
+    "114": [
+      "constants_layer_colors_layercolor"
+    ],
+    "115": [
+      "constants_profile_icon_base64tobytes"
+    ],
+    "116": [
+      "constants_profile_icon_base64togrid"
+    ],
+    "117": [
+      "constants_profile_icon_bytestobase64"
+    ],
+    "118": [
+      "constants_profile_icon_bytestogrid"
+    ],
+    "119": [
+      "constants_profile_icon_drawcircle"
+    ],
+    "120": [
+      "constants_profile_icon_drawdisc"
+    ],
+    "121": [
+      "constants_profile_icon_drawellipse"
+    ],
+    "122": [
+      "constants_profile_icon_drawellipsefill"
+    ],
+    "123": [
+      "constants_profile_icon_drawline"
+    ],
+    "124": [
+      "constants_profile_icon_drawrect"
+    ],
+    "125": [
+      "constants_profile_icon_drawrectfill"
+    ],
+    "126": [
+      "constants_profile_icon_emptygrid"
+    ],
+    "127": [
+      "constants_profile_icon_filliconpixels"
+    ],
+    "128": [
+      "constants_profile_icon_getpixel"
+    ],
+    "129": [
+      "constants_profile_icon_gridindex"
+    ],
+    "130": [
+      "constants_profile_icon_gridtobase64"
+    ],
+    "131": [
+      "constants_profile_icon_gridtobytes"
+    ],
+    "132": [
+      "constants_profile_icon_gridtoimagedata"
+    ],
+    "133": [
+      "constants_profile_icon_imagedatatogrid"
+    ],
+    "134": [
+      "constants_profile_icon_isemptyicon"
+    ],
+    "135": [
+      "constants_profile_icon_library_libraryicon"
+    ],
+    "136": [
+      "constants_profile_icon_setpixel"
+    ],
+    "137": [
+      "constants_profile_presets_getpresetbyid"
+    ],
+    "138": [
+      "constants_profile_presets_listprofilepresets"
+    ],
+    "139": [
+      "constants_profile_presets_profilepresetsource"
+    ],
+    "140": [
+      "constants_profile_presets_registerpresetsource"
+    ],
+    "141": [
+      "constants_profile_presets_remotepresetsource"
+    ],
+    "142": [
+      "constants_reorder_derivesinglemove"
+    ],
+    "143": [
+      "device_status_device_status_h"
+    ],
+    "144": [
+      "display_display_h"
+    ],
+    "145": [
+      "display_font5x7_h"
+    ],
+    "146": [
+      "docs_index_components"
+    ],
+    "147": [
+      "docs_index_docentry"
+    ],
+    "148": [
+      "docs_index_doctreefolder"
+    ],
+    "149": [
+      "docs_index_doctreeleaf"
+    ],
+    "150": [
+      "docs_index_doctreenode"
+    ],
+    "151": [
+      "docs_index_getdocsmanifest"
+    ],
+    "152": [
+      "docs_index_getdocstree"
+    ],
+    "153": [
+      "docs_index_getdoctitle"
+    ],
+    "154": [
+      "dropdown_menu_checkbox_group_checkbox_group"
+    ],
+    "155": [
+      "dropdown_menu_group_group"
+    ],
+    "156": [
+      "dropdown_menu_index_dropdown_menu_exports"
+    ],
+    "157": [
+      "dropdown_menu_radio_group_radio_group"
+    ],
+    "158": [
+      "editor_encoder_presets_applyencoderpreset"
+    ],
+    "159": [
+      "editor_encoder_presets_encoderpreset"
+    ],
+    "160": [
+      "editor_encoder_presets_matchpreset"
+    ],
+    "161": [
+      "editor_encoder_svelte_encoderfield"
+    ],
+    "162": [
+      "editor_encoder_svelte_encoderknoboptions"
+    ],
+    "163": [
+      "editor_encoder_svelte_getactiveencoderknob"
+    ],
+    "164": [
+      "editor_encoder_svelte_setactiveencoderknob"
+    ],
+    "165": [
+      "editor_keypad_context_svelte_createkeypadcontext"
+    ],
+    "166": [
+      "editor_keypad_context_svelte_getkeypadcontext"
+    ],
+    "167": [
+      "editor_keypad_context_svelte_keycodeoption"
+    ],
+    "168": [
+      "editor_keypad_context_svelte_keypadcontext"
+    ],
+    "169": [
+      "editor_keypad_context_svelte_pickerstage"
+    ],
+    "170": [
+      "encoder_encoder_c_encoder_init"
+    ],
+    "171": [
+      "encoder_encoder_h"
+    ],
+    "172": [
+      "hooks_is_mobile_svelte_ismobile"
+    ],
+    "173": [
+      "hooks_keyboard_layout_svelte_keyboardlayout"
+    ],
+    "174": [
+      "hooks_pointer_svelte_hasfinepointer"
+    ],
+    "175": [
+      "hooks_use_toc_svelte_heading"
+    ],
+    "176": [
+      "hooks_use_toc_svelte_headingkind"
+    ],
+    "177": [
+      "hooks_use_toc_svelte_usetoc"
+    ],
+    "178": [
+      "led_engine_led_engine_c_led_engine_tick"
+    ],
+    "179": [
+      "led_engine_led_engine_h"
+    ],
+    "180": [
+      "lib_components_led_effects_component"
+    ],
+    "181": [
+      "lib_components_test_component"
+    ],
+    "182": [
+      "lib_header_right_svelte_createheaderright"
+    ],
+    "183": [
+      "lib_header_right_svelte_useheaderright"
+    ],
+    "184": [
+      "lib_nav_breadcrumbitem"
+    ],
+    "185": [
+      "lib_nav_getbreadcrumbs"
+    ],
+    "186": [
+      "lib_nav_navitem"
+    ],
+    "187": [
+      "lib_simulate_typing_easingpreset"
+    ],
+    "188": [
+      "lib_simulate_typing_simulatetyping"
+    ],
+    "189": [
+      "lib_simulate_typing_simulatetypingoptions"
+    ],
+    "190": [
+      "mock_device_status_currentmockpercent"
+    ],
+    "191": [
+      "mock_device_status_makemockdevicestatus"
+    ],
+    "192": [
+      "mock_device_status_resetmockdischarge"
+    ],
+    "193": [
+      "mock_device_status_tickmockcharge"
+    ],
+    "194": [
+      "mock_device_status_tickmockdischarge"
+    ],
+    "195": [
+      "power_mgmt_power_mgmt_h"
+    ],
+    "196": [
+      "routes_demo_page_svelte"
+    ],
+    "197": [
+      "routes_docs_layout_svelte"
+    ],
+    "198": [
+      "routes_error_page"
+    ],
+    "199": [
+      "routes_flash_page_svelte"
+    ],
+    "200": [
+      "routes_layout_ts"
+    ],
+    "201": [
+      "routes_studio_layout_svelte"
+    ],
+    "202": [
+      "shared_hooks_use_toc"
+    ],
+    "203": [
+      "shared_lib_hooks_is_mobile"
+    ],
+    "204": [
+      "shared_lib_hooks_keyboard_layout"
+    ],
+    "205": [
+      "shared_lib_hooks_pointer"
+    ],
+    "206": [
+      "sheet_sheet_root_component"
+    ],
+    "207": [
+      "sheet_sheet_trigger_component"
+    ],
+    "208": [
+      "sidebar_constants_sidebar_width"
+    ],
+    "209": [
+      "sidebar_context_svelte_setsidebar"
+    ],
+    "210": [
+      "sidebar_context_svelte_sidebarstateprops"
+    ],
+    "211": [
+      "sidebar_context_svelte_usesidebar"
+    ],
+    "212": [
+      "src_utils_cn"
+    ],
+    "213": [
+      "src_utils_safecapitalize"
+    ],
+    "214": [
+      "src_utils_scrollshadow"
+    ],
+    "215": [
+      "src_utils_withelementref"
+    ],
+    "216": [
+      "src_utils_withoutchild"
+    ],
+    "217": [
+      "src_utils_withoutchildren"
+    ],
+    "218": [
+      "src_utils_withoutchildrenorchild"
+    ],
+    "219": [
+      "store_config_svelte_addlayer"
+    ],
+    "220": [
+      "store_config_svelte_addprofile"
+    ],
+    "221": [
+      "store_config_svelte_canredo"
+    ],
+    "222": [
+      "store_config_svelte_canundo"
+    ],
+    "223": [
+      "store_config_svelte_clearmacro"
+    ],
+    "224": [
+      "store_config_svelte_clearprofile"
+    ],
+    "225": [
+      "store_config_svelte_createmacrofromsteps"
+    ],
+    "226": [
+      "store_config_svelte_deletelayer"
+    ],
+    "227": [
+      "store_config_svelte_deleteprofile"
+    ],
+    "228": [
+      "store_config_svelte_duplicatelayer"
+    ],
+    "229": [
+      "store_config_svelte_editlayer"
+    ],
+    "230": [
+      "store_config_svelte_editprofile"
+    ],
+    "231": [
+      "store_config_svelte_ensureconfigloaded"
+    ],
+    "232": [
+      "store_config_svelte_exportprofiles"
+    ],
+    "233": [
+      "store_config_svelte_factoryreset"
+    ],
+    "234": [
+      "store_config_svelte_importprofiles"
+    ],
+    "235": [
+      "store_config_svelte_redo"
+    ],
+    "236": [
+      "store_config_svelte_saveconfig"
+    ],
+    "237": [
+      "store_config_svelte_setencoderaction"
+    ],
+    "238": [
+      "store_config_svelte_setkeyaction"
+    ],
+    "239": [
+      "store_config_svelte_setmacroname"
+    ],
+    "240": [
+      "store_config_svelte_setmacrosteps"
+    ],
+    "241": [
+      "store_config_svelte_setprofileicon"
+    ],
+    "242": [
+      "store_config_svelte_undo"
+    ],
+    "243": [
+      "store_config_svelte_updateconfig"
+    ],
+    "244": [
+      "store_devicestatus_svelte_refreshdevicestatus"
+    ],
+    "245": [
+      "store_devicestatus_svelte_stoppolling"
+    ],
+    "246": [
+      "store_is_mobile_svelte_ismobile"
+    ],
+    "247": [
+      "store_macromanager_svelte_macromanagerstore"
+    ],
+    "248": [
+      "store_serial_svelte_disconnect"
+    ],
+    "249": [
+      "store_serial_svelte_factoryreset"
+    ],
+    "250": [
+      "store_serial_svelte_getdevicestatus"
+    ],
+    "251": [
+      "store_serial_svelte_onkeyevent"
+    ],
+    "252": [
+      "store_serial_svelte_onmessage"
+    ],
+    "253": [
+      "store_serial_svelte_setactiveprofile"
+    ],
+    "254": [
+      "store_serial_svelte_settime"
+    ],
+    "255": [
+      "store_trainingmode_svelte_trainingtarget"
+    ],
+    "256": [
+      "store_transport_activestatustransport"
+    ],
+    "257": [
+      "store_transport_transportmode"
+    ],
+    "258": [
+      "tabs_index_tabs_index"
+    ],
+    "259": [
+      "transport_http_factoryreset"
+    ],
+    "260": [
+      "transport_http_getconfig"
+    ],
+    "261": [
+      "transport_http_getdevicestatus"
+    ],
+    "262": [
+      "transport_http_ping"
+    ],
+    "263": [
+      "transport_http_setactiveprofile"
+    ],
+    "264": [
+      "transport_http_setconfig"
+    ],
+    "265": [
+      "transport_mock_factoryreset"
+    ],
+    "266": [
+      "transport_mock_getconfig"
+    ],
+    "267": [
+      "transport_mock_getdevicestatus"
+    ],
+    "268": [
+      "transport_mock_setactiveprofile"
+    ],
+    "269": [
+      "transport_mock_setconfig"
+    ],
+    "270": [
+      "types_dev_mode_d_batteryscenario"
+    ],
+    "271": [
+      "types_dev_mode_d_connectionscenario"
+    ],
+    "272": [
+      "types_dev_mode_d_mockoptions"
+    ],
+    "273": [
+      "types_serial_d_messagehandler"
+    ],
+    "274": [
+      "types_serial_d_rpcqueueentry"
+    ],
+    "275": [
+      "types_serial_d_serialstatesnapshot"
+    ],
+    "276": [
+      "types_transport_d_devicestatustransport"
+    ],
+    "277": [
+      "types_transport_d_transport"
+    ],
+    "278": [
+      "underline_tabs_underline_tabs_svelte_useunderlinetabs"
+    ],
+    "279": [
+      "underline_tabs_underline_tabs_svelte_useunderlinetabstrigger"
+    ],
+    "280": [
+      "usb_hid_usb_hid_c_usb_hid_init"
+    ],
+    "281": [
+      "usb_hid_usb_hid_h"
+    ],
+    "282": [
+      "web_config_web_config_c_web_config_init"
+    ],
+    "283": [
+      "web_config_web_config_h"
+    ],
+    "284": [
+      "website_app_html"
+    ],
+    "285": [
+      "website_studio_app_layout_ts"
+    ],
+    "286": [
+      "widgets_index_createwidget"
+    ],
+    "287": [
+      "widgets_index_placeablewidgettype"
+    ],
+    "288": [
+      "widgets_index_widgetdefaultsize"
+    ],
+    "289": [
+      "widgets_index_widgetsize"
+    ],
+    "290": [
+      "widgets_index_widgetsizes"
+    ],
+    "291": [
+      "widgets_types_widgetoptionkind"
+    ],
+    "292": [
+      "widgets_types_widgetsizerange"
+    ]
+  },
+  "cohesion": {
+    "0": 0.058384547848990345,
+    "1": 0.051587301587301584,
+    "2": 0.05555555555555555,
+    "3": 0.07624113475177305,
+    "4": 0.06984126984126984,
+    "5": 0.07007575757575757,
+    "6": 0.10317460317460317,
+    "7": 0.11688311688311688,
+    "8": 0.1568627450980392,
+    "9": 0.25274725274725274,
+    "10": 0.1978021978021978,
+    "11": 0.15384615384615385,
+    "12": 0.1794871794871795,
+    "13": 0.19696969696969696,
+    "14": 0.16666666666666666,
+    "15": 0.18181818181818182,
+    "16": 0.2,
+    "17": 0.2222222222222222,
+    "18": 0.3055555555555556,
+    "19": 0.2777777777777778,
+    "20": 0.25,
+    "21": 0.2857142857142857,
+    "22": 0.2857142857142857,
+    "23": 0.2857142857142857,
+    "24": 0.4666666666666667,
+    "25": 0.26666666666666666,
+    "26": 0.4,
+    "27": 0.4,
+    "28": 0.5,
+    "29": 0.6666666666666666,
+    "30": 0.5,
+    "31": 0.5,
+    "32": 1.3333333333333333,
+    "33": 0.6666666666666666,
+    "34": 0.6666666666666666,
+    "35": 0.6666666666666666,
+    "36": 0.6666666666666666,
+    "37": 0.6666666666666666,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0,
+    "118": 1.0,
+    "119": 1.0,
+    "120": 1.0,
+    "121": 1.0,
+    "122": 1.0,
+    "123": 1.0,
+    "124": 1.0,
+    "125": 1.0,
+    "126": 1.0,
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "130": 1.0,
+    "131": 1.0,
+    "132": 1.0,
+    "133": 1.0,
+    "134": 1.0,
+    "135": 1.0,
+    "136": 1.0,
+    "137": 1.0,
+    "138": 1.0,
+    "139": 1.0,
+    "140": 1.0,
+    "141": 1.0,
+    "142": 1.0,
+    "143": 1.0,
+    "144": 1.0,
+    "145": 1.0,
+    "146": 1.0,
+    "147": 1.0,
+    "148": 1.0,
+    "149": 1.0,
+    "150": 1.0,
+    "151": 1.0,
+    "152": 1.0,
+    "153": 1.0,
+    "154": 1.0,
+    "155": 1.0,
+    "156": 1.0,
+    "157": 1.0,
+    "158": 1.0,
+    "159": 1.0,
+    "160": 1.0,
+    "161": 1.0,
+    "162": 1.0,
+    "163": 1.0,
+    "164": 1.0,
+    "165": 1.0,
+    "166": 1.0,
+    "167": 1.0,
+    "168": 1.0,
+    "169": 1.0,
+    "170": 1.0,
+    "171": 1.0,
+    "172": 1.0,
+    "173": 1.0,
+    "174": 1.0,
+    "175": 1.0,
+    "176": 1.0,
+    "177": 1.0,
+    "178": 1.0,
+    "179": 1.0,
+    "180": 1.0,
+    "181": 1.0,
+    "182": 1.0,
+    "183": 1.0,
+    "184": 1.0,
+    "185": 1.0,
+    "186": 1.0,
+    "187": 1.0,
+    "188": 1.0,
+    "189": 1.0,
+    "190": 1.0,
+    "191": 1.0,
+    "192": 1.0,
+    "193": 1.0,
+    "194": 1.0,
+    "195": 1.0,
+    "196": 1.0,
+    "197": 1.0,
+    "198": 1.0,
+    "199": 1.0,
+    "200": 1.0,
+    "201": 1.0,
+    "202": 1.0,
+    "203": 1.0,
+    "204": 1.0,
+    "205": 1.0,
+    "206": 1.0,
+    "207": 1.0,
+    "208": 1.0,
+    "209": 1.0,
+    "210": 1.0,
+    "211": 1.0,
+    "212": 1.0,
+    "213": 1.0,
+    "214": 1.0,
+    "215": 1.0,
+    "216": 1.0,
+    "217": 1.0,
+    "218": 1.0,
+    "219": 1.0,
+    "220": 1.0,
+    "221": 1.0,
+    "222": 1.0,
+    "223": 1.0,
+    "224": 1.0,
+    "225": 1.0,
+    "226": 1.0,
+    "227": 1.0,
+    "228": 1.0,
+    "229": 1.0,
+    "230": 1.0,
+    "231": 1.0,
+    "232": 1.0,
+    "233": 1.0,
+    "234": 1.0,
+    "235": 1.0,
+    "236": 1.0,
+    "237": 1.0,
+    "238": 1.0,
+    "239": 1.0,
+    "240": 1.0,
+    "241": 1.0,
+    "242": 1.0,
+    "243": 1.0,
+    "244": 1.0,
+    "245": 1.0,
+    "246": 1.0,
+    "247": 1.0,
+    "248": 1.0,
+    "249": 1.0,
+    "250": 1.0,
+    "251": 1.0,
+    "252": 1.0,
+    "253": 1.0,
+    "254": 1.0,
+    "255": 1.0,
+    "256": 1.0,
+    "257": 1.0,
+    "258": 1.0,
+    "259": 1.0,
+    "260": 1.0,
+    "261": 1.0,
+    "262": 1.0,
+    "263": 1.0,
+    "264": 1.0,
+    "265": 1.0,
+    "266": 1.0,
+    "267": 1.0,
+    "268": 1.0,
+    "269": 1.0,
+    "270": 1.0,
+    "271": 1.0,
+    "272": 1.0,
+    "273": 1.0,
+    "274": 1.0,
+    "275": 1.0,
+    "276": 1.0,
+    "277": 1.0,
+    "278": 1.0,
+    "279": 1.0,
+    "280": 1.0,
+    "281": 1.0,
+    "282": 1.0,
+    "283": 1.0,
+    "284": 1.0,
+    "285": 1.0,
+    "286": 1.0,
+    "287": 1.0,
+    "288": 1.0,
+    "289": 1.0,
+    "290": 1.0,
+    "291": 1.0,
+    "292": 1.0
+  },
+  "gods": [
+    {
+      "id": "shared_utils_cn",
+      "label": "Shared Utils (cn / WithElementRef / WithoutChild)",
+      "degree": 58
+    },
+    {
+      "id": "shared_utils",
+      "label": "Shared Utils",
+      "degree": 51
+    },
+    {
+      "id": "shared_utils_utils",
+      "label": "shared utils",
+      "degree": 28
+    },
+    {
+      "id": "sidebar_index_sidebar_index",
+      "label": "Sidebar Index",
+      "degree": 18
+    },
+    {
+      "id": "config_store_config_store_c_config_store_get",
+      "label": "config_store_get",
+      "degree": 17
+    },
+    {
+      "id": "dashboard_tile_main",
+      "label": "TileMain Component",
+      "degree": 17
+    },
+    {
+      "id": "studio_macromanager_macromanager",
+      "label": "MacroManager Component",
+      "degree": 16
+    },
+    {
+      "id": "keymap_keymap_c_send_action",
+      "label": "send_action (private)",
+      "degree": 15
+    },
+    {
+      "id": "widgets_index",
+      "label": "Widget Registry Index",
+      "degree": 14
+    },
+    {
+      "id": "constants_config_schema_fullconfig",
+      "label": "FullConfig",
+      "degree": 13
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Studio Mode (WiFi AP Config)",
+      "target": "SPIFFS Image Build (Studio Embedded)",
+      "source_files": [
+        "README.md",
+        "packages/firmware/README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "Developer Certificate of Origin",
+      "target": "DCO Signed-off-by Requirement",
+      "source_files": [
+        "CONTRIBUTING.md",
+        "CLAUDE.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "SpinPad Monorepo Structure",
+      "target": "SpinPad Project — ESP32-S3 Macropad",
+      "source_files": [
+        "CONTRIBUTING.md",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "finish-task Skill",
+      "target": "Commit Conventions (type/scope)",
+      "source_files": [
+        ".claude/skills/finish-task/SKILL.md",
+        "CONTRIBUTING.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `Commit Conventions (type/scope)` unexpectedly reaches hub `finish-task Skill`"
+    },
+    {
+      "source": "SpinPad CLAUDE.md — Agent Instructions",
+      "target": "Triage Labels Mapping",
+      "source_files": [
+        "CLAUDE.md",
+        "docs/agents/triage-labels.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; peripheral node `Triage Labels Mapping` unexpectedly reaches hub `SpinPad CLAUDE.md — Agent Instructions`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "ambiguous_edge",
+      "question": "What is the exact relationship between `IsMobile Class` and `KeyVisualsState Class`?",
+      "why": "Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Shared Utils` connect `Community 1` to `Community 16`, `Community 3`, `Community 11`?",
+      "why": "High betweenness centrality (0.053) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Shared Utils (cn / WithElementRef / WithoutChild)` connect `Community 7` to `Community 32`, `Community 1`, `Community 33`, `Community 11`, `Community 13`, `Community 14`, `Community 16`, `Community 25`, `Community 26`, `Community 27`?",
+      "why": "High betweenness centrality (0.052) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `ResponsiveSheet Component` connect `Community 16` to `Community 1`?",
+      "why": "High betweenness centrality (0.037) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `PlaceableWidgetType`, `WidgetSize`, `widgetSizes` to the rest of the system?",
+      "why": "463 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.058384547848990345 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.051587301587301584 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

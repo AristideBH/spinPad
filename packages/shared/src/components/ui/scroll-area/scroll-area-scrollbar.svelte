@@ -17,9 +17,9 @@
   data-orientation={orientation}
   {orientation}
   class={cn(
-    // Overlay : positionné en absolu pour ne PAS réserver d'espace (pas de
-    // padding parasite sous le contenu). Fin par défaut, s'épaissit au
-    // survol pour rester accessible.
+    // Overlay: absolutely positioned so it does NOT reserve space (no
+    // stray padding under the content). Thin by default, thickens on
+    // hover to stay accessible.
     'absolute z-20 flex touch-none select-none p-px transition-[width,height] duration-150',
     'data-horizontal:inset-x-0 data-horizontal:bottom-0 data-horizontal:h-1 data-horizontal:flex-col hover:data-horizontal:h-2',
     'data-vertical:inset-y-0 data-vertical:right-0 data-vertical:w-1 hover:data-vertical:w-2',

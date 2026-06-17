@@ -80,7 +80,7 @@
                       {#each breadcrumbs as crumb, i (i)}
                         {#if i > 0}
                           {#if !breadcrumbs[i - 1].url && !breadcrumbs[i - 1].current}
-                            <!-- séparateur entre un groupe (dossier) et son enfant -->
+                            <!-- separator between a group (folder) and its child -->
                             <Breadcrumb.Separator class="hidden md:block">
                               <DotIcon />
                             </Breadcrumb.Separator>

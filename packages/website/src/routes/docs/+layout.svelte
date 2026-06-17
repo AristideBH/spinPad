@@ -7,9 +7,9 @@
   const toc = new Toc.UseToc();
 </script>
 
-<div class="flex max-w-5xl gap-10 px-4 py-10 mx-auto">
+<div class="flex w-full max-w-5xl gap-10 px-4 py-10 mx-auto">
   <!-- ── Content ── -->
-  <article class="prose-docs flex-1 min-w-0">
+  <article class="flex-1 min-w-0 prose-docs">
     <div bind:this={toc.ref} style="display: contents;">
       {@render children()}
     </div>
@@ -20,7 +20,7 @@
     {#if toc.current.length > 0}
       <div class="sticky top-24">
         <p class="mb-3 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
-          Sur cette page
+          On this page
         </p>
         <Toc.Root toc={toc.current} />
       </div>

@@ -1,14 +1,5 @@
 {
   "mcpServers": {
-    "github-projects": {
-      "command": "uvx",
-      "args": [
-        "mcp-github-projects"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "%GITHUB_PAT%"
-      }
-    },
     "svelte": {
       "type": "http",
       "url": "https://mcp.svelte.dev/mcp"

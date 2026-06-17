@@ -27,7 +27,7 @@
     date: string;
     assets: ReleaseAsset[];
   }
-  // Promesse awaited dans le markup via <svelte:boundary> (pending/failed).
+  // Promise awaited in the markup via <svelte:boundary> (pending/failed).
   let releasesPromise = $state<Promise<Release[]> | null>(null);
 
   // ── WebSerial detection ───────────────────────────────────────────────
@@ -45,8 +45,8 @@
     log = [];
   }
 
-  // ── Charger les releases GitHub ───────────────────────────────────────
-  // Throw en cas d'échec : l'erreur remonte au <svelte:boundary> (snippet failed).
+  // ── Load GitHub releases ──────────────────────────────────────────────
+  // Throw on failure: the error bubbles up to the <svelte:boundary> (failed snippet).
   async function fetchReleases(): Promise<Release[]> {
     const r = await fetch('https://api.github.com/repos/Aristide-BH/spinpad/releases?per_page=10');
     if (!r.ok) throw new Error(`GitHub API: ${r.status}`);
@@ -76,15 +76,15 @@
     errorMsg = '';
 
     try {
-      addLog("Demande d'accès au port série…");
+      addLog('Requesting serial port access…');
       const port = await (navigator as any).serial.requestPort({
         filters: [{ usbVendorId: 0x303a }], // Espressif USB-JTAG
       });
 
-      addLog('Connexion au port…');
+      addLog('Connecting to port…');
       await port.open({ baudRate: 115200 });
 
-      addLog('Lecture des fichiers…');
+      addLog('Reading files…');
       const firmwareBuf = await firmwareFile.arrayBuffer();
       const images: { offset: number; data: Uint8Array }[] = [{ offset: 0x10000, data: new Uint8Array(firmwareBuf) }];
 
@@ -106,16 +106,16 @@
         },
       });
 
-      addLog('Connexion au bootloader ROM…');
+      addLog('Connecting to ROM bootloader…');
       phase = 'connecting';
       const chip = await loader.main();
-      addLog(`Chip détecté : ${chip}`);
+      addLog(`Chip detected: ${chip}`);
 
-      addLog('Effacement…');
+      addLog('Erasing…');
       phase = 'erasing';
       await loader.eraseFlash();
 
-      addLog('Flash en cours…');
+      addLog('Flashing in progress…');
       phase = 'flashing';
 
       const total = images.reduce((s, img) => s + img.data.byteLength, 0);
@@ -138,21 +138,21 @@
         },
       });
 
-      addLog('Redémarrage…');
+      addLog('Restarting…');
       await loader.after('hard_reset');
       await port.close();
 
       phase = 'done';
       progress = 100;
-      addLog('✅ Flash terminé avec succès !');
+      addLog('✅ Flash completed successfully!');
     } catch (e: unknown) {
       phase = 'error';
       errorMsg = e instanceof Error ? e.message : String(e);
-      addLog(`❌ Erreur : ${errorMsg}`);
+      addLog(`❌ Error: ${errorMsg}`);
     }
   }
 
-  // ── Télécharger un asset depuis GitHub ────────────────────────────────
+  // ── Download an asset from GitHub ─────────────────────────────────────
   async function downloadAsset(url: string, filename: string) {
     try {
       const r = await fetch(url);
@@ -163,13 +163,13 @@
       a.download = filename;
       a.click();
     } catch (e: unknown) {
-      addLog(`Téléchargement échoué : ${e instanceof Error ? e.message : e}`);
+      addLog(`Download failed: ${e instanceof Error ? e.message : e}`);
     }
   }
 </script>
 
 <svelte:head>
-  <title>Flash firmware : SpinPad</title>
+  <title>Flash firmware: SpinPad</title>
 </svelte:head>
 
 <div class="max-w-2xl px-4 py-8 mx-auto">
@@ -177,27 +177,27 @@
   <div class="mb-8">
     <h1 class="mb-1 text-2xl font-bold">SpinPad Flasher</h1>
     <p class="text-sm text-muted-foreground">
-      Flashez le firmware de votre SpinPad via WebSerial. Chrome / Edge requis.
+      Flash your SpinPad's firmware via WebSerial. Chrome / Edge required.
     </p>
   </div>
 
   <!-- WebSerial warning -->
   {#if !hasWebSerial}
     <div class="px-4 py-3 mb-6 text-sm text-yellow-300 border border-yellow-600 rounded-lg bg-yellow-950/40">
-      ⚠️ <strong>WebSerial non disponible.</strong>
-      Utilisez Chrome ou Edge (≥89) pour flasher directement depuis le navigateur.
+      ⚠️ <strong>WebSerial not available.</strong>
+      Use Chrome or Edge (≥89) to flash directly from the browser.
     </div>
   {/if}
 
-  <!-- Releases GitHub -->
+  <!-- GitHub releases -->
   <section class="mb-6">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="font-semibold">Releases GitHub</h2>
+      <h2 class="font-semibold">GitHub releases</h2>
       <button
         class="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
         onclick={() => (releasesPromise = fetchReleases())}
       >
-        {releasesPromise ? 'Recharger les releases' : 'Charger les releases'}
+        {releasesPromise ? 'Reload releases' : 'Load releases'}
       </button>
     </div>
 
@@ -228,7 +228,7 @@
               </div>
             </div>
           {:else}
-            <p class="text-sm text-muted-foreground">Aucune release trouvée.</p>
+            <p class="text-sm text-muted-foreground">No releases found.</p>
           {/each}
         </div>
 
@@ -243,7 +243,7 @@
         {#snippet failed(error, reset)}
           <div class="p-3 border rounded-lg border-destructive/40 bg-destructive/5">
             <p class="mb-2 text-sm text-destructive">
-              Impossible de charger les releases : {(error as Error).message}
+              Unable to load releases: {(error as Error).message}
             </p>
             <button
               class="text-sm text-blue-400 hover:text-blue-300"
@@ -252,23 +252,23 @@
                 reset();
               }}
             >
-              Réessayer
+              Retry
             </button>
           </div>
         {/snippet}
       </svelte:boundary>
     {:else}
       <p class="text-sm text-muted-foreground">
-        Cliquez sur "Charger les releases" pour voir les versions disponibles.
+        Click "Load releases" to see the available versions.
       </p>
     {/if}
   </section>
 
   <hr class="mb-6 border-border" />
 
-  <!-- Sélection des fichiers -->
+  <!-- File selection -->
   <section class="mb-6 space-y-4">
-    <h2 class="font-semibold">Fichiers à flasher</h2>
+    <h2 class="font-semibold">Files to flash</h2>
 
     <!-- Firmware -->
     <Field>
@@ -287,12 +287,12 @@
       {/if}
     </Field>
 
-    <!-- SPIFFS (optionnel) -->
+    <!-- SPIFFS (optional) -->
     <div class="space-y-2">
       <Field orientation="horizontal" class="gap-2">
         <Switch id="flash-spiffs" bind:checked={flashSpiffs} />
         <FieldLabel for="flash-spiffs" class="font-normal">
-          Flasher le Studio (SPIFFS, offset 0x310000)
+          Flash Studio (SPIFFS, offset 0x310000)
         </FieldLabel>
       </Field>
       {#if flashSpiffs}
@@ -308,7 +308,7 @@
     </div>
   </section>
 
-  <!-- Bouton flash -->
+  <!-- Flash button -->
   <div class="flex gap-3 mb-6">
     <button
       class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed
@@ -317,13 +317,13 @@
       onclick={startFlash}
     >
       {#if phase === 'connecting'}
-        Connexion…
+        Connecting…
       {:else if phase === 'erasing'}
-        Effacement…
+        Erasing…
       {:else if phase === 'flashing'}
-        Flash en cours…
+        Flashing in progress…
       {:else}
-        ⚡ Flasher
+        ⚡ Flash
       {/if}
     </button>
 
@@ -332,26 +332,26 @@
         class="px-4 py-2.5 rounded-lg border border-border hover:bg-secondary text-sm transition-colors"
         onclick={reset}
       >
-        Réinitialiser
+        Reset
       </button>
     {/if}
   </div>
 
-  <!-- Barre de progression -->
+  <!-- Progress bar -->
   {#if phase !== 'idle'}
     <div class="mb-4">
       <div class="flex justify-between mb-1 text-xs text-muted-foreground">
         <span>
           {#if phase === 'connecting'}
-            Connexion au bootloader…
+            Connecting to bootloader…
           {:else if phase === 'erasing'}
-            Effacement de la flash…
+            Erasing flash…
           {:else if phase === 'flashing'}
-            Écriture… {progress}%
+            Writing… {progress}%
           {:else if phase === 'done'}
-            Terminé
+            Done
           {:else if phase === 'error'}
-            Erreur
+            Error
           {/if}
         </span>
         <span>{progress}%</span>
@@ -366,7 +366,7 @@
     </div>
   {/if}
 
-  <!-- Erreur -->
+  <!-- Error -->
   {#if phase === 'error'}
     <div class="px-4 py-3 mb-4 text-sm text-red-300 border border-red-700 rounded-lg bg-red-950/40">
       ❌ {errorMsg}
@@ -386,7 +386,7 @@
 
   <!-- Footer note -->
   <p class="mt-6 text-xs text-muted-foreground">
-    Maintenez <Kbd>BOOT</Kbd> appuyé pendant la connexion si le SpinPad ne passe pas automatiquement
-    en mode flash.
+    Hold <Kbd>BOOT</Kbd> down during connection if the SpinPad doesn't automatically switch
+    to flash mode.
   </p>
 </div>

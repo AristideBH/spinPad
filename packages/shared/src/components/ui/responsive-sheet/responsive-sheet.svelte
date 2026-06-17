@@ -55,7 +55,7 @@
     children,
   }: Props = $props();
 
-  // breakpoint est une prop "configure-once" : valeur initiale uniquement.
+  // breakpoint is a "configure-once" prop: initial value only.
   const isMobile = new IsMobile(untrack(() => breakpoint));
 </script>
 

@@ -90,16 +90,16 @@
       <Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
       <Sidebar.Menu>
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isHome} tooltipContent="Accueil">
+          <Sidebar.MenuButton isActive={isHome} tooltipContent="Home">
             {#snippet child({ props })}
-              <a href="/" {...props}><HomeIcon /><span>Accueil</span></a>
+              <a href="/" {...props}><HomeIcon /><span>Home</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isShop} tooltipContent="Boutique">
+          <Sidebar.MenuButton isActive={isShop} tooltipContent="Store">
             {#snippet child({ props })}
-              <a href="/shop/" {...props}><ShoppingCart /><span>Boutique</span></a>
+              <a href="/shop/" {...props}><ShoppingCart /><span>Store</span></a>
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
@@ -124,16 +124,16 @@
         <Collapsible.Root open={toolsOpen}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
-              <Sidebar.MenuButton tooltipContent="Outils">
+              <Sidebar.MenuButton tooltipContent="Tools">
                 {#snippet child({ props: btnProps })}
-                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Outils</span></a>
+                  <a href="/studio/" {...btnProps}><WrenchIcon /><span>Tools</span></a>
                 {/snippet}
               </Sidebar.MenuButton>
               <Collapsible.Trigger>
                 {#snippet child({ props: trigProps })}
                   <Sidebar.MenuAction {...trigProps} class="data-[state=open]:rotate-90">
                     <ChevronRightIcon />
-                    <span class="sr-only">Ouvrir/Fermer</span>
+                    <span class="sr-only">Open/Close</span>
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>
@@ -173,7 +173,7 @@
                 {#snippet child({ props: trigProps })}
                   <Sidebar.MenuAction {...trigProps} class="data-[state=open]:rotate-90">
                     <ChevronRightIcon />
-                    <span class="sr-only">Ouvrir/Fermer</span>
+                    <span class="sr-only">Open/Close</span>
                   </Sidebar.MenuAction>
                 {/snippet}
               </Collapsible.Trigger>

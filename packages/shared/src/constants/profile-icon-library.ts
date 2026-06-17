@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-//  profile-icon-library.ts — Bibliothèque d'icônes de profil 24×24
+//  profile-icon-library.ts — 24×24 profile icon library
 //
-//  Les icônes sont stockées directement en base64 (72 o → 96 chars),
-//  prêtes à être affectées à profile.icon sans calcul.
+//  The icons are stored directly as base64 (72 bytes → 96 chars),
+//  ready to be assigned to profile.icon without computation.
 //
-//  Pour mettre à jour une icône :
-//    1. Dessinez-la dans l'IconEditor
-//    2. Copiez le base64 affiché dans le panneau « Dev »
-//    3. Remplacez la valeur data: ci-dessous
+//  To update an icon:
+//    1. Draw it in the IconEditor
+//    2. Copy the base64 shown in the "Dev" panel
+//    3. Replace the data: value below
 // ═══════════════════════════════════════════════════════════════
 
 import { base64ToGrid, type BoolGrid } from './profile-icon.js';
@@ -15,8 +15,8 @@ import { base64ToGrid, type BoolGrid } from './profile-icon.js';
 export interface IconLibraryEntry {
   id: string;
   label: string;
-  data: string; // base64 — source de vérité
-  /** Décodé à la demande (lazy via getter) */
+  data: string; // base64 — source of truth
+  /** Decoded on demand (lazy via getter) */
   readonly grid: BoolGrid;
 }
 
@@ -33,23 +33,23 @@ function entry(id: string, label: string, data: string): IconLibraryEntry {
   };
 }
 
-// ── Données ─────────────────────────────────────────────────────
-// Source de vérité : base64. Éditable via le panneau Dev de l'IconEditor.
+// ── Data ────────────────────────────────────────────────────────
+// Source of truth: base64. Editable via the Dev panel of the IconEditor.
 
 export const PROFILE_ICON_LIBRARY: IconLibraryEntry[] = [
   entry(
     'home',
-    'Maison',
+    'Home',
     'AAAAAAAAAAAAAPgfAAQQAAIQAAEQgAAQQAAQIAAQEAAQCAAQCAAQEAAfIIAAQIAAgAAfAAEQAAIQAAQQAPgfAAAAAAAAAAAA',
   ),
   entry(
     'controller',
-    'Manette',
+    'Controller',
     'AAAAAAAAAAAAgP8HwAAMQAAIQAAMwGYGgGYCgAACgAACgAACgAACgAgCgAgCgDYCwAgGQAgMQAAIwAAMgP8HAAAAAAAAAAAA',
   ),
   entry(
     'pc',
-    'Ordinateur',
+    'Computer',
     'AAAAAAAAAAAA8P8AEIAAEIAAEIAAEIAIEIAIEIAIEIAPEIAPEIAPEIAPEIAIEIAIEIAIEIAAEIAAEIAA8P8AAAAAAAAAAAAA',
   ),
   entry(
@@ -59,12 +59,12 @@ export const PROFILE_ICON_LIBRARY: IconLibraryEntry[] = [
   ),
   entry(
     'settings',
-    'Réglages',
+    'Settings',
     'AAAAAAAAADwAACQAYGIGsIENEAAIIAAEIDwEMGYYDMMgDIEgDIEgDMMgMGYYIDwEIAAEEAAIsIENYGIGACQAADwAAAAAAAAA',
   ),
   entry(
     'music',
-    'Musique',
+    'Music',
     'AAAAAAAAAAAAAAAAAAAOAAAfAAAfAAAfAAAP4P8HYAAAYAAAcAAAMAAAMMADOOAHGOAHGOAHHOAD/P8BAAAAAAAAAAAAAAAA',
   ),
   entry(
@@ -74,7 +74,7 @@ export const PROFILE_ICON_LIBRARY: IconLibraryEntry[] = [
   ),
   entry(
     'lightbulb',
-    'Ampoule',
+    'Light bulb',
     'AAAAAAAAAAAAAAAAAAAAgA8A4HAAIIAAEAABGAAeCAAyCAAyCAAyyAAymAEeEAEBIIAA4HAAgA8AAAAAAAAAAAAAAAAAAAAA',
   ),
 ];
@@ -83,7 +83,7 @@ export function iconLibraryEntry(id: string): IconLibraryEntry | undefined {
   return PROFILE_ICON_LIBRARY.find((e) => e.id === id);
 }
 
-/** base64 d'un preset de la bibliothèque (chaîne vide si introuvable). */
+/** base64 of a library preset (empty string if not found). */
 export function libraryIcon(id: string): string {
   return iconLibraryEntry(id)?.data ?? '';
 }

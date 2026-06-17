@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>SpinPad — Démo profils &amp; layers</title>
+  <title>SpinPad — Profiles &amp; layers demo</title>
 </svelte:head>
 
 <ProfilesDemo />

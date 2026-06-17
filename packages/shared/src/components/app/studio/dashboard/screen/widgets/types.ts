@@ -1,38 +1,38 @@
 // ───────────────────────────────────────────────────────────────
-//  types.ts — Forme d'une définition de widget OLED (registre Studio)
+//  types.ts — Shape of an OLED widget definition (Studio registry)
 //
-//  Chaque fichier de widget exporte un `WidgetDef`. Voir README.md pour
-//  ajouter un widget de bout en bout.
+//  Each widget file exports a `WidgetDef`. See README.md to add a widget
+//  end to end.
 // ───────────────────────────────────────────────────────────────
 import type { Component } from 'svelte';
 import type { WidgetConfig } from '$shared/constants/config-schema.js';
 
-/** Contrainte de taille min/max (en cellules) → le sélecteur génère les tailles. */
+/** Min/max size constraint (in cells) → the picker generates the sizes. */
 export interface WidgetSizeRange {
   minW: number;
   maxW: number;
   minH: number;
   maxH: number;
-  /** Taille à l'ajout ; par défaut { minW, minH }. */
+  /** Size on add; defaults to { minW, minH }. */
   default?: { w: number; h: number };
-  /** Tailles carrées uniquement (w === h). */
+  /** Square sizes only (w === h). */
   square?: boolean;
 }
 
 export type WidgetOptionKind = 'bool' | 'text' | 'icon';
 
 /**
- * Option éditable d'un widget. La valeur `default` sert à la fois de seed à la
- * création et de valeur initiale dans l'éditeur. Rendu générique par
+ * Editable option of a widget. The `default` value serves both as a seed on
+ * creation and as the initial value in the editor. Rendered generically by
  * screen/bits/OptionControls.svelte (bool → Switch, text → Input).
  */
 export interface WidgetOption {
-  key: string; // champ correspondant sur WidgetConfig (ex. 'clock_24h')
+  key: string; // matching field on WidgetConfig (e.g. 'clock_24h')
   kind: WidgetOptionKind;
   label: string;
   default: boolean | string;
   max?: number; // maxlength (text)
-  /** Grise le contrôle selon l'état courant du widget (ex. date seulement en 2×2). */
+  /** Greys out the control based on the widget's current state (e.g. date only in 2×2). */
   disabled?: (w: WidgetConfig) => boolean;
 }
 
@@ -40,9 +40,9 @@ export interface WidgetDef {
   label: string;
   icon: Component;
   size: WidgetSizeRange;
-  /** false → duplications autorisées dans la palette. */
+  /** false → duplications allowed in the palette. */
   singleton: boolean;
-  /** Aperçu live dans la carte d'édition. `now` permet le tick de l'horloge. */
+  /** Live preview in the edit card. `now` enables the clock tick. */
   preview: (w: WidgetConfig, now: Date) => string;
   options?: WidgetOption[];
 }

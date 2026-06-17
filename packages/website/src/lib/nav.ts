@@ -23,7 +23,7 @@ function humanize(segment: string): string {
 const docsChildren: NavItem[] = getDocsManifest().map((d) => ({ title: d.title, url: d.url }));
 
 export const navTree: NavItem[] = [
-	{ title: 'Accueil', url: '/' },
+	{ title: 'Home', url: '/' },
 	{
 		title: 'Tools',
 		url: '/studio/',
@@ -48,7 +48,7 @@ export function getBreadcrumbs(pathname: string, pageTitle?: string): Breadcrumb
 	if (pathname === '/') return [];
 
 	// Docs get a dedicated, fully-nested trail so deep slugs like
-	// /docs/keymap/layers/ read "Documentation › Keymap › Layers et Keymap",
+	// /docs/keymap/layers/ read "Documentation › Keymap › Layers and Keymap",
 	// with each segment titled from the manifest when a doc exists for it.
 	if (pathname.startsWith('/docs/') && pathname !== '/docs/') {
 		const segments = pathname

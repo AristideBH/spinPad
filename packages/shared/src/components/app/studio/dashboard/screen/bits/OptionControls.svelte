@@ -1,9 +1,9 @@
 <script lang="ts">
   // ───────────────────────────────────────────────────────────────
-  //  OptionControls.svelte — Rendu générique des options d'un widget
+  //  OptionControls.svelte — Generic rendering of a widget's options
   //
-  //  Construit les contrôles depuis le descriptif `options` du WidgetDef :
-  //  bool → Switch, text → Input, icon → IconPreview + dialogue IconEditor.
+  //  Builds the controls from the WidgetDef's `options` descriptor:
+  //  bool → Switch, text → Input, icon → IconPreview + IconEditor dialog.
   // ───────────────────────────────────────────────────────────────
   import { Switch } from '$shared/components/ui/switch/index.js';
   import { Input } from '$shared/components/ui/input/index.js';
@@ -64,12 +64,12 @@
           class="flex items-center gap-2 rounded-md border border-border p-1.5 text-xs hover:border-primary/50"
         >
           <IconPreview value={String(value(o) ?? '')} size={32} class="shrink-0 bg-background/40" />
-          <span>Choisir une icône…</span>
+          <span>Choose an icon…</span>
         </Dialog.Trigger>
         <Dialog.Content class="sm:max-w-fit">
           <Dialog.Header>
             <Dialog.Title>{o.label}</Dialog.Title>
-            <Dialog.Description class="sr-only">Choisis ou dessine l'icône.</Dialog.Description>
+            <Dialog.Description class="sr-only">Choose or draw the icon.</Dialog.Description>
           </Dialog.Header>
           <IconEditor
             value={String(value(o) ?? '')}
