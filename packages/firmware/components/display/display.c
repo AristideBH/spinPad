@@ -36,6 +36,9 @@
 
 static const char *TAG = "DISPLAY";
 
+static kb_orientation_t g_orientation = ORIENTATION_0;
+
+
 // ─────────────────────────────────────────────────────────────
 //  FRAMEBUFFER  72×40 = 5 pages × 72 colonnes = 360 bytes
 // ─────────────────────────────────────────────────────────────
@@ -245,7 +248,7 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
 
     case WIDGET_LAYER: {
         uint8_t layer = keymap_get_active_layer();
-        char b[16];
+        char b[64];
         if (wide) {
             // 2×1 : "L:<name>"
             const char *ln = cfg->profiles[cfg->active_profile].layers[layer].name;
@@ -287,7 +290,7 @@ static void render_widget(const kb_config_t *cfg, const kb_widget_t *w)
             time_t    t = (time_t)unix_now;
             struct tm tmv;
             gmtime_r(&t, &tmv);
-            char dbuf[6];
+            char dbuf[32];
             snprintf(dbuf, sizeof(dbuf), "%02d/%02d", tmv.tm_mday, tmv.tm_mon + 1);
             fb_draw_string_in(px, py + ph / 2, pw, ph - ph / 2, dbuf, false);
         } else {
@@ -434,7 +437,6 @@ void display_set_sleep(bool sleep)
 //    ╚══════════════════╝
 
 static bool g_studio_mode_screen = false;    // True = screen locked on Studio Mode
-static kb_orientation_t g_orientation = ORIENTATION_0;
 
 void display_show_studio_mode(const char *ssid, const char *ip)
 {

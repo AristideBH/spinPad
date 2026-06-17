@@ -396,7 +396,7 @@ static esp_err_t handle_static(httpd_req_t *req)
     set_cors_headers(req);
 
     // Build the SPIFFS path
-    char path[128];
+    char path[600];
     const char *uri = req->uri;
 
     // Root → index.html

@@ -175,7 +175,8 @@ static void render_extension(uint8_t breathe)
             for (uint8_t i = 0; i < count; i++) {
                 if (i >= g_ext_count) {
                     led_strip_set_pixel(g_strip, LED_KEY_COUNT + i, 0, 0, 0);
-                } else {
+                }
+                else {
                     uint8_t r = scale8(g_ext_rgb[i * 3 + 0], eb);
                     uint8_t g = scale8(g_ext_rgb[i * 3 + 1], eb);
                     uint8_t b = scale8(g_ext_rgb[i * 3 + 2], eb);
@@ -275,8 +276,8 @@ esp_err_t led_engine_init(void)
     led_strip_config_t strip_cfg = {
         .strip_gpio_num   = LED_KEY_GPIO,
         .max_leds         = LED_TOTAL_MAX,
-        .led_pixel_format = LED_PIXEL_FORMAT_GRB,  // WS2812 standard
         .led_model        = LED_MODEL_WS2812,
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB,
         .flags.invert_out = false,
     };
     led_strip_rmt_config_t rmt_cfg = {
