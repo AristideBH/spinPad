@@ -31,10 +31,11 @@ export class EncoderKnob {
   isAnimatingEntrance = $state(true);
   isResetting = $state(false);
   activeTriggeredButton = $state<string | null>(null);
-  /** Incremented on each press-pulse so Knob.svelte can remount the flash via {#key}. */
-  pressPulseNonce = $state(0);
+  /** True while the knob is actually held down (real press, or a simulated pulse window). */
+  pressed = $state(false);
 
   #el: HTMLElement | null = null;
+  #pulseReleaseTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // Non-reactive physics tracking
   #startAngle = 0;
@@ -82,6 +83,7 @@ export class EncoderKnob {
 
   handleStart = (e: MouseEvent | TouchEvent): void => {
     this.isDragging = true;
+    this.pressed = true;
 
     cancelAnimationFrame(this.#animationFrameId);
     if (this.#delayTimeoutId) clearTimeout(this.#delayTimeoutId);
@@ -204,12 +206,19 @@ export class EncoderKnob {
     this.#pulseRotation('encoder_ccw', -25);
   }
 
+  /** Simulated/device press notification — no separate release event, so hold `pressed` briefly. */
   pulsePress(): void {
-    this.pressPulseNonce++;
+    this.pressed = true;
+    if (this.#pulseReleaseTimeoutId) clearTimeout(this.#pulseReleaseTimeoutId);
+    this.#pulseReleaseTimeoutId = setTimeout(() => {
+      this.pressed = false;
+      this.#pulseReleaseTimeoutId = null;
+    }, 150);
   }
 
   handleEnd = (): void => {
     this.isDragging = false;
+    this.pressed = false;
     this.#dragEndTime = performance.now();
 
     window.removeEventListener('mousemove', this.handleMove);

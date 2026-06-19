@@ -42,7 +42,7 @@
 
 {#if ctx.layer}
   <div class="flex flex-col self-stretch gap-2 keycap-grid">
-    <Label>Encodeur</Label>
+    <Label>Knob</Label>
     <PresetSelect />
     <EncoderButtons {knob} />
     <Knob {knob} />

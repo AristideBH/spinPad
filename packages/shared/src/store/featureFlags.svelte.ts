@@ -11,8 +11,8 @@
 const DEV_FEATURE_DEFAULTS = {
   batteryPresenceDetection: false,
   profileIconEditing: true,
-  iconEditorTools: false,
-  testMode: false,
+  iconEditorTools: true,
+  testMode: true,
 };
 
 type DevFeature = keyof typeof DEV_FEATURE_DEFAULTS;

@@ -3,8 +3,14 @@
 //
 //  Used by keyVisuals and trainingMode to simulate device key/encoder
 //  events from the physical keyboard when devMode is active (no real
-//  device connected).
+//  device connected). Both can be bound at the same time (keyVisuals is
+//  always-on while devMode is active, trainingMode layers on top) and both
+//  must react to the same keydown — so this module fans a single
+//  dispatcher scope out to every currently-bound handler set, rather than
+//  registering one scope per caller.
 // ═══════════════════════════════════════════════════════════════
+
+import { keyboardDispatcher, KEYBOARD_PRIORITY, type KeyboardScopeHandle } from './keyboard-dispatcher.js';
 
 const DEV_KEY_MAP: Record<string, number> = {
   Digit1: 0,
@@ -36,26 +42,45 @@ export interface DevKeySimulationHandlers {
   onEncoderPress?(): void;
 }
 
+const _handlers = new Set<DevKeySimulationHandlers>();
+let _scope: KeyboardScopeHandle | null = null;
+
+function dispatchToHandlers(e: KeyboardEvent): boolean {
+  if (e.repeat) return false;
+  const idx = DEV_KEY_MAP[e.code];
+  if (idx !== undefined) {
+    for (const h of _handlers) h.onKey(idx);
+    return true;
+  }
+  if (e.code === 'ArrowRight') {
+    e.preventDefault();
+    for (const h of _handlers) h.onEncoderCW?.();
+    return true;
+  }
+  if (e.code === 'ArrowLeft') {
+    e.preventDefault();
+    for (const h of _handlers) h.onEncoderCCW?.();
+    return true;
+  }
+  if (e.code === 'Space') {
+    e.preventDefault();
+    for (const h of _handlers) h.onEncoderPress?.();
+    return true;
+  }
+  return false;
+}
+
 /** Binds a devMode keydown listener that maps digit/numpad keys + arrows/space to key/encoder events. Returns the cleanup function. */
 export function bindDevKeySimulation(handlers: DevKeySimulationHandlers): () => void {
-  const onKey = (e: KeyboardEvent) => {
-    if (e.repeat) return;
-    const idx = DEV_KEY_MAP[e.code];
-    if (idx !== undefined) {
-      handlers.onKey(idx);
-      return;
-    }
-    if (e.code === 'ArrowRight') {
-      e.preventDefault();
-      handlers.onEncoderCW?.();
-    } else if (e.code === 'ArrowLeft') {
-      e.preventDefault();
-      handlers.onEncoderCCW?.();
-    } else if (e.code === 'Space') {
-      e.preventDefault();
-      handlers.onEncoderPress?.();
+  _handlers.add(handlers);
+  if (!_scope) {
+    _scope = keyboardDispatcher.push({ priority: KEYBOARD_PRIORITY.DEV_SIM, onKey: dispatchToHandlers });
+  }
+  return () => {
+    _handlers.delete(handlers);
+    if (_handlers.size === 0) {
+      _scope?.pop();
+      _scope = null;
     }
   };
-  window.addEventListener('keydown', onKey, true);
-  return () => window.removeEventListener('keydown', onKey, true);
 }

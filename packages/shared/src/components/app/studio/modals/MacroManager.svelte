@@ -37,10 +37,11 @@
   import { configState, setMacroName, setMacroSteps, clearMacro } from '$shared/store/config.svelte.js';
   import { macroManager } from '$shared/store/macroManager.svelte.js';
   import { HasFinePointer } from '$shared/lib/hooks/pointer.svelte.js';
+  import { keyboardDispatcher, KEYBOARD_PRIORITY } from '$shared/lib/keyboard-dispatcher.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import * as DropdownMenu from '$shared/components/ui/dropdown-menu/index.js';
   import * as Item from '$shared/components/ui/item/index.js';
-  import { Activity, ArrowLeft, List, Keyboard } from '@lucide/svelte';
+  import { Activity, ArrowLeft, List, Keyboard, Square } from '@lucide/svelte';
   import { fly } from 'svelte/transition';
 
   const finePointer = new HasFinePointer();
@@ -189,6 +190,62 @@
     return () => window.removeEventListener('keydown', onRecordKeydown, true);
   });
 
+  // ── Continuous recording (full macro, modifiers included) ─────
+  // Unlike the single-key picker above, every keydown/keyup is appended
+  // live as a KEY_DOWN/KEY_UP step — including modifiers and Escape, since
+  // any of them may need to be part of the recorded macro. Stopping is a
+  // deliberate UI action only; no key (Escape included) stops recording.
+  let recording = $state(false);
+  let recordedCount = $state(0);
+  let recordScope: { pop: () => void } | null = null;
+
+  function recordKeyEvent(e: KeyboardEvent, type: (typeof MACRO_STEP_TYPE)['KEY_DOWN' | 'KEY_UP']) {
+    const kc = keyEventToKeycode(e);
+    if (!kc || draftSteps.length >= MACRO_MAX_STEPS) {
+      if (draftSteps.length >= MACRO_MAX_STEPS) stopRecording();
+      return;
+    }
+    draftSteps = [...draftSteps, { type, keycode: kc.value & 0x0fff }];
+    recordedCount++;
+  }
+
+  function onRecordingKeyup(e: KeyboardEvent) {
+    recordKeyEvent(e, MACRO_STEP_TYPE.KEY_UP);
+  }
+
+  function startRecording() {
+    if (recording) return;
+    recordedCount = 0;
+    recording = true;
+    recordScope = keyboardDispatcher.push({
+      priority: KEYBOARD_PRIORITY.MACRO_RECORDING,
+      allowInInputs: true,
+      allowInModals: true,
+      onKey: (e) => {
+        if (e.repeat) return true; // swallow OS key-repeat, don't double-record
+        e.preventDefault();
+        recordKeyEvent(e, MACRO_STEP_TYPE.KEY_DOWN);
+        return true;
+      },
+    });
+    window.addEventListener('keyup', onRecordingKeyup, true);
+  }
+
+  function stopRecording() {
+    if (!recording) return;
+    recording = false;
+    recordScope?.pop();
+    recordScope = null;
+    window.removeEventListener('keyup', onRecordingKeyup, true);
+  }
+
+  // Safety net: never leave the highest-priority scope registered if the
+  // sheet closes mid-recording (outside click, etc.).
+  $effect(() => {
+    if (macroManager.open) return;
+    if (recording) stopRecording();
+  });
+
   // Sync the draft from the config when the drawer is open and
   // the selected slot or its content changes (load, save, undo/redo).
   // Does not depend on the draft → no loop, and does not overwrite during editing
@@ -295,18 +352,35 @@
         {/if}
       </div>
 
+      {#if recording}
+        <Button variant="destructive" size="sm" class="gap-1.5 animate-pulse" onclick={stopRecording}>
+          <Square class="size-3.5" /> Stop ({recordedCount} steps)
+        </Button>
+      {:else}
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1.5"
+          onclick={startRecording}
+          disabled={draftSteps.length >= MACRO_MAX_STEPS || !finePointer.current}
+          title={finePointer.current ? 'Record the whole macro from your physical keyboard' : 'Requires a physical keyboard'}
+        >
+          <Activity class="size-3.5" /> Start recording
+        </Button>
+      {/if}
+
       <ButtonGroup.Root>
         <Button
           variant="outline"
           size="sm"
           class="gap-1.5"
           onclick={() => openPicker('tap')}
-          disabled={draftSteps.length + 2 > MACRO_MAX_STEPS}
+          disabled={draftSteps.length + 2 > MACRO_MAX_STEPS || recording}
         >
           <Plus class="size-3.5" /> Key
         </Button>
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
+          <DropdownMenu.Trigger disabled={recording}>
             {#snippet child({ props })}
               <Button {...props} variant="outline" size="icon-sm">
                 <ChevronDown />

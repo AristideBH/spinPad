@@ -3,7 +3,7 @@
   import { Badge } from '$shared/components/ui/badge/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
-  import { Usb, Bluetooth, RefreshCw, LogOut, Activity, Settings } from '@lucide/svelte';
+  import { Usb, Bluetooth, RefreshCw, LogOut, Activity, Settings, Maximize2, Minimize2 } from '@lucide/svelte';
   import { deviceStatus } from '$shared/store/deviceStatus.svelte.js';
   import { disconnect, serial } from '$shared/store/serial.svelte.js';
   import { ResponsiveSheet } from '$shared/components/ui/responsive-sheet/index.js';
@@ -19,6 +19,8 @@
   import { keyVisuals } from '$shared/store/keyVisuals.svelte.js';
   import { type LedMode, GRADIENT_PRESETS } from '$shared/constants/config-schema.js';
 
+  let { tileHidden = $bindable(false) }: { tileHidden?: boolean } = $props();
+
   async function toggleLiveMode() {
     if (trainingMode.active) await trainingMode.stop();
     else await trainingMode.start();
@@ -31,6 +33,7 @@
   const usbOn = $derived(data?.connection?.usb === true);
   const bleOn = $derived(data?.connection?.ble === true);
   const bleSlot = $derived(data?.connection?.ble_slot ?? 0);
+  const bleSlotName = $derived(configState.data?.ble?.slot_names?.[bleSlot]?.trim() || `slot ${bleSlot}`);
 
   async function handleReload() {
     await loadConfig();
@@ -73,7 +76,7 @@
   });
 </script>
 
-<Card.Root class="@container/card relative h-full py-0 gap-0 z-10 w-full">
+<Card.Root class="@container/card relative h-full py-0 gap-0 z-20! w-full">
   <Card.Header
     class="relative h-full py-4 overflow-hidden isolate shadow-[inset_0_0px_50px_rgba(0,0,0,1)] shadow-black/50"
   >
@@ -102,7 +105,7 @@
         </Badge>
         <Badge variant={bleOn ? 'default' : 'outline'} class="gap-1">
           <Bluetooth class="size-3" />
-          BLE {bleOn ? `slot ${bleSlot}` : 'OFF'}
+          BLE {bleOn ? bleSlotName : 'OFF'}
         </Badge>
       </div>
     </Card.Description>
@@ -129,6 +132,18 @@
 
     <Button variant="outline" size="icon" class="ms-auto" onclick={() => (settingsOpen = true)}>
       <Settings />
+    </Button>
+    <Button
+      variant="outline"
+      size="icon"
+      title="{tileHidden ? 'Show' : 'Hide'} details"
+      onclick={() => (tileHidden = !tileHidden)}
+    >
+      {#if tileHidden}
+        <Minimize2 />
+      {:else}
+        <Maximize2 />
+      {/if}
     </Button>
     <ResponsiveSheet
       bind:open={settingsOpen}

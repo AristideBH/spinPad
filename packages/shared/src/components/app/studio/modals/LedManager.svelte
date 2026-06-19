@@ -48,9 +48,7 @@
   const ledExtEnabled = $derived(ledExt?.enabled ?? false);
   const ledExtMode = $derived(ledExt?.mode ?? 0);
 
-  const extLedPickerColor = new SyncedHexColor(() =>
-    rgbToHex(ledExt?.r ?? 255, ledExt?.g ?? 255, ledExt?.b ?? 255),
-  );
+  const extLedPickerColor = new SyncedHexColor(() => rgbToHex(ledExt?.r ?? 255, ledExt?.g ?? 255, ledExt?.b ?? 255));
   extLedPickerColor.bind();
 
   // Local values for the sliders (buffer during the drag)
@@ -97,12 +95,12 @@
 </script>
 
 <Button variant="outline" class="gap-1.5" title="LED control" onclick={() => (open = true)}>
-  <Lightbulb class="size-4" /> LED
+  <Lightbulb class="size-4" /> Lights
 </Button>
 
 <ResponsiveSheet
   bind:open
-  title="LED control"
+  title="Lights control"
   description="Global effects, per-profile colors and LED extension."
   srOnlyTitle={false}
   desktopClass="w-full max-w-md!"
@@ -262,10 +260,7 @@
           </div>
 
           {#if ledExtMode !== 1 && ledExtMode !== 5}
-            <SettingsField
-              label="Color"
-              description={ledExtMode === 4 ? 'Reactive flash color' : 'Base color'}
-            >
+            <SettingsField label="Color" description={ledExtMode === 4 ? 'Reactive flash color' : 'Base color'}>
               <Popover.Root>
                 <Popover.Trigger>
                   {#snippet child({ props })}

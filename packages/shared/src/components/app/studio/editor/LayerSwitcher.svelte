@@ -185,6 +185,7 @@
                     <InputGroup.Root class="h-7">
                       <InputGroup.Input
                         placeholder="Layer name"
+                        id="renameLayer"
                         value={l.name ?? ''}
                         onkeydown={(e: KeyboardEvent) => {
                           e.stopPropagation();
@@ -226,7 +227,7 @@
 {#snippet addBtn()}
   <Button
     variant="outline"
-    size="sm"
+    size={!horizontal ? 'sm' : 'icon-sm'}
     class={cn('shrink-0', horizontal ? '' : 'w-full justify-start! gap-2!')}
     disabled={layerCount >= CONFIG_MAX_LAYERS}
     title="Add a blank layer"
@@ -254,7 +255,10 @@
         >
           {@render tabs()}
           <!-- "+" button pinned to the right: stays visible when the track scrolls. -->
-          <div data-add-btn class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted">
+          <div
+            data-add-btn
+            class="sticky right-0 z-10 flex items-center rounded-lg ms-auto shrink-0 bg-card border-muted bg-muted"
+          >
             {@render addBtn()}
           </div>
         </RadioGroup.Root>

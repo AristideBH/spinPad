@@ -10,6 +10,25 @@
 
 <body data-sveltekit-preload-data="hover">
   <div style="display: contents">%sveltekit.body%</div>
+  <script>
+    // Prerendered HTML always bakes the sidebar as expanded (no server to read
+    // the persisted pref at build time). Runs after the sidebar DOM is parsed
+    // but before first paint, so correcting the attributes here avoids the
+    // expand-then-collapse flash without an animated jump. Must stay in sync
+    // with the 'spinpad-sidebar-open' key (+layout.svelte) and the
+    // collapsible="icon" prop (lib/components/ui/app-sidebar.svelte).
+    (function () {
+      try {
+        var raw = localStorage.getItem('spinpad-sidebar-open');
+        if (raw === null || JSON.parse(raw) === true) return;
+        var el = document.querySelector('[data-slot="sidebar"]');
+        if (el) {
+          el.dataset.state = 'collapsed';
+          el.dataset.collapsible = 'icon';
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 
 </html>

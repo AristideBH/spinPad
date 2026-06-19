@@ -62,7 +62,7 @@
 {#if ctx.layer}
   <div class="flex flex-col gap-3 keycap-grid">
     <span class="flex flex-row items-baseline justify-between gap-1">
-      <Label>Clavier</Label>
+      <Label>Keypad</Label>
       {#if ctx.orientDeg !== 0}
         <p class="flex items-center gap-1 mb-2 text-xs text-muted-foreground">
           <span>Orientation</span>
@@ -362,5 +362,4 @@
     border-radius: 9999px;
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--background) 60%, transparent);
   }
-
 </style>

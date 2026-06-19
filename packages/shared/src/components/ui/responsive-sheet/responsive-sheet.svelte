@@ -6,6 +6,7 @@
   import { IsMobile } from '$shared/store/is-mobile.svelte.js';
   import type { Side } from '$shared/components/ui/sheet/sheet-content.svelte';
   import { cn } from '$shared';
+  import { pushModal } from '$shared/lib/modal-stack.js';
 
   type Props = {
     open?: boolean;
@@ -57,6 +58,16 @@
 
   // breakpoint is a "configure-once" prop: initial value only.
   const isMobile = new IsMobile(untrack(() => breakpoint));
+
+  // Lets keyboard-dispatcher scopes (e.g. training-mode device simulation)
+  // know a sheet/dialog/drawer is covering the screen, so they yield to
+  // whatever's inside it (custom widgets like the Scrubber aren't literal
+  // form elements, so the input-guard alone doesn't catch this case).
+  $effect(() => {
+    if (!open) return;
+    const popModal = pushModal();
+    return () => popModal();
+  });
 </script>
 
 {#snippet drawerBody()}

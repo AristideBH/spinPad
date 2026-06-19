@@ -180,11 +180,12 @@
           <Settings2 />
         </DropdownMenu.Trigger>
       </div>
-      <DropdownMenu.Content align="end" sideOffset={54} class="w-64 translate-x-1">
+      <DropdownMenu.Content align="end" sideOffset={64} class="w-[250px] ">
         <div class="px-1.5 py-1">
           <InputGroup.Root class="h-7">
             <InputGroup.Input
               placeholder="Profile name"
+              id="renameProfile"
               value={prof.name ?? ''}
               onkeydown={(e: KeyboardEvent) => {
                 e.stopPropagation();

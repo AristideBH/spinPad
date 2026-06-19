@@ -311,7 +311,7 @@
                         { value: 'no', label: 'Force absent' },
                       ]}
                       value={data.power?.battery_present ?? 'auto'}
-                      onSelect={(v: number) => updateConfig('power.battery_present', v)}
+                      onSelect={(v: string) => updateConfig('power.battery_present', v)}
                       emphasizeSelected
                     >
                       {#snippet item(o)}{o.label}{/snippet}

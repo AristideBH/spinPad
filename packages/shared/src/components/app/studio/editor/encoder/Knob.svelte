@@ -12,7 +12,12 @@
   });
 </script>
 
-<div class="mt-2 knob-container w-fit" style="--rotation-deg: {knob.rotation}deg;" class:dragging={knob.isDragging}>
+<div
+  class="mt-2 knob-container w-fit"
+  style="--rotation-deg: {knob.rotation}deg;"
+  class:dragging={knob.isDragging}
+  class:active={knob.pressed}
+>
   <div
     bind:this={knobEl}
     class="knob"
@@ -30,11 +35,6 @@
   >
     <div class="indicator"></div>
   </div>
-  {#key knob.pressPulseNonce}
-    {#if knob.pressPulseNonce > 0}
-      <div class="press-pulse"></div>
-    {/if}
-  {/key}
 </div>
 
 <style>
@@ -45,8 +45,8 @@
     --knob-side-color: color-mix(in oklch, var(--knob-color) 70%, hsl(0, 0%, 0%));
     --knob-size: 180px;
     --indicator-size: 32px;
-    --conic-tone: 65%;
-    margin-bottom: var(--knob-depth);
+    --conic-tone: 55%;
+    margin-bottom: calc(1.5 * var(--knob-depth));
     padding: 0px;
 
     width: var(--knob-size);
@@ -72,6 +72,10 @@
       filter: drop-shadow(
         0px calc(var(--knob-depth) * 2) var(--knob-depth) color-mix(in oklch, var(--color-background) 10%, transparent)
       );
+    }
+
+    &.active {
+      translate: 0 1.5px;
     }
   }
 
@@ -159,27 +163,6 @@
       transparent 60%,
       rgba(0, 0, 0, 0.3) 100%
     );
-  }
-
-  .press-pulse {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 6;
-    box-shadow: 0 0 0 0 color-mix(in oklch, var(--knob-color) 80%, white);
-    animation: press-pulse 450ms ease-out;
-  }
-
-  @keyframes press-pulse {
-    0% {
-      box-shadow: 0 0 0 0 color-mix(in oklch, var(--knob-color) 80%, white);
-      opacity: 1;
-    }
-    100% {
-      box-shadow: 0 0 0 24px transparent;
-      opacity: 0;
-    }
   }
 
   .indicator {
