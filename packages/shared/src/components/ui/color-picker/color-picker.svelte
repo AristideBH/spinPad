@@ -300,9 +300,13 @@
   }
 
   function handleDragStart(e: MouseEvent | TouchEvent, fn: (e: MouseEvent | TouchEvent) => void) {
+    e.preventDefault();
     isDragging = true;
     fn(e);
-    const move = (e: MouseEvent | TouchEvent) => fn(e);
+    const move = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      fn(e);
+    };
     const stop = () => {
       isDragging = false;
       window.removeEventListener('mousemove', move);
@@ -311,7 +315,7 @@
       window.removeEventListener('touchend', stop);
     };
     window.addEventListener('mousemove', move);
-    window.addEventListener('touchmove', move);
+    window.addEventListener('touchmove', move, { passive: false });
     window.addEventListener('mouseup', stop);
     window.addEventListener('touchend', stop);
   }

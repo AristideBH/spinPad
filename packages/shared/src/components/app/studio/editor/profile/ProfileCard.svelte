@@ -5,7 +5,8 @@
     deleteProfile,
     clearProfile,
     editProfile,
-    undo,
+    restoreProfile,
+    restoreProfileState,
   } from '$shared/store/config.svelte.js';
   import {
     CONFIG_MAX_PROFILES,
@@ -57,12 +58,9 @@
   }
 
   // Full spectrum for the global `rainbow` effect (no single representative color).
-  const RAINBOW_GRADIENT =
-    'linear-gradient(90deg,#ff0000,#ff8000,#ffe000,#00c853,#00b0ff,#3d5afe,#aa00ff)';
+  const RAINBOW_GRADIENT = 'linear-gradient(90deg,#ff0000,#ff8000,#ffe000,#00c853,#00b0ff,#3d5afe,#aa00ff)';
 
-  type LedDot =
-    | { kind: 'solid'; color: string; inherited: boolean }
-    | { kind: 'gradient'; css: string };
+  type LedDot = { kind: 'solid'; color: string; inherited: boolean } | { kind: 'gradient'; css: string };
 
   /**
    * Resolved LED dot of the profile.
@@ -99,14 +97,22 @@
 
   function onDelete() {
     const name = prof.name ?? `Profile ${index + 1}`;
+    const snapshot = $state.snapshot(prof) as ProfileConfig;
+    const idx = index;
     deleteProfile(index);
-    toast(`Profile "${name}" deleted`, { action: { label: 'Undo', onClick: () => undo() } });
+    toast(`Profile "${name}" deleted`, {
+      action: { label: 'Undo', onClick: () => restoreProfile(idx, snapshot) },
+    });
   }
 
   function onClear() {
     const name = prof.name ?? `Profile ${index + 1}`;
+    const snapshot = $state.snapshot(prof) as ProfileConfig;
+    const idx = index;
     clearProfile(index);
-    toast(`Profile "${name}" reset`, { action: { label: 'Undo', onClick: () => undo() } });
+    toast(`Profile "${name}" reset`, {
+      action: { label: 'Undo', onClick: () => restoreProfileState(idx, snapshot) },
+    });
   }
 </script>
 
@@ -114,9 +120,7 @@
   variant="outline"
   class={cn(
     'relative h-full w-full py-3 group transition-all duration-200 items-center border-muted',
-    isActive
-      ? 'bg-primary text-primary-foreground'
-      : 'bg-card hover:border-muted-foreground/15 hover:bg-muted/50',
+    isActive ? 'bg-primary text-primary-foreground' : 'bg-card hover:border-muted-foreground/15 hover:bg-muted/50',
   )}
 >
   <Item.Media class="self-center! mb-1.5 me-2 gap-1">
@@ -144,7 +148,7 @@
   </Item.Media>
 
   {#if dot === null}
-    <span class="keycap-led-dot" style="background:rgb(0,0,0)" title="LED off"></span>
+    <span class="keycap-led-dot" style="background:rgba(0,0,0,70)" title="LED off"></span>
   {:else if dot.kind === 'gradient'}
     <span class="keycap-led-dot" style="background:{dot.css}" title="Animated LED effect inherited from global"></span>
   {:else}
@@ -171,7 +175,7 @@
             buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
             'absolute top-0.5 right-0.5 size-6 z-10 text-muted-foreground hover:bg-muted-foreground/20! hover:text-muted-foreground data-[state=open]:bg-muted-foreground/50 data-[state=open]:text-muted/50',
           )}
-          onclick={(e) => e.preventDefault()}
+          onclick={(e: Event) => e.preventDefault()}
         >
           <Settings2 />
         </DropdownMenu.Trigger>
@@ -196,7 +200,7 @@
         <DropdownMenu.Separator />
         <DropdownMenu.Item onSelect={() => (appearanceOpen = true)}>
           <Palette />
-          Icon & LED
+          Customize
         </DropdownMenu.Item>
         <DropdownMenu.Item disabled={profileCount >= CONFIG_MAX_PROFILES} onSelect={duplicateProfile}>
           <CopyPlus />
@@ -206,11 +210,7 @@
           <BrushCleaning />
           Reset
         </DropdownMenu.Item>
-        <DropdownMenu.Item
-          variant="destructive"
-          disabled={profileCount <= MIN_PROFILES}
-          onSelect={onDelete}
-        >
+        <DropdownMenu.Item variant="destructive" disabled={profileCount <= MIN_PROFILES} onSelect={onDelete}>
           <Trash2 />
           Delete
         </DropdownMenu.Item>

@@ -7,9 +7,11 @@
   // ───────────────────────────────────────────────────────────────
   import ResponsiveSheet from '$shared/components/ui/responsive-sheet/responsive-sheet.svelte';
   import { configState, setProfileIcon, setProfileLed } from '$shared/store/config.svelte.js';
+  import { featureFlags } from '$shared/store/featureFlags.svelte.js';
   import * as ColorPicker from '$shared/components/ui/color-picker/index.js';
   import * as Popover from '$shared/components/ui/popover/index.js';
   import * as Select from '$shared/components/ui/select/index.js';
+  import { Switch } from '$shared/components/ui/switch/index.js';
   import IconEditor from '../../IconEditor.svelte';
   import type { LedModeProfile } from '$shared/constants/config-schema.js';
   import { hexToRgb, rgbToHex } from '$shared/lib/color.js';
@@ -28,18 +30,11 @@
     { value: 'pulse', label: 'Pulse' },
   ];
 
-  const INHERIT = '__inherit__';
-  const selectedLed = $derived(currentLed ? (currentLed.effect ?? 'static') : INHERIT);
-  const selectedLedLabel = $derived(
-    selectedLed === INHERIT
-      ? 'Inherit global'
-      : (LED_PROFILE_EFFECTS.find((o) => o.value === selectedLed)?.label ?? 'Inherit global'),
-  );
+  const selectedLed = $derived(currentLed?.effect ?? 'static');
+  const selectedLedLabel = $derived(LED_PROFILE_EFFECTS.find((o) => o.value === selectedLed)?.label ?? 'Static');
 
   function onLedModeChange(value: string) {
-    if (value === INHERIT) {
-      setProfileLed(profileIndex, undefined);
-    } else if (value === 'off') {
+    if (value === 'off') {
       setProfileLed(profileIndex, { r: 0, g: 0, b: 0, effect: 'off' });
     } else {
       setProfileLed(profileIndex, {
@@ -51,6 +46,30 @@
     }
   }
 
+  let iconCustomized = $state(false);
+  $effect(() => {
+    iconCustomized = !!prof?.icon;
+  });
+
+  function onIconToggle(v: boolean) {
+    iconCustomized = v;
+    if (!v) setProfileIcon(profileIndex, '');
+  }
+
+  let ledCustomized = $state(false);
+  $effect(() => {
+    ledCustomized = !!currentLed;
+  });
+
+  function onLedToggle(v: boolean) {
+    ledCustomized = v;
+    if (!v) {
+      setProfileLed(profileIndex, undefined);
+    } else if (!currentLed) {
+      setProfileLed(profileIndex, { r: 255, g: 255, b: 255, effect: 'static' });
+    }
+  }
+
   const profilePickerColor = new SyncedHexColor(() =>
     currentLed ? rgbToHex(currentLed.r, currentLed.g, currentLed.b) : '#ffffff',
   );
@@ -59,10 +78,10 @@
 
 <ResponsiveSheet
   bind:open
-  title="Appearance — {prof?.name ?? `Profile ${profileIndex + 1}`}"
+  title="Customize profile : {prof?.name ?? `Profile ${profileIndex + 1}`}"
   description="Icon and LED color of this profile."
   desktop="dialog"
-  desktopClass="sm:max-w-fit max-h-[90dvh] flex flex-col p-0 gap-0"
+  desktopClass=" max-h-[90dvh] max-w-lg! flex w-full! flex-col p-0 gap-0"
 >
   {#snippet header()}
     <div class="px-4 py-3 border-b">
@@ -72,58 +91,73 @@
 
   {#if prof}
     <div class="flex flex-col gap-6 p-4 overflow-y-auto">
-      <section class="flex flex-col gap-2">
-        <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Icon</h3>
-        <IconEditor value={prof.icon ?? ''} onchange={(b64) => setProfileIcon(profileIndex, b64)} />
-      </section>
+      {#if featureFlags.profileIconEditing}
+        <section class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Customize icon</h3>
+            <Switch checked={iconCustomized} onCheckedChange={onIconToggle} />
+          </div>
+          {#if iconCustomized}
+            <IconEditor value={prof.icon ?? ''} onchange={(b64) => setProfileIcon(profileIndex, b64)} />
+          {/if}
+        </section>
+      {/if}
 
-      <section class="flex flex-col gap-3">
-        <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">LED</h3>
-        <p class="text-xs text-muted-foreground">LED color and effect for this profile. Inherits from global if absent.</p>
-        <div class="flex items-center gap-3">
-          <span class="text-sm">Mode</span>
-          <Select.Root type="single" name="led-mode" value={selectedLed} onValueChange={onLedModeChange}>
-            <Select.Trigger class="w-[180px]">
-              {selectedLedLabel}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Group>
-                <Select.Label>Mode LED</Select.Label>
-                {#each LED_PROFILE_EFFECTS as opt (opt.value)}
-                  <Select.Item value={opt.value} label={opt.label}>{opt.label}</Select.Item>
-                {/each}
-                <Select.Item value={INHERIT} label="Inherit global">Inherit global</Select.Item>
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+      <section class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Customize LED</h3>
+          <Switch checked={ledCustomized} onCheckedChange={onLedToggle} />
         </div>
 
-        {#if currentLed && currentLed.effect !== 'off'}
-          <div class="flex items-center gap-3">
-            <span class="text-sm">Color</span>
-            <Popover.Root>
-              <Popover.Trigger>
-                {#snippet child({ props })}
-                  <button
-                    {...props}
-                    class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
-                    style="background-color: {profilePickerColor.value}"
-                    aria-label="Choose the LED color"
-                  ></button>
-                {/snippet}
-              </Popover.Trigger>
-              <Popover.Content class="w-auto p-0!">
-                <ColorPicker.Root
-                  formats={['hsl', 'hex']}
-                  bind:value={profilePickerColor.value}
-                  onchange={(color) => {
-                    const rgb = hexToRgb(color);
-                    if (rgb) setProfileLed(profileIndex, { ...currentLed, ...rgb });
-                  }}
-                />
-              </Popover.Content>
-            </Popover.Root>
+        {#if ledCustomized}
+          <p class="text-xs text-muted-foreground">LED color and effect for this profile.</p>
+          <div class="flex flex-row gap-2">
+            <div class="flex items-center gap-3">
+              <span class="text-sm">Mode</span>
+              <Select.Root type="single" name="led-mode" value={selectedLed} onValueChange={onLedModeChange}>
+                <Select.Trigger class="w-[180px]">
+                  {selectedLedLabel}
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Group>
+                    <Select.Label>Mode LED</Select.Label>
+                    {#each LED_PROFILE_EFFECTS as opt (opt.value)}
+                      <Select.Item value={opt.value} label={opt.label}>{opt.label}</Select.Item>
+                    {/each}
+                  </Select.Group>
+                </Select.Content>
+              </Select.Root>
+            </div>
+            {#if currentLed && currentLed.effect !== 'off'}
+              <div class="flex items-center gap-3">
+                <span class="text-sm">Color</span>
+                <Popover.Root>
+                  <Popover.Trigger>
+                    {#snippet child({ props }: { props: Record<string, unknown> })}
+                      <button
+                        {...props}
+                        class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
+                        style="background-color: {profilePickerColor.value}"
+                        aria-label="Choose the LED color"
+                      ></button>
+                    {/snippet}
+                  </Popover.Trigger>
+                  <Popover.Content class="w-auto p-0!">
+                    <ColorPicker.Root
+                      formats={['hsl', 'hex']}
+                      bind:value={profilePickerColor.value}
+                      onchange={(color: string) => {
+                        const rgb = hexToRgb(color);
+                        if (rgb) setProfileLed(profileIndex, { ...currentLed, ...rgb });
+                      }}
+                    />
+                  </Popover.Content>
+                </Popover.Root>
+              </div>
+            {/if}
           </div>
+        {:else}
+          <p class="text-xs text-muted-foreground">Inherits LED color and effect from global settings.</p>
         {/if}
       </section>
     </div>

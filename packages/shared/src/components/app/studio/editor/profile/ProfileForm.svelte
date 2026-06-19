@@ -12,15 +12,25 @@
   import { Button } from '$shared/components/ui/button/index.js';
   import { Label } from '$shared/components/ui/label/index.js';
   import * as InputGroup from '$shared/components/ui/input-group/index.js';
+  import * as ColorPicker from '$shared/components/ui/color-picker/index.js';
+  import * as Popover from '$shared/components/ui/popover/index.js';
+  import * as Select from '$shared/components/ui/select/index.js';
+  import { Switch } from '$shared/components/ui/switch/index.js';
   import IconEditor from '../../IconEditor.svelte';
+  import Sortable from '../../Sortable.svelte';
+  import { featureFlags } from '$shared/store/featureFlags.svelte.js';
   import {
     defaultProfile,
     defaultLayer,
     CONFIG_MAX_LAYERS,
     MIN_LAYERS,
     type ProfileConfig,
+    type LayerConfig,
+    type LedModeProfile,
   } from '$shared/constants/config-schema.js';
-  import { ChevronDown, ChevronUp, Plus, Trash2 } from '@lucide/svelte';
+  import { hexToRgb, rgbToHex } from '$shared/lib/color.js';
+  import { SyncedHexColor } from '$shared/lib/hooks/synced-hex-color.svelte.js';
+  import { GripVertical, Plus, Trash2 } from '@lucide/svelte';
   import { untrack } from 'svelte';
 
   interface Props {
@@ -57,6 +67,51 @@
     if (!draft.name.trim()) draft.name = 'Profile';
     onsubmit($state.snapshot(draft) as ProfileConfig);
   }
+
+  // ── Icon toggle (mirrors ProfileAppearanceSheet, but on the local draft) ──
+  let iconCustomized = $state(!!draft.icon);
+
+  function onIconToggle(v: boolean) {
+    iconCustomized = v;
+    if (!v) draft.icon = '';
+  }
+
+  // ── LED toggle (mirrors ProfileAppearanceSheet, but on the local draft) ──
+  const LED_PROFILE_EFFECTS: { value: LedModeProfile; label: string }[] = [
+    { value: 'off', label: 'Off' },
+    { value: 'static', label: 'Static' },
+    { value: 'breathe', label: 'Breathe' },
+    { value: 'pulse', label: 'Pulse' },
+  ];
+
+  let ledCustomized = $state(!!draft.led);
+
+  const selectedLed = $derived(draft.led?.effect ?? 'static');
+  const selectedLedLabel = $derived(LED_PROFILE_EFFECTS.find((o) => o.value === selectedLed)?.label ?? 'Static');
+
+  function onLedToggle(v: boolean) {
+    ledCustomized = v;
+    if (!v) draft.led = undefined;
+    else if (!draft.led) draft.led = { r: 255, g: 255, b: 255, effect: 'static' };
+  }
+
+  function onLedModeChange(value: string) {
+    if (value === 'off') {
+      draft.led = { r: 0, g: 0, b: 0, effect: 'off' };
+    } else {
+      draft.led = {
+        r: draft.led?.r ?? 255,
+        g: draft.led?.g ?? 255,
+        b: draft.led?.b ?? 255,
+        effect: value as LedModeProfile,
+      };
+    }
+  }
+
+  const draftPickerColor = new SyncedHexColor(() =>
+    draft.led ? rgbToHex(draft.led.r, draft.led.g, draft.led.b) : '#ffffff',
+  );
+  draftPickerColor.bind();
 </script>
 
 <div class="flex flex-col gap-4 px-4 py-2 overflow-y-auto">
@@ -65,10 +120,75 @@
     <Input id="pf-name" bind:value={draft.name} placeholder="Profile name" maxlength={31} />
   </div>
 
-  <div class="flex flex-col gap-1.5">
-    <Label>Icon</Label>
-    <IconEditor value={draft.icon ?? ''} onchange={(b64) => (draft.icon = b64)} />
-  </div>
+  {#if featureFlags.profileIconEditing}
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Customize icon</h3>
+        <Switch checked={iconCustomized} onCheckedChange={onIconToggle} />
+      </div>
+      {#if iconCustomized}
+        <IconEditor value={draft.icon ?? ''} onchange={(b64) => (draft.icon = b64)} />
+      {/if}
+    </section>
+  {/if}
+
+  <section class="flex flex-col gap-2">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Customize LED</h3>
+      <Switch checked={ledCustomized} onCheckedChange={onLedToggle} />
+    </div>
+
+    {#if ledCustomized}
+      <p class="text-xs text-muted-foreground">LED color and effect for this profile.</p>
+      <div class="flex flex-row gap-2">
+        <div class="flex items-center gap-3">
+          <span class="text-sm">Mode</span>
+          <Select.Root type="single" name="led-mode" value={selectedLed} onValueChange={onLedModeChange}>
+            <Select.Trigger class="w-[180px]">
+              {selectedLedLabel}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Group>
+                <Select.Label>Mode LED</Select.Label>
+                {#each LED_PROFILE_EFFECTS as opt (opt.value)}
+                  <Select.Item value={opt.value} label={opt.label}>{opt.label}</Select.Item>
+                {/each}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+        </div>
+        {#if draft.led && draft.led.effect !== 'off'}
+          <div class="flex items-center gap-3">
+            <span class="text-sm">Color</span>
+            <Popover.Root>
+              <Popover.Trigger>
+                {#snippet child({ props }: { props: Record<string, unknown> })}
+                  <button
+                    {...props}
+                    class="w-8 h-8 border rounded-full shadow-sm cursor-pointer border-border"
+                    style="background-color: {draftPickerColor.value}"
+                    aria-label="Choose the LED color"
+                  ></button>
+                {/snippet}
+              </Popover.Trigger>
+              <Popover.Content class="w-auto p-0!">
+                <ColorPicker.Root
+                  formats={['hsl', 'hex']}
+                  bind:value={draftPickerColor.value}
+                  onchange={(color: string) => {
+                    const rgb = hexToRgb(color);
+                    if (rgb && draft.led) draft.led = { ...draft.led, ...rgb };
+                  }}
+                />
+              </Popover.Content>
+            </Popover.Root>
+          </div>
+        {/if}
+      </div>
+    {:else}
+      <p class="text-xs text-muted-foreground">Inherits LED color and effect from global settings.</p>
+    {/if}
+  </section>
 
   <div class="flex flex-col gap-1.5">
     <div class="flex items-center justify-between">
@@ -78,43 +198,43 @@
       </Button>
     </div>
     <div class="flex flex-col gap-1.5">
-      {#each draft.layers as layer, i (i)}
-        <InputGroup.Root>
-          <InputGroup.Input bind:value={layer.name} placeholder={`Layer ${i + 1}`} />
-          <InputGroup.Addon align="inline-end">
-            <Button
-              variant="ghost"
-              size="icon"
-              class="size-6"
-              title="Move up"
-              disabled={i === 0}
-              onclick={() => moveLayer(i, i - 1)}
-            >
-              <ChevronUp class="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="size-6"
-              title="Move down"
-              disabled={i === draft.layers.length - 1}
-              onclick={() => moveLayer(i, i + 1)}
-            >
-              <ChevronDown class="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="size-6 text-destructive"
-              title="Delete the layer"
-              disabled={!canRemoveLayer}
-              onclick={() => removeLayerRow(i)}
-            >
-              <Trash2 class="size-3.5" />
-            </Button>
-          </InputGroup.Addon>
-        </InputGroup.Root>
-      {/each}
+      <Sortable
+        items={draft.layers as LayerConfig[]}
+        orientation="vertical"
+        rowHeight="auto"
+        gap={[0, 6]}
+        getKey={(_l, i) => `pf-layer-${i}`}
+        onReorder={moveLayer}
+      >
+        {#snippet children({ item: layer, index: i, handlePointerDown })}
+          <InputGroup.Root>
+            <InputGroup.Addon align="inline-start">
+              <button
+                type="button"
+                class="flex items-center justify-center text-muted-foreground hover:text-foreground cursor-grab touch-none"
+                title="Reorder"
+                onpointerdown={handlePointerDown}
+                onclick={(e) => e.preventDefault()}
+              >
+                <GripVertical class="size-3.5" />
+              </button>
+            </InputGroup.Addon>
+            <InputGroup.Input bind:value={layer.name} placeholder={`Layer ${i + 1}`} />
+            <InputGroup.Addon align="inline-end">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-6 text-destructive"
+                title="Delete the layer"
+                disabled={!canRemoveLayer}
+                onclick={() => removeLayerRow(i)}
+              >
+                <Trash2 class="size-3.5" />
+              </Button>
+            </InputGroup.Addon>
+          </InputGroup.Root>
+        {/snippet}
+      </Sortable>
     </div>
     <p class="text-xs text-muted-foreground">The keys are assigned afterwards in the editor.</p>
   </div>

@@ -107,25 +107,3 @@
   opacity: 0.5;
 }
 
-/* ── Docs prose mode ──
-   Element styling itself comes from the shared @layer base typography; this
-   scoped class only adds doc-context tweaks: a readable measure, anchor jumps
-   that clear the sticky header, and code/pre surface overrides. */
-.prose-docs {
-  @apply max-w-none;
-}
-.prose-docs :is(h1, h2, h3, h4, h5, h6) {
-  scroll-margin-top: 6rem;
-}
-.prose-docs :is(h2, h3, h4) {
-  @apply mt-8;
-}
-.prose-docs code {
-  @apply bg-muted px-1.5 py-0.5 rounded text-sm;
-}
-.prose-docs pre {
-  @apply p-4 border bg-card border-border;
-}
-.prose-docs pre code {
-  @apply p-0 bg-transparent;
-}

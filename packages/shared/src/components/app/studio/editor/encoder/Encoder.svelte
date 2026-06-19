@@ -9,7 +9,7 @@
   import PresetSelect from './PresetSelect.svelte';
   import { trainingMode } from '$shared/store/trainingMode.svelte.js';
   import { configState, updateConfig } from '$shared/store/config.svelte.js';
-  import { RotateCcw, Zap } from '@lucide/svelte';
+  import { RotateCcw } from '@lucide/svelte';
 
   const ctx = getKeypadContext();
 
@@ -44,7 +44,6 @@
   <div class="flex flex-col self-stretch gap-2 keycap-grid">
     <Label>Encodeur</Label>
     <PresetSelect />
-
     <EncoderButtons {knob} />
     <Knob {knob} />
     <div class="flex flex-col gap-1.5">
@@ -56,21 +55,23 @@
         max={4}
         step={1}
         ticks={2}
+        decimals={0}
         value={effectiveSensitivity}
         class={layerSensitivity === null ? 'opacity-50' : ''}
-        onChange={(v) => setLayerSensitivity(v)}
+        onChange={(v: number) => setLayerSensitivity(v)}
       >
         {#snippet label()}
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Reset (inherits from global)"
-            title="Reset (inherits from global)"
-            disabled={layerSensitivity === null}
-            onclick={resetLayerSensitivity}
-          >
-            <RotateCcw class="size-4" />
-          </Button>
+          {#if layerSensitivity !== null}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Reset (inherits from global)"
+              title="Reset (inherits from global)"
+              onclick={resetLayerSensitivity}
+            >
+              <RotateCcw class="size-4" />
+            </Button>
+          {/if}
         {/snippet}
       </Scrubber>
     </div>

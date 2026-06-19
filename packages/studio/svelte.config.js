@@ -1,4 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { mdsvex } from 'mdsvex';
+import rehypeSlug from 'rehype-slug';
 import path from 'path';
 
 // Build output directory — overridable via env var for embedded build
@@ -6,6 +9,13 @@ const BUILD_DIR = process.env.VITE_BUILD_DIR || 'build';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+    extensions: ['.svelte', '.md'],
+    preprocess: [
+        vitePreprocess(),
+        // rehype-slug adds `id` to every heading so help-page anchors work.
+        mdsvex({ extensions: ['.md'], rehypePlugins: [rehypeSlug] }),
+    ],
+
     // `await` in components + <svelte:boundary pending> (experimental,
     // requires Svelte >=5.36; the flag disappears in Svelte 6).
     compilerOptions: {

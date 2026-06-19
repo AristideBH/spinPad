@@ -8,7 +8,7 @@
 //
 //  Features:
 //    - Auto-save debounced (800ms) → transport.setConfig()
-//    - Undo / Redo via Runed StateHistory (Ctrl+Z / Ctrl+Y)
+//    - Undo / Redo via CommitHistory, committed on the auto-save debounce (Ctrl+Z / Ctrl+Y)
 //    - Import / Export in .spinpad format (JSON with header)
 //
 //  Note: the Ctrl+Z/Y keyboard shortcuts are handled in Studio.svelte
@@ -17,11 +17,10 @@
 
 // @ts-ignore - shared workspace is not a Svelte folder; resolved at runtime by
 // the Vite alias of the studio/website workspaces (resolution varies by check).
-import { browser } from '$app/environment';
-import { StateHistory } from 'runed';
 import { toast } from 'svelte-sonner';
 import { activeTransport, transportMode as _transportMode } from './transport.js';
 import { AutoSave } from './auto-save.js';
+import { CommitHistory } from './history.js';
 import {
   parseSpinpadFile,
   createSpinpadFile,
@@ -36,11 +35,13 @@ import {
   defaultConfig,
   defaultLedKey,
   defaultMacros,
+  defaultProfile,
   isMacroUsed,
   MACRO_COUNT,
   MACRO_MAX_STEPS,
   MACRO_NAME_MAX_LEN,
   type FullConfig,
+  type LayerConfig,
   type LedProfile,
   type KeyLedOverride,
   type MacroDef,
@@ -56,6 +57,11 @@ import type { Selection } from '$shared/constants/config-ops.js';
 
 async function _flushSave(): Promise<void> {
   if (!configState.data) return;
+  if (_skipNextCommit) _skipNextCommit = false;
+  else {
+    _history.commit($state.snapshot(configState.data) as FullConfig);
+    _syncHistoryFlags();
+  }
   configState.isSaving = true;
   try {
     await activeTransport().setConfig(configState.data);
@@ -101,36 +107,44 @@ class ConfigState {
 export const configState = new ConfigState();
 
 // ─────────────────────────────────────────────────────────────
-//  UNDO/REDO HISTORY (Runed StateHistory)
+//  UNDO/REDO HISTORY (CommitHistory, committed on auto-save debounce)
 // ─────────────────────────────────────────────────────────────
 
-let _history: StateHistory<FullConfig | null> | null = null;
+const _history = new CommitHistory<FullConfig>(50);
+let _skipNextCommit = false;
 
-if (browser) {
-  $effect.root(() => {
-    _history = new StateHistory(
-      () => configState.data,
-      (v) => {
-        configState.data = v ? ($state.snapshot(v) as FullConfig) : null;
-        configState.isDirty = true;
-        _autoSave.schedule();
-      },
-      { capacity: 50 },
-    );
-  });
+// CommitHistory is a plain (rune-less) class, so its internal log/redoStack
+// aren't tracked by Svelte. Mirror its canUndo/canRedo into $state here so
+// the toolbar buttons actually re-render after every seed/commit/undo/redo.
+let _canUndo = $state(false);
+let _canRedo = $state(false);
+
+function _syncHistoryFlags(): void {
+  _canUndo = _history.canUndo;
+  _canRedo = _history.canRedo;
+}
+
+function _restore(snapshot: FullConfig): void {
+  configState.data = snapshot;
+  configState.isDirty = true;
+  _skipNextCommit = true;
+  _autoSave.schedule();
+  _syncHistoryFlags();
 }
 
 export function undo(): void {
-  if (_history?.canUndo) _history.undo();
+  const prev = _history.undo();
+  if (prev !== undefined) _restore(prev);
 }
 export function redo(): void {
-  if (_history?.canRedo) _history.redo();
+  const next = _history.redo();
+  if (next !== undefined) _restore(next);
 }
 export function canUndo(): boolean {
-  return _history?.canUndo ?? false;
+  return _canUndo;
 }
 export function canRedo(): boolean {
-  return _history?.canRedo ?? false;
+  return _canRedo;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -149,6 +163,8 @@ export async function loadConfig(): Promise<void> {
       configState.data = cfg;
       configState.activeProfileIndex = cfg.active_profile ?? 0;
       configState.isDirty = false;
+      _history.seed($state.snapshot(cfg) as FullConfig);
+      _syncHistoryFlags();
       return;
     }
     const cfg = await activeTransport().getConfig();
@@ -156,6 +172,8 @@ export async function loadConfig(): Promise<void> {
     configState.data = cfg;
     configState.activeProfileIndex = cfg.active_profile ?? 0;
     configState.isDirty = false;
+    _history.seed($state.snapshot(cfg) as FullConfig);
+    _syncHistoryFlags();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     configState.loadError = msg;
@@ -237,6 +255,26 @@ export async function importConfig(file: File): Promise<void> {
   configState.isDirty = true;
   _autoSave.schedule();
   toast.success('Config imported', { description: file.name });
+}
+
+/**
+ * Wipes the keymap-side state back to a clean slate: a single profile with
+ * a single empty layer, no macros, no per-key LED overrides. Device-level
+ * settings (display, BLE, power, orientation, LED extension) are untouched —
+ * use `factoryReset()` for a full hardware reset instead.
+ */
+export function resetToMinimalConfig(): void {
+  if (!configState.data) return;
+  const cfg = $state.snapshot(configState.data) as FullConfig;
+  cfg.profiles = [defaultProfile()];
+  cfg.active_profile = 0;
+  cfg.macros = defaultMacros();
+  configState.data = cfg;
+  configState.activeProfileIndex = 0;
+  configState.activeLayerIndex = 0;
+  configState.isDirty = true;
+  _autoSave.schedule();
+  toast.success('Config reset to a minimal starting point');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -511,6 +549,16 @@ export function deleteProfile(idx: number): void {
   _applyOp(ops.deleteProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx));
 }
 
+/** Restores a deleted profile at `idx` (per-toast undo, decoupled from the global undo stack). */
+export function restoreProfile(idx: number, profile: ops.ProfileTemplate): void {
+  _applyOp(ops.insertProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx, profile));
+}
+
+/** Restores a reset/cleared profile's prior state at `idx` (per-toast undo). */
+export function restoreProfileState(idx: number, profile: ops.ProfileTemplate): void {
+  _applyOp(ops.replaceProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx, profile));
+}
+
 export function editProfile(idx: number, patch: ops.ProfilePatch): void {
   _applyOp(ops.editProfile($state.snapshot(configState.data) as FullConfig, _currentSelection(), idx, patch));
 }
@@ -529,6 +577,20 @@ export function duplicateLayer(profileIdx: number, layerIdx: number): void {
 
 export function deleteLayer(profileIdx: number, layerIdx: number): void {
   _applyOp(ops.deleteLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, layerIdx));
+}
+
+/** Restores a deleted layer at `idx` in profile `profileIdx` (per-toast undo). */
+export function restoreLayer(profileIdx: number, idx: number, layer: LayerConfig): void {
+  _applyOp(
+    ops.insertLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, idx, layer),
+  );
+}
+
+/** Restores a reset layer's prior state at `idx` in profile `profileIdx` (per-toast undo). */
+export function restoreLayerState(profileIdx: number, idx: number, layer: LayerConfig): void {
+  _applyOp(
+    ops.replaceLayer($state.snapshot(configState.data) as FullConfig, _currentSelection(), profileIdx, idx, layer),
+  );
 }
 
 export function editLayer(profileIdx: number, layerIdx: number, patch: ops.LayerPatch): void {

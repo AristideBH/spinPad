@@ -1,6 +1,14 @@
 <script lang="ts">
   import { Label } from '$shared/components/ui/label/index.js';
-  import { addLayer, configState, deleteLayer, duplicateLayer, editLayer, undo } from '$shared/store/config.svelte.js';
+  import {
+    addLayer,
+    configState,
+    deleteLayer,
+    duplicateLayer,
+    editLayer,
+    restoreLayer,
+    restoreLayerState,
+  } from '$shared/store/config.svelte.js';
   import { toast } from 'svelte-sonner';
   import { getKeypadContext } from './keypad-context.svelte.js';
   import Sortable from '../Sortable.svelte';
@@ -87,18 +95,24 @@
   // Immediate delete / reset: no dialog. The op enters the history (Ctrl+Z)
   // and the toast offers a direct "Undo" via undo().
   function onDelete(i: number) {
-    const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
-    deleteLayer(configState.activeProfileIndex, i);
+    const layer = ctx.profile?.layers?.[i];
+    const name = layer?.name ?? `L${i}`;
+    const snapshot = layer ? ($state.snapshot(layer) as LayerConfig) : undefined;
+    const profileIdx = configState.activeProfileIndex;
+    deleteLayer(profileIdx, i);
     toast(`Layer "${name}" deleted`, {
-      action: { label: 'Undo', onClick: () => undo() },
+      action: { label: 'Undo', onClick: () => snapshot && restoreLayer(profileIdx, i, snapshot) },
     });
   }
 
   function onReset(i: number) {
-    const name = ctx.profile?.layers?.[i]?.name ?? `L${i}`;
+    const layer = ctx.profile?.layers?.[i];
+    const name = layer?.name ?? `L${i}`;
+    const snapshot = layer ? ($state.snapshot(layer) as LayerConfig) : undefined;
+    const profileIdx = configState.activeProfileIndex;
     ctx.resetLayer(i);
     toast(`Layer "${name}" reset`, {
-      action: { label: 'Undo', onClick: () => undo() },
+      action: { label: 'Undo', onClick: () => snapshot && restoreLayerState(profileIdx, i, snapshot) },
     });
   }
 

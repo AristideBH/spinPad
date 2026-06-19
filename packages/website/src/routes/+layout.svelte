@@ -4,7 +4,6 @@
   import { page } from '$app/state';
   import { afterNavigate } from '$app/navigation';
   import { blur } from 'svelte/transition';
-  import { MediaQuery } from 'svelte/reactivity';
 
   import * as Breadcrumb from '$shared/components/ui/breadcrumb/index.js';
   import DotIcon from '@lucide/svelte/icons/dot';
@@ -12,7 +11,8 @@
   import * as Sidebar from '$shared/components/ui/sidebar/index.js';
   import AppSidebar from '../lib/components/ui/app-sidebar.svelte';
   import PageCurtain from '$lib/components/PageCurtain.svelte';
-  import { scrollToTop } from '$lib/page-transitions';
+  import { scrollToTop } from '$shared/lib/page-transitions.js';
+  import { createHeaderTransition } from '$shared/lib/hooks/header-transition.svelte.js';
 
   import { PersistedState } from 'runed';
   import { createHeaderRight } from '$lib/header-right.svelte.js';
@@ -28,10 +28,7 @@
   );
 
   // Blur+fade the per-page header content on nav; reduced motion → plain fade.
-  const reducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)');
-  const headerTransition = $derived(
-    reducedMotion.current ? { amount: 0, duration: 120 } : { amount: 6, duration: 200 }
-  );
+  const ht = createHeaderTransition();
 
   // Studio mounts a JS mosaic grid whose height settles a frame after mount, so
   // a translateY entrance amplifies the reflow into a visible jump. Heavy routes
@@ -48,7 +45,7 @@
 
   afterNavigate((nav) => {
     if (nav.type === 'enter') return; // initial load — nothing to scroll
-    scrollToTop(insetEl, reducedMotion.current);
+    scrollToTop(insetEl, ht.reducedMotion);
   });
 </script>
 
@@ -70,8 +67,8 @@
             {#key page.url.pathname}
               <div
                 class="flex items-center gap-2"
-                in:blur={headerTransition}
-                out:blur={headerTransition}
+                in:blur={ht.headerTransition}
+                out:blur={ht.headerTransition}
               >
                 {#if breadcrumbs.length > 0}
                   <Separator orientation="vertical" class="me-2 data-[orientation=vertical]:h-4" />
@@ -113,8 +110,8 @@
             {#key page.url.pathname}
               <div
                 class="flex items-center w-full gap-2"
-                in:blur={headerTransition}
-                out:blur={headerTransition}
+                in:blur={ht.headerTransition}
+                out:blur={ht.headerTransition}
               >
                 {@render headerRight.current()}
               </div>
@@ -123,6 +120,7 @@
         {/if}
       </div>
     </header>
+
     <!-- Content area: curtain (reflects real load state) sits over the keyed
          page content, which fly+fades in (staggered) on every navigation. -->
     <div class="relative flex flex-col flex-1">

@@ -146,6 +146,12 @@ importers:
       csstype:
         specifier: ^3.2.3
         version: 3.2.3
+      mdsvex:
+        specifier: ^0.12.7
+        version: 0.12.7(svelte@5.55.10)
+      rehype-slug:
+        specifier: ^6.0.0
+        version: 6.0.0
       shadcn-svelte:
         specifier: ^1.2.7
         version: 1.2.7(svelte@5.55.10)
@@ -2767,11 +2773,11 @@ snapshots:
 
   '@types/hast@3.0.4':
     dependencies:
-      '@types/unist': 2.0.11
+      '@types/unist': 3.0.3
 
   '@types/mdast@4.0.4':
     dependencies:
-      '@types/unist': 2.0.11
+      '@types/unist': 3.0.3
 
   '@types/node@12.20.55': {}
 

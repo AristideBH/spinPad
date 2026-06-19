@@ -22,6 +22,7 @@ import {
   defaultLayer,
   type FullConfig,
   type ProfileConfig,
+  type LayerConfig,
 } from './config-schema.js';
 import { allocColorSlot } from './layer-colors.js';
 import { action, getActionType, getActionValue, ACTION_TYPES } from './action-types.js';
@@ -164,6 +165,29 @@ export function deleteProfile(config: FullConfig, selection: Selection, idx: num
 }
 
 /**
+ * Re-inserts a previously deleted profile at `idx` and selects it.
+ * Used to restore a specific profile from a delete-toast, independent of
+ * the global undo stack. No-op if already at max.
+ */
+export function insertProfile(config: FullConfig, selection: Selection, idx: number, profile: ProfileConfig): OpResult {
+  const cfg = clone(config);
+  if (cfg.profiles.length >= CONFIG_MAX_PROFILES) {
+    return { config: cfg, selection };
+  }
+  const at = clamp(idx, 0, cfg.profiles.length);
+  cfg.profiles.splice(at, 0, clone(profile));
+  return { config: cfg, selection: { profile: at, layer: 0 } };
+}
+
+/** Overwrites profile `idx` wholesale. Used to restore a reset/cleared profile from its toast. */
+export function replaceProfile(config: FullConfig, selection: Selection, idx: number, profile: ProfileConfig): OpResult {
+  const cfg = clone(config);
+  if (!cfg.profiles[idx]) return { config: cfg, selection };
+  cfg.profiles[idx] = clone(profile);
+  return { config: cfg, selection };
+}
+
+/**
  * Edits a profile in a unified way: rename, icon and/or move.
  * patch = { name?, icon?, moveTo? }
  */
@@ -255,6 +279,46 @@ export function deleteLayer(config: FullConfig, selection: Selection, pIdx: numb
     sel = { ...selection, layer };
   }
   return { config: cfg, selection: sel };
+}
+
+/**
+ * Re-inserts a previously deleted layer at `idx` in profile `pIdx` and
+ * selects it. Used to restore a specific layer from a delete-toast,
+ * independent of the global undo stack. No-op if already at max.
+ */
+export function insertLayer(
+  config: FullConfig,
+  selection: Selection,
+  pIdx: number,
+  idx: number,
+  layer: LayerConfig,
+): OpResult {
+  const cfg = clone(config);
+  const profile = cfg.profiles[pIdx];
+  if (!profile || profile.layers.length >= CONFIG_MAX_LAYERS) {
+    return { config: cfg, selection };
+  }
+  const at = clamp(idx, 0, profile.layers.length);
+  profile.layers.splice(at, 0, clone(layer));
+
+  let sel = selection;
+  if (selection.profile === pIdx) sel = { ...selection, layer: at };
+  return { config: cfg, selection: sel };
+}
+
+/** Overwrites layer `idx` of profile `pIdx` wholesale. Used to restore a reset layer from its toast. */
+export function replaceLayer(
+  config: FullConfig,
+  selection: Selection,
+  pIdx: number,
+  idx: number,
+  layer: LayerConfig,
+): OpResult {
+  const cfg = clone(config);
+  const profile = cfg.profiles[pIdx];
+  if (!profile?.layers[idx]) return { config: cfg, selection };
+  profile.layers[idx] = clone(layer);
+  return { config: cfg, selection };
 }
 
 /**

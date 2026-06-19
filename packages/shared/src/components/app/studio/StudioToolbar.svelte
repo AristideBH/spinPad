@@ -11,6 +11,9 @@
   import DemoSettings from './connect/DemoSettings.svelte';
   import { cn } from '$shared';
   import SaveBadge from './SaveBadge.svelte';
+  import { featureFlags } from '$shared/store/featureFlags.svelte';
+
+  let { helpHref = '/docs/studio/layers/' }: { helpHref?: string } = $props();
 
   // Start polling the device status when connected or in demo mode.
   // The store automatically routes to the right transport (serial / http / mock).
@@ -33,6 +36,25 @@
 </script>
 
 {#if isOnline}
+  <!-- Auto-save indicator -->
+  <SaveBadge />
+
+  <div class="grow"></div>
+
+  <!-- Dev mode toggle (visible as soon as demo mode is active) -->
+  {#if featureFlags.testMode}
+    {#if devMode.active}
+      <Popover.Root>
+        <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
+          <FlaskConical class="size-4" />
+        </Popover.Trigger>
+        <Popover.Content align="end" class="p-0 w-2xs rounded-xl">
+          <DemoSettings />
+        </Popover.Content>
+      </Popover.Root>
+    {/if}
+  {/if}
+
   <!-- Undo / Redo -->
   <ButtonGroup.Root>
     <Button size="icon" variant="secondary" onclick={undo} disabled={!canUndo()} title="Undo (Ctrl+Z)">
@@ -42,24 +64,8 @@
       <Redo2 class="size-4" />
     </Button>
   </ButtonGroup.Root>
-  <div class="grow"></div>
 
-  <!-- Auto-save indicator -->
-  <SaveBadge />
-
-  <!-- Dev mode toggle (visible as soon as demo mode is active) -->
-  {#if devMode.active}
-    <Popover.Root>
-      <Popover.Trigger class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}>
-        <FlaskConical class="size-4" />
-      </Popover.Trigger>
-      <Popover.Content align="end" class="p-0 w-2xs rounded-xl">
-        <DemoSettings />
-      </Popover.Content>
-    </Popover.Root>
-  {/if}
-
-  <Button size="icon" variant="outline" title="Help & documentation" href="/docs/studio/layers/">
+  <Button size="icon" variant="outline" title="Help & documentation" href={helpHref}>
     <Info class="size-4" />
   </Button>
 {/if}

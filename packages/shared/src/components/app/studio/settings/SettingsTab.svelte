@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { configState, updateConfig, exportConfig, importConfig } from '$shared/store/config.svelte.js';
-  import { Download, Upload } from '@lucide/svelte';
+  import {
+    configState,
+    updateConfig,
+    exportConfig,
+    importConfig,
+    resetToMinimalConfig,
+  } from '$shared/store/config.svelte.js';
+  import { featureFlags } from '$shared/store/featureFlags.svelte.js';
+  import { Download, Upload, Eraser } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
   import { setTime } from '$shared/store/serial.svelte.js';
   import { Card, CardContent, CardHeader, CardTitle } from '$shared/components/ui/card/index.js';
@@ -14,7 +21,6 @@
   import SettingsField from './SettingsField.svelte';
   import NotConnected from './NotConnected.svelte';
   import OptionGrid from './OptionGrid.svelte';
-  import SliderField from './SliderField.svelte';
   import * as UnderlineTabs from '$shared/components/ui/underline-tabs';
   import StatsTile from '$shared/components/app/studio/dashboard/tile-stats.svelte';
   import { Scrubber } from '$shared/components/ui/scrubber';
@@ -59,8 +65,6 @@
   $effect(() => {
     ledExtBright = configState.data?.led_extension?.brightness ?? 200;
   });
-
-  const SENS_LABELS = ['', '1× (standard)', '2× (reactive)', '3×', '4× (max)'] as const;
 
   // ── NumberField state ─────────────────────────────────────────
   let displayTimeout = $state(configState.data?.display?.timeout_s ?? 60);
@@ -126,6 +130,11 @@
       toast.error('Import failed', { description: msg });
     }
     if (backupFileInput) backupFileInput.value = '';
+  }
+
+  function onResetMinimalClick() {
+    if (!confirm('Reset to a minimal config? All profiles, layers, macros and LED overrides will be lost.')) return;
+    resetToMinimalConfig();
   }
 
   // ── Widget system ─────────────────────────────────────────────
@@ -236,14 +245,11 @@
                     tickStep={1}
                     percentage
                     decimals={0}
-                    onCommit={() => updateConfig('led_key.brightness', brightness)}
+                    onCommit={() => updateConfig('display.brightness', brightness)}
                   />
                 </div>
 
-                <SettingsField
-                  label="Turn off after (s)"
-                  description="Inactivity duration before the screen turns off"
-                >
+                <SettingsField label="Turn off after (s)" description="Inactivity duration before the screen turns off">
                   {#snippet children()}
                     <NumberField.Root min={5} max={600} bind:value={displayTimeout}>
                       <NumberField.Group>
@@ -289,27 +295,29 @@
                   {/snippet}
                 </SettingsField>
 
-                <div class="mt-4">
-                  <Label class="block mb-2 text-sm">Battery presence</Label>
-                  <p class="mb-2 text-xs leading-relaxed text-muted-foreground">
-                    The SpinPad comes in variants with and without a battery. <strong>Auto</strong>
-                    lets the firmware detect via the ADC.
-                    <strong>Force present / absent</strong>
-                    disables detection.
-                  </p>
-                  <OptionGrid
-                    options={[
-                      { value: 'auto', label: 'Auto' },
-                      { value: 'yes', label: 'Force present' },
-                      { value: 'no', label: 'Force absent' },
-                    ]}
-                    value={data.power?.battery_present ?? 'auto'}
-                    onSelect={(v) => updateConfig('power.battery_present', v)}
-                    emphasizeSelected
-                  >
-                    {#snippet item(o)}{o.label}{/snippet}
-                  </OptionGrid>
-                </div>
+                {#if featureFlags.batteryPresenceDetection}
+                  <div class="mt-4">
+                    <Label class="block mb-2 text-sm">Battery presence</Label>
+                    <p class="mb-2 text-xs leading-relaxed text-muted-foreground">
+                      The SpinPad comes in variants with and without a battery. <strong>Auto</strong>
+                      lets the firmware detect via the ADC.
+                      <strong>Force present / absent</strong>
+                      disables detection.
+                    </p>
+                    <OptionGrid
+                      options={[
+                        { value: 'auto', label: 'Auto' },
+                        { value: 'yes', label: 'Force present' },
+                        { value: 'no', label: 'Force absent' },
+                      ]}
+                      value={data.power?.battery_present ?? 'auto'}
+                      onSelect={(v: number) => updateConfig('power.battery_present', v)}
+                      emphasizeSelected
+                    >
+                      {#snippet item(o)}{o.label}{/snippet}
+                    </OptionGrid>
+                  </div>
+                {/if}
               </CardContent>
             </Card>
 
@@ -352,19 +360,21 @@
                 >
               </CardHeader>
               <CardContent class="pt-0">
-                <div class="mb-2">
-                  <SliderField
-                    label="Sensitivity"
+                <div class="flex flex-col gap-1.5 mb-2">
+                  <Label class="block mb-1.5 text-sm">Sensitivity</Label>
+                  <Scrubber
+                    bind:value={encoderSens}
                     min={1}
                     max={4}
                     step={1}
-                    bind:value={encoderSens}
-                    valueText={SENS_LABELS[encoderSens] ?? '—'}
-                    valueClass="font-mono text-muted-foreground"
-                    minLabel="1 click / detent"
-                    maxLabel="4 clicks / detent"
+                    ticks={2}
+                    decimals={0}
                     onCommit={() => updateConfig('encoder.sensitivity', encoderSens)}
                   />
+                  <div class="flex justify-between mt-1 text-xs text-muted-foreground">
+                    <span>1 click / detent</span>
+                    <span>4 clicks / detent</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -397,6 +407,23 @@
                   class="hidden"
                   onchange={onBackupFileSelected}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Clean slate</CardTitle>
+            </CardHeader>
+            <CardContent class="flex flex-col gap-3">
+              <p class="text-xs text-muted-foreground">
+                Wipe profiles, layers, macros and LED overrides back to a single empty profile with one blank layer.
+                Display, Bluetooth and power settings are kept as-is.
+              </p>
+              <div>
+                <Button variant="outline" onclick={onResetMinimalClick} disabled={!configState.data} class="gap-1.5">
+                  <Eraser class="size-4" /> Reset to minimal config
+                </Button>
               </div>
             </CardContent>
           </Card>

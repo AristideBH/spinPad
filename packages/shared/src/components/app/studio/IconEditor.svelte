@@ -16,28 +16,13 @@
     type BoolGrid,
   } from '$shared/constants/profile-icon.js';
   import { PROFILE_ICON_LIBRARY } from '$shared/constants/profile-icon-library.js';
-  import {
-    Pencil,
-    Minus,
-    Square,
-    SquareDashed,
-    Circle,
-    Disc3,
-    Trash2,
-    FlipHorizontal2,
-    Save,
-    RotateCcw,
-    Upload,
-    Download,
-    Copy,
-    Check,
-    Contrast,
-  } from '@lucide/svelte';
+  import { Pencil, Minus, Square, Circle, Trash2, Upload, Download, Copy, Check, Contrast } from '@lucide/svelte';
   import { Input } from '$shared/components/ui/input/index.js';
   import { Slider } from '$shared/components/ui/slider/index.js';
   import { Button } from '$shared/components/ui/button/index.js';
   import * as ButtonGroup from '$shared/components/ui/button-group/index.js';
   import * as Select from '$shared/components/ui/select/index.js';
+  import { featureFlags } from '$shared/store/featureFlags.svelte';
 
   interface Props {
     value?: string; // current base64 (external prop)
@@ -59,9 +44,7 @@
 
   // ── State ────────────────────────────────────────────────────
   let grid = $state<BoolGrid>(emptyGrid());
-  let saved = $state<BoolGrid>(emptyGrid()); // snapshot at last Save
   let synced = $state<string | undefined>(undefined);
-  let dirty = $state(false); // modified since last Save
   let tool = $state<Tool>('pen');
   let fileInput = $state<HTMLInputElement | null>(null);
 
@@ -83,9 +66,7 @@
   $effect(() => {
     if (value !== synced) {
       grid = base64ToGrid(value);
-      saved = grid.slice();
       synced = value;
-      dirty = false;
     }
   });
 
@@ -173,7 +154,6 @@
         break;
     }
     grid = g;
-    dirty = true;
   }
 
   function onPointerDown(e: PointerEvent) {
@@ -188,7 +168,6 @@
       const next = grid.slice();
       setPixel(next, c.x, c.y, paintOn);
       grid = next;
-      dirty = true;
     }
     (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
   }
@@ -201,7 +180,6 @@
       const next = grid.slice();
       drawLine(next, start.x, start.y, c.x, c.y, paintOn);
       grid = next;
-      dirty = true;
       start = c;
     } else {
       applyShape(start, c, paintOn);
@@ -212,21 +190,14 @@
     if (!drawing) return;
     drawing = false;
     start = null;
-    // No emit here — the user must click Save
+    commit();
   }
 
-  // ── Save / Reset ─────────────────────────────────────────────
-  function save() {
+  // ── Autosave ──────────────────────────────────────────────────
+  function commit() {
     const b64 = currentBase64;
-    saved = grid.slice();
     synced = b64;
-    dirty = false;
     onchange?.(b64);
-  }
-
-  function reset() {
-    grid = saved.slice();
-    dirty = false;
   }
 
   // ── Presets (Select) ──────────────────────────────────────────
@@ -242,17 +213,17 @@
   // ── Actions rapides ───────────────────────────────────────────
   function loadPreset(g: BoolGrid) {
     grid = g.slice();
-    dirty = true;
+    commit();
   }
 
   function clear() {
     grid = emptyGrid();
-    dirty = true;
+    commit();
   }
 
   function invert() {
     grid = grid.map((p) => !p);
-    dirty = true;
+    commit();
   }
 
   // ── Copy base64 ──────────────────────────────────────────────
@@ -295,7 +266,7 @@
       if (!ctx) return;
       ctx.drawImage(img, 0, 0);
       grid = imageDataToGrid(ctx.getImageData(0, 0, img.width, img.height), threshold);
-      dirty = true;
+      commit();
       URL.revokeObjectURL(img.src);
     };
     img.src = URL.createObjectURL(file);
@@ -304,44 +275,52 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <!-- ── Barre d'outils ── -->
-  <div class="flex flex-wrap items-center gap-1">
-    <ButtonGroup.Root>
-      {#each TOOLS as t (t.id)}
-        {@const isActive = tool === t.id}
-        <Button title={t.label} variant={isActive ? 'default' : 'secondary'} onclick={() => (tool = t.id)}>
-          <t.icon size={14} class={t?.fill ? 'fill-current' : ''} />
-        </Button>
-      {/each}
-    </ButtonGroup.Root>
-
-    <!-- Inverser -->
-    <ButtonGroup.Root>
-      <Button title="Inverser" variant="secondary" class="" onclick={invert}>
-        <Contrast size={14} />
-      </Button>
-
-      <!-- Effacer -->
-      <Button title="Effacer" variant="secondary" class="" onclick={clear}>
-        <Trash2 size={14} />
-      </Button>
-
-      <!-- Reset -->
-      <Button title="Discard changes" variant="secondary" disabled={!dirty} onclick={reset}>
-        <RotateCcw size={14} />
-      </Button>
-    </ButtonGroup.Root>
-
-    <!-- Save -->
-    <Button title="Save" disabled={!dirty} onclick={save}>
-      <Save size={14} />
-    </Button>
-
-    <span class="ml-2 text-[10px] text-muted-foreground"> left click: paint · right click: erase </span>
+  <!-- ── Presets ── -->
+  <div class="flex flex-wrap items-center gap-2">
+    <span class="text-xs text-muted-foreground">Presets:</span>
+    <Select.Root type="single" name="icon-presets" value={selectedPreset} onValueChange={onPresetChange}>
+      <Select.Trigger class="w-[180px]">
+        {matchedPreset ? matchedPreset.label : 'Custom'}
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Group>
+          <Select.Label>Presets</Select.Label>
+          {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
+            <Select.Item value={entry.id} label={entry.label}>{entry.label}</Select.Item>
+          {/each}
+          {#if !matchedPreset}
+            <Select.Item value={CUSTOM_ICON} label="Custom" disabled>Custom</Select.Item>
+          {/if}
+        </Select.Group>
+      </Select.Content>
+    </Select.Root>
   </div>
 
   <!-- ── Zone de dessin + preview ── -->
   <div class="flex items-start gap-3">
+    <!-- ── Barre d'outils ── -->
+    <div class="flex flex-col items-center gap-1">
+      <ButtonGroup.Root orientation="vertical">
+        {#each TOOLS as t (t.id)}
+          {@const isActive = tool === t.id}
+          <Button title={t.label} variant={isActive ? 'default' : 'secondary'} onclick={() => (tool = t.id)}>
+            <t.icon size={14} class={t?.fill ? 'fill-current' : ''} />
+          </Button>
+        {/each}
+      </ButtonGroup.Root>
+
+      <!-- Inverser -->
+      <ButtonGroup.Root orientation="vertical">
+        <Button title="Invert" variant="secondary" class="" onclick={invert}>
+          <Contrast size={14} />
+        </Button>
+
+        <!-- Effacer -->
+        <Button title="Clear" variant="secondary" class="" onclick={clear}>
+          <Trash2 size={14} />
+        </Button>
+      </ButtonGroup.Root>
+    </div>
     <!-- Canvas principal -->
     <canvas
       {@attach renderEditor}
@@ -369,77 +348,58 @@
     </div>
   </div>
 
-  <!-- ── Presets ── -->
-  <div class="flex flex-wrap items-center gap-2">
-    <span class="text-xs text-muted-foreground">Presets:</span>
-    <Select.Root type="single" name="icon-presets" value={selectedPreset} onValueChange={onPresetChange}>
-      <Select.Trigger class="w-[180px]">
-        {matchedPreset ? matchedPreset.label : 'Custom'}
-      </Select.Trigger>
-      <Select.Content>
-        <Select.Group>
-          <Select.Label>Presets</Select.Label>
-          {#each PROFILE_ICON_LIBRARY as entry (entry.id)}
-            <Select.Item value={entry.id} label={entry.label}>{entry.label}</Select.Item>
-          {/each}
-          {#if !matchedPreset}
-            <Select.Item value={CUSTOM_ICON} label="Custom" disabled>Custom</Select.Item>
-          {/if}
-        </Select.Group>
-      </Select.Content>
-    </Select.Root>
-  </div>
+  {#if featureFlags.iconEditorTools}
+    <!-- ── Export / Import ── -->
+    <div class="flex flex-wrap items-center gap-2">
+      <Button title="Export PNG" onclick={exportPng}>
+        <Download size={12} /> PNG
+      </Button>
+      <Button title="Import an image" onclick={() => fileInput?.click()}>
+        <Upload size={12} /> Image
+      </Button>
+      <input bind:this={fileInput} type="file" accept="image/*" class="hidden" onchange={importFile} />
 
-  <!-- ── Export / Import ── -->
-  <div class="flex flex-wrap items-center gap-2">
-    <Button title="Export PNG" onclick={exportPng}>
-      <Download size={12} /> PNG
-    </Button>
-    <Button title="Import an image" onclick={() => fileInput?.click()}>
-      <Upload size={12} /> Image
-    </Button>
-    <input bind:this={fileInput} type="file" accept="image/*" class="hidden" onchange={importFile} />
-
-    <!-- Threshold import -->
-    <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-      <span>Import threshold</span>
-      <Slider type="single" min={0} max={255} step={1} bind:value={threshold} class="w-20" />
-      <span class="w-6 text-right tabular-nums">{threshold}</span>
-    </div>
-  </div>
-
-  <!-- ── Dev panel (collapsible) ── -->
-  <details class="text-[10px] border border-dashed border-border rounded">
-    <summary class="px-2 py-1 cursor-pointer select-none text-muted-foreground hover:text-foreground">
-      Dev — update profile-icon-library.ts
-    </summary>
-    <div class="flex flex-col gap-2 p-2">
-      <!-- ── base64 field ── -->
-      <div class="flex items-center gap-2">
-        <Input
-          type="text"
-          readonly
-          value={currentBase64}
-          class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
-          onclick={(e: Event) => (e.target as HTMLInputElement).select()}
-        />
-        <Button variant="outline" title="Copy the base64" onclick={copyBase64}>
-          {#if copied}
-            <Check size={14} class="text-green-500" />
-          {:else}
-            <Copy size={14} />
-          {/if}
-        </Button>
+      <!-- Threshold import -->
+      <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <span>Import threshold</span>
+        <Slider type="single" min={0} max={255} step={1} bind:value={threshold} class="w-20" />
+        <span class="w-6 text-right tabular-nums">{threshold}</span>
       </div>
-      <p class="text-muted-foreground">
-        Copy the line below to replace an entry in
-        <code>profile-icon-library.ts</code>.
-      </p>
-      <pre
-        class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">entry('id', 'Label', '{currentBase64}'),</pre>
-      <p class="text-muted-foreground">Raw base64:</p>
-      <pre
-        class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">{currentBase64}</pre>
     </div>
-  </details>
+
+    <!-- ── Dev panel (collapsible) ── -->
+    <details class="text-[10px] border border-dashed border-border rounded">
+      <summary class="px-2 py-1 cursor-pointer select-none text-muted-foreground hover:text-foreground">
+        Dev — update profile-icon-library.ts
+      </summary>
+      <div class="flex flex-col gap-2 p-2">
+        <!-- ── base64 field ── -->
+        <div class="flex items-center gap-2">
+          <Input
+            type="text"
+            readonly
+            value={currentBase64}
+            class="flex-1 min-w-0 font-mono text-[10px] truncate text-muted-foreground"
+            onclick={(e: Event) => (e.target as HTMLInputElement).select()}
+          />
+          <Button variant="outline" title="Copy the base64" onclick={copyBase64}>
+            {#if copied}
+              <Check size={14} class="text-green-500" />
+            {:else}
+              <Copy size={14} />
+            {/if}
+          </Button>
+        </div>
+        <p class="text-muted-foreground">
+          Copy the line below to replace an entry in
+          <code>profile-icon-library.ts</code>.
+        </p>
+        <pre
+          class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">entry('id', 'Label', '{currentBase64}'),</pre>
+        <p class="text-muted-foreground">Raw base64:</p>
+        <pre
+          class="bg-muted rounded p-2 text-[10px] font-mono overflow-x-auto whitespace-pre-wrap break-all select-all">{currentBase64}</pre>
+      </div>
+    </details>
+  {/if}
 </div>

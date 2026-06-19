@@ -86,14 +86,14 @@
 </script>
 
 <Card.Root size="sm" class="gap-y-5!">
-  <div transition:fly={{ y: 50, duration: 350, delay: 220 }} class="relative">
+  <div in:fly={{ y: 50, duration: 350, delay: 220 }} class="relative">
     <Card.Header class="flex items-start gap-1.5">
       <ProfileSwitcher />
     </Card.Header>
   </div>
 
   <!-- Editor -->
-  <div transition:fly={{ y: 20, duration: 600, delay: 350 }} class="relative">
+  <div in:fly={{ y: 20, duration: 600, delay: 350 }} class="relative">
     <Card.Content bind:ref={contentEl} class="flex flex-wrap items-start justify-start gap-x-4 gap-y-1">
       {#if ctx.layer}
         <div bind:this={layerEl} class={wrapped ? 'w-full' : 'grow min-w-[180px] max-w-[180px]'}>
