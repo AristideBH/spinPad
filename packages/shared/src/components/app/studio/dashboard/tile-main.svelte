@@ -93,7 +93,7 @@
       rotation={() => keyVisuals.encoderTurn}
       pop={0.5}
       eqGain={0.25}
-      class="absolute inset-0 pointer-events-none -z-10"
+      class="absolute inset-0 pointer-events-none -z-10 "
     />
     <!-- LED showcase as header background: off if nothing is connected. -->
     <Card.Description>

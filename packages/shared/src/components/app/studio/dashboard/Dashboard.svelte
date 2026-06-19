@@ -88,6 +88,7 @@
     gap={[16, 16]}
     readOnly
     unstyled
+    fastStart
     onmount={(e) => (activeCols = e.cols)}
     onresize={(e) => (activeCols = e.cols)}
   >
