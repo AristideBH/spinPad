@@ -9,7 +9,14 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { ACTION_TYPES, MEDIA_CODES, SPECIAL_CODES, action } from './action-types.js';
-import { MACRO_COUNT, MACRO_STEP_TYPE, isMacroUsed, type MacroDef, type MacroStep } from './config-schema.js';
+import {
+  CONFIG_MAX_LAYERS,
+  MACRO_COUNT,
+  MACRO_STEP_TYPE,
+  isMacroUsed,
+  type MacroDef,
+  type MacroStep,
+} from './config-schema.js';
 
 const {
   ACTION_TYPE_KC,
@@ -103,6 +110,18 @@ const KC_MOD_SHIFT = 0x02;
 /** Encodes a HID keycode with a modifier nibble in bits 11–8. */
 function modKc(usage: number, mod: number): number {
   return action(ACTION_TYPE_KC, ((mod & 0x0f) << 8) | (usage & 0xff));
+}
+
+/** Layer-action keycodes (MO/TG/TO) for layers 0..count-1. */
+function layerKeycodes(count: number): Keycode[] {
+  return (['MO', 'TG', 'TO'] as const).flatMap((kind) => {
+    const type = { MO: ACTION_TYPE_LAYER_MO, TG: ACTION_TYPE_LAYER_TG, TO: ACTION_TYPE_LAYER_TO }[kind];
+    return Array.from({ length: count }, (_, n) => ({
+      label: `${kind}(${n})`,
+      value: action(type, n),
+      category: 'layer' as KeycodeCategory,
+    }));
+  });
 }
 
 // ── Table principale ────────────────────────────────────────────
@@ -260,18 +279,7 @@ export const KEYCODES: Record<string, Keycode[]> = {
   ],
 
   // ── Layers ───────────────────────────────────────────────────
-  layers: [
-    { label: 'MO(0)', value: action(ACTION_TYPE_LAYER_MO, 0), category: 'layer' },
-    { label: 'MO(1)', value: action(ACTION_TYPE_LAYER_MO, 1), category: 'layer' },
-    { label: 'MO(2)', value: action(ACTION_TYPE_LAYER_MO, 2), category: 'layer' },
-    { label: 'MO(3)', value: action(ACTION_TYPE_LAYER_MO, 3), category: 'layer' },
-    { label: 'TG(1)', value: action(ACTION_TYPE_LAYER_TG, 1), category: 'layer' },
-    { label: 'TG(2)', value: action(ACTION_TYPE_LAYER_TG, 2), category: 'layer' },
-    { label: 'TG(3)', value: action(ACTION_TYPE_LAYER_TG, 3), category: 'layer' },
-    { label: 'TO(0)', value: action(ACTION_TYPE_LAYER_TO, 0), category: 'layer' },
-    { label: 'TO(1)', value: action(ACTION_TYPE_LAYER_TO, 1), category: 'layer' },
-    { label: 'TO(2)', value: action(ACTION_TYPE_LAYER_TO, 2), category: 'layer' },
-  ],
+  layers: layerKeycodes(CONFIG_MAX_LAYERS),
 
   // ── Media ────────────────────────────────────────────────────
   media: [
@@ -346,15 +354,26 @@ export function macroKeycodes(macros?: MacroDef[]): Keycode[] {
   return out;
 }
 
-/** Keycode groups for the picker, macros resolved from the config. */
-export function keycodeGroups(macros?: MacroDef[]): Record<string, Keycode[]> {
+/**
+ * Keycode groups for the picker, macros resolved from the config and
+ * layer actions (MO/TG/TO) restricted to the active profile's layer count.
+ */
+export function keycodeGroups(macros?: MacroDef[], layerCount: number = CONFIG_MAX_LAYERS): Record<string, Keycode[]> {
   const used = macroKeycodes(macros);
-  return used.length > 0 ? { ...KEYCODES, macros: used } : { ...KEYCODES };
+  return {
+    ...KEYCODES,
+    layers: layerKeycodes(layerCount),
+    ...(used.length > 0 ? { macros: used } : {}),
+  };
 }
 
-/** Flat table including the used macros (for lookup). */
-export function keycodesFlat(macros?: MacroDef[]): Keycode[] {
-  return [...KEYCODES_FLAT, ...macroKeycodes(macros)];
+/** Flat table including the used macros and the active profile's layer actions (for lookup). */
+export function keycodesFlat(macros?: MacroDef[], layerCount: number = CONFIG_MAX_LAYERS): Keycode[] {
+  return [
+    ...KEYCODES_FLAT.filter((k) => k.category !== 'layer'),
+    ...layerKeycodes(layerCount),
+    ...macroKeycodes(macros),
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════

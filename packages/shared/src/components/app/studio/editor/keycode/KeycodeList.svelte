@@ -49,11 +49,15 @@
 
   const tabs = new ScrollSyncedTabs('all');
 
-  const entries = $derived(Object.entries(keycodeGroups(configState.data?.macros)) as [string, Keycode[]][]);
+  const layerCount = $derived(configState.activeProfile?.layers.length);
+
+  const entries = $derived(
+    Object.entries(keycodeGroups(configState.data?.macros, layerCount)) as [string, Keycode[]][],
+  );
 
   const filteredKeycodes = $derived(
     ctx.searchQuery
-      ? keycodesFlat(configState.data?.macros).filter((k: Keycode) =>
+      ? keycodesFlat(configState.data?.macros, layerCount).filter((k: Keycode) =>
           k.label.toLowerCase().includes(ctx.searchQuery.toLowerCase()),
         )
       : null,
