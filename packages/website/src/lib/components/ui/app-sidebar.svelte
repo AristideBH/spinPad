@@ -13,6 +13,7 @@
   import { navTree } from '$lib/nav.js';
   import { getDocsTree, type DocTreeNode } from '$lib/docs';
   import { WrenchIcon, ShoppingCart } from '@lucide/svelte';
+  import { featureFlags } from '$shared/store/featureFlags.svelte.js';
 
   let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
@@ -96,13 +97,15 @@
             {/snippet}
           </Sidebar.MenuButton>
         </Sidebar.MenuItem>
-        <Sidebar.MenuItem>
-          <Sidebar.MenuButton isActive={isShop} tooltipContent="Store">
-            {#snippet child({ props })}
-              <a href="/shop/" {...props}><ShoppingCart /><span>Store</span></a>
-            {/snippet}
-          </Sidebar.MenuButton>
-        </Sidebar.MenuItem>
+        {#if featureFlags.shopActive}
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton isActive={isShop} tooltipContent="Store">
+              {#snippet child({ props })}
+                <a href="/shop/" {...props}><ShoppingCart /><span>Store</span></a>
+              {/snippet}
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        {/if}
 
         <!-- <Sidebar.MenuItem>
           <Sidebar.MenuButton isActive={isStudio} tooltipContent="Studio">
