@@ -10,9 +10,10 @@
 
 const DEV_FEATURE_DEFAULTS = {
   batteryPresenceDetection: false,
-  profileIconEditing: true,
-  iconEditorTools: true,
-  testMode: true,
+  profileIconEditing: false,
+  iconEditorTools: false,
+  testMode: false,
+  shopActive: false,
 };
 
 type DevFeature = keyof typeof DEV_FEATURE_DEFAULTS;
@@ -33,6 +34,7 @@ class FeatureFlagsState {
   profileIconEditing = $state(DEV_FEATURE_DEFAULTS.profileIconEditing);
   iconEditorTools = $state(DEV_FEATURE_DEFAULTS.iconEditorTools);
   testMode = $state(DEV_FEATURE_DEFAULTS.testMode);
+  shopActive = $state(DEV_FEATURE_DEFAULTS.shopActive);
 
   constructor() {
     Object.assign(this, readOverrides());
